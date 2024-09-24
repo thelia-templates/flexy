@@ -1,34 +1,14 @@
 {% set href = href|default('') %}
 {% set classes = classes|default('') %}
 {% set customText = customText|default('') %}
-{% set sub = sub|default(null) %}
+{% set subs1 = subs1|default(null) %}
+{% set childCount = childCount|default(0) %}
 
 <li class="flex">
 	<a href='{{ href }}' class='ItemHeader {{ classes }}'>
 		{{ customText }}
 	</a>
-	{% if sub %}
-		<button type="button" data-menu-item="{{sub}}">{{ ux_icon("arrow-right") }}</button>
-		<ul data-menu-sub="{{sub}}" data-menu-previous="0">
-			<li>
-				<a href="#0">Titre sous menu</a>
-				<button type="button" data-menu-item="5">{{ ux_icon("arrow-right") }}</button>
-				<ul data-menu-sub="5" data-menu-previous="{{sub}}">
-					<li>
-						<a href="#0">Titre sous sous menu</a>
-					</li>
-				</ul>
-			</li>
-			<li>
-				<a href="#0">Titre sous menu</a>
-			</li>
-			<li>
-				<a href="#0">Titre sous menu</a>
-			</li>
-			<li>
-				<a href="#0">Titre sous menu</a>
-			</li>
-		</ul>
+	{% if subs1 and childCount > 0 %}
+    	{% include '@components/Organisms/Navigation/SubMenu/SubMenu.html.twig' with { subs1: subs1 } %}
 	{% endif %}
-
 </li>

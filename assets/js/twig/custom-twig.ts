@@ -32,4 +32,7 @@ Twig.extend(function(Twig: any) {
   Twig.exports.functions.stimulus_controller = function() {
     return '';
   };
+  Twig.exports.functions.component = function () {
+    return '';
+  };
 });

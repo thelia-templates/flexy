@@ -1,0 +1,11 @@
+<ul class="Navigation">
+  {% for category in categories %}
+    {% set childCount = category.subs1 | length %}
+    {% include '@components/Molecules/ItemHeader/ItemHeader.html.twig' with {
+        customText: category.i18ns.title,
+        href: category.publicUrl,
+        subs1: category.subs1 ,
+        childCount: childCount
+    } %}
+  {% endfor %}
+</ul>

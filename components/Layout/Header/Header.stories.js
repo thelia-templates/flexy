@@ -1,7 +1,6 @@
 import Header from './Header.html.twig';
 import HeaderScript from './Header.js';
 import HeaderCheckout from './HeaderCheckout.html.twig';
-import headerButtonProfileFunction from '../../Molecules/HeaderButton/HeaderButtonProfile.js';
 
 export default {
   title: 'Design System/Layout/Header'
@@ -9,14 +8,41 @@ export default {
 
 const types = ['generic', 'sticky', 'searchbar'];
 
+// generate items
+const categories = [];
+const numberOfItems = 5;
+const numberOfSubItems = 3;
+
+for (let i = 1; i <= numberOfItems; i++) {
+  categories.push({
+    i18ns: {
+      title: `Item ${i}`
+    },
+    publicUrl: `#`,
+    subs1: Array.from({ length: numberOfSubItems }, () => ({
+      i18ns: {
+        title: `Sous item niv 1`
+      },
+      publicUrl: '#',
+      subs2: Array.from({ length: numberOfSubItems }, () => ({
+        i18ns: {
+          title: `Sous item niv 2`
+        },
+        publicUrl: '#'
+      }))
+    }))
+  });
+}
+
 export const base = {
   render: (args) => Header(args),
   play: () => {
     HeaderScript();
-    headerButtonProfileFunction();
   },
   args: {
-    type: 'generic'
+    type: 'generic',
+    categories: categories,
+    childCount: numberOfItems
   },
   argTypes: {
     type: {

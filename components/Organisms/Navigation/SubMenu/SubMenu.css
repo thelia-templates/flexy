@@ -1,0 +1,10 @@
+.SubMenu {
+  @apply lg:hidden lg:absolute lg:justify-between lg:w-full lg:gap-5 lg:pt-10 lg:pb-10 lg:mx-auto lg:text-sm lg:font-normal lg:bg-white lg:top-full lg:left-1/2 lg:transform lg:-translate-x-1/2;
+
+  &-title {
+    @apply bg-cyan-200 !important;
+    @screen lg {
+      background-color: transparent !important;
+    }
+  }
+}

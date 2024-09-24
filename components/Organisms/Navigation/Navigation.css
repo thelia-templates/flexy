@@ -1,0 +1,3 @@
+.Navigation {
+  @apply flex items-stretch justify-center gap-[30px] xl:gap-[50px] list-none h-full;
+}

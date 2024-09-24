@@ -1,0 +1,32 @@
+{% set subs1 = subs1|default(null) %}
+
+<div class="SubMenu">
+  <button type="button" class="SubMenu-back md:hidden">
+    {{ ux_icon('arrow-left') }}
+    {{ 'Menu'|trans }}
+  </button>
+  <ul class="SubMenu-sub1List">
+    {% for sub1 in subs1 %}
+      <li class="SubMenu-sub1Item">
+        <a href={{ sub1.publicUrl }} class="SubMenu-sub1Link">
+          {{ sub1.i18ns.title }}
+          {{ ux_icon('arrow-right') }}
+        </a>
+
+        {% set subs2 = sub1.subs2|default(null) %}
+        {% set childCount = subs2 | length %}
+        {% if subs2 and childCount > 0 %}
+          <ul class="SubMenu-sub2List">
+            {% for sub2 in subs2 %}
+              <li class="SubMenu-sub2Item">
+                <a href={{ sub2.publicUrl }} class="SubMenu-sub2Link">
+                  {{ sub2.i18ns.title }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>

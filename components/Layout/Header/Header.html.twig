@@ -1,54 +1,53 @@
 {% set type = type|default("generic") %}
-{% set categories = resources('/api/front/categories') %}
+{% set categories = categories|default(resources('/api/front/categories')) %}
 
-<header
-  class='Header {% if type == "sticky" %}is-sticky{% endif %} {% if type == "searchbar" %}Header--withSearchBar{% endif %}'>
-  <div class='flex'>
-    {% if type == "searchbar" %}
-      <div class='hidden lg:block xl:hidden'>
-        {% include '@components/Molecules/HeaderButton/HeaderButton.html.twig' with {icon: 'menu', text: 'Cart', classes: 'HeaderButton--light', small: true } %}
-      </div>
-    {% endif %}
+<header class='Header {% if type == "sticky" %}is-sticky{% endif %} {% if type == "searchbar" %}Header--withSearchBar{% endif %}'>
+	<div class='flex'>
+		{% if type == "searchbar" %}
+			<div class='hidden lg:block xl:hidden'>
+				{% include '@components/Molecules/HeaderButton/HeaderButton.html.twig' with {icon: 'menu', text: 'Cart', classes: 'HeaderButton--light', small: true } %}
+			</div>
+		{% endif %}
 
-    <div class='flex items-center self-center h-full'>
-      <a href="/" class='Header-logo'>
-        {{ ux_icon('thelia') }}
-      </a>
-    </div>
-  </div>
+		<div class='flex items-center self-center h-full'>
+			<a href="/" class='Header-logo'>
+				{{ ux_icon('thelia') }}
+			</a>
+		</div>
+	</div>
 
-  {% if type == "searchbar" %}
-    {{ component('Flexy:SearchBar') }}
-  {% else %}
-    <nav id="Menu">
-      <button type="button" data-menu-back="-1">
-        {{ ux_icon('arrow-left') }}
-      </button>
-      <button type="button" data-menu-close>
-        {{ ux_icon('close') }}
-      </button>
-      <ul class="Header-navigation" data-menu-sub="0">
-        {% for category in categories %}
-          {% include '@components/Molecules/ItemHeader/ItemHeader.html.twig' with { customText: category.i18ns.title, href: category.publicUrl} %}
-        {% endfor %}
-      </ul>
-    </nav>
-  {% endif %}
+	{% if type == "searchbar" %}
+		{{ component('Flexy:SearchBar') }}
+	{% else %}
+		<nav id="Menu">
+			<button type="button" data-menu-back="-1">
+				{{ ux_icon('arrow-left') }}
+			</button>
+			<button type="button" data-menu-close>
+				{{ ux_icon('close') }}
+			</button>
+			<ul class="Header-navigation" data-menu-sub="0">
+				{% for category in categories %}
+					{% include '@components/Molecules/ItemHeader/ItemHeader.html.twig' with { customText: category.i18ns.title, href: category.publicUrl} %}
+				{% endfor %}
+			</ul>
+		</nav>
+	{% endif %}
 
-  {% include '@components/Organisms/HeaderNav/HeaderNav.html.twig' with {type: type} %}
+	{% include '@components/Organisms/HeaderNav/HeaderNav.html.twig' with {type: type} %}
 
-  {% if type == "searchbar" %}
-    <nav id="Menu" class='Header-navWrap'>
-      <button type="button" data-menu-back="-1">
-        {{ ux_icon('arrow-left') }}
-      </button>
-      <button type="button" data-menu-close>
-        {{ ux_icon('close') }}
-      </button>
-      <ul class="Header-navigation">
-        {% for category in categories %}
-          {% include '@components/Molecules/ItemHeader/ItemHeader.html.twig' with { customText: category.i18ns.title, href: category.publicUrl} %}
-        {% endfor %}
-      </ul>
-    </nav>
-  {% endif %}
+	{% if type == "searchbar" %}
+		<nav id="Menu" class='Header-navWrap'>
+			<button type="button" data-menu-back="-1">
+				{{ ux_icon('arrow-left') }}
+			</button>
+			<button type="button" data-menu-close>
+				{{ ux_icon('close') }}
+			</button>
+			<ul class="Header-navigation">
+				{% for category in categories %}
+					{% include '@components/Molecules/ItemHeader/ItemHeader.html.twig' with { customText: category.i18ns.title, href: category.publicUrl} %}
+				{% endfor %}
+			</ul>
+		</nav>
+	{% endif %}
