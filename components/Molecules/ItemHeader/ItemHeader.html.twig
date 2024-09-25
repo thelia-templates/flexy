@@ -3,12 +3,22 @@
 {% set customText = customText|default('') %}
 {% set subs1 = subs1|default(null) %}
 {% set childCount = childCount|default(0) %}
+{% set isInCategory = isInCategory|default(false) %}
+{% set complexNav = complexNav|default(false) %}
 
-<li class="flex">
-	<a href='{{ href }}' class='ItemHeader {{ classes }}'>
-		{{ customText }}
-	</a>
-	{% if subs1 and childCount > 0 %}
-    	{% include '@components/Organisms/Navigation/SubMenu/SubMenu.html.twig' with { subs1: subs1 } %}
-	{% endif %}
+<li class="ItemHeader">
+  {% if subs1 and childCount > 0 %}
+    <span role="button"
+          class="{% if complexNav %}js-toggleCategory {% endif %} ItemHeader-link {{ classes }}{% if isInCategory %} ItemHeader-link--active{% endif %}"
+          data-href="{{ href }}" {% if tabindex is defined %} tabindex="{{ tabindex }}" {% endif %}>
+      {{ customText }}
+    </span>
+    {% include '@components/Organisms/Navigation/SubMenu/SubMenu.html.twig' with { subs1: subs1, complexNav: complexNav } %}
+  {% else %}
+    <a href='{{ href }}'
+       class="ItemHeader-link {{ classes }}{% if isInCategory %} ItemHeader--active {% endif %}"
+       {% if tabindex is defined %} tabindex="{{ tabindex }}" {% endif %}>
+        {{ customText }}
+    </a>
+  {% endif %}
 </li>

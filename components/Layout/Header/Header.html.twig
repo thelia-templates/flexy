@@ -1,5 +1,6 @@
 {% set type = type|default("generic") %}
 {% set categories = categories|default(resources('/api/front/categories')) %}
+{% set complexNav = complexNav|default(false) %}
 
 <header class='Header {% if type == "sticky" %}is-sticky{% endif %} {% if type == "searchbar" %}Header--withSearchBar{% endif %}'>
 	<div class='flex'>

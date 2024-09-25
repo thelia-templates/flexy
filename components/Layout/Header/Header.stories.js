@@ -11,7 +11,7 @@ const types = ['generic', 'sticky', 'searchbar'];
 // generate items
 const categories = [];
 const numberOfItems = 5;
-const numberOfSubItems = 3;
+const numberOfSubItems = 5;
 
 for (let i = 1; i <= numberOfItems; i++) {
   categories.push({
@@ -21,12 +21,12 @@ for (let i = 1; i <= numberOfItems; i++) {
     publicUrl: `#`,
     subs1: Array.from({ length: numberOfSubItems }, () => ({
       i18ns: {
-        title: `Sous item niv 1`
+        title: `Sous item niveau 1`
       },
       publicUrl: '#',
       subs2: Array.from({ length: numberOfSubItems }, () => ({
         i18ns: {
-          title: `Sous item niv 2`
+          title: `Item sous menu niveau 2`
         },
         publicUrl: '#'
       }))
@@ -41,6 +41,7 @@ export const base = {
   },
   args: {
     type: 'generic',
+    complexNav: true,
     categories: categories,
     childCount: numberOfItems
   },
@@ -48,6 +49,9 @@ export const base = {
     type: {
       options: types,
       control: { type: 'radio' }
+    },
+    complexNav: {
+      control: { type: 'boolean' }
     }
   }
 };

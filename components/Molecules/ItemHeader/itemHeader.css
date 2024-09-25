@@ -1,15 +1,53 @@
 .ItemHeader {
-  @screen lg {
-    @apply paragraph-2 no-underline outline-none text-black flex items-center justify-center relative;
+  display: flex;
 
-    &:after {
-      @apply h-[2px] w-full bg-theme-dark bottom-0 left-0 absolute;
+  a {
+    text-decoration: unset;
+  }
+
+  &:hover {
+    .ItemHeader-link {
+      &:not(.js-toggleCategory) {
+        & + .SubMenu {
+          display: flex;
+          opacity: 1;
+        }
+      }
     }
-    &:hover,
-    &:focus,
-    &:active {
+  }
+
+  &.active {
+    .SubMenu {
+      display: flex;
+      opacity: 1;
+
+      a {
+        visibility: initial;
+      }
+    }
+
+    .ItemHeader-link {
+      &::after {
+        width: 100%;
+        opacity: 1;
+        transition: ease-in 0.15s 0.1s;
+      }
+    }
+  }
+
+  &-link {
+    @screen md {
+      @apply paragraph-2 no-underline outline-none text-black flex items-center justify-center relative;
+
       &:after {
-        content: '';
+        @apply h-[2px] w-full bg-theme-dark bottom-0 left-0 absolute;
+      }
+      &:hover,
+      &:focus,
+      &:active {
+        &:after {
+          content: '';
+        }
       }
     }
   }

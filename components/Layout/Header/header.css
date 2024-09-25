@@ -75,7 +75,7 @@
   }
 
   &-navWrap {
-    @apply flex justify-center bg-grey-lightest h-[78px];
+    @apply flex justify-center h-[78px];
   }
 
   &--withSearchBar {

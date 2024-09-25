@@ -1,21 +1,24 @@
 {% set subs1 = subs1|default(null) %}
+{% set complexNav = complexNav|default(false) %}
 
-<div class="SubMenu">
+<div class="SubMenu {% if complexNav == true %} SubMenu--isComplexNav {% endif %}">
   <button type="button" class="SubMenu-back md:hidden">
     {{ ux_icon('arrow-left') }}
     {{ 'Menu'|trans }}
   </button>
   <ul class="SubMenu-sub1List">
     {% for sub1 in subs1 %}
-      <li class="SubMenu-sub1Item">
+      {% set subs2 = sub1.subs2|default(null) %}
+      {% set childCount = subs2 | length %}
+      <li class="SubMenu-sub1Item {% if subs2 and childCount > 0 %} SubMenu-sub1Item--noChild {% endif %} ">
         <a href={{ sub1.publicUrl }} class="SubMenu-sub1Link">
           {{ sub1.i18ns.title }}
-          {{ ux_icon('arrow-right') }}
+          <div class="SubMenu-arrowIcon">
+            {{ ux_icon('arrow-right') }}
+          </div>
         </a>
 
-        {% set subs2 = sub1.subs2|default(null) %}
-        {% set childCount = subs2 | length %}
-        {% if subs2 and childCount > 0 %}
+        {% if subs2 and childCount > 0 and complexNav == true %}
           <ul class="SubMenu-sub2List">
             {% for sub2 in subs2 %}
               <li class="SubMenu-sub2Item">

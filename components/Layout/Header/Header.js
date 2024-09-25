@@ -1,6 +1,8 @@
-export default () => {
-  Menu();
+import trapItemsMenu from '../../../assets/js/trapItemsMenu';
 
+const Header = () => {
+  Menu();
+  trapItemsMenu();
   const btn = document.getElementById('toggleMenu');
 
   btn?.addEventListener('click', () =>
@@ -56,3 +58,5 @@ export function Menu() {
     backBtn.dataset.menuBack = previous;
   }
 }
+
+export default Header;
