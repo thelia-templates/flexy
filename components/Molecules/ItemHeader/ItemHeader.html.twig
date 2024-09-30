@@ -1,6 +1,6 @@
 {% set href = href|default('') %}
 {% set classes = classes|default('') %}
-{% set customText = customText|default('') %}
+{% set itemTitle = itemTitle|default('') %}
 {% set subs1 = subs1|default(null) %}
 {% set childCount = childCount|default(0) %}
 {% set isInCategory = isInCategory|default(false) %}
@@ -8,17 +8,23 @@
 
 <li class="ItemHeader">
   {% if subs1 and childCount > 0 %}
-    <span role="button"
-          class="{% if complexNav %}js-toggleCategory {% endif %} ItemHeader-link {{ classes }}{% if isInCategory %} ItemHeader-link--active{% endif %}"
+    <div role="button"
+          class="js-toggleCategory {% if complexNav %} ItemHeader-link--complexNav {% endif %} ItemHeader-link {{ classes }}{% if isInCategory %} ItemHeader-link--active{% endif %}"
           data-href="{{ href }}" {% if tabindex is defined %} tabindex="{{ tabindex }}" {% endif %}>
-      {{ customText }}
-    </span>
-    {% include '@components/Organisms/Navigation/SubMenu/SubMenu.html.twig' with { subs1: subs1, complexNav: complexNav } %}
+      <span>{{ itemTitle }}</span>
+      <div class="ItemHeader-arrowIcon">
+        {{ ux_icon('arrow-right') }}
+      </div>
+    </div>
+    {% include '@components/Organisms/Navigation/SubMenu/SubMenu.html.twig' with { subs1: subs1, complexNav: complexNav, parentItemTitle: itemTitle } %}
   {% else %}
     <a href='{{ href }}'
        class="ItemHeader-link {{ classes }}{% if isInCategory %} ItemHeader--active {% endif %}"
        {% if tabindex is defined %} tabindex="{{ tabindex }}" {% endif %}>
-        {{ customText }}
+        {{ itemTitle }}
     </a>
+    <div class="ItemHeader-arrowIcon">
+      {{ ux_icon('arrow-right') }}
+    </div>
   {% endif %}
 </li>

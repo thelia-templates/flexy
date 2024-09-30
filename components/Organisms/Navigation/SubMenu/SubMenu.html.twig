@@ -1,33 +1,42 @@
 {% set subs1 = subs1|default(null) %}
 {% set complexNav = complexNav|default(false) %}
+{% set parentItemTitle = parentItemTitle %}
 
 <div class="SubMenu {% if complexNav == true %} SubMenu--isComplexNav {% endif %}">
-  <button type="button" class="SubMenu-back md:hidden">
-    {{ ux_icon('arrow-left') }}
-    {{ 'Menu'|trans }}
-  </button>
-  <ul class="SubMenu-sub1List">
+  {% include '@components/Molecules/Button/Button.html.twig' with {
+    text: 'Menu'| trans,
+    variant: 'minimal',
+    classes: 'SubMenu-back Button--small',
+    icon_left: 'chevron-left',
+  } %}
+  <p class="SubMenu-parentItemTitle">{{ parentItemTitle }}</p>
+  <ul class="SubMenu-sub1">
     {% for sub1 in subs1 %}
       {% set subs2 = sub1.subs2|default(null) %}
       {% set childCount = subs2 | length %}
-      <li class="SubMenu-sub1Item {% if subs2 and childCount > 0 %} SubMenu-sub1Item--noChild {% endif %} ">
-        <a href={{ sub1.publicUrl }} class="SubMenu-sub1Link">
-          {{ sub1.i18ns.title }}
-          <div class="SubMenu-arrowIcon">
-            {{ ux_icon('arrow-right') }}
-          </div>
-        </a>
-
+      <li class="SubMenu-sub1Item">
         {% if subs2 and childCount > 0 and complexNav == true %}
-          <ul class="SubMenu-sub2List">
-            {% for sub2 in subs2 %}
-              <li class="SubMenu-sub2Item">
-                <a href={{ sub2.publicUrl }} class="SubMenu-sub2Link">
-                  {{ sub2.i18ns.title }}
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
+          {% set sub2List %}
+            <ul class="SubMenu-sub2">
+              {% for sub2 in subs2 %}
+                <li class="SubMenu-sub2Item">
+                  <a href="{{ sub2.publicUrl }}" class="SubMenu-sub2Link">
+                    {{ sub2.i18ns.title }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endset %}
+          {% include '@components/Molecules/Accordion/Accordion.html.twig' with {
+            title: sub1.i18ns.title,
+            content: sub2List,
+            iconPlus: "plus",
+            iconMinus: "minus"
+          } %}
+        {% else %}
+          <a href={{ sub1.publicUrl }} class="SubMenu-sub1Link">
+            {{ sub1.i18ns.title }}
+          </a>
         {% endif %}
       </li>
     {% endfor %}

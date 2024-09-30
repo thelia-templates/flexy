@@ -1,39 +1,112 @@
 .SubMenu {
-  @apply md:hidden md:absolute md:justify-between md:w-full md:gap-5 md:mx-auto md:text-sm md:font-normal md:bg-white md:top-full md:left-1/2 md:transform md:-translate-x-1/2;
-
-  padding: 0 48px;
+  padding: 58px 48px 50px;
   display: none;
-  z-index: 10;
-  display: flex;
-  max-height: calc(100vh - 200px);
+  flex-direction: column;
   overflow: auto;
-  background-color: var(--grey-lightest);
+  background-color: var(--white);
   opacity: 0;
   transition: ease-in 0.1s;
   pointer-events: auto;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  z-index: -9;
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-height: 100%;
+  width: 100%;
+  height: 100vh;
+
+  @screen md {
+    padding: 0 48px;
+    height: initial;
+    justify-content: space-between;
+    width: 100%;
+    gap: 1.25rem;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 0.875rem;
+    font-weight: 400;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9;
+    max-height: initial;
+    flex-wrap: wrap;
+    background-color: var(--grey-lightest);
+  }
+
+  .ItemHeader.active & {
+    z-index: 9;
+  }
 
   &--isComplexNav {
-    padding: 24px 48px 50px;
+    padding: 58px 48px 50px;
+    @screen md {
+      padding: 24px 48px 50px;
+    }
+
+    & a:hover {
+      text-decoration: underline;
+    }
     .SubMenu-sub1 {
+      height: initial;
+      align-items: initial;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+
+      @screen md {
+        flex-wrap: wrap;
+        gap: rem-convert(50px);
+      }
+
       &Item {
         padding: 0;
         &:hover {
           background-color: initial;
         }
       }
-      &List {
-        height: initial;
-        align-items: initial;
-        gap: rem-convert(50px);
-        flex-wrap: wrap;
-        justify-content: flex-start;
-      }
-      &Link {
-        @apply paragraph-2;
 
-        font-weight: 600;
-        margin-bottom: rem-convert(25px);
+      .Accordion-summary,
+      &Link {
+        @apply paragraph-4;
+        height: 100%;
+        display: flex;
+        align-items: center;
+      }
+
+      .Accordion {
+        border-bottom: 0;
+        width: 100%;
+        @screen md {
+          width: auto;
+        }
+        &-icon {
+          @screen md {
+            display: none;
+          }
+        }
+        &-summary {
+          @apply paragraph-2;
+
+          font-weight: 600;
+          padding: 0;
+          padding-top: rem-convert(15px);
+          padding-bottom: rem-convert(15px);
+          border-bottom: 1px solid var(--grey-lighter) !important;
+          @screen md {
+            padding: 0;
+            border-bottom-width: 0 !important;
+            margin-bottom: rem-convert(25px);
+          }
+        }
+        &-content {
+          padding: 20px 0;
+          border-bottom: 0;
+          @screen md {
+            padding: 0;
+            border-bottom: 0;
+          }
+        }
       }
     }
   }
@@ -45,45 +118,59 @@
     }
   }
 
+  &-parentItemTitle {
+    @apply h3;
+    display: block;
+    margin: 20px 0 35px;
+    color: var(--black);
+
+    @screen md {
+      display: none;
+    }
+  }
+
   &-sub1 {
+    display: flex;
+    width: 100%;
+    max-width: rem-convert(1272px);
+    margin: initial;
+    justify-content: center;
+    flex-direction: column;
+    align-items: flex-start;
+
+    @screen md {
+      align-items: center;
+      height: rem-convert(78px);
+      flex-direction: row;
+      margin: auto;
+    }
     &Item {
       height: 100%;
-      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      padding: 13px 0;
+
       &:hover {
         background-color: var(--white);
       }
-    }
-    &List {
-      display: flex;
-      width: 100%;
-      max-width: rem-convert(1272px);
-      margin: auto;
-      justify-content: center;
-      height: rem-convert(78px);
-      align-items: center;
-    }
-    &Link {
-      @apply paragraph-4;
-      height: 100%;
-      display: flex;
-      align-items: center;
+      @screen md {
+        padding: 0 32px;
+      }
     }
   }
 
   &-sub2 {
+    display: flex;
+    flex-direction: column;
     &Link {
       @apply paragraph-2;
-    }
-    &List {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+      display: block;
+      padding: 10px 0;
     }
   }
 
-  &-arrowIcon {
-    display: block;
-    width: 12px;
+  &-back {
+    width: fit-content;
     @screen md {
       display: none;
     }

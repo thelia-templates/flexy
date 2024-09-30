@@ -19,21 +19,12 @@
 
 	{% if type == "searchbar" %}
 		{{ component('Flexy:SearchBar') }}
-	{% else %}
-		<nav id="Menu">
-			<button type="button" data-menu-back="-1">
-				{{ ux_icon('arrow-left') }}
-			</button>
-			<button type="button" data-menu-close>
-				{{ ux_icon('close') }}
-			</button>
-			<ul class="Header-navigation" data-menu-sub="0">
-				{% for category in categories %}
-					{% include '@components/Molecules/ItemHeader/ItemHeader.html.twig' with { customText: category.i18ns.title, href: category.publicUrl} %}
-				{% endfor %}
-			</ul>
-		</nav>
 	{% endif %}
+
+	{% include '@components/Organisms/Navigation/Navigation.html.twig' with {
+    categories: categories,
+    complexNav: complexNav
+  } %}
 
 	{% include '@components/Organisms/HeaderNav/HeaderNav.html.twig' with {type: type} %}
 

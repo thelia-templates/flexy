@@ -10,7 +10,6 @@ import '@components/base.css';
 
 import './bootstrap.js';
 
-import HeaderScript from '@components/Layout/Header/Header.js';
 import MobileDrawer from './js/mobileDrawer';
 import filterSelect from '@components/Molecules/Filters/FilterSelect/FilterSelect';
 import { quantityButton } from '@components/Molecules/Button/button';
@@ -25,7 +24,6 @@ import StepsFunction from '@components/Molecules/Step/Steps.js';
 function main() {
   document.body.classList.remove('no-js');
 
-  HeaderScript();
   MobileDrawer();
   filterSelect();
   quantityButton();

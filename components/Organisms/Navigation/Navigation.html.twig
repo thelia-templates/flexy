@@ -1,14 +1,22 @@
 {% set complexNav = complexNav|default(false) %}
 
-<ul class="Navigation">
-  {% for category in categories %}
-    {% set childCount = category.subs1 | length %}
-    {% include '@components/Molecules/ItemHeader/ItemHeader.html.twig' with {
-        customText: category.i18ns.title,
-        href: category.publicUrl,
-        subs1: category.subs1 ,
-        childCount: childCount,
-        complexNav: complexNav
-    } %}
-  {% endfor %}
-</ul>
+<nav class='Navigation'>
+  <button type="button" class="Navigation-close">
+    {{ ux_icon('close') }}
+  </button>
+  <div class="Navigation-inner">
+    <ul class="Navigation-list">
+      {% for category in categories %}
+        {% set childCount = category.subs1 | length %}
+        {% include '@components/Molecules/ItemHeader/ItemHeader.html.twig' with {
+            itemTitle: category.i18ns.title,
+            href: category.publicUrl,
+            subs1: category.subs1 ,
+            childCount: childCount,
+            complexNav: complexNav
+        } %}
+      {% endfor %}
+    </ul>
+  </div>
+</nav>
+

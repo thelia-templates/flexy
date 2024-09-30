@@ -1,3 +1,77 @@
 .Navigation {
-  @apply flex items-stretch justify-center gap-[30px] xl:gap-[50px] list-none h-full;
+  position: fixed;
+  display: none;
+  flex-direction: column-reverse;
+  height: 100%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  justify-content: flex-end;
+  background-color: var(--white);
+
+  @screen md {
+    display: none;
+    flex-direction: column;
+    height: 78px;
+    top: var(--header-height);
+    justify-content: flex-end;
+    width: 100%;
+    right: 0;
+    box-shadow: 0 -1px 0 0 var(--grey-lighter) inset;
+  }
+
+  @screen lg {
+    position: initial;
+    display: flex;
+    align-items: center;
+    padding-top: 0;
+    padding-left: calc(var(--header-logo-width) + 20px);
+    box-shadow: initial;
+  }
+
+  .is-open & {
+    display: flex;
+  }
+
+  &-close {
+    display: none;
+    width: 38px;
+    position: absolute;
+    z-index: 99;
+    right: 15px;
+    top: 15px;
+
+    .is-open & {
+      @screen maxMd {
+        display: block;
+      }
+    }
+  }
+
+  &-inner {
+    padding: 0 55px;
+    height: 100%;
+  }
+
+  &-list {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    list-style: none;
+    height: 100%;
+    justify-content: flex-start;
+    margin-top: 82px;
+
+    @screen xl {
+      gap: 50px;
+    }
+
+    @screen md {
+      gap: 30px;
+      flex-direction: row;
+      justify-content: center;
+      margin-top: 0;
+    }
+  }
 }

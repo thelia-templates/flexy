@@ -32,10 +32,29 @@ export default function trapItemsMenu(callback) {
       trapTabKey(sub, e);
       trapEscape(category, e);
     });
+
+    sub.querySelector('.SubMenu-back').addEventListener('click', (e) => {
+      e.stopPropagation();
+      sub.parentNode.classList.remove('active');
+    });
   });
+
+  const subMenus = document.querySelectorAll('.SubMenu');
   const page = document.querySelector('body:not(.SubMenu)');
-  const close = document.querySelectorAll('.Menu-close-md');
-  page.addEventListener('click', closeMenu);
+  const close = document.querySelectorAll('.Navigation-close');
+
+  page.addEventListener('click', function (event) {
+    let clickedInsideSubMenu = false;
+    subMenus.forEach((subMenu) => {
+      if (subMenu.contains(event.target)) {
+        clickedInsideSubMenu = true;
+      }
+    });
+    if (!clickedInsideSubMenu) {
+      closeMenu();
+    }
+  });
+
   close.forEach((el) => el.addEventListener('click', closeMenu));
 }
 

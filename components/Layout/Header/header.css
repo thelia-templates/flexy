@@ -74,10 +74,6 @@
     @apply w-[60px] h-[18px] sm:w-[98px] sm:h-[30px];
   }
 
-  &-navWrap {
-    @apply flex justify-center h-[78px];
-  }
-
   &--withSearchBar {
     & @screen sm {
       --header-height: 100px;
