@@ -11,12 +11,11 @@
 	{{ encore_entry_link_tags('category') }}
 {% endblock %}
 
-{% block title %}
-	{{ 'Category'|trans }}
-{% endblock %}
 
 {% block body %}
-	{% include '@components/Layout/Subheader/Category/SubheaderCategory.html.twig' with {title: attr('category', 'title'), description: attr('category', 'chapo'), nbProducts: 9, breadcrumb}  %}
+
+
+	{% include '@components/Layout/Subheader/Category/SubheaderCategory.html.twig' with {title: BetterSeoPageH1("category", categoryId), description: attr('category', 'chapo'), nbProducts: 9, breadcrumb}  %}
 	{{ component('Flexy:Layout:CategoryProducts', {categoryId, page}) }}
 	{% include '@components/Layout/Reinsurance/Reinsurance.html.twig' with { data: [
       {

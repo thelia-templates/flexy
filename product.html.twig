@@ -10,11 +10,7 @@
 	{{ encore_entry_script_tags('product') }}
 {% endblock %}
 
-
 {% set productId = attr('product', 'id') %}
-{% block title %}
-	{{ attr('product', 'title') }}
-{% endblock %}
 
 {% set product = resources('/api/front/products/' ~ productId) %}
 {% set productCategory = product.productCategories|filter(c => c.defaultCategory)|first.category %}
@@ -32,7 +28,7 @@
 		<div class="container">
 			<div class="ProductPage-grid">
 				<section id="infos" class="ProductPage-infos">
-					<h1 class="mb-3 h3">{{ attr('product', 'title') }}</h1>
+					<h1 class="mb-3 h3">{{ BetterSeoPageH1("product", productId)}}</h1>
 					{% set chapo = attr('product', 'chapo') %}
 					{% if chapo %}
 						<div class="paragraph-3 text-grey">{{ chapo }}</div>

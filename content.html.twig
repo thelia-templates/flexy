@@ -1,8 +1,6 @@
 {%  extends 'base.html.twig' %}
+{% set contentId = attr('content', 'id') %}
 
-{% block title %}
-	{{ 'Content page'|trans }}
-{% endblock %}
 
 {% block body %}
 	{% set contents = resources('/api/front/contents', {itemsPerPage:3}) %}
@@ -14,7 +12,7 @@
     img: {url: '/legacy-image-library/category_image_'~c.id~'/full/%5E*!386,280/0/default.webp', alt: c.i18ns.title}
   })) %}
 
-	{% include '@components/Layout/Subheader/ContentPage/SubheaderContentPage.html.twig' with {title: attr('content', 'title'), description: attr('content', 'chapo') }  %}
+	{% include '@components/Layout/Subheader/ContentPage/SubheaderContentPage.html.twig' with {title: BetterSeoPageH1('content', contentId), description: attr('content', 'chapo') }  %}
 
 	<div class="px-[25px] lg:pr-[225px] lg:pl-[250px] xl:pr-[325px] xl:pl-[350px] flex gap-[173px] mt-[25px] lg:mt-[54px] mb-[80px] lg:mb-[120px]">
 		<article class="wysiwyg">

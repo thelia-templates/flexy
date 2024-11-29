@@ -11,7 +11,9 @@
     "symfony/ux-react": "^2.19",
     "symfony/ux-icons": "^2.19",
     "symfony/ux-translator": "^2.19",
-    "symfony/ux-live-component": "^2.19"
+    "symfony/ux-live-component": "^2.19",
+    "thelia/page-module": "dev-twig",
+    "thelia/better-seo-module": "dev-twig"
   },
   "autoload": {
     "psr-4": {
