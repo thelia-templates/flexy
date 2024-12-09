@@ -1,0 +1,13 @@
+{% set label = '' %}
+{% set url = '' %}
+
+{% if page == 'cart' %}
+  {% set label = 'Order' %}
+  {% set url = '/checkout/delivery' %}
+{% endif %}
+
+{% if url != '' and label != '' %}
+  <div class='mt-[30px]'>
+    {% include '@components/Molecules/Button/Button.html.twig' with {text: label|trans, href: url, classes:'md:Button--unfill Button--fill'} %}
+  </div>
+{% endif %}

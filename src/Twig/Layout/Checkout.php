@@ -18,30 +18,56 @@ use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Thelia\Service\Model\CartService;
+use TwigEngine\Service\DataAccess\AttributeAccessService;
 use TwigEngine\Service\DataAccess\DataAccessService;
 
 #[AsLiveComponent(template: '@components/Layout/Checkout/Checkout.html.twig')]
 class Checkout
 {
     use DefaultActionTrait;
+
+    #[LiveProp]
+    public string $page = 'cart';
+
+    #[LiveProp]
+    public int $step = 1;
+
     #[LiveProp]
     public array $cart;
 
+    #[LiveProp]
+    public array $summary = [
+        'item_count' => null,
+        'total_price_without_discount' => null,
+        'total_taxed_price' => null,
+        'total_tax_amount' => null,
+    ];
+
     public function __construct(
-        private DataAccessService $dataAccessService,
-        private CartService $cartService
+        private readonly DataAccessService $dataAccessService,
+        private readonly AttributeAccessService $attributeAccessService,
+        private readonly CartService $cartService
     ) {
     }
 
-    public function mount(): void
+    public function mount(string $page, string $step): void
     {
+        $this->page = $page;
+        $this->step = (int) $step;
         $this->setCart();
+        $this->setSummary();
     }
 
     #[LiveListener('resetCart')]
     public function resetCart(): void
     {
         $this->setCart();
+    }
+
+    #[LiveListener('resetSummary')]
+    public function resetSummary(): void
+    {
+        $this->setSummary();
     }
 
     public function getCart(): array
@@ -56,5 +82,12 @@ class Checkout
         $items = $sessionCart->getCartItems();
 
         $this->cart = [...$sessionCart->toArray(TableMap::TYPE_CAMELNAME), 'items' => $items->toArray(null, false, TableMap::TYPE_CAMELNAME)];
+    }
+
+    protected function setSummary(): void
+    {
+        foreach ($this->summary as $key => &$value) {
+            $value = $this->attributeAccessService->attributeCart($key);
+        }
     }
 }

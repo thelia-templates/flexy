@@ -1,0 +1,11 @@
+<div>
+  <div class='Checkout-main-header'>
+    {{ totalItems }} {{ 'articles'|trans }}
+  </div>
+
+  <div class='flex flex-col gap-4'>
+    {% for item in items %}
+      {{ component('Flexy:Organisms:CartItem', {cartItemId: item.id}) }}
+    {% endfor %}
+  </div>
+</div>

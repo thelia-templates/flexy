@@ -129,6 +129,7 @@ class CartItem
         $this->cartService->changeItem($this->cartItemId, $quantity);
 
         $this->cartItem['quantity'] = $quantity;
+        $this->emit('resetSummary');
     }
 
     #[LiveAction]

@@ -1,6 +1,6 @@
 {% set promo = promo|default(null) %}
 {% set giftCard = giftCard|default(null) %}
-{% set nbArticles = nbArticles|default(0) %}
+{% set totalItems = totalItems|default(0) %}
 {% set subTotal = subTotal|default('') %}
 {% set total = total|default('') %}
 {% set cgvLink = cgvLink|default('') %}
@@ -10,8 +10,10 @@
 <div class='SummaryCard'>
   <div class='SummaryCard-list'>
     <div class='SummaryCard-line'>
-      <div>{{ 'Subtotal'|trans }} <span class='font-normal paragraph-6 '>({{ nbArticles}} {{ 'item'|trans }}{{ nbArticles > 1 ? 's' : '' }})</span></div>
-      <div>{{ subTotal }}</div>
+      <div>{{ 'Subtotal'|trans }} <span
+          class='font-normal paragraph-6 '>({{ totalItems }} {{ 'item'|trans }}{{ totalItems > 1 ? 's' : '' }})</span>
+      </div>
+      <div>{{ subTotal|format_currency('EUR', locale: 'fr') }}</div>
     </div>
     <div class='SummaryCard-line'>
       <div>{{ 'Delivery'|trans }}</div>
@@ -31,38 +33,39 @@
               {selected: true, customText:promo.reduction, icon:'price-tag'} %}
           </div>
         {% else %}
-        <div>{{ 'No Promo Code'|trans }}</div>
+          <div>{{ 'No Promo Code'|trans }}</div>
         {% endif %}
       </div>
     {% endif %}
     {% if not noGiftCard %}
-    <div class='SummaryCard-line'>
-      <div>
-        {{ 'Gift Card'|trans }}
-        <div class='font-normal paragraph-6'>{{ giftCard.code }}</div>
-      </div>
-      {% if giftCard %}
+      <div class='SummaryCard-line'>
         <div>
-          {% include '@components/Molecules/Filters/FilterPill/FilterPill.html.twig' with
-            {selected: true, customText:giftCard.reduction, icon:'gift'} %}
+          {{ 'Gift Card'|trans }}
+          <div class='font-normal paragraph-6'>{{ giftCard.code }}</div>
         </div>
-      {% else %}
-        <div>{{ 'No Gift Card'|trans }}</div>
-      {% endif %}
-    </div>
+        {% if giftCard %}
+          <div>
+            {% include '@components/Molecules/Filters/FilterPill/FilterPill.html.twig' with
+              {selected: true, customText:giftCard.reduction, icon:'gift'} %}
+          </div>
+        {% else %}
+          <div>{{ 'No Gift Card'|trans }}</div>
+        {% endif %}
+      </div>
     {% endif %}
   </div>
   <div class='SummaryCard-footer'>
     <div class='SummaryCard-total'>
       <div>{{ 'Total (including VAT)'|trans }}</div>
-      <div>{{ total }}</div>
+      <div>{{ total|format_currency('EUR', locale: 'fr') }}</div>
     </div>
     <div class='italic'>
-      {{ 'Taxes of'| trans }} 5,05€  {{ 'included'| trans }}
+      {{ 'Taxes of'| trans }} {{ taxAmount|format_currency('EUR', locale: 'fr') }} {{ 'included'| trans }}
     </div>
     {% if cgvLink %}
       <div class='mt-2'>
-        {{ 'By paying for your order, you agree to our'|trans }} <a href='{{ cgvLink }}'>{{ 'terms and conditions'|trans }}</a>.
+        {{ 'By paying for your order, you agree to our'|trans }} <a
+          href='{{ cgvLink }}'>{{ 'terms and conditions'|trans }}</a>.
       </div>
     {% endif %}
   </div>

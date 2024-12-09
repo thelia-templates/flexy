@@ -4,6 +4,6 @@
   {% include '@components/Molecules/HeaderButton/HeaderButton.html.twig' with { icon: 'account', classes: 'HeaderNav-btn HeaderButton--theme', text: 'Account'|trans, small: true } %}
   {# Bouton mon profil à afficher quand on est connecté #}
   {# {% include '@components/Molecules/HeaderButton/HeaderButtonProfile.html.twig' %} #}
-  {% include '@components/Molecules/HeaderButton/HeaderButton.html.twig' with { icon: 'cart', link:'/checkout', text: 'Cart'|trans, classes: 'HeaderNav-btn HeaderButton--dark ', small: true} %}
+  {% include '@components/Molecules/HeaderButton/HeaderButton.html.twig' with { icon: 'cart', link:'/checkout/cart', text: 'Cart'|trans, classes: 'HeaderNav-btn HeaderButton--dark ', small: true} %}
   {% include '@components/Molecules/HeaderButton/HeaderButton.html.twig' with { icon: 'menu', id: "toggleMenu", classes: 'HeaderNav-btn HeaderButton--light lg:hidden', text: 'Menu'|trans, small: true } %}
 </div></header>
