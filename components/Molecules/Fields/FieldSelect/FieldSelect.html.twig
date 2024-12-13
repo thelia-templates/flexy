@@ -13,41 +13,42 @@
 
 {% set classes = '' %}
 {% if error %}
-	{% set classes = classes ~ ' FieldSelect--error' %}
+  {% set classes = classes ~ ' FieldSelect--error' %}
 {% endif %}
 {% if success %}
-	{% set classes = classes ~ ' FieldSelect--success' %}
+  {% set classes = classes ~ ' FieldSelect--success' %}
 {% endif %}
 {% if size %}
-	{% set classes = classes ~ ' FieldSelect--' ~ size %}
+  {% set classes = classes ~ ' FieldSelect--' ~ size %}
 {% endif %}
 
 <div class='FieldSelect{{ classes }}' {% if disabled %} disabled {% endif %}>
-	<div class='FieldSelect-header'>
-		<label for='{{ name }}' class='FieldSelect-label'>
-			{{ label }}
-			{% if required and label %}
-				*
-			{% endif %}
-		</label>
-		{% if tooltip %}
-			{% include '@components/Molecules/Tooltip/Tooltip.html.twig' with {tooltip: tooltip, position: 'bottom'} %}
-		{% endif %}
-	</div>
-	<select class='FieldSelect-select' name='{{ name }}' id='{{ name }}' {% if value %} value='{{ value }}' {% endif %} {% if required %} required {% endif %} {% if dataAction %} data-action="{{dataAction}}" {% endif %}>
-		{% if placeholder %}
-			<option value="" hidden class='FieldSelect-placeholder'>
-				{{ placeholder }}
-				{% if required and  not label %}
-					*
-				{% endif %}
-			</option>
-		{% endif %}
-		{% for option in options %}
-			<option value="{{ option.value }}">{{ option.label }}</option>
-		{% endfor %}
-	</select>
-	{% if error %}
-		<span class='FieldSelect-error'>{{ error }}</span>
-	{% endif %}
+  <div class='FieldSelect-header'>
+    <label for='{{ name }}' class='FieldSelect-label'>
+      {{ label }}
+      {% if not required and label %}
+        ({{ 'optional' | trans }})
+      {% endif %}
+    </label>
+    {% if tooltip %}
+      {% include '@components/Molecules/Tooltip/Tooltip.html.twig' with {tooltip: tooltip, position: 'bottom'} %}
+    {% endif %}
+  </div>
+  <select class='FieldSelect-select' name='{{ name }}'
+          id='{{ name }}' {% if required %} required {% endif %} {% if dataAction %} data-action="{{ dataAction }}" {% endif %}>
+    {% if placeholder %}
+      <option value="" hidden class='FieldSelect-placeholder' selected>
+        {{ placeholder }}
+        {% if not required and not label %}
+          ({{ 'optional' | trans }})
+        {% endif %}
+      </option>
+    {% endif %}
+    {% for option in options %}
+      <option value="{{ option.value }}" {% if value == option.value %}selected{% endif %}>{{ option.label }}</option>
+    {% endfor %}
+  </select>
+  {% if error %}
+    <span class='FieldSelect-error'>{{ error }}</span>
+  {% endif %}
 </div>

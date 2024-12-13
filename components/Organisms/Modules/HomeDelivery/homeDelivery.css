@@ -2,17 +2,6 @@
   background: var(--theme-lightest);
   border: 1px solid var(--theme-lightest);
   border-radius: rem-convert(8px);
-  max-width: rem-convert(340px);
-
-  @screen lg {
-    max-width: rem-convert(540px);
-  }
-
-  &.selected {
-    background: var(--theme-lighter);
-    border: 1px solid var(--theme-medium);
-  }
-
   label {
     cursor: pointer;
   }
@@ -65,9 +54,18 @@
     padding: 1rem 2.5rem;
     @apply paragraph-4 py-4 px-5 lg:px-10;
     font-weight: 600;
-    display: flex;
     border-radius: 0 0 rem-convert(8px) rem-convert(8px);
     justify-content: space-between;
     align-items: center;
+    display: none;
   }
+
+  &.selected {
+    background: var(--theme-lighter);
+    border: 1px solid var(--theme-medium);
+    .HomeDelivery-bottom {
+      display: flex;
+    }
+  }
+
 }

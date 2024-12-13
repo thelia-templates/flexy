@@ -1,0 +1,9 @@
+{% set choices = choices|default([]) %}
+{% set value = value|default(null) %}
+{% set placeholder = placeholder|default('') %}
+{% set name = name|default(null) %}
+{% set required = required|default(false) %}
+
+
+
+ {% include '@components/Molecules/Fields/FieldSelect/FieldSelect.html.twig' with {name, options: choices, required:required} %}

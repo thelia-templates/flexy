@@ -1,0 +1,43 @@
+<div {{ attributes }}>
+  {{ form_start(form, {
+    attr: {
+      'data-action': 'live#action:prevent',
+      'data-live-action-param': 'save'
+    }
+  }) }}
+
+  <div class='flex flex-col gap-3 font-normal'>
+    {{ form_row(form.label) }}
+    <div class='paragraph-6'>
+      {{ "This name will allow you to easily identify each of your addresses"|trans }}
+    </div>
+    <hr />
+    <div class='grid sm:grid-cols-2 gap-5'>
+      {{ form_row(form.firstname) }}
+      {{ form_row(form.lastname) }}
+    </div>
+    {{ form_row(form.country) }}
+    {{ form_row(form.address1) }}
+    {{ form_row(form.address2) }}
+    <div class='grid sm:grid-cols-2 gap-5'>
+      {{ form_row(form.zipcode) }}
+      {{ form_row(form.city) }}
+    </div>
+    <div class='grid sm:grid-cols-3'>
+      <div class="col-span-2">{{ form_row(form.phone) }}</div>
+    </div>
+    <div class='paragraph-5'>
+      {{ "In case we need to contact you about your order"|trans }}
+    </div>
+    {{ form_rest(form) }}
+
+    <div class='flex justify-between'>
+      {% include '@components/Molecules/Button/Button.html.twig' with {text: 'cancel'|trans, classes:'Button--large Button--secondary', props:{'data-action': "live#emit",'data-live-event-param': "cancelUpdateCreate"} } %}
+      {% include '@components/Molecules/Button/Button.html.twig' with {text: 'Save the address'|trans, classes:'Button--large', inLiveComp: true} %}
+    </div>
+  </div>
+
+  {{ form_errors(form) }}
+  {{ form_end(form) }}
+
+</div>

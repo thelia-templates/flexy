@@ -92,6 +92,7 @@ class PseSelector extends BaseFrontController
                 'label' => $attribute['label'],
                 'choices' => $choices,
                 'data' => reset($choices),
+                'expanded' => true,
                 'multiple' => false,
                 'required' => false,
             ]);

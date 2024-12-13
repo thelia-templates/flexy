@@ -1,32 +1,34 @@
 <div class='grid grid-cols-12' {{ attributes }}>
 
-  <div class='md:col-span-7 col-span-12 Checkout-main'>
+    <div class='md:col-span-7 col-span-12 Checkout-main'>
 
-    <div class='Checkout-main-container'>
-      {% if page == "cart" %}
-        {% include '@components/Page/Checkout/Cart.html.twig' with {items: this.cart.items, totalItems:attr('cart', 'item_count')} %}
-      {% endif %}
+        <div class='Checkout-main-container'>
+            {% if page == "cart" %}
+                {% include '@components/Page/Checkout/Cart.html.twig' with {items: this.cart.items, totalItems:summary.item_count} %}
+            {% elseif page == "delivery" %}
+                {% include '@components/Page/Checkout/Delivery.html.twig' %}
+            {% endif %}
+        </div>
     </div>
-  </div>
 
 
-  <div class='Checkout-sidebar md:col-span-5 col-span-12'>
-    <div class='Checkout-sidebar-container'>
-      <h2 class='h3 text-black'>{{ 'Summary'|trans }}</h2>
-      {% include '@components/Organisms/SummaryCard/SummaryCard.html.twig' with {
-        totalItems: summary.item_count,
-        subTotal: summary.total_price_without_discount,
-        total: summary.total_taxed_price,
-        taxAmount: summary.total_tax_amount,
-      } %}
+    <div class='Checkout-sidebar md:col-span-5 col-span-12'>
+        <div class='Checkout-sidebar-container'>
+            <h2 class='h3 text-black'>{{ 'Summary'|trans }}</h2>
+            {% include '@components/Organisms/SummaryCard/SummaryCard.html.twig' with {
+                totalItems: summary.item_count,
+                subTotal: summary.total_price_without_discount,
+                total: summary.total_taxed_price,
+                taxAmount: summary.total_tax_amount,
+            } %}
 
-      {% include '@components/Layout/Checkout/NextButton.html.twig' with {page: page} %}
+            {% include '@components/Layout/Checkout/NextButton.html.twig' with {page: page} %}
+
+        </div>
+    </div>
+
+    <div>
 
     </div>
-  </div>
-
-  <div>
-
-  </div>
-  {{ component('Flexy:Organisms:CartItemDelete') }}
+    {{ component('Flexy:Organisms:CartItemDelete') }}
 </div>

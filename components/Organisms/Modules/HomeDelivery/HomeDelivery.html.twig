@@ -2,27 +2,20 @@
 {% set title = title|default('') %}
 {% set date = date|default('') %}
 {% set price = price|default('') %}
-{% set noAddress = noAddress|default(false) %}
-{% set address = address|default({
-  title: "",
-  name: "",
-  address1: "",
-  zipCode: '',
-  city: '',
-  country: '',
-  phone: '',
-}) %}
+{% set addresses = addresses|default([]) %}
 
-<div class='HomeDelivery {% if selected %}selected{% endif %}'>
-	<label class='HomeDelivery-content'>
-    {% include '@components/Atoms/Form/Radio.html.twig' with {type:"span", name:"HomeDelivery", value:1, checked:selected} %}
+{% set name = name|default('') %}
 
-		<span>
+<div class='HomeDelivery DeliveryModule {% if selected %}selected{% endif %}'>
+  <label class='HomeDelivery-content'>
+    {% include '@components/Atoms/Form/Radio.html.twig' with {type:"span", name:name, value:1, checked:selected} %}
+
+    <span>
 			<div class='flex justify-between'>
 				<div>
 					<span class='HomeDelivery-title'>{{ title }}</span>
 					<span class='HomeDelivery-description'>{{ 'Estimated delivery on'|trans }}
-						{{ date }}</span>
+            {{ date }}</span>
 				</div>
 				<div class="w-12 h-12 text-theme-medium">
 					{{ ux_icon("reinsurance-homedelivery") }}
@@ -33,34 +26,8 @@
           {% include '@components/Molecules/Tag/Tag.html.twig' with { icon: "carbone", customText: "0.80kg CO2" } %}
 			</div>
 		</span>
-	</label>
-	{% if selected %}
-		<div class='HomeDelivery-bottom bg-theme-lightest'>
-			{% if noAddress %}
-				<div class="flex flex-col items-start">
-					<span class="HomeDelivery-noAddress">
-						{{ 'You have no registered address' |trans }}:
-					</span>
-
-					{% include '@components/Molecules/Button/Button.html.twig' with {text: 'Add an address'|trans, classes:'mt-4'} %}
-				</div>
-			{% else %}
-				<div>
-					<div class='flex flex-col gap-2'>
-						{% include '@components/Organisms/Card/Address/AddressCard.html.twig' with { address: address } %}
-						{% include '@components/Organisms/Card/Address/AddressCard.html.twig' with { address: address, selected: false } %}
-					</div>
-
-					<div class='my-4'>
-          {% include '@components/Atoms/Form/Checkbox.html.twig' with { label: "Use this address for billing"|trans } %}
-					</div>
-
-					<div class='flex flex-col gap-2 mt-4 lg:flex-row lg:items-center'>
-          {% include '@components/Molecules/Button/Button.html.twig' with {text: 'Choose this address'|trans, classes:'Button--fill lg:w-1/2'} %}
-          {% include '@components/Molecules/Button/Button.html.twig' with {text: 'Use another address'|trans, classes:'Button--secondary lg:w-1/2'} %}
-					</div>
-				</div>
-			{% endif %}
-		</div>
-	{% endif %}
+  </label>
+  <div class='HomeDelivery-bottom bg-theme-lightest'>
+    {{ component('Flexy:Organisms:Modules:HomeDeliveryAddresses') }}
+  </div>
 </div>

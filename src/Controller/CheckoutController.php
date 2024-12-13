@@ -13,6 +13,7 @@
 namespace FlexyBundle\Controller;
 
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\HttpFoundation\Response;
 
@@ -42,8 +43,11 @@ class CheckoutController extends BaseFrontController
     }
 
     #[Route('/delivery', name: 'delivery')]
-    public function deliveryAction(): Response
+    public function deliveryAction(EventDispatcherInterface $eventDispatcher): Response
     {
+        $this->checkAuth();
+        $this->checkCartNotEmpty($eventDispatcher);
+
         return $this->render('checkout', [
           'page' => self::STEP_DELIVERY,
           'current' => self::STEPS[self::STEP_DELIVERY],

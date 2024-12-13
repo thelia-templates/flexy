@@ -21,10 +21,10 @@
 
   &-select {
     @apply paragraph-4;
-    border: 1px solid var(--theme-medium);
+    border: 1px solid var(--theme);
     border-radius: 8px;
-    color: var(--grey-dark);
-    font-style: italic;
+    color: var(--black);
+    font-style: normal;
     width: 100%;
     padding: rem-convert(16px) rem-convert(10px);
     appearance: none;
@@ -33,7 +33,8 @@
     background-position: right 0 top 50%;
     background-size: rem-convert(40px) auto;
     transition: 0.2s ease all;
-
+    background-color: var(--white);
+    cursor: pointer;
     &:hover {
       background-color: var(--theme-lightest);
     }
@@ -43,10 +44,10 @@
       outline: 1px solid var(--theme);
     }
 
-    &--filled {
-      border-color: var(--theme);
-      color: var(--black);
-      font-style: normal;
+    &:has(option[value=""]:checked ) {
+      border-color: var(--theme-medium);
+      font-style: italic;
+      color: var(--grey-dark);
     }
   }
 

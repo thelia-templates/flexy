@@ -5,11 +5,12 @@
 {% set carbone = carbone|default('') %}
 {% set pickupServices = pickupServices|default([]) %} {# pickupServices: [{name: 'Mondial relais', value: 'mondial_relais', img: '' }, ...] #}
 {% set pickups = pickups|default([]) %} {# pickups: [{ selected: false, closed: false, title: 'Nom du point relais', date: 'JJ/MM', address, price: '7,80€', img: { alt: 'Logo Mondial Relay', src: '/images/mondialRelay.svg' },hours}, ...] #}
+{% set name = name|default('') %}
 
-<div class='PickupPointModule {% if selected %}selected{% endif %}'>
+<div class='PickupPointModule DeliveryModule {% if selected %}selected{% endif %}'>
   <label class='PickupPointModule-content'>
-    {% include '@components/Atoms/Form/Radio.html.twig' with {type:"span", name:"PickupPoint", value:1, checked:selected} %}
-  <span>
+    {% include '@components/Atoms/Form/Radio.html.twig' with {type:"span", name:name, value:1, checked:selected} %}
+    <span>
       <span class='PickupPointModule-top'>
       <span>
         <span class='PickupPointModule-title'>{{ title }}</span>
@@ -21,7 +22,7 @@
     </span>
     <div class='flex items-center justify-between mt-6'>
       <span class='PickupPointModule-price'>{{ price }}</span>
-      {% include '@components/Molecules/Tag/Tag.html.twig' with { icon: "carbone", customText: carbone } %}
+     {% if carbone %}{% include '@components/Molecules/Tag/Tag.html.twig' with { icon: "carbone", customText: carbone } %}{% endif %}
     </div>
   </span>
   </label>
@@ -30,16 +31,17 @@
       {% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with { label: "Find a delivery address"|trans, placeholder: "e.g. City, Postcode"|trans, iconButton: "search" } %}
     </div>
     <div>
-      <button class='text-black underline-with-icon' type='button'>{{ ux_icon("pin-circle") }}{{ 'Select on map'|trans }}</button>
+      <button class='text-black underline-with-icon'
+              type='button'>{{ ux_icon("pin-circle") }}{{ 'Select on map'|trans }}</button>
     </div>
     <div class='flex gap-1 md:gap-5'>
       {% include '@components/Molecules/Button/Button.html.twig' with {classes: 'PickupPointModule-buttonView', text: 'Map view'|trans, sharp:true, icon_left: 'list', variant: 'secondary'} %}
       {% include '@components/Molecules/Button/Button.html.twig' with {classes: 'PickupPointModule-buttonView', text: 'Map view'|trans, sharp:true, icon_left: 'pin-circle'} %}
     </div>
-    <div class='mt-5 paragraph-6'>3 {{ 'relay point(s) found'|trans }}</div>
+    <div class='mt-5 paragraph-6'>{{ pickupServices|length }} {{ 'relay point(s) found'|trans }}</div>
     <div class='gap-10 mt-3 text-black xl:flex'>
       {% for pickupService in pickupServices %}
-        <label class="Checkbox">
+        <label class="Checkbox items-center">
           <input type="checkbox"
                  name='pickup'
                  value='{{ pickupService.value }}'
@@ -56,7 +58,7 @@
     </div>
     <div class='flex flex-col gap-2 mt-6'>
       {% for pickup in pickups %}
-      {% include '../../Card/PickupPoint/PickupPoint.html.twig' with pickup %}
+        {% include '../../Card/PickupPoint/PickupPoint.html.twig' with pickup %}
       {% endfor %}
     </div>
   </div>

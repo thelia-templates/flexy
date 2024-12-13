@@ -3,11 +3,6 @@
   border: 1px solid var(--theme-lightest);
   border-radius: rem-convert(8px);
   padding: rem-convert(16px);
-  max-width: rem-convert(340px);
-
-  @screen lg {
-    max-width: rem-convert(540px);
-  }
 
   &.selected {
     background: var(--theme-lighter);

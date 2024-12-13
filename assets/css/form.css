@@ -45,3 +45,13 @@
     }
   }
 }
+
+
+form
+{
+  hr {
+    height: 1px;
+    color: var(--theme-medium);
+    border-bottom: 1px solid var(--theme-medium);
+  }
+}

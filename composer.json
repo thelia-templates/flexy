@@ -13,7 +13,8 @@
     "symfony/ux-translator": "^2.19",
     "symfony/ux-live-component": "^2.19",
     "symfony/twig-bundle": "6.4.*",
-    "twig/intl-extra": "^3.16"
+    "twig/intl-extra": "^3.16",
+    "twig/extra-bundle": "^3.16"
   },
   "autoload": {
     "psr-4": {

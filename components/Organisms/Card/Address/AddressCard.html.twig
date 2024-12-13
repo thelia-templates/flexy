@@ -6,10 +6,10 @@
 {% set purchaseFunnel = purchaseFunnel|default(false) %}
 {% set isDefault = isDefault|default(false) %}
 {% set address = address|default({
-  title: "",
+  label: "",
   name: "",
   address1: "",
-  zipCode: '',
+  zipcode: '',
   city: '',
   country: '',
   phone: '',
@@ -31,29 +31,32 @@
     </div>
   {% endif %}
   <{{ contentType }} class='AddressCard-content'>
-    {% include '@components/Atoms/Form/Radio.html.twig' with {classes:radio ? "" : "invisible max-w-0", type:"span", name:"test", value:1, checked:selected} %}
+  {% include '@components/Atoms/Form/Radio.html.twig' with {classes:radio ? "" : "invisible max-w-0", type:"span", name:"test", value:1, checked:selected} %}
 
-    <span>
-      <span class='AddressCard-title'>{% if not purchaseFunnel %}{{ address.title }}{% else %}{{ title }}{% endif %}</span>
+  <span>
+      <span
+        class='AddressCard-title'>{% if not purchaseFunnel %}{{ address.label }}{% else %}{{ title }}{% endif %}</span>
       <span class='AddressCard-name'>{{ address.name }}</span>
       <span class='AddressCard-address'>
         <span>{{ address.address1 }},{% if address.address2 %} {{ address.address2 }},{% endif %}</span>
-        <span>{{ address.zipCode }} {{ address.city }}, {{ address.country }}</span>
+        <span>{{ address.zipcode }} {{ address.city }}, {{ address.country.isoalpha3 }}</span>
         <span class='AddressCard-phone'>{{ address.phone }}</span>
       </span>
     </span>
-  </{{ contentType }}>
+</{{ contentType }}>
 
-  {% if not purchaseFunnel %}
-    <div class="bottom-card-buttons">
-      <button {% if disabled %}disabled{% endif %} class='hover:text-theme' type='button'>
-        <span>{{ ux_icon("edit") }}</span>
-        {{ 'Modify'|trans }}
-      </button>
-      <button {% if disabled %}disabled{% endif %} class='hover:text-theme{% if attributesDelete.class|default('') %} {{ attributesDelete.class }}{% endif %}' type='button' {% if attributesDelete['data-id']|default('') %}data-id="{{ attributesDelete['data-id'] }}"{% endif %}>
-        <span>{{ ux_icon("delete") }}</span>
-        {{ 'Delete'|trans }}
-      </button>
-    </div>
-  {% endif %}
+{% if not purchaseFunnel %}
+  <div class="bottom-card-buttons">
+    <button {% if disabled %}disabled{% endif %} class='hover:text-theme' type='button'>
+      <span>{{ ux_icon("edit") }}</span>
+      {{ 'Modify'|trans }}
+    </button>
+    <button {% if disabled %}disabled{% endif %}
+            class='hover:text-theme{% if attributesDelete.class|default('') %} {{ attributesDelete.class }}{% endif %}'
+            type='button' {% if attributesDelete['data-id']|default('') %}data-id="{{ attributesDelete['data-id'] }}"{% endif %}>
+      <span>{{ ux_icon("delete") }}</span>
+      {{ 'Delete'|trans }}
+    </button>
+  </div>
+{% endif %}
 </div>

@@ -1,0 +1,34 @@
+<div class='flex flex-col gap-3.5'>
+  {% if modules.localPickup  is defined %}
+    {% include '@components/Organisms/Modules/StoreDelivery/StoreDelivery.html.twig' with {
+      name: 'delivery_method',
+      title: 'Store delivery'|trans,
+      date: '25/12',
+      address: {
+        address1: attr('config', 'store_address1'),
+        address2: attr('config', 'store_address2'),
+        address3: attr('config', 'store_address3'),
+        zipCode: attr('config', 'store_zipcode'),
+        city: attr('config', 'store_city')
+      }
+    } %}
+  {% endif %}
+  {% if modules.pickup  is defined %}
+    {% set pickupServices = modules.pickup|map((pickup) => {name:pickup.title, value: pickup.code, img: pickup.img}) %}
+    {% include '@components/Organisms/Modules/PickupPointModule/PickupPointModule.html.twig' with {
+      name: 'delivery_method',
+      title: 'Pick-up point'|trans,
+      date: '25/12',
+      pickupServices: pickupServices
+    } %}
+  {% endif %}
+
+  {% if modules.delivery  is defined %}
+    {% include '@components/Organisms/Modules/HomeDelivery/HomeDelivery.html.twig' with {
+      name: 'delivery_method',
+      title: 'Home Delivery'|trans,
+      date: '25/12'
+    } %}
+  {% endif %}
+
+</div>

@@ -1,11 +1,4 @@
 .PickupPointModule {
-  max-width: rem-convert(340px);
-  @screen md {
-    max-width: rem-convert(444px);
-  }
-  @screen xl {
-    max-width: rem-convert(540px);
-  }
   background: var(--theme-lightest);
   border: 1px solid var(--theme-lightest);
   border-radius: rem-convert(8px);

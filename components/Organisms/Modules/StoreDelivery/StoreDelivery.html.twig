@@ -2,9 +2,7 @@
 {% set title = title|default('') %}
 {% set date = date|default('') %}
 {% set price = price|default('') %}
-{% set registeredClient = registeredClient|default(false) %}
-{% set newClient = newClient|default(false) %}
-{% set closed = closed|default(false) %}
+{% set closed = closed|default(null) %}
 {% set address = address|default({
   title: "",
   name: "",
@@ -16,10 +14,11 @@
 }) %}
 {% set hours = hours|default([]) %} {# hours: [{ day: 'lundi', hours: '14h - 19h' }, ...] #}
 {% set carbone = carbone|default(null) %}
+{% set name = name|default('') %}
 
-<div class='StoreDelivery {% if selected %}selected{% endif %}'>
+<div class='StoreDelivery DeliveryModule {% if selected %}selected{% endif %}'>
   <label class='StoreDelivery-content'>
-    {% include '@components/Atoms/Form/Radio.html.twig' with {type:"span", name:"StoreDelivery", value:1, checked:selected} %}
+    {% include '@components/Atoms/Form/Radio.html.twig' with {type:"span", name:name, value:1, checked:selected} %}
 
     <span>
         <div class='flex justify-between'>
@@ -38,46 +37,49 @@
           {% endif %}
         </div>
 
-        {% if registeredClient and newClient == false %}
-        <div class="mt-4 border-t border-t-grey-lighter lg:flex lg:justify-between lg:items-center">
+        {% if not address %}
+          <div class="mt-4 border-t border-t-grey-lighter lg:flex lg:justify-between lg:items-center">
           <span class='my-4 lg:my-6 paragraph-2'>Magasin de Ville-sur-Fleuve</span>
 
           {% include '@components/Molecules/Button/Button.html.twig' with {text: 'Choose another shop'|trans, classes:'Button--fill lg:w-max'} %}
         </div>
         {% endif %}
 
-        {% if newClient %}
-          {% include '@components/Molecules/Button/Button.html.twig' with {text: 'Choose another shop'|trans, classes:'Button--fill mt-4'} %}
-        {% endif %}
-
-        {% if not newClient %}
-          {% if closed %}
-            <span class='StoreDelivery-opening closed'>{{ 'Close'|trans }} {{ 'currently'|trans }}</span>
-          {% else %}
-            <span class='StoreDelivery-opening'>{{ 'Open'|trans }} {{ 'currently'|trans }}</span>
-          {% endif %}
-          <span class='StoreDelivery-address'>
+      {% if not address %}
+        {% include '@components/Molecules/Button/Button.html.twig' with {text: 'Choose another shop'|trans, classes:'Button--fill mt-4'} %}
+      {% endif %}
+      {% if closed != null %}
+        <span class='StoreDelivery-opening  {% if closed %}closed {% endif %}'>
+              {{ closed?'Close':'Open'|trans }} {{ 'currently'|trans }}
+            </span>
+      {% endif %}
+      {% if address is defined %}
+        <span class='StoreDelivery-address'>
             <span>{{ address.address1 }},</span>
             {% if address.address2 %}<span>{{ address.address2 }},</span>{% endif %}
+          {% if address.address3 %}<span>{{ address.address3 }},</span>{% endif %}
             <span>{{ address.zipCode }} {{ address.city }}</span>
           </span>
-        {% endif %}
+      {% endif %}
 
     </span>
   </label>
-  {% if newClient == false %}
-  <div class='StoreDelivery-bottom'>
-    <button class='StoreDelivery-hours' data-show-hours={{ 'See opening hours' |trans }} data-hide-hours={{ 'hide opening times' |trans }}>{{ ux_icon("clock") }}<span>{{ 'See opening hours' |trans }}</span></span></button>
-  </div>
-  <div class='StoreDelivery-hoursListing md:hidden'>
-    <table>
-      {% for hour in hours %}
-        <tr>
-          <td>{{ hour.day }}</td>
-          <td>{{ hour.hours }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-  </div>
+  {% if hours is not empty %}
+    <div class='StoreDelivery-bottom'>
+      <button class='StoreDelivery-hours'
+              data-show-hours={{ 'See opening hours' |trans }} data-hide-hours={{ 'hide opening times' |trans }}>{{ ux_icon("clock") }}
+        <span>{{ 'See opening hours' |trans }}</span>
+      </button>
+    </div>
+    <div class='StoreDelivery-hoursListing md:hidden'>
+      <table>
+        {% for hour in hours %}
+          <tr>
+            <td>{{ hour.day }}</td>
+            <td>{{ hour.hours }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
   {% endif %}
 </div>
