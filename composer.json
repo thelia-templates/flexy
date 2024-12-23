@@ -18,7 +18,8 @@
     "thelia/thelia-blocks-module": "dev-twig",
     "thelia/twig-engine-module": "dev-twig",
     "thelia/header-highlights-module": "dev-main",
-    "twig/extra-bundle": "^3.17"
+    "twig/extra-bundle": "^3.17",
+    "twig/intl-extra": "^3.17"
   },
   "autoload": {
     "psr-4": {
