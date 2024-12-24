@@ -1,13 +1,13 @@
 {%  extends 'base.html.twig' %}
 
 {% block title %}
-  {{ 'Account' | trans }}
+	{{ 'Account' | trans }}
 {% endblock %}
 
 {% block body %}
-
-  <div class="relative">
-    {% include "@components/Molecules/Button/Button.html.twig" with {
+	{{customer}}
+	<div class="relative">
+		{% include "@components/Molecules/Button/Button.html.twig" with {
       text: 'My account' | trans,
       href: '/account',
       variant: 'minimal',
@@ -15,43 +15,43 @@
       classes: 'absolute top-2 lg:top-6 lg:left-5',
     } %}
 
-	  {% include '@components/Layout/Subheader/TitleOnly/SubheaderTitle.html.twig' with {title: "My profile" | trans, position: "centered" } %}
-  </div>
+		{% include '@components/Layout/Subheader/TitleOnly/SubheaderTitle.html.twig' with {title: "My profile" | trans, position: "centered" } %}
+	</div>
 
-  <div class="grid w-full max-w-screen-lg grid-cols-1 gap-8 lg:gap-14 mx-auto md:grid-cols-2 mt-8 lg:mt-14 mb-20 lg:mb-32 px-[25px] lg:px-0">
-    <div class="flex flex-col gap-6">
-      <div class='h4'>{{'My contact information' | trans}}</div>
-      <form class="bg-theme-lighter rounded-lg px-10 pt-8 pb-6 flex flex-col gap-6">
-        {% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "lastName", label: "Lastname" | trans} %}
-        {% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "firstName", label: "Firstname" | trans} %}
-        {% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "birthday", label: "Birthday" | trans, type: "date", optional: true} %}
-        {% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "email", label: "E-mail" | trans, disabled: true} %}
-        {% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "phone", label: "Phone number" | trans}  %}
-        {% include "@components/Molecules/Button/Button.html.twig" with {text: 'Edit my information' | trans, href: '#', classes: 'Button--large mt-1.5'} %}
+	<div class="grid w-full max-w-screen-lg grid-cols-1 gap-8 lg:gap-14 mx-auto md:grid-cols-2 mt-8 lg:mt-14 mb-20 lg:mb-32 px-[25px] lg:px-0">
+		<div class="flex flex-col gap-6">
+			<div class='h4'>{{'My contact information' | trans}}</div>
+			<form class="flex flex-col gap-6 px-10 pt-8 pb-6 rounded-lg bg-theme-lighter">
+				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "lastName", label: "Lastname" | trans} %}
+				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "firstName", label: "Firstname" | trans} %}
+				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "birthday", label: "Birthday" | trans, type: "date", optional: true} %}
+				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "email", label: "E-mail" | trans, disabled: true} %}
+				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "phone", label: "Phone number" | trans}  %}
+				{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Edit my information' | trans, href: '#', classes: 'Button--large mt-1.5'} %}
 
-        {# Modal de success de modifications d'informations #}
-        {% include "@components/Molecules/Button/Button.html.twig" with {text: 'Edit my information' | trans, classes: 'Button--large mt-1.5 open-modal', name : 'updateInfosSuccess' } %}
-      </form>
-    </div>
-    <div class="flex flex-col gap-6">
-      <div class='h4'>{{'Change my password' | trans}}</div>
-      <form class="bg-theme-lighter rounded-lg px-10 pt-8 pb-6 flex flex-col gap-6">
-        {# Snackbar d'erreur de mot de passe #}
-        {# {% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: '<div>Please enter your current password so we can change it.</div>' | trans ~ include("@components/Molecules/Link/Link.html.twig", { customText: "I forgot my password"| trans, href: '' }), variant: 'error', size: 'full', withIcon: true} %} #}
+				{# Modal de success de modifications d'informations #}
+				{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Edit my information' | trans, classes: 'Button--large mt-1.5 open-modal', name : 'updateInfosSuccess' } %}
+			</form>
+		</div>
+		<div class="flex flex-col gap-6">
+			<div class='h4'>{{'Change my password' | trans}}</div>
+			<form class="flex flex-col gap-6 px-10 pt-8 pb-6 rounded-lg bg-theme-lighter">
+				{# Snackbar d'erreur de mot de passe #}
+				{# {% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: '<div>Please enter your current password so we can change it.</div>' | trans ~ include("@components/Molecules/Link/Link.html.twig", { customText: "I forgot my password"| trans, href: '' }), variant: 'error', size: 'full', withIcon: true} %} #}
 
-        {% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "currentPassword", label: "Current password" | trans, type: "password", placeholder: "########" }  %}
+				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "currentPassword", label: "Current password" | trans, type: "password", placeholder: "########" }  %}
 
-        {# si le mot de passe dans le FieldInput est correct, au clic sur le bouton, ajouter un input et le composant controle du mot de passe #}
-        {# {% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "password", label: "New password" | trans, type: "password", placeholder: "########" }  %}
-        {% include '@components/Molecules/PasswordControls/PasswordControls.html.twig' %} #}
+				{# si le mot de passe dans le FieldInput est correct, au clic sur le bouton, ajouter un input et le composant controle du mot de passe #}
+				{# {% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "password", label: "New password" | trans, type: "password", placeholder: "########" }  %}
+				        {% include '@components/Molecules/PasswordControls/PasswordControls.html.twig' %} #}
 
-        {% include "@components/Molecules/Button/Button.html.twig" with {text: 'Change my password' | trans, href: '#', classes: 'Button--large mt-1.5'} %}
+			{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Change my password' | trans, href: '#', classes: 'Button--large mt-1.5'} %}
 
-        {# Modal de success de changement de mot de passe #}
-        {# {% include "@components/Molecules/Button/Button.html.twig" with {text: 'Change my password' | trans, classes: 'Button--large mt-1.5 open-modal', name : 'updatePasswordSuccess' } %} #}
-      </form>
-    </div>
-  </div>
+				{# Modal de success de changement de mot de passe #}
+				{# {% include "@components/Molecules/Button/Button.html.twig" with {text: 'Change my password' | trans, classes: 'Button--large mt-1.5 open-modal', name : 'updatePasswordSuccess' } %} #}
+			</form>
+		</div>
+	</div>
 
 {% endblock %}
 
@@ -60,51 +60,51 @@
 {% endblock %}
 
 {% block modals %}
-  {% set customContentUpdatePassword %}
-    <div class='h4'>{{"Your password has been changed successfully"| trans}}</div>
-    <div class='flex gap-4 mt-8 flex-col md:flex-row'>
-      {% include '@components/Molecules/Button/Button.html.twig' with {
+	{% set customContentUpdatePassword %}
+	<div class='h4'>{{"Your password has been changed successfully"| trans}}</div>
+	<div class='flex flex-col gap-4 mt-8 md:flex-row'>
+		{% include '@components/Molecules/Button/Button.html.twig' with {
         text: 'Return to my profile'| trans,
         variant: 'secondary',
         fill: true,
         classes: 'close-button'
         }
       %}
-      {% include '@components/Molecules/Button/Button.html.twig' with {
+		{% include '@components/Molecules/Button/Button.html.twig' with {
         text: 'Continue my shopping'| trans,
         fill: true,
         href: '/'
         }
       %}
-    </div>
-  {% endset %}
+	</div>
+	{% endset %}
 
-  {% set customContentUpdateInfos %}
-    <div class='h4'>{{"Your information has been successfully modified"| trans}}</div>
-    <div class='flex gap-4 mt-8 flex-col md:flex-row'>
-      {% include '@components/Molecules/Button/Button.html.twig' with {
+	{% set customContentUpdateInfos %}
+	<div class='h4'>{{"Your information has been successfully modified"| trans}}</div>
+	<div class='flex flex-col gap-4 mt-8 md:flex-row'>
+		{% include '@components/Molecules/Button/Button.html.twig' with {
         text: 'Return to my profile'| trans,
         variant: 'secondary',
         fill: true,
         classes: 'close-button'
         }
       %}
-      {% include '@components/Molecules/Button/Button.html.twig' with {
+		{% include '@components/Molecules/Button/Button.html.twig' with {
         text: 'Continue my shopping'| trans,
         fill: true,
         href: '/'
         }
       %}
-    </div>
-  {% endset %}
+	</div>
+	{% endset %}
 
-  {% include '@components/Molecules/Modal/Modal.html.twig' with {
+	{% include '@components/Molecules/Modal/Modal.html.twig' with {
     name: 'updatePasswordSuccess',
     content: customContentUpdatePassword
     }
   %}
 
-  {% include '@components/Molecules/Modal/Modal.html.twig' with {
+	{% include '@components/Molecules/Modal/Modal.html.twig' with {
     name: 'updateInfosSuccess',
     content: customContentUpdateInfos
     }

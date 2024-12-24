@@ -1,33 +1,15 @@
 {%  extends 'base.html.twig' %}
 
 {% block title %}
-  {{ 'My orders'| trans }}
+	{{ 'My orders'| trans }}
 {% endblock %}
 
 {% block body %}
-	{# {% set orders = resources('/api/front/account/orders') %} #}
-	{% set orders = [
-    {
-      orderNumber: "123456",
-      date: "12/12/2021",
-      nbItems: 2,
-      price: "120.00 €",
-      deliveryDate: "12/12/2021",
-      productImages: [
-        {
-          src: "https://via.placeholder.com/150",
-          alt: "product"
-        },
-        {
-          src: "https://via.placeholder.com/150",
-          alt: "product"
-        }
-      ]
-    }
-  ] %}
 
-  <div class="relative">
-    {% include "@components/Molecules/Button/Button.html.twig" with {
+	{% set orders = resources('/api/front/account/orders') %}
+
+	<div class="relative">
+		{% include "@components/Molecules/Button/Button.html.twig" with {
       text: 'My account' | trans,
       href: '/account',
       variant: 'minimal',
@@ -35,23 +17,23 @@
       classes: 'absolute top-2 lg:top-6 lg:left-5',
     } %}
 
-    {% include '@components/Layout/Subheader/Orders/SubheaderOrders.html.twig' with {title: 'My orders' | trans} %}
-  </div>
+		{% include '@components/Layout/Subheader/Orders/SubheaderOrders.html.twig' with {title: 'My orders' | trans} %}
+	</div>
 
-  {% if orders|length > 0 %}
-    <div class="grid max-w-screen-xl grid-cols-1 gap-6 mx-auto md:grid-cols-2 mt-2 md:mt-11 mb-[80px] md:mb-[120px] [&>.OrderCard]:max-w-full">
-      {% for order in orders %}
-        {% include '@components/Organisms/Card/Order/OrderCard.html.twig' with order %}
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="flex flex-col items-center justify-center text-center mt-11 lg:mt-12 mb-20">
-      <div class="w-[135px] h-[140px] lg:w-[244px] lg:h-[253px]">
-        {{ source('assets/images/nothing.svg') }}
-      </div>
-      <h3 class="mt-4 mb-6 h3">{{ 'You have no orders yet' | trans }}</h3>
-    </div>
-  {% endif %}
+	{% if orders|length > 0 %}
+		<div class="grid max-w-screen-xl grid-cols-1 gap-6 mx-auto md:grid-cols-2 mt-2 md:mt-11 mb-[80px] md:mb-[120px] [&>.OrderCard]:max-w-full">
+			{% for order in orders %}
+				{% include '@components/Organisms/Card/Order/OrderCard.html.twig' with order %}
+			{% endfor %}
+		</div>
+	{% else %}
+		<div class="flex flex-col items-center justify-center mb-20 text-center mt-11 lg:mt-12">
+			<div class="w-[135px] h-[140px] lg:w-[244px] lg:h-[253px]">
+				{{ source('assets/images/nothing.svg') }}
+			</div>
+			<h3 class="mt-4 mb-6 h3">{{ 'You have no orders yet' | trans }}</h3>
+		</div>
+	{% endif %}
 
 {% endblock %}
 
