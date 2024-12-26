@@ -15,28 +15,23 @@ namespace FlexyBundle\Service;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Map\TableMap;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Model\Base\OrderProductQuery;
 use Thelia\Model\Map\OrderProductTableMap;
 use Thelia\Model\Map\OrderProductTaxTableMap;
-use Thelia\Model\Map\ProductTaxTableMap;
-use Thelia\Model\Module;
 use Thelia\Model\OrderQuery;
-use Thelia\Module\AbstractDeliveryModule;
-use Thelia\Module\BaseModule;
-use Thelia\Tools\URL;
 use TwigEngine\Service\DataAccess\DataAccessService;
 use Propel\Runtime\ActiveQuery\Join;
-use Thelia\Model\Map\ProductSaleElementsTableMap;
-use Thelia\Model\Map\ProductTableMap;
+use RuntimeException;
+use Thelia\Model\Base\ProductSaleElementsQuery;
+use Thelia\Model\Customer;
 
 class OrderService
 {
   protected $session;
 
-  public function __construct(private readonly RequestStack $requestStack, private DataAccessService $dataAccessService)
+  public function __construct(private readonly RequestStack $requestStack, private DataAccessService $dataAccessService, private ProductSaleElementsService $pseService)
   {
     $request = $this->requestStack->getCurrentRequest();
 
@@ -47,55 +42,75 @@ class OrderService
   public function getCustomerOrders(): array|ObjectCollection
   {
     $orderList = [];
-    $search = OrderQuery::create();
-    $search->findByCustomerId($this->session->getCustomerUser()->getId());
+    $customer = $this->session->getCustomerUser();
 
-    $orders = $search->find();
+    if (!$customer instanceof Customer) {
+      throw new RuntimeException('Customer not found');
+    }
+
+    $ordersQuery = OrderQuery::create();
+    $ordersQuery->findByCustomerId($this->session->getCustomerUser()->getId());
+
+    $orders = $ordersQuery->find();
 
     foreach ($orders as $order) {
-      $orderProducts = [];
-      $orderProductQuery = OrderProductQuery::create();
-      $orderProductTaxJoin = new Join(
-        OrderProductTableMap::COL_ID,
-        OrderProductTaxTableMap::COL_ORDER_PRODUCT_ID,
-        Criteria::LEFT_JOIN
-      );
-
-      $pseJoin = new Join(
-        OrderProductTableMap::COL_PRODUCT_SALE_ELEMENTS_ID,
-        ProductSaleElementsTableMap::COL_ID,
-        Criteria::LEFT_JOIN
-      );
-
-      $orderProductQuery
-        ->addJoinObject($orderProductTaxJoin)
-        ->addAsColumn(
-          'taxAmount',
-          OrderProductTaxTableMap::COL_AMOUNT
-        )->addAsColumn(
-          'promoTaxAmount',
-          OrderProductTaxTableMap::COL_PROMO_AMOUNT
-        )
-        ->addJoinObject($pseJoin)
-        ->addAsColumn(
-          'productId',
-          ProductSaleElementsTableMap::COL_PRODUCT_ID
-        )
-        ->addAsColumn(
-          'productSale',
-          ProductSaleElementsTableMap::COL_PRODUCT_ID
-        )
-        ->findByOrderId($order->getId());
-
-      foreach ($orderProductQuery->find() as $product) {
-        $orderProducts[] = $product->toArray(TableMap::TYPE_CAMELNAME);
-      };
-      $orderList[] = [
-        ...$order->toArray(TableMap::TYPE_CAMELNAME),
-        'orderProducts' => $orderProducts
-      ];
+      $orderList[] = $this->getExtendOrderProductInfo($order);
     }
 
     return $orderList;
+  }
+
+  public function getOrder(int $id = null)
+  {
+    if (null === $id) {
+      return null;
+    }
+
+    $orderQuery = OrderQuery::create();
+
+    $order = $orderQuery->findPk($id);
+
+    return $this->getExtendOrderProductInfo($order);
+  }
+
+  public function getExtendOrderProductInfo(\Thelia\Model\Order $order)
+  {
+    $orderProducts = [];
+    $orderProductQuery = OrderProductQuery::create();
+    $orderProductTaxJoin = new Join(
+      OrderProductTableMap::COL_ID,
+      OrderProductTaxTableMap::COL_ORDER_PRODUCT_ID,
+      Criteria::LEFT_JOIN
+    );
+
+    $orderProductQuery
+      ->addJoinObject($orderProductTaxJoin)
+      ->addAsColumn(
+        'taxAmount',
+        OrderProductTaxTableMap::COL_AMOUNT
+      )->addAsColumn(
+        'promoTaxAmount',
+        OrderProductTaxTableMap::COL_PROMO_AMOUNT
+      )
+      ->findByOrderId($order->getId());
+
+    foreach ($orderProductQuery as $product) {
+      $pseQuery = ProductSaleElementsQuery::create();
+
+      $pse = $pseQuery->findPk($product->getProductSaleElementsId());
+
+      $orderProducts[] = [
+        ...$product->toArray(TableMap::TYPE_CAMELNAME),
+        'productId' => $pse->getProductId(),
+        'attributesAv' => $this->pseService->getAttributesAvFromPse($pse),
+      ];
+    };
+    $orderExtend = [
+      ...$order->toArray(TableMap::TYPE_CAMELNAME),
+      'orderProducts' => $orderProducts
+    ];
+
+
+    return $orderExtend;
   }
 }

@@ -31,13 +31,13 @@ class AccountController extends BaseFrontController
       'customer' => 'toto',
     ]);
   }
-
-  #[Route('/orders', name: 'account_orders')]
-  public function ordersAction(): Response
+  #[Route('/order/{orderId}', name: 'account_order', requirements: ['orderId' => '\d+'])]
+  public function orderAction(int $orderId = null): Response
   {
     $this->checkAuth();
-    return $this->render('account-orders', [
-      'orders' => $this->orderService->getCustomerOrders()
+
+    return $this->render('account-order', [
+      'orderId' => $orderId
     ]);
   }
 }

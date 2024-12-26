@@ -11,9 +11,9 @@
     {% include '@components/Molecules/Button/Button.html.twig' with {classes: 'Button--small',text:'Track my package'|trans} %}
   </div>
   <hr />
-  <div class='DeliveryTracking-steps'>
+  <ul class='DeliveryTracking-steps'>
     {% for index, step in steps %}
-      <div class='DeliveryTracking-step'><span class='DeliveryTracking-icon'>{% if index == status %}{{ ux_icon("checkmark") }}{% endif %}</span>{{ step | trans }}</div>
+      <li class='DeliveryTracking-step'><span class='DeliveryTracking-icon'>{% if index == status %}{{ ux_icon("checkmark") }}{% endif %}</span>{{ step | trans }}</li>
     {% endfor %}
-  </div>
+  </ul>
 </div>

@@ -39,6 +39,7 @@
     }
   }
 
+  &--paid,
   &--validated {
     background-color: var(--validated-lightest);
     border: 1px solid var(--validated);
@@ -75,6 +76,7 @@
     }
   }
 
+  &--not_paid,
   &--warning {
     background-color: var(--warning-lightest);
     border: 1px solid var(--warning);

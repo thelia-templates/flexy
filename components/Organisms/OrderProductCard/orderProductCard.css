@@ -25,6 +25,7 @@
   &-img {
     height: 130px;
     width: 112px;
+    background-color: var(--white);
     display: flex;
     img {
       object-fit: cover;
@@ -47,7 +48,7 @@
     color: var(--black);
     text-decoration: none;
     transition: inherit;
-    display: block;
+    display: inline-block;
   }
 
   &-orderInfos {
@@ -92,7 +93,6 @@
   &-footer {
     margin-top: 10px;
   }
-
 
   &:hover,
   &:focus-visible {

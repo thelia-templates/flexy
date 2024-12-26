@@ -1,18 +1,14 @@
 <div class="OrderProductCard">
   <div class="OrderProductCard-mainContent">
     <figure class="OrderProductCard-img">
-      <img src="{{ img.url }}" alt="{{ img.alt }}" title="{{ img.alt }}" loading="lazy">
+      <img src="{{ img.src }}" alt="{{ img.alt }}" title="{{ img.alt }}" loading="lazy">
     </figure>
     <div class="OrderProductCard-desc">
-      <div class="OrderProductCard-title">{{ productTitle }}</div>
-
-
+      <a href="{{product.publicUrl ~ '?ref=' ~ orderProduct.productRef }}" class="OrderProductCard-title">{{ productTitle }}</a>
       <div class="OrderProductCard-orderInfos paragraph-6">
         <span class="OrderProductCard-secondaryTitle">{{ secondaryTitle }}</span>
         {% for attribute,value in attributesAv %}
-          <span class="OrderProductCard-secondarySize">{{ attribute }}
-								:
-								{{ value }}</span>
+          <span class="OrderProductCard-secondarySize">{{ attribute }} : {{ value }}</span>
         {% endfor %}
         {% if quantity %}
           <span>{{ 'Quantity:' |trans }}
@@ -29,11 +25,11 @@
       </div>
       {% if isPromo %}
         <div class="OrderProductCard-footerRight">
-          <div class="OrderProductCard-price">{{ promoPrice }}</div>
-          <div class="OrderProductCard-originalPrice">{{ price }}</div>
+          <div class="OrderProductCard-price">{{ promoPrice|format_currency('EUR', locale: 'fr') }}</div>
+          <div class="OrderProductCard-originalPrice">{{ price|format_currency('EUR', locale: 'fr') }}</div>
         </div>
       {% else %}
-        <div class="OrderProductCard-price">{{ price }}</div>
+        <div class="OrderProductCard-price">{{ price|format_currency('EUR', locale: 'fr') }}</div>
       {% endif %}
     </div>
   </div>

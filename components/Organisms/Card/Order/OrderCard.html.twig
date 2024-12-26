@@ -1,12 +1,5 @@
-{% set price = price|default(0) %}
 
-{% for orderProduct in orderProducts %}
-	{% if wasInPromo %}
-		{% set price = (price + orderProduct.promoPrice + orderProduct.promoTaxAmount) * orderProduct.quantity %}
-	{% else %}
-		{% set price = (price + orderProduct.price + orderProduct.taxAmount) * orderProduct.quantity %}
-	{% endif %}
-{% endfor %}
+{% set orderProducts = resources('/api/front/account/order_products',{'order.id':order.id}) %}
 
 <div class='OrderCard'>
 	<div class='justify-between 2xl:flex'>
@@ -24,13 +17,13 @@
 					{{ 'item'|trans }}
 				{% endif %}
 			</div>
-			<div class='font-semibold text-black paragraph-1'>{{ (price + postage)|format_currency('EUR', locale: 'fr') }}</div>
+			<div class='font-semibold text-black paragraph-1'>{{ totalAmount|format_currency('EUR', locale: 'fr') }}</div>
 		</div>
 	</div>
 
 	<div class='2xl:flex 2xl:items-center 2xl:gap-4 2xl:mb-4 2xl:mt-2'>
 		<div class='mt-1 mb-2 2xl:mt-0 2xl:mb-0'>
-			{% include '@components/Molecules/OrderTag/OrderTag.html.twig' with {customText: 'Order shipped'|trans, variant:'validated'} %}
+			{% include '@components/Molecules/OrderTag/OrderTag.html.twig' with {customText: orderStatus.i18ns.title, classes:'OrderTag--' ~orderStatus.code} %}
 		</div>
 		{% if deliveryDate is defined %}
 			<div class='OrderCard-delivery'>{{ 'Scheduled for delivery on'|trans }}

@@ -2,11 +2,10 @@
 {% set variant = variant|default('informative') %}
 {% set type = type|default('outline') %}
 {% set withoutChip = withoutChip|default(false) %}
+{% set classes = classes|default('') %}
 
-
-{% set classes = '' %}
 {% set classes = classes ~ ' OrderTag--' ~ variant %}
 {% set classes = classes ~ ' OrderTag--' ~ type %}
 {% if withoutChip %}{% set classes = classes ~ ' OrderTag--withoutChip' %}{% endif %}
 
-<span class="OrderTag{{ classes }}">{{ customText }}</span>
+<span class="OrderTag {{ classes }}">{{ customText }}</span>
