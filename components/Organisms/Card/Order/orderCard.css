@@ -34,14 +34,15 @@
     padding: rem-convert(4px);
     gap: rem-convert(4px);
     box-shadow: 0 0 8px 0 rgba(84, 84, 84, 0.15);
-    counter-reset:nbOrderImages;
+    counter-reset: nbOrderImages;
   }
   &-image {
     width: rem-convert(72px);
     height: rem-convert(72px);
+    object-fit: contain;
 
-    &:nth-child(6) ~ .OrderCard-image  {
-      counter-increment:nbOrderImages;
+    &:nth-child(6) ~ .OrderCard-image {
+      counter-increment: nbOrderImages;
       position: absolute;
       max-height: 0;
       max-width: 0;
@@ -49,48 +50,48 @@
       opacity: 0;
     }
 
-    @screen '2xl' {
-      &:not(:nth-child(n+7)):nth-last-child(2) ~ .OrderCard-nbImages {
+    @screen 2xl {
+      &:not(:nth-child(n + 7)):nth-last-child(2) ~ .OrderCard-nbImages {
         display: none;
       }
     }
 
     @screen maxSm {
-      &:nth-child(2) ~ .OrderCard-image  {
-        counter-increment:nbOrderImages;
+      &:nth-child(2) ~ .OrderCard-image {
+        counter-increment: nbOrderImages;
         position: absolute;
         max-height: 0;
         max-width: 0;
         overflow: hidden;
         opacity: 0;
       }
-      &:not(:nth-child(n+3)):nth-last-child(2) ~ .OrderCard-nbImages {
+      &:not(:nth-child(n + 3)):nth-last-child(2) ~ .OrderCard-nbImages {
         display: none;
       }
     }
     @screen maxXs {
-      &:nth-child(3) ~ .OrderCard-image  {
-        counter-increment:nbOrderImages;
+      &:nth-child(3) ~ .OrderCard-image {
+        counter-increment: nbOrderImages;
         position: absolute;
         max-height: 0;
         max-width: 0;
         overflow: hidden;
         opacity: 0;
       }
-      &:not(:nth-child(n+4)):nth-last-child(2) ~ .OrderCard-nbImages {
+      &:not(:nth-child(n + 4)):nth-last-child(2) ~ .OrderCard-nbImages {
         display: none;
       }
     }
-    @screen 'max2xl' {
-      &:nth-child(4) ~ .OrderCard-image  {
-        counter-increment:nbOrderImages;
+    @screen max2xl {
+      &:nth-child(4) ~ .OrderCard-image {
+        counter-increment: nbOrderImages;
         position: absolute;
         max-height: 0;
         max-width: 0;
         overflow: hidden;
         opacity: 0;
       }
-      &:not(:nth-child(n+5)):nth-last-child(2) ~ .OrderCard-nbImages {
+      &:not(:nth-child(n + 5)):nth-last-child(2) ~ .OrderCard-nbImages {
         display: none;
       }
     }
