@@ -5,9 +5,6 @@
 {% endblock %}
 
 {% block body %}
-
-	{% set orders = resources('/api/front/account/orders') %}
-
 	<div class="relative">
 		{% include "@components/Molecules/Button/Button.html.twig" with {
       text: 'My account' | trans,
@@ -21,10 +18,12 @@
 	</div>
 
 	{% if orders|length > 0 %}
-		<div class="grid max-w-screen-xl grid-cols-1 gap-6 mx-auto md:grid-cols-2 mt-2 md:mt-11 mb-[80px] md:mb-[120px] [&>.OrderCard]:max-w-full">
-			{% for order in orders %}
-				{% include '@components/Organisms/Card/Order/OrderCard.html.twig' with order %}
-			{% endfor %}
+		<div class="container">
+			<div class="grid gap-6 mx-auto md:grid-cols-2 mt-2 md:mt-11 mb-[80px] md:mb-[120px]">
+				{% for order in orders %}
+					{% include '@components/Organisms/Card/Order/OrderCard.html.twig' with order %}
+				{% endfor %}
+			</div>
 		</div>
 	{% else %}
 		<div class="flex flex-col items-center justify-center mb-20 text-center mt-11 lg:mt-12">

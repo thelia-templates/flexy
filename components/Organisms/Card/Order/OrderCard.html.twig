@@ -1,23 +1,30 @@
-{% set orderNumber = orderNumber|default('') %}
-{% set date = date|default('') %}
-{% set nbItems = nbItems|default(0) %}
-{% set price = price|default('') %}
-{% set deliveryDate = deliveryDate|default('') %}
-{% set productImages = productImages|default([]) %}
+{% set price = price|default(0) %}
+
+{% for orderProduct in orderProducts %}
+	{% if wasInPromo %}
+		{% set price = (price + orderProduct.promoPrice + orderProduct.promoTaxAmount) * orderProduct.quantity %}
+	{% else %}
+		{% set price = (price + orderProduct.price + orderProduct.taxAmount) * orderProduct.quantity %}
+	{% endif %}
+{% endfor %}
 
 <div class='OrderCard'>
 	<div class='justify-between 2xl:flex'>
 		<div>
 			<div class='OrderCard-title'>{{ 'Order N°'|trans }}
-				{{ orderNumber }}</div>
+				{{ ref }}</div>
 			<div class='OrderCard-date'>{{ 'of'|trans }}
-				{{ date }}</div>
+				{{ createdAt|format_date() }}</div>
 		</div>
 		<div class='flex justify-between mt-1 2xl:block 2xl:mt-0'>
-			<div class='text-black paragraph-3'>{{ nbItems }}
-        {{ 'item'|trans }}{% if nbItems > 1 %}s{% endif %}
+			<div class='text-black paragraph-3'>{{ orderProducts|length }}
+				{% if orderProducts|length > 1 %}
+					{{ 'items'|trans }}
+				{% else %}
+					{{ 'item'|trans }}
+				{% endif %}
 			</div>
-			<div class='font-semibold text-black paragraph-1'>{{ price }}</div>
+			<div class='font-semibold text-black paragraph-1'>{{ (price + postage)|format_currency('EUR', locale: 'fr') }}</div>
 		</div>
 	</div>
 
@@ -25,18 +32,32 @@
 		<div class='mt-1 mb-2 2xl:mt-0 2xl:mb-0'>
 			{% include '@components/Molecules/OrderTag/OrderTag.html.twig' with {customText: 'Order shipped'|trans, variant:'validated'} %}
 		</div>
-		<div class='OrderCard-delivery'>{{ 'Scheduled for delivery on'|trans }}
-			{{ deliveryDate }}</div>
+		{% if deliveryDate is defined %}
+			<div class='OrderCard-delivery'>{{ 'Scheduled for delivery on'|trans }}
+				{{ deliveryDate }}
+			</div>
+		{% endif %}
 	</div>
 	<div class='OrderCard-images'>
-		{%  for img in productImages %}
-			<div class='OrderCard-image'>
+		{% for orderProduct in orderProducts %}
+
+			{% set product = resources('/api/front/products/' ~ orderProduct.productId) %}
+			{% set images = resources('/api/front/product_images', {'product.id':product.id}) %}
+
+			{% if images %}
+				{% set img = {src: '/legacy-image-library/product_image_'~ images|last.id ~'/full/%5E*!288,288/0/default.webp', alt: product.i18ns.title} %}
+			{% else %}
+				{% set img = img|default({src: asset('dist/images/placeholder2.webp'), alt:'Default image'|trans}) %}
+			{% endif %}
+
+			<a href="{{product.publicUrl ~ '?ref=' ~ orderProduct.productRef }}" class='OrderCard-image'>
 				<img src='{{ img.src }}' alt='{{ img.alt }}' loading="lazy"/>
-			</div>
+			</a>
+
 		{% endfor %}
 		<div class='OrderCard-nbImages'></div>
 	</div>
 	<div class='mt-6 text-center md:text-left'>
-		{% include '@components/Molecules/Button/Button.html.twig' with {text: 'See order details'|trans} %}
+		{% include '@components/Molecules/Button/Button.html.twig' with {text: 'See order details'|trans, href: "/account/order/"~id} %}
 	</div>
 </div>
