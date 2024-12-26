@@ -1,80 +1,90 @@
 {%  extends 'base.html.twig' %}
 
+
+
 {% block title %}
-  {{ 'My orders'| trans }}
+  {{ 'My order'| trans }}
 {% endblock %}
 
 {% block body %}
-	{# {% set orders = resources('/api/front/account/orders/', {'id': xx}) %} #}
+	{% set order = resources('/api/front/account/orders/'~ orderId ) %}
+  {% set orderProducts = resources('/api/front/account/order_products',{'order.id':order.id}) %}
+
+  {{dump(order)}}
   <main>
     {% include "@components/Molecules/Button/Button.html.twig" with {
       text: 'My orders' | trans,
-      href: '/account-orders',
+      href: '/account/orders',
       variant: 'minimal',
       icon_left: 'chevron-left',
       classes: 'mt-2 lg:mt-6 lg:ml-5',
     } %}
     <div class="lg:w-[540px] mx-6 lg:mx-auto mt-8 lg:mt-4 mb-[56px] md:mb-[94px]">
-      <div class='h3'>{{'Order N°' | trans}} XXXXXXXX</div>
-      <p class='p3 mb-[26px] lg:mb-[44px]'>du 08/01/2024</p>
+      <div class='h3'>{{'Order N°' | trans}} {{order.ref}}</div>
+      <p class='p3 mb-[26px] lg:mb-[44px]'>{{ createdAt|format_date() }}</p>
 
-       {% include '@components/Organisms/Card/DeliveryTracking/DeliveryTracking.html.twig' with {number:'0123', status: 1} %}
+       {% include '@components/Organisms/Card/DeliveryTracking/DeliveryTracking.html.twig' with {number:order.ref, status: 1} %}
 
       <div class='h4 mb-6 mt-[62px]'>{{'Order details' | trans}}</div>
+
       <div class="flex flex-col gap-2">
-        {% include '@components/Organisms/ProductCard/ProductCard.html.twig' with {classes:'ProductCardOrder', isOrderCard: true, imgWidth:'112', imgHeight:'112', productTitle: 'Nom du produit', orderSecondaryTitle: 'titre secondaire', quantity: 1, price: '150€', attributesAv: {
-        size: '34', autre: 'test'}} %}
-        {% include '@components/Organisms/ProductCard/ProductCard.html.twig' with {classes:'ProductCardOrder', isOrderCard: true, imgWidth:'112', imgHeight:'112', productTitle: 'Nom du produit', orderSecondaryTitle: 'titre secondaire', quantity: 1, price: '150€', attributesAv: {
-        size: '34', autre: 'test'}} %}
+        {% for orderProduct in orderProducts %}
+			    {% set product = resources('/api/front/products/' ~ orderProduct.id) %}
+			    {% set images = resources('/api/front/product_images', {'product.id':product.id}) %}
+          {% include '@components/Organisms/OrderProductCard/OrderProductCard.html.twig'
+            with orderProduct|merge({
+              isOrderCard: true,
+              img: {
+                src: '/legacy-image-library/product_image_'~ images|last.id ~'/full/%5E*!224,224/0/default.webp',
+                alt: product.i18ns.title
+              },
+              imgWidth:'112',
+              imgHeight:'112',
+              productTitle: product.i18ns.title,
+              secondaryTitle: product.i18ns.chapo,
+              attributesAv:orderProduct.attributesAv
+            }) %}
+        {% endfor %}
+
         {% include '@components/Organisms/SummaryCard/SummaryCard.html.twig' with {
-          cgvLink: '#',
-          nbArticles: 2,
-          subTotal: '2 150,00€',
-          total: '2 000,00€',
-          promo: {
-            code: '50JUIL23',
-            reduction: '-50€'
-          },
-          giftCard: {
-            code: '4781 6931 567',
-            reduction: '-100€'
-          },
-          noGiftCard: false,
-          noPromo: false}
+          nbArticles: order.orderProducts|length,
+          subTotal: order.totalAmountWithoutTaxes|format_currency('EUR', locale: 'fr'),
+          total: order.totalAmountWithTaxesAfterDiscount|format_currency('EUR', locale: 'fr'),
+          tax: (order.totalAmount  - order.totalAmountWithoutTaxes)|format_currency('EUR', locale: 'fr'),
+          delivery: order.postage + order.postageTax,
+          noGiftCard: true,
+          noPromo: true}
         %}
       </div>
 
       <hr class="mt-[55px] lg:mt-[72px] mb-[30px] lg:mb-[54px]"/>
 
-      <div class='h4 mb-6'>{{'Delivery & payment' | trans}}</div>
+      <div class='mb-6 h4'>{{'Delivery & payment' | trans}}</div>
       <div class="flex flex-col gap-2">
+        {% set deliveryAddress = resources('/api/front/account/addresses/' ~ order.deliveryOrderAddress.id) %}
+        {% set country = resources(deliveryAddress.country) %}
         {% include '@components/Organisms/Card/Address/AddressCard.html.twig' with {
-          address:{
-            name: 'Eleanor Shellstrop',
-            address1: '12 rue du port',
-            address2: 'Bâtiment C',
-            zipCode: '63000',
-            city: 'Clermont-Ferrand',
-            country: 'France',
-            phone: '06 00 00 00 00'
-          },
+          address:deliveryAddress|merge({
+            country: country.isoalpha2
+          }),
           purchaseFunnel: true,
-          title: 'Delivery address'|trans}
+          title: 'Delivery address'|trans
+          }
         %}
+
+        {% set invoiceAddress = resources('/api/front/account/addresses/' ~ order.invoiceOrderAddress.id) %}
+          {% set country = resources(deliveryAddress.country) %}
         {% include '@components/Organisms/Card/Address/AddressCard.html.twig' with {
-          address:{
-            name: 'Eleanor Shellstrop',
-            address1: '86 avenue Jean V.',
-            address2: '',
-            zipCode: '63000',
-            city: 'Clermont-Ferrand',
-            country: 'France',
-            phone: '06 00 00 00 00'
-          },
+          address:invoiceAddress|merge({
+            country: country.isoalpha2
+          }),
           purchaseFunnel: true,
           title: 'Billing address'|trans}
         %}
-        {% include '@components/Organisms/Card/Payment/PaymentCard.html.twig' with {title:'Mode de paiement', withoutButton: true, date: '13/10/25', cardType: 'VISA', number: '**** **** **** 0000'} %}
+        {# {% set paymentModule = resources('/api/front/module/' ~ orderProduct.paymentModuleId) %} #}
+
+        {% include '@components/Organisms/Card/Payment/PaymentCard.html.twig'with {
+            title:'Mode de paiement', withoutButton: true, date: '13/10/25', cardType: 'VISA', number: '**** **** **** 0000'} %}
       </div>
 
 

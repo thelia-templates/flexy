@@ -1,4 +1,5 @@
 {%  extends 'base.html.twig' %}
+{% set orders = resources('/api/front/account/orders') %}
 
 {% block title %}
 	{{ 'My orders'| trans }}
