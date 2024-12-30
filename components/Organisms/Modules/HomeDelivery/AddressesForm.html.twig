@@ -32,7 +32,7 @@
     {{ form_rest(form) }}
 
     <div class='flex justify-between'>
-      {% include '@components/Molecules/Button/Button.html.twig' with {text: 'cancel'|trans, classes:'Button--large Button--secondary', props:{'data-action': "live#emit",'data-live-event-param': "cancelUpdateCreate"} } %}
+      {% include '@components/Molecules/Button/Button.html.twig' with {text: 'cancel'|trans, classes:'Button--large Button--secondary', liveEvent: "cancelUpdateCreate" } %}
       {% include '@components/Molecules/Button/Button.html.twig' with {text: 'Save the address'|trans, classes:'Button--large', inLiveComp: true} %}
     </div>
   </div>

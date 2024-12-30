@@ -13,6 +13,7 @@
   city: '',
   country: '',
   phone: '',
+  id: null
 }) %}
 {% set attributesDelete = attributesDelete|default({
   'class': '',
@@ -44,16 +45,17 @@
       </span>
     </span>
 </{{ contentType }}>
-
 {% if not purchaseFunnel %}
   <div class="bottom-card-buttons">
-    <button {% if disabled %}disabled{% endif %} class='hover:text-theme' type='button'>
+    <button {% if disabled %}disabled{% endif %} class='hover:text-theme' type='button' data-action='live#emit'
+            data-live-event-param='editAddress' data-live-id-param="{{ address.id }}">
       <span>{{ ux_icon("edit") }}</span>
       {{ 'Modify'|trans }}
     </button>
     <button {% if disabled %}disabled{% endif %}
             class='hover:text-theme{% if attributesDelete.class|default('') %} {{ attributesDelete.class }}{% endif %}'
-            type='button' {% if attributesDelete['data-id']|default('') %}data-id="{{ attributesDelete['data-id'] }}"{% endif %}>
+            type='button' {% if attributesDelete['data-id']|default('') %}data-id="{{ attributesDelete['data-id'] }}"{% endif %}
+            data-action='live#emit' data-live-event-param='deleteAddress' data-live-id-param="{{ address.id }}">
       <span>{{ ux_icon("delete") }}</span>
       {{ 'Delete'|trans }}
     </button>

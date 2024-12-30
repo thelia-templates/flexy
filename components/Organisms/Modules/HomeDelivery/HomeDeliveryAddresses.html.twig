@@ -1,9 +1,11 @@
 <div {{ attributes }} class='flex-1'>
-  {% if update or create %}
+  {% set addressId = create ? null : update %}
+  {% set key =  create ? 'create' : 'update_' ~ update %}
+  <div class={{ (update or create) ? '' : 'hidden' }}>
+    {{ component('Flexy:Organisms:Modules:AddressesForm', {addressId:addressId, key: key }) }}
+  </div>
 
-    {{ component('Flexy:Organisms:Modules:AddressesForm', {addressId: create ? null : update}) }}
-
-  {% else %}
+  <div class={{ (update or create) ? 'hidden' : '' }}>
     {% if addresses|length <= 0 %}
       <div class="flex flex-col items-start">
 					<span class="HomeDelivery-noAddress">
@@ -30,5 +32,6 @@
         </div>
       </div>
     {% endif %}
-  {% endif %}
+  </div>
+
 </div>

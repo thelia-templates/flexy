@@ -15,14 +15,18 @@ namespace FlexyBundle\Twig\Organisms\Modules;
 use Propel\Runtime\Map\TableMap;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
+use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\HttpFoundation\Session\Session;
+use Thelia\Core\Service\AddressService;
+use Thelia\Log\Tlog;
 use Thelia\Model\Customer;
 
 #[AsLiveComponent(template: '@components/Organisms/Modules/HomeDelivery/HomeDeliveryAddresses.html.twig')]
-class HomeDeliveryAddresses
+class HomeDeliveryAddresses extends BaseFrontController
 {
     use DefaultActionTrait;
 
@@ -34,7 +38,8 @@ class HomeDeliveryAddresses
     public bool $create = false;
 
     public function __construct(
-        private readonly Session $session
+        private readonly Session $session,
+        private readonly AddressService $addressService,
     ) {
     }
 
@@ -45,6 +50,14 @@ class HomeDeliveryAddresses
         $addresses = $user->getAddresses()?->toArray(null, false, TableMap::TYPE_CAMELNAME);
 
         $this->addresses = $addresses;
+    }
+
+    #[LiveListener('homeDeliveryAddresses:refresh')]
+    public function refresh(): void
+    {
+        $this->mount();
+        $this->create = false;
+        $this->update = null;
     }
 
     #[LiveAction]
@@ -58,5 +71,23 @@ class HomeDeliveryAddresses
     {
         $this->create = false;
         $this->update = null;
+    }
+
+    #[LiveListener('editAddress')]
+    public function editAddress(#[LiveArg] int $id): void
+    {
+        $this->update = $id;
+    }
+
+    #[LiveListener('deleteAddress')]
+    public function deleteAddress(#[LiveArg] int $id): void
+    {
+        $this->checkAuth();
+        try {
+            $this->addressService->deleteAddress($id);
+            $this->refresh();
+        } catch (\Exception $e) {
+            Tlog::getInstance()->error(sprintf('Error during address deletion : %s', $e->getMessage()));
+        }
     }
 }
