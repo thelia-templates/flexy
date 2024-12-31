@@ -4,6 +4,11 @@
 	{{ 'Account' | trans }}
 {% endblock %}
 
+{% block javascripts %}
+	{{ parent() }}
+	{{ encore_entry_script_tags('account') }}
+{% endblock %}
+
 {% block body %}
 	<div class="relative">
 		{% include "@components/Molecules/Button/Button.html.twig" with {
@@ -32,10 +37,22 @@
 				{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Edit my information' | trans, classes: 'Button--large mt-1.5 open-modal', name : 'updateInfosSuccess' } %}
 			</form>
 		</div>
-		{{ component('Flexy:Layout:UpdatePassword') }}
+		<div class="flex flex-col gap-6" {{attributes}}>
+			<div class='text-black h4'>{{'Change my password' | trans}}</div>
 
-		
+			{% set form = getForm("thelia.front.customer.password.update") %}
 
+			{{ form_start(form, {attr : {
+        class: 'flex flex-col gap-6 px-10 pt-8 pb-6 rounded-lg bg-theme-lighter',
+        'action': path('account_account_password'),
+        }})}}
+
+			{{form_row(form.success_url, { value: path('account_index') }) }}
+			{{form_row(form.error_url, { value: path('account_index') }) }}
+			{{form_rest(form)}}
+			{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Update my password' | trans, classes: 'Button--large mt-1.5 open-modal', type: 'submit' } %}
+			{{ form_end(form) }}
+		</div>
 	</div>
 
 {% endblock %}

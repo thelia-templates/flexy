@@ -1,41 +1,47 @@
 export default function PasswordControlsFunction() {
-  const passwordInput = document.getElementById('password');
-  const controls      = document.querySelector('.PasswordControls');
-  if (passwordInput && controls) {
-    passwordInput.addEventListener('focus', () => {
-      document.querySelector('.PasswordControls').style.display = 'block';
+  const controls = document.querySelectorAll('[data-control-password]');
+
+  if (!controls.length) return;
+
+  const getIndicators = (id) => ({
+    length: document.getElementById(id + '_length'),
+    uppercase: document.getElementById(id + '_uppercase'),
+    lowercase: document.getElementById(id + '_lowercase'),
+    number: document.getElementById(id + '_number'),
+    special: document.getElementById(id + '_special')
+  });
+
+  const conditions = {
+    length: (value) => value.length >= 8,
+    uppercase: (value) => /[A-Z]/.test(value),
+    lowercase: (value) => /[a-z]/.test(value),
+    number: (value) => /[0-9]/.test(value),
+    special: (value) => /[\W_]/.test(value)
+  };
+
+  const updateIndicator = (indicator, isValid) => {
+    if (isValid) {
+      indicator.classList.add('valid');
+    } else {
+      indicator.classList.remove('valid');
+    }
+  };
+
+  controls.forEach((control) => {
+    const input = document.getElementById(control.dataset.controlPassword);
+
+    if (!input) return;
+
+    input.addEventListener('focus', () => {
+      control.style.display = 'block';
     });
 
-    const indicators = {
-      length   : document.getElementById('length'),
-      uppercase: document.getElementById('uppercase'),
-      lowercase: document.getElementById('lowercase'),
-      number   : document.getElementById('number'),
-      special  : document.getElementById('special')
-    };
+    const indicators = getIndicators(input.id);
 
-    const controls = {
-      length   : (value) => value.length >= 8,
-      uppercase: (value) => /[A-Z]/.test(value),
-      lowercase: (value) => /[a-z]/.test(value),
-      number   : (value) => /[0-9]/.test(value),
-      special  : (value) => /[\W_]/.test(value)
-    };
-
-    const updateIndicator = (condition, isValid) => {
-      const indicator = indicators[condition];
-      if (isValid) {
-        indicator.classList.add('valid');
-      } else {
-        indicator.classList.remove('valid');
-      }
-    };
-
-    passwordInput.addEventListener('input', function() {
-      const value = passwordInput.value;
-      for (const [condition, check] of Object.entries(controls)) {
-        updateIndicator(condition, check(value));
+    input.addEventListener('input', function () {
+      for (const [condition, check] of Object.entries(conditions)) {
+        updateIndicator(indicators[condition], check(input.value));
       }
     });
-  }
+  });
 }
