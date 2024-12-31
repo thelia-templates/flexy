@@ -32,24 +32,10 @@
 				{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Edit my information' | trans, classes: 'Button--large mt-1.5 open-modal', name : 'updateInfosSuccess' } %}
 			</form>
 		</div>
-		<div class="flex flex-col gap-6">
-			<div class='h4'>{{'Change my password' | trans}}</div>
-			<form class="flex flex-col gap-6 px-10 pt-8 pb-6 rounded-lg bg-theme-lighter">
-				{# Snackbar d'erreur de mot de passe #}
-				{# {% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: '<div>Please enter your current password so we can change it.</div>' | trans ~ include("@components/Molecules/Link/Link.html.twig", { customText: "I forgot my password"| trans, href: '' }), variant: 'error', size: 'full', withIcon: true} %} #}
+		{{ component('Flexy:Layout:UpdatePassword') }}
 
-				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "currentPassword", label: "Current password" | trans, type: "password", placeholder: "########" }  %}
+		
 
-				{# si le mot de passe dans le FieldInput est correct, au clic sur le bouton, ajouter un input et le composant controle du mot de passe #}
-				{# {% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "password", label: "New password" | trans, type: "password", placeholder: "########" }  %}
-				        {% include '@components/Molecules/PasswordControls/PasswordControls.html.twig' %} #}
-
-			{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Change my password' | trans, href: '#', classes: 'Button--large mt-1.5'} %}
-
-				{# Modal de success de changement de mot de passe #}
-				{# {% include "@components/Molecules/Button/Button.html.twig" with {text: 'Change my password' | trans, classes: 'Button--large mt-1.5 open-modal', name : 'updatePasswordSuccess' } %} #}
-			</form>
-		</div>
 	</div>
 
 {% endblock %}

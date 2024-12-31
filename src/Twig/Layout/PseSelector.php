@@ -70,7 +70,6 @@ class PseSelector extends BaseFrontController
       'append' => 1,
       'newness' => 0,
     ]);
-
     $form->add(
       'currentCombination',
       FieldsetType::class,

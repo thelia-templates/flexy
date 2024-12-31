@@ -6,25 +6,29 @@
 {% set date = date|default('') %}
 
 <div class='PaymentCard'>
-  <div class='PaymentCard-icon'><span>{{ ux_icon("calendar") }}</span></div>
-  <div class='PaymentCard-title'>{{ title }}</div>
-  <div class='{% if not expired %}flex flex-cols items-end justify-between {% endif %}'>
-    <div class='PaymentCard-content'>
-      <div class='font-semibold'>{{ cardType }}</div>
-      <div>N° {{ number }}</div>
-      {% if expired %}
-        <div class='font-bold text-error-dark'>{{ 'Expired'|trans }}</div>
-      {% else %}
-        <div>{{ 'Expires on'|trans }} {{ date }}</div>
-      {% endif %}
-    </div>
-    {% if not withoutButton %}
-      <div class='{% if expired %}mt-2 flex gap-2{% endif %}'>
-        {% include '@components/Molecules/Button/Button.html.twig' with {classes: 'Button--small',text:'Delete'|trans, icon_left: 'delete'} %}
-        {% if expired %}
-          {% include '@components/Molecules/Button/Button.html.twig' with {classes: 'Button--small', variant:'secondary', text:'Update'|trans} %}
-        {% endif %}
-      </div>
-    {% endif %}
-  </div>
+	<div class='PaymentCard-icon'>
+		<span>{{ ux_icon("calendar") }}</span>
+	</div>
+	<div class='PaymentCard-title'>{{ title }}</div>
+	<div class='{% if not expired %}flex flex-cols items-end justify-between {% endif %}'>
+		<div class='PaymentCard-content'>
+			<div class='font-semibold'>{{ cardType }}</div>
+			<div>N°
+				{{ number }}</div>
+			{% if expired %}
+				<div class='font-bold text-error-dark'>{{ 'Expired'|trans }}</div>
+			{% else %}
+				<div>{{ 'Expires on'|trans }}
+					{{ date }}</div>
+			{% endif %}
+		</div>
+		{% if not withoutButton %}
+			<div class='{% if expired %}mt-2 flex gap-2{% endif %}'>
+				{% include '@components/Molecules/Button/Button.html.twig' with {classes: 'Button--small',text:'Delete'|trans, icon_left: 'delete'} %}
+				{% if expired %}
+					{% include '@components/Molecules/Button/Button.html.twig' with {classes: 'Button--small', variant:'secondary', text:'Update'|trans} %}
+				{% endif %}
+			</div>
+		{% endif %}
+	</div>
 </div>
