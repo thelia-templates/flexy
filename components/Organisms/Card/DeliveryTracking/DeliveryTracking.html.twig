@@ -1,19 +1,29 @@
 {% set number = number|default('') %}
 {% set status = status|default(0) %}
+{% set trackLink = trackLink|default(null) %}
 {% set steps = ["Order validated", "Order in preparation", "Order shipped", "Order delivered"] %}
 
 <div class='DeliveryTracking'>
-  <div class='DeliveryTracking-content'>
-    <div>
-      <div class='DeliveryTracking-title'>{{ 'Delivery tracking'| trans }}</div>
-      <div class='DeliveryTracking-desc'>{{ 'Tracking number'| trans}} {{ number }}</div>
-    </div>
-    {% include '@components/Molecules/Button/Button.html.twig' with {classes: 'Button--small',text:'Track my package'|trans} %}
-  </div>
-  <hr />
-  <ul class='DeliveryTracking-steps'>
-    {% for index, step in steps %}
-      <li class='DeliveryTracking-step'><span class='DeliveryTracking-icon'>{% if index == status %}{{ ux_icon("checkmark") }}{% endif %}</span>{{ step | trans }}</li>
-    {% endfor %}
-  </ul>
+	<div class='DeliveryTracking-content'>
+		<div>
+			<div class='DeliveryTracking-title'>{{ 'Delivery tracking'| trans }}</div>
+			<div class='DeliveryTracking-desc'>{{ 'Tracking number'| trans}}
+				{{ number }}</div>
+		</div>
+		{% if trackLink %}
+			{% include '@components/Molecules/Button/Button.html.twig' with {classes: 'Button--small',text:'Track my package'|trans, href:trackLink } %}
+		{% endif %}
+	</div>
+	<hr/>
+	<ul class='DeliveryTracking-steps'>
+		{% for index, step in steps %}
+			<li class='DeliveryTracking-step {% if index == status %}DeliveryTracking-step--active{% endif %}'>
+				<span class='DeliveryTracking-icon'>
+					{% if index == status %}
+						{{ ux_icon("checkmark") }}
+					{% endif %}
+				</span>
+				{{ step | trans }}</li>
+		{% endfor %}
+	</ul>
 </div>

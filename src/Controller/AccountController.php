@@ -12,7 +12,6 @@
 
 namespace FlexyBundle\Controller;
 
-use FlexyBundle\Service\OrderService;
 use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\HttpFoundation\Response;
@@ -20,17 +19,23 @@ use Thelia\Core\HttpFoundation\Response;
 #[Route('/account', name: 'account_')]
 class AccountController extends BaseFrontController
 {
-  public function __construct(private OrderService $orderService) {}
 
   #[Route('', name: 'no_route')]
   public function noRouteAction(): Response
   {
     $this->checkAuth();
 
-    return $this->render('account', [
-      'customer' => 'toto',
-    ]);
+    return $this->render('account');
   }
+
+  #[Route('/orders', name: 'account_orders')]
+  public function ordersAction(): Response
+  {
+    $this->checkAuth();
+
+    return $this->render('account-orders');
+  }
+
   #[Route('/order/{orderId}', name: 'account_order', requirements: ['orderId' => '\d+'])]
   public function orderAction(int $orderId = null): Response
   {

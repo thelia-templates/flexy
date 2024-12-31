@@ -1,6 +1,3 @@
-
-{% set orderProducts = resources('/api/front/account/order_products',{'order.id':order.id}) %}
-
 <div class='OrderCard'>
 	<div class='justify-between 2xl:flex'>
 		<div>
@@ -10,8 +7,8 @@
 				{{ createdAt|format_date() }}</div>
 		</div>
 		<div class='flex justify-between mt-1 2xl:block 2xl:mt-0'>
-			<div class='text-black paragraph-3'>{{ orderProducts|length }}
-				{% if orderProducts|length > 1 %}
+			<div class='text-black paragraph-3'>{{ order.orderProducts|length }}
+				{% if order.orderProducts|length > 1 %}
 					{{ 'items'|trans }}
 				{% else %}
 					{{ 'item'|trans }}
@@ -32,18 +29,15 @@
 		{% endif %}
 	</div>
 	<div class='OrderCard-images'>
-		{% for orderProduct in orderProducts %}
-
+		{% for orderProduct in order.orderProducts %}
 			{% set product = resources('/api/front/products/' ~ orderProduct.productId) %}
 			{% set images = resources('/api/front/product_images', {'product.id':product.id}) %}
-
 			{% if images %}
 				{% set img = {src: '/legacy-image-library/product_image_'~ images|last.id ~'/full/%5E*!288,288/0/default.webp', alt: product.i18ns.title} %}
 			{% else %}
 				{% set img = img|default({src: asset('dist/images/placeholder2.webp'), alt:'Default image'|trans}) %}
 			{% endif %}
-
-			<a href="{{product.publicUrl ~ '?ref=' ~ orderProduct.productRef }}" class='OrderCard-image'>
+			<a href="{{product.publicUrl ~ '?ref=' ~ orderProduct.productSaleElementsRef }}" class='OrderCard-image'>
 				<img src='{{ img.src }}' alt='{{ img.alt }}' loading="lazy"/>
 			</a>
 
