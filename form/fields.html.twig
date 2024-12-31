@@ -15,6 +15,7 @@
 			{% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
       label:  label,
       name: form.vars.full_name,
+      id: form.vars.id,
       type: type,
       placeholder: placeholder,
       required: form.vars.required,
@@ -23,11 +24,16 @@
 			{% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
       label: label,
       name: form.vars.full_name,
+      id: form.vars.id,
       type: type,
       placeholder: placeholder,
       required: form.vars.required,
     } %}
-			{% include "@components/Molecules/PasswordControls/PasswordControls.html.twig" %}
+			{% if widget_attr.password_control %}
+				{% include "@components/Molecules/PasswordControls/PasswordControls.html.twig" with {
+          control : form.vars.id,
+        } %}
+			{% endif %}
 		{%  else %}
 			{# Appel du rendu par défaut si vous n'avez pas besoin de personnaliser davantage #}
 			{{ block('form_widget_simple') }}
@@ -39,7 +45,7 @@
 
 {% block form_errors %}
 	{% for error in errors %}
-		{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: error.message, variant: 'error', withIcon:true} %}
+		{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: error.message, variant: 'error', withIcon:true,size: "full"} %}
 	{% endfor %}
 {% endblock %}
 
