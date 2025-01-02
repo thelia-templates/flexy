@@ -2,12 +2,14 @@
 
 <header class='HeaderCheckout flex justify-between items-center {{ classes }} h-12 xl:h-20 px-6  relative'>
 	<div class='xl:mx-auto Header-logo'>
-    {{ ux_icon('thelia') }}
-  </div>
+		<a href="{{path('index')}}">
+			{{ ux_icon('thelia') }}
+		</a>
+	</div>
 	<div class='flex sm:absolute sm:right-6 HeaderCheckout-reassurance top-1/2 sm:-translate-y-1/2  items-center gap-[2px]'>
 		<div class="w-[20px]">
-      {{ ux_icon('lock') }}
+			{{ ux_icon('lock') }}
 		</div>
-    <span class="text-grey-dark indication indication-lower">{{ '100% secure'|trans }}</span>
+		<span class="text-grey-dark indication indication-lower">{{ '100% secure'|trans }}</span>
 	</div>
 </header>
