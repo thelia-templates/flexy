@@ -2,7 +2,7 @@
 {% set success = success|default(false) %}
 {% set size = size|default(false) %}
 {% set disabled = disabled|default(false) %}
-{% set optional = optional|default(false) %}
+{% set required = required|default(false) %}
 {% set tooltip = tooltip|default(false) %}
 {% set name = name|default('') %}
 {% set id = id|default(name) %}
@@ -37,7 +37,7 @@
 	<div class='FieldInput-header'>
 		<label for='{{ name }}' class='FieldInput-label'>
 			{{ label }}
-			{% if optional and label %}
+			{% if not required and label %}
 				({{'optional' | trans}})
 			{% endif %}
 		</label>
@@ -46,7 +46,7 @@
 		{% endif %}
 	</div>
 	<div class='FieldInput-blockInput {% if iconButton and iconButtonLeft %}FieldInput-blockInputIconLeft{% endif %}{% if type == ' password' %}fieldinput-blockinputiconright{% endif %}'>
-		<input class='FieldInput-input{% if unit %} FieldInput-input--unit{% endif %}{% if verificationCode %} FieldInput-input--verificationCode{% endif %}' type='{{ type }}' name='{{ name }}' id='{{ id }}' {% if value %} value='{{ value }}' {% endif %} {% if not optional %} required {% endif %} {% if placeholder %} placeholder='{{ placeholder }}{% if optional and not label %} ({{'optional' | trans}}){% endif %}' {% endif %} {% if min %} minlength='{{ min }}' {% endif %} {% if max %} maxlength='{{ max }}' {% endif %}/>
+		<input class='FieldInput-input{% if unit %} FieldInput-input--unit{% endif %}{% if verificationCode %} FieldInput-input--verificationCode{% endif %}' type='{{ type }}' name='{{ name }}' id='{{ id }}' {% if value %} value='{{ value }}' {% endif %} {% if required %} required {% endif %} {% if placeholder %} placeholder='{{ placeholder }}{% if not required and not label %} ({{'optional' | trans}}){% endif %}' {% endif %} {% if min %} minlength='{{ min }}' {% endif %} {% if max %} maxlength='{{ max }}' {% endif %}/>
 		{% if unit %}
 			<span class="FieldInput-unit">{{ unit }}</span>
 		{% endif %}

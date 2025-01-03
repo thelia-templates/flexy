@@ -1,7 +1,6 @@
 export function ModalFunction() {
   const openModalButtons = document.querySelectorAll('.open-modal');
   const modals = document.querySelectorAll('.Modal');
-  console.log(modals);
 
   openModalButtons.forEach((button) => {
     button.addEventListener('click', function () {

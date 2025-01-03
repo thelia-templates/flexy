@@ -19,17 +19,16 @@
 			<div class='text-black h3 mb-6 lg:mb-[44px]'>{{'My Address' | trans}}</div>
 
 			{% set form = getForm("thelia_address_update", address) %}
-
 			{{ form_start(form, {attr : {
         class: 'flex flex-col gap-6',
         'action': path('account_address_update', {addressId}),
         'method': 'POST'
       }})}}
-
-			{{form_row(form.success_url, { value: path('account_index',{success : true}) }) }}
-			{{form_row(form.error_url, { value: path('account_address_update',{addressId :'2'}) }) }}
-			{{form_rest(form)}}
 			{{ form_errors(form) }}
+
+			{{form_row(form.success_url, { value: path('account_addresses',{update_success : true}) }) }}
+			{{form_row(form.error_url, { value: path('account_address_update',{addressId}) }) }}
+			{{form_rest(form)}}
 			<div class="flex justify-center mt-4">
 				{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Update address' | trans, classes: 'Button--large lg:w-full', type: 'submit' } %}
 			</div>

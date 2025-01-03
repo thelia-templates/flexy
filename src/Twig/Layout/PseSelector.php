@@ -13,7 +13,7 @@
 namespace FlexyBundle\Twig\Layout;
 
 use FlexyBundle\Form\Type\FieldsetType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use FlexyBundle\Form\Type\PillType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -86,7 +86,7 @@ class PseSelector extends BaseFrontController
       foreach ($attribute['values'] as $value) {
         $choices[$value['label']] = $value['id'];
       }
-      $form->get('currentCombination')->add($attribute['id'], ChoiceType::class, [
+      $form->get('currentCombination')->add($attribute['id'], PillType::class, [
         'label' => $attribute['label'],
         'choices' => $choices,
         'data' => array_values(array_filter($choices, function ($choice) use (&$attribute) {

@@ -26,17 +26,27 @@
 	{% if addresses|length > 0 %}
 		<div class="flex flex-col items-center justify-center mt-6 md:mt-11 mb-[80px] md:mb-[120px] px-6">
 			<ul class="grid w-full max-w-screen-lg grid-cols-1 gap-6 mx-auto md:grid-cols-2">
-				{% if app.request.get('delete_success') == 1 %}
+				{% if app.request.get('delete_success') %}
 					<div class="col-span-full">
 						{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'Your address has been deleted'|trans, variant: 'validated', withIcon:true, size: "full"} %}
 					</div>
 				{% endif %}
-				{% if app.request.get('create_success') == 1 %}
+				{% if app.request.get('create_success') %}
 					<div class="col-span-full">
 						{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'Your address has been created'|trans, variant: 'validated', withIcon:true, size: "full"} %}
 					</div>
 				{% endif %}
-				{% if app.request.get('error') == 1 %}
+				{% if app.request.get('update_success') %}
+					<div class="col-span-full">
+						{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'Your address has been updaded'|trans, variant: 'validated', withIcon:true, size: "full"} %}
+					</div>
+				{% endif %}
+				{% if app.request.get('default_success') %}
+					<div class="col-span-full">
+						{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'Your default address has been updaded'|trans, variant: 'validated', withIcon:true, size: "full"} %}
+					</div>
+				{% endif %}
+				{% if app.request.get('error') %}
 					<div class="col-span-full">
 						{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'An error has occurred, please try again later'|trans, variant: 'warning', withIcon:true, size: "full"} %}
 					</div>
