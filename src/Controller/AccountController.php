@@ -56,7 +56,7 @@ class AccountController extends BaseFrontController
     return $this->render('account-addresses');
   }
 
-  #[Route('/address/{addressId}', name: 'address_update', requirements: ['addressId' => '\d+'])]
+  #[Route('/address/{addressId}', name: 'address', requirements: ['addressId' => '\d+'], methods: ['GET'])]
   public function address(int $addressId = null): Response
   {
     $this->checkAuth();
@@ -66,7 +66,57 @@ class AccountController extends BaseFrontController
     ]);
   }
 
-  #[Route('/address', name: 'address', methods: ['GET'])]
+  #[Route('/address/{addressId}', name: 'address_update', requirements: ['addressId' => '\d+'], methods: ['POST'])]
+  public function addressUpdate(EventDispatcherInterface $eventDispatcher, int $addressId = null): RedirectResponse
+  {
+    $this->checkAuth();
+
+    $addressUpdate = $this->createForm(FrontForm::ADDRESS_UPDATE);
+
+    try {
+      $customer = $this->getSecurityContext()->getCustomerUser();
+
+      $form = $this->validateForm($addressUpdate);
+
+      $address = AddressQuery::create()->findPk($addressId);
+
+      if (null === $address) {
+        return $this->generateRedirectFromRoute('default');
+      }
+
+      if ($address->getCustomer()->getId() != $customer->getId()) {
+        return $this->generateRedirectFromRoute('default');
+      }
+
+      $event = $this->createAddressEvent($form);
+      $event->setAddress($address);
+
+      $eventDispatcher->dispatch($event, TheliaEvents::ADDRESS_UPDATE);
+
+      return $this->generateSuccessRedirect($addressUpdate);
+    } catch (FormValidationException $e) {
+      $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()], Front::MESSAGE_DOMAIN);
+    } catch (\Exception $e) {
+      $message = $this->getTranslator()->trans('Sorry, an error occured: %s', ['%s' => $e->getMessage()], Front::MESSAGE_DOMAIN);
+    }
+
+    $this->getParserContext()->set('address_id', $addressId);
+
+    Tlog::getInstance()->error(sprintf('Error during address creation process : %s', $message));
+
+    $addressUpdate->setErrorMessage($message);
+
+    $this->getParserContext()
+      ->addForm($addressUpdate)
+      ->setGeneralError($message)
+    ;
+
+    if ($addressUpdate->hasErrorUrl()) {
+      return $this->generateErrorRedirect($addressUpdate);
+    }
+  }
+
+  #[Route('/address', name: 'address_new', methods: ['GET'])]
   public function addressNew(): Response
   {
     $this->checkAuth();
@@ -197,9 +247,9 @@ class AccountController extends BaseFrontController
       $event = new AddressEvent($address);
       $eventDispatcher->dispatch($event, TheliaEvents::ADDRESS_DEFAULT);
 
-      $url = $this->urlGenerator->generate('account_addresses');
-
-      $url = $this->urlGenerator->generate('account_addresses');
+      $url = $this->urlGenerator->generate('account_addresses', [
+        'default_success' => true
+      ]);
     } catch (\Exception $e) {
       $this->getParserContext()
         ->setGeneralError($e->getMessage())

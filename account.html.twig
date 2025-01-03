@@ -28,7 +28,7 @@
 			<form class="flex flex-col gap-6 px-10 pt-8 pb-6 rounded-lg bg-theme-lighter">
 				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "lastName", label: "Lastname" | trans} %}
 				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "firstName", label: "Firstname" | trans} %}
-				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "birthday", label: "Birthday" | trans, type: "date", optional: true} %}
+				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "birthday", label: "Birthday" | trans, type: "date"} %}
 				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "email", label: "E-mail" | trans, disabled: true} %}
 				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "phone", label: "Phone number" | trans}  %}
 				{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Edit my information' | trans, href: '#', classes: 'Button--large mt-1.5'} %}

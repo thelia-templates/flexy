@@ -48,19 +48,4 @@
       opacity: 0.2;
     }
   }
-
-  &--drawer {
-    @media screen and (max-width: theme('screens.sm')) {
-      border: none;
-      width: 100%;
-      padding: 14px 0;
-      background-color: transparent;
-
-      &:hover,
-      &:has(:checked) {
-        border: none;
-        background: transparent;
-      }
-    }
-  }
 }
