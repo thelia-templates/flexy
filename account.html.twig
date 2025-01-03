@@ -40,14 +40,18 @@
 		<div class="flex flex-col gap-6" {{attributes}}>
 			<div class='text-black h4'>{{'Change my password' | trans}}</div>
 
+			{% if app.request.get('password_success') == 1 %}
+				{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'Your password has been updated'|trans, variant: 'validated', withIcon:true, size: "full"} %}
+			{% endif %}
+
 			{% set form = getForm("thelia.front.customer.password.update") %}
 
 			{{ form_start(form, {attr : {
         class: 'flex flex-col gap-6 px-10 pt-8 pb-6 rounded-lg bg-theme-lighter',
-        'action': path('account_account_password'),
+        'action': path('account_password'),
         }})}}
 
-			{{form_row(form.success_url, { value: path('account_index') }) }}
+			{{form_row(form.success_url, { value: path('account_index',{password_success : 1}) }) }}
 			{{form_row(form.error_url, { value: path('account_index') }) }}
 			{{form_rest(form)}}
 			{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Update my password' | trans, classes: 'Button--large mt-1.5 open-modal', type: 'submit' } %}

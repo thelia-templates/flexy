@@ -11,6 +11,8 @@
 			{% include '@formTwig/fields/sort.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value} %}
 		{% elseif type == 'choice' %}
 			{% include '@formTwig/fields/choice.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value } %}
+
+
 		{% elseif type == 'text' or type == 'email' %}
 			{% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
       label:  label,

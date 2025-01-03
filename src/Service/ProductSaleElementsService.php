@@ -19,30 +19,29 @@ use Thelia\Model\ProductSaleElements;
 
 class ProductSaleElementsService
 {
-    protected ?string $locale = null;
+  public function __construct(private readonly RequestStack $requestStack) {}
 
-    public function __construct(private readonly RequestStack $requestStack)
-    {
-        $request = $this->requestStack->getCurrentRequest();
+  public function getAttributesAvFromPse(ProductSaleElements $pse): array
+  {
+    $request = $this->requestStack->getCurrentRequest();
 
-        /** @var Session $session */
-        $session = $request->getSession();
+    /** @var ?Session $session */
+    $session = $request?->getSession();
 
-        $this->locale = $session->getLang()->getLocale();
+    $locale = $session?->getLang()->getLocale();
+
+    $combinations = $pse->getAttributeCombinations();
+    $attributesAv = [];
+
+
+    /** @var AttributeCombination $combination */
+    foreach ($combinations as $combination) {
+      $title = $combination->getAttribute()->setLocale($locale)->getTitle();
+      $av = $combination->getAttributeAv()->setLocale($locale)->getTitle();
+
+      $attributesAv[$title] = $av;
     }
 
-    public function getAttributesAvFromPse(ProductSaleElements $pse): array
-    {
-        $combinations = $pse->getAttributeCombinations();
-        $attributesAv = [];
-        /** @var AttributeCombination $combination */
-        foreach ($combinations as $combination) {
-            $title = $combination->getAttribute()->setLocale($this->locale)->getTitle();
-            $av = $combination->getAttributeAv()->setLocale($this->locale)->getTitle();
-
-            $attributesAv[$title] = $av;
-        }
-
-        return $attributesAv;
-    }
+    return $attributesAv;
+  }
 }

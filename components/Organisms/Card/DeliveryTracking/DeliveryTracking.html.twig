@@ -19,7 +19,7 @@
 		{% for index, step in steps %}
 			<li class='DeliveryTracking-step {% if index == status %}DeliveryTracking-step--active{% endif %}'>
 				<span class='DeliveryTracking-icon'>
-					{% if index == status %}
+					{% if index <= status %}
 						{{ ux_icon("checkmark") }}
 					{% endif %}
 				</span>
