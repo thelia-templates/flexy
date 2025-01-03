@@ -1,9 +1,12 @@
 {% set text = text|default('') %}
 {% set selected = selected|default(false) %}
+{% set contentType = "div" %}
+{% set addressId = addressId|default(null) %}
 
-<button class='Favorite {% if selected %}selected{% endif %}'>
-  <span class='text'>{{ text }}</span>
-  <span class='star'>
-    {{ ux_icon('star') }}
-  </span>
+
+<button class='Favorite {% if selected %}selected {% else %}open-modal{% endif %}' {% if not selected %} data-id="confirmDefaultAdresse" data-url="{{path('account_address_default',{addressId})}}" {% endif %}>
+	<span class='text'>{{ text }}</span>
+	<span class='star'>
+		{{ ux_icon('star') }}
+	</span>
 </button>

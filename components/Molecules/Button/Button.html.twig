@@ -13,42 +13,43 @@
 {% set sharp = sharp|default(false) %}
 {% set round = round|default(false) %}
 {% set name = name|default('') %}
+{% set id = id|default('') %}
 {% set onClick = onClick|default({}) %}
 {% set toggleDrawer = toggleDrawer|default(null) %}
 {% set props = props|default([]) %}
 
 
 {% if variant and variant != 'primary' %}
-  {% set classes = classes ~ ' Button--' ~ variant %}
+	{% set classes = classes ~ ' Button--' ~ variant %}
 {% endif %}
 {% if fill %}
-  {% set classes = classes ~ ' Button--fill' %}
+	{% set classes = classes ~ ' Button--fill' %}
 {% endif %}
 {% if rectangle %}
-  {% set classes = classes ~ ' Button--rectangle' %}
+	{% set classes = classes ~ ' Button--rectangle' %}
 {% endif %}
 {% if sharp %}
-  {% set classes = classes ~ ' Button--sharp' %}
+	{% set classes = classes ~ ' Button--sharp' %}
 {% endif %}
 {% if round %}
-  {% set classes = classes ~ ' Button--round' %}
+	{% set classes = classes ~ ' Button--round' %}
 {% endif %}
 {% set tag = 'button' %}
 {% if href %}
-  {% set tag = 'a' %}
+	{% set tag = 'a' %}
 {% endif %}
 
 
-<{{ tag }} class='Button {{ classes }}'  {% for key,value in props %}{{ key }}="{{ value }}"{% endfor %} {% if disabled %} disabled {% endif %} {% if href %} href='{{ href }}' {% else %} type='{{ type }}' {% endif %} {% if onClick %} onclick="{{ onClick }}" {% endif %} {% if name %} data-id="{{ name }}" {% endif %} {% if liveAction %} data-action="live#action" data-live-action-param="{{ liveAction }}" {% endif %} {% if toggleDrawer %} data-drawer-toggle="{{ toggleDrawer }}" {% endif %}>
-{% if icon_left %}
-  <span class='icon icon-left'>
+<{{tag}} {% if id %} id="{{id}}" {% endif %} class='Button {{ classes }}' {% for key,value in props %} {{ key }}="{{ value }}" {% endfor %} {% if disabled %} disabled {% endif %} {% if href %} href='{{ href }}' {% else %} type='{{ type }}' {% endif %} {% if onClick %} onclick="{{ onClick }}" {% endif %} {% if name %} data-id="{{ name }}" {% endif %} {% if liveAction %} data-action="live#action" data-live-action-param="{{ liveAction }}" {% endif %} {% if toggleDrawer %} data-drawer-toggle="{{ toggleDrawer }}" {% endif %}>
+	{% if icon_left %}
+		<span class='icon icon-left'>
 			{{ ux_icon(icon_left) }}
 		</span>
-{% endif %}
+	{% endif %}
 	{{ text|striptags('<span>')|raw }}
 	{% if icon_right %}
-    <span class='icon icon-right'>
+		<span class='icon icon-right'>
 			{{ ux_icon(icon_right) }}
 		</span>
-  {% endif %}
-</{{ tag }}>
+	{% endif %}
+</{{tag}}>

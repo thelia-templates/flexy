@@ -18,8 +18,13 @@
 
 {% set product = resources('/api/front/products/' ~ productId) %}
 {% set productCategory = product.productCategories|filter(c => c.defaultCategory)|first.category %}
-{% block body %}
+{% set currentPse = resources('/api/front/products/' ~ productId)|first %}
 
+{% if app.request.get('ref') %}
+	{% set currentPse = resources('/api/front/product_sale_elements', {ref : app.request.get('ref')})|first %}
+{% endif %}
+
+{% block body %}
 	<div class="ProductPage">
 		<div class="lg:justify-between lg:items-center mb-[29px] lg:flex">
 			{{ component('Molecules:Breadcrumb:Breadcrumb', {
@@ -71,7 +76,7 @@
 					</div>
 				</section>
 				<section id="gallery" class="ProductPage-gallery">
-					{% include '@components/Layout/ProductGallery/ProductGallery.html.twig' with {productId:productId } %}
+					{% include '@components/Layout/ProductGallery/ProductGallery.html.twig' with {productId:productId, currrentPse } %}
 				</section>
 				<section id="description" class="ProductPage-description">
 					{% set descriptionContent %}

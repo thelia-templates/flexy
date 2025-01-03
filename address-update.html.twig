@@ -4,6 +4,8 @@
 	{{ 'New Address'| trans }}
 {% endblock %}
 
+{% set address = resources('/api/front/account/addresses/' ~ addressId) %}
+
 {% block body %}
 	<main>
 		{% include "@components/Molecules/Button/Button.html.twig" with {
@@ -14,22 +16,22 @@
       classes: 'mt-2 lg:mt-6 lg:ml-5',
     } %}
 		<div class="lg:w-[400px] mx-6 lg:mx-auto mt-4 lg:mt-8 lg:mt-120 mb-20">
-			<div class='text-black h3 mb-6 lg:mb-[44px]'>{{'New Address' | trans}}</div>
+			<div class='text-black h3 mb-6 lg:mb-[44px]'>{{'My Address' | trans}}</div>
 
-			{% set form = getForm("thelia_address_creation") %}
+			{% set form = getForm("thelia_address_update", address) %}
 
 			{{ form_start(form, {attr : {
         class: 'flex flex-col gap-6',
-        'action': path('account_address_create'),
+        'action': path('account_address_update', {addressId}),
         'method': 'POST'
-        }})}}
+      }})}}
 
 			{{form_row(form.success_url, { value: path('account_index',{success : true}) }) }}
-			{{form_row(form.error_url, { value: path('account_address_create') }) }}
+			{{form_row(form.error_url, { value: path('account_address_update',{addressId :'2'}) }) }}
 			{{form_rest(form)}}
 			{{ form_errors(form) }}
 			<div class="flex justify-center mt-4">
-				{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Create address' | trans, classes: 'Button--large lg:w-full', type: 'submit' } %}
+				{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Update address' | trans, classes: 'Button--large lg:w-full', type: 'submit' } %}
 			</div>
 			{{ form_end(form) }}
 		</div>

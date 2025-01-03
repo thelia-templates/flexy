@@ -4,56 +4,65 @@
 {% set radio = radio|default(false) %}
 {% set selected = selected|default(false) %}
 {% set purchaseFunnel = purchaseFunnel|default(false) %}
-{% set isDefault = isDefault|default(false) %}
-{% set address = address|default({
-  title: "",
-  name: "",
-  address1: "",
-  zipCode: '',
-  city: '',
-  country: '',
-  phone: '',
-}) %}
 {% set attributesDelete = attributesDelete|default({
   'class': '',
   'data-id': ''
 }) %}
-
+{% set classes = classes|default('') %}
 {% if purchaseFunnel %}
-  {% set radio = false %}
-  {% set selected = false %}
-  {% set contentType = "div" %}
+	{% set radio = false %}
+	{% set selected = false %}
+	{% set contentType = "div" %}
 {% endif %}
-<div class='AddressCard {% if selected %}selected{% endif %}'>
-  {% if not purchaseFunnel %}
-    <div class='AddressCard-top'>
-      {% include '@components/Molecules/Favorite/Favorite.html.twig' with {text: 'Favourite'|trans, selected: isDefault} %}
-    </div>
-  {% endif %}
-  <{{ contentType }} class='AddressCard-content'>
-    {% include '@components/Atoms/Form/Radio.html.twig' with {classes:radio ? "" : "invisible max-w-0", type:"span", name:"test", value:1, checked:selected} %}
+<div class='AddressCard {% if selected %}selected{% endif %} {{classes}}'>
+	{% if not purchaseFunnel %}
+		<div class='AddressCard-top'>
+			{% include '@components/Molecules/Favorite/Favorite.html.twig' with {text: 'Favourite'|trans, selected: address.isDefault, addressId : address.id} %}
+		</div>
+	{% endif %}
+	<{{contentType}} class='AddressCard-content {% if radio %}cursor{% endif %}'>
+		{% if radio %}
+			{% include '@components/Atoms/Form/Radio.html.twig' with {type:"span", name:"test", value:1, checked:selected} %}
+		{% endif %}
+		<span>
+			<span class='AddressCard-title'>
+				{% if not purchaseFunnel %}
+					{{ title }}
+				{% else %}
+					{{ title }}
+				{% endif %}
+			</span>
+			<span class='AddressCard-name'>{{ address.label }}</span>
+			<span class='AddressCard-address'>
+				<span>{{ address.address1 }},
+					{% if address.address2 %}
+						{{ address.address2 }},
+					{% endif %}
+				</span>
+				<span>{{ address.zipcode }}
+					{{ address.city }},
+					{{address.country}}
+				</span>
+				<span class='AddressCard-phone'>{{ address.cellphone }}</span>
+				{% if phone %}
+					<span class='AddressCard-phone'>{{ address.phone }}</span>
+				{% endif %}
+			</span>
+		</span>
+	</{{contentType}}>
 
-    <span>
-      <span class='AddressCard-title'>{% if not purchaseFunnel %}{{ address.title }}{% else %}{{ title }}{% endif %}</span>
-      <span class='AddressCard-name'>{{ address.name }}</span>
-      <span class='AddressCard-address'>
-        <span>{{ address.address1 }},{% if address.address2 %} {{ address.address2 }},{% endif %}</span>
-        <span>{{ address.zipCode }} {{ address.city }}, {{ address.country }}</span>
-        <span class='AddressCard-phone'>{{ address.phone }}</span>
-      </span>
-    </span>
-  </{{ contentType }}>
-
-  {% if not purchaseFunnel %}
-    <div class="bottom-card-buttons">
-      <button {% if disabled %}disabled{% endif %} class='hover:text-theme' type='button'>
-        <span>{{ ux_icon("edit") }}</span>
-        {{ 'Modify'|trans }}
-      </button>
-      <button {% if disabled %}disabled{% endif %} class='hover:text-theme{% if attributesDelete.class|default('') %} {{ attributesDelete.class }}{% endif %}' type='button' {% if attributesDelete['data-id']|default('') %}data-id="{{ attributesDelete['data-id'] }}"{% endif %}>
-        <span>{{ ux_icon("delete") }}</span>
-        {{ 'Delete'|trans }}
-      </button>
-    </div>
-  {% endif %}
+	{% if not purchaseFunnel %}
+		<div class="mt-auto bottom-card-buttons">
+			<a {% if disabled %} disabled {% endif %} href="{{path('account_address_update', {'addressId': address.id})}}" class='hover:text-theme' type='button'>
+				<span>{{ ux_icon("edit") }}</span>
+				{{ 'Modify'|trans }}
+			</a>
+			{% if not address.isDefault %}
+				<button {% if disabled %} disabled {% endif %} class='hover:text-theme{% if attributesDelete.class|default(' ') %} {{ attributesDelete.class }}{% endif %}' type='button' {% if attributesDelete['data-id']|default('') %} data-id="{{ attributesDelete['data-id'] }}" {% endif %} data-url="{{path('account_address_delete', {'addressId': address.id})}}">
+					<span>{{ ux_icon("delete") }}</span>
+					{{ 'Delete'|trans }}
+				</button>
+			{% endif %}
+		</div>
+	{% endif %}
 </div>

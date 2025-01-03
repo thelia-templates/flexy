@@ -40,7 +40,7 @@
     gap: 8px;
 
     &:not(:last-child):after {
-      content: "";
+      content: '';
       position: absolute;
       top: 20px;
       left: 8px;
@@ -48,14 +48,18 @@
       width: 1px;
       background-color: var(--theme);
     }
-    
   }
 
   &-icon {
     display: block;
     width: 16px;
     height: 16px;
-    border: 1px solid var(--theme);
+    color: var(--theme);
+    border: 1px solid currentColor;
     border-radius: 50%;
+
+    svg {
+      color: currentColor;
+    }
   }
 }

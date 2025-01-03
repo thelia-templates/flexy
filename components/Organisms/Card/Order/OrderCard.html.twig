@@ -30,14 +30,19 @@
 	</div>
 	<div class='OrderCard-images'>
 		{% for orderProduct in order.orderProducts %}
-			{% set product = resources('/api/front/products/' ~ orderProduct.productId) %}
-			{% set images = resources('/api/front/product_images', {'product.id':product.id}) %}
-			{% if images %}
-				{% set img = {src: '/legacy-image-library/product_image_'~ images|last.id ~'/full/%5E*!288,288/0/default.webp', alt: product.i18ns.title} %}
+			{% set pse = resources('/api/front/product_sale_elements/' ~ orderProduct.productSaleElementsId) %}
+			{% set product = resources('/api/front/products/' ~ pse.product.id) %}
+			{% set image = resources('/api/front/product_sale_elements_product_image', {'productSaleElementsId':pse.id})|first.productImageId %}
+			{% if not image %}
+				{% set image = resources('/api/front/product_images', {'product.id':product.id})|first.id %}
+			{% endif %}
+
+			{% if image %}
+				{% set img = {src: '/legacy-image-library/product_image_'~ image ~'/full/%5E*!288,288/0/default.webp', alt: product.i18ns.title} %}
 			{% else %}
 				{% set img = img|default({src: asset('dist/images/placeholder2.webp'), alt:'Default image'|trans}) %}
 			{% endif %}
-			<a href="{{product.publicUrl ~ '?ref=' ~ orderProduct.productSaleElementsRef }}" class='OrderCard-image'>
+			<a href="{{product.publicUrl ~ '?ref=' ~ pse.ref }}" class='OrderCard-image'>
 				<img src='{{ img.src }}' alt='{{ img.alt }}' loading="lazy"/>
 			</a>
 

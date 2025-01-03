@@ -3,6 +3,9 @@
   border: 1px solid var(--theme-medium);
   border-radius: rem-convert(8px);
   position: relative;
+  display: flex;
+  flex-direction: column;
+
   &--client-information {
     border: none;
     color: var(--black);
@@ -16,9 +19,7 @@
     right: 0;
     top: 0;
   }
-  label {
-    cursor: pointer;
-  }
+
   &-content {
     display: flex;
     padding: 1.5rem 1.5rem 1rem;

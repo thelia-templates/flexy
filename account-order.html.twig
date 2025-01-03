@@ -6,7 +6,6 @@
 
 {% block body %}
 	{% set order = resources('/api/front/account/orders/'~ orderId ) %}
-	{% set orderProducts = resources('/api/front/account/order_products',{'order.id':order.id}) %}
 	<main>
 		{% include "@components/Molecules/Button/Button.html.twig" with {
       text: 'My orders' | trans,
@@ -25,14 +24,20 @@
 			<div class='h4 mb-6 mt-[62px]'>{{'Order details' | trans}}</div>
 
 			<div class="flex flex-col gap-2">
-				{% for orderProduct in orderProducts %}
-					{% set product = resources('/api/front/products/' ~ orderProduct.id) %}
-					{% set images = resources('/api/front/product_images', {'product.id':product.id}) %}
+				{% for orderProduct in order.orderProducts %}
+					{% set pse = resources('/api/front/product_sale_elements/' ~ orderProduct.productSaleElementsId) %}
+					{% set product = resources('/api/front/products/' ~ pse.product.id) %}
+					{% set image = resources('/api/front/product_sale_elements_product_image', {'productSaleElementsId':pse.id})|first.productImageId %}
+					{% if not image %}
+						{% set image = resources('/api/front/product_images', {'product.id':product.id})|first.id %}
+					{% endif %}
+
+
 					{% include '@components/Organisms/OrderProductCard/OrderProductCard.html.twig'
             with orderProduct|merge({
               isOrderCard: true,
               img: {
-                src: '/legacy-image-library/product_image_'~ images|last.id ~'/full/%5E*!224,224/0/default.webp',
+                src: '/legacy-image-library/product_image_'~ image ~'/full/%5E*!224,224/0/default.webp',
                 alt: product.i18ns.title
               },
               imgWidth:'112',
@@ -58,32 +63,31 @@
 
 			<div class='mb-6 h4'>{{'Delivery & payment' | trans}}</div>
 			<div class="flex flex-col gap-2">
-				{% set deliveryAddress = resources('/api/front/account/addresses/' ~ order.deliveryOrderAddress.id) %}
-				{% set country = resources(deliveryAddress.country) %}
+
 				{% include '@components/Organisms/Card/Address/AddressCard.html.twig' with {
-          address:deliveryAddress|merge({
-            country: country.isoalpha2
+          address:order.deliveryOrderAddress|merge({
+            country: order.deliveryOrderAddress.country.isoalpha2
           }),
           purchaseFunnel: true,
           title: 'Delivery address'|trans
           }
         %}
-				{{dump('/api/front/account/addresses/' ~ order.invoiceOrderAddress.id)}}
-				{% set invoiceAddress = resources('/api/front/account/addresses/' ~ order.invoiceOrderAddress.id) %}
-				{% set country = resources(deliveryAddress.country) %}
+
 				{% include '@components/Organisms/Card/Address/AddressCard.html.twig' with {
-          address:invoiceAddress|merge({
-            country: country.isoalpha2
+          address:order.invoiceOrderAddress|merge({
+            country: order.invoiceOrderAddress.country.isoalpha2
           }),
           purchaseFunnel: true,
           title: 'Billing address'|trans}
         %}
+
 				{% set paymentModule = resources('/api/front/modules/' ~ order.paymentModule.id) %}
-				{% include '@components/Organisms/Card/Payment/PaymentCard.html.twig'with {
+
+				{% if paymentModule %}
+					{% include '@components/Organisms/Card/Payment/PaymentCard.html.twig' with{
             title:'Mode de paiement', withoutButton: true, date: '13/10/25', cardType: 'VISA', number: '**** **** **** 0000'} %}
+				{% endif %}
 			</div>
-
-
 		</div>
 	</main>
 {% endblock %}
