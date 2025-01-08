@@ -12,7 +12,7 @@ export default function PasswordControlsFunction() {
   });
 
   const conditions = {
-    length: (value) => value.length >= 8,
+    length: (value) => value.length >= 12,
     uppercase: (value) => /[A-Z]/.test(value),
     lowercase: (value) => /[a-z]/.test(value),
     number: (value) => /[0-9]/.test(value),

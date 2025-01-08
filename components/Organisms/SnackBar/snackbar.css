@@ -6,6 +6,10 @@
   &-content {
     display: flex;
   }
+
+  &-message {
+    word-break: break-word;
+  }
   &-icon {
     width: rem-convert(20px);
     height: rem-convert(20px);

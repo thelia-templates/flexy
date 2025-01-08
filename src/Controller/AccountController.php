@@ -15,7 +15,6 @@ namespace FlexyBundle\Controller;
 use Front\Front;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\Event\Customer\CustomerCreateOrUpdateEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Response;
@@ -25,21 +24,12 @@ use Thelia\Log\Tlog;
 use Thelia\Core\Event\Address\AddressCreateOrUpdateEvent;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Thelia\Model\Base\AddressQuery;
 use Thelia\Model\Event\AddressEvent;
 
 #[Route('/account', name: 'account_')]
-class AccountController extends BaseFrontController
+class AccountController extends FlexyController
 {
-
-  private UrlGeneratorInterface $urlGenerator;
-
-  public function __construct(UrlGeneratorInterface $urlGenerator)
-  {
-    $this->urlGenerator = $urlGenerator;
-  }
-
   #[Route('', name: 'index')]
   public function noRoute(): Response
   {
@@ -189,8 +179,7 @@ class AccountController extends BaseFrontController
           )
         );
       }
-
-      $url = $this->urlGenerator->generate('account_addresses', [
+      $url = $this->generateUrl('account_addresses', [
         'delete_success' => 1
       ]);
       return new RedirectResponse($url);
@@ -222,8 +211,8 @@ class AccountController extends BaseFrontController
 
       return $response;
     }
-    $url = $this->urlGenerator->generate('account_addresses', [
-      'delete_success' => 1
+    $url = $this->generateUrl('account_addresses', [
+      'delete_success' => true
     ]);
     return new RedirectResponse($url);
   }
@@ -238,7 +227,7 @@ class AccountController extends BaseFrontController
       ->findPk($addressId);
 
     if (null === $address) {
-      $url = $this->urlGenerator->generate('account_addresses', [
+      $url = $this->generateUrl('account_addresses', [
         'error' => true
       ]);
     }
@@ -246,15 +235,14 @@ class AccountController extends BaseFrontController
     try {
       $event = new AddressEvent($address);
       $eventDispatcher->dispatch($event, TheliaEvents::ADDRESS_DEFAULT);
-
-      $url = $this->urlGenerator->generate('account_addresses', [
+      $url = $this->generateUrl('account_addresses', [
         'default_success' => true
       ]);
     } catch (\Exception $e) {
       $this->getParserContext()
         ->setGeneralError($e->getMessage())
       ;
-      $url = $this->urlGenerator->generate('account_addresses', [
+      $url = $this->generateUrl('account_addresses', [
         'error' => true
       ]);
     }
@@ -282,11 +270,12 @@ class AccountController extends BaseFrontController
   #[Route('/password', name: 'password', methods: 'POST')]
   public function password(EventDispatcherInterface $eventDispatcher)
   {
-    if ($this->getSecurityContext()->hasCustomerUser()) {
+    if ($this->securityContext->hasCustomerUser()) {
       $customerPasswordUpdateForm = $this->createForm(FrontForm::CUSTOMER_PASSWORD_UPDATE);
+
       try {
         /** @var Customer $customer */
-        $customer = $this->getSecurityContext()->getCustomerUser();
+        $customer = $this->securityContext->getCustomerUser();
 
         $form = $this->validateForm($customerPasswordUpdateForm, 'post');
 
@@ -296,14 +285,14 @@ class AccountController extends BaseFrontController
 
         return $this->generateSuccessRedirect($customerPasswordUpdateForm);
       } catch (FormValidationException $e) {
-        $message = $this->getTranslator()->trans(
+        $message = $this->translator->trans(
           'Please check your input: %s',
           [
             '%s' => $e->getMessage(),
           ],
         );
       } catch (\Exception $e) {
-        $message = $this->getTranslator()->trans(
+        $message = $this->translator->trans(
           'Sorry, an error occured: %s',
           [
             '%s' => $e->getMessage(),
@@ -320,7 +309,7 @@ class AccountController extends BaseFrontController
 
       $customerPasswordUpdateForm->setErrorMessage($message);
 
-      $this->getParserContext()
+      $this->parserContext
         ->addForm($customerPasswordUpdateForm)
         ->setGeneralError($message)
       ;

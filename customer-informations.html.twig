@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block javascripts %}
+	{{ parent() }}
+	{{ encore_entry_script_tags('register') }}
+{% endblock %}
+
+{% block title %}Register
+{% endblock %}
+
+{% block body %}
+	{% include '@components/Layout/CheckoutSteps/CheckoutSteps.html.twig' with {steps: ["Your login"|trans, "Your informations"|trans], current: 2} %}
+
+	<div class="w-full max-w-[400px] px-[25px] pt-[30px] pb-[54px] lg:px-0 lg:pt-[50px] lg:pb-[120px] mx-auto">
+		<h1 class="mb-4 text-black h2">{{'Create account'|trans}}</h1>
+		<p class="mb-8">
+			{{'With your account, you can track your orders, manage your profile, receive the newsletter, manage your wish lists...'|trans}}
+		</p>
+		{% set form = getForm('flexybundle_form_customer_informations_form', register_data) %}
+		<div class="flex flex-col gap-6 mb-3">
+			{{ form_start(form, {attr : {
+          class: 'flex flex-col gap-6',
+          'action': path('customer_informations_create'),
+          'method': 'POST'
+        }})}}
+			{{ form_errors(form) }}
+
+			<input type="hidden" name="{{ field_name(form.email) }}" value="{{ field_value(form.email) }}">
+
+			<input type="hidden" name="{{ field_name(form.password) }}" value="{{register_data.password}}">
+			<input type="hidden" name="{{ field_name(form.password_confirm) }}" value="{{register_data.password_confirm}}">
+
+			{{form_row(form.success_url, { value: path('customer_activation') }) }}
+			{{form_row(form.error_url, { value: path('customer_informations') }) }}
+			{{form_rest(form)}}
+			<div class="flex flex-col items-start">
+				{% include "@components/Molecules/Button/Button.html.twig" with {type:"submit", text: "Confirm my registration"|trans, variant: "large" } %}
+			</div>
+
+			{% if form.accept_privacy_policy.vars.help %}
+				<p class="paragraph-5 text-grey">{{form.accept_privacy_policy.vars.help}}</p>
+			{% endif %}
+
+		</div>
+	</div>
+{% endblock %}
