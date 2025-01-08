@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block javascripts %}
+	{{ parent() }}
+	{{ encore_entry_script_tags('register') }}
+{% endblock %}
+
+{% block title %}Register
+{% endblock %}
+
+{% block body %}
+	{% include '@components/Layout/CheckoutSteps/CheckoutSteps.html.twig' with {steps: ["Your login"|trans, "Your informations"|trans], current: 1} %}
+
+	<div class="w-full max-w-[400px] px-[25px] pt-[30px] pb-[54px] lg:px-0 lg:pt-[50px] lg:pb-[120px] mx-auto">
+		<h1 class="mb-4 text-black h2">{{'Create account'|trans}}</h1>
+		<p class="mb-8">
+			{{'With your account, you can track your orders, manage your profile, receive the newsletter, manage your wish lists...'|trans}}
+		</p>
+		{% set form = getForm('flexybundle_form_customer_register_form') %}
+
+		<div class="flex flex-col gap-6 mb-3">
+			{{ form_start(form, {attr : {
+          class: 'flex flex-col gap-6',
+          'action': path('customer_register_create'),
+          'method': 'POST'
+        }})}}
+			{{ form_errors(form) }}
+
+			{{form_row(form.success_url, { value: path('customer_informations') }) }}
+			{{form_row(form.error_url, { value: path('customer_register') }) }}
+			{{form_rest(form)}}
+			<div class="flex flex-col items-start">
+				{% include "@components/Molecules/Button/Button.html.twig" with {type:"submit", icon_right: 'chevron-right', text: "Next step"|trans, variant: "large" } %}
+				<div class="mt-9">
+					<p>{{'You already have an account ?'|trans}}</p>
+					{% include "@components/Molecules/Link/Link.html.twig" with {
+              customText: 'Connectez-vous',
+              href: '/login'
+            } %}
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
