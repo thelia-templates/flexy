@@ -7,13 +7,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Action\RedirectException;
-use Thelia\Core\Event\Customer\CustomerCreateOrUpdateEvent;
-use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Form\Exception\FormValidationException;
 use Thelia\Log\Tlog;
-use Thelia\Model\Customer;
-
 
 #[Route('/customer', name: 'customer_')]
 
@@ -106,5 +102,11 @@ class CustomerController extends FlexyController
   public function activation(): Response
   {
     return $this->render('customer-activation');
+  }
+
+  #[Route('/password/forgotten', name: 'password_forgotten', methods: ['GET'])]
+  public function password(): Response
+  {
+    return $this->render('customer-password-forgotten');
   }
 }

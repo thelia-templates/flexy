@@ -1,26 +1,37 @@
-{% set variant = variant|default('theme-light') %} {# variant: 'theme-light'|'error'|'warning'|'validated'|'informative' #}
-{% set size = size|default('small') %} {# size: 'small'|'large'|'full' #}
+{% set variant = variant|default('theme-light') %}
+{# variant: 'theme-light'|'error'|'warning'|'validated'|'informative' #}
+{% set size = size|default('small') %}
+{# size: 'small'|'large'|'full' #}
 {% set withIcon = withIcon|default(false) %}
 {% set text = text|default('') %}
 {% set button = button|default(null) %}
+{% set classes = classes|default(null) %}
 
 {% set icon = '' %}
-{% if variant == 'error' %}{% set icon = 'error' %}{% endif %}
-{% if variant == 'warning' %}{% set icon = 'warning' %}{% endif %}
-{% if variant == 'validated' %}{% set icon = 'check' %}{% endif %}
-{% if variant == 'informative' %}{% set icon = 'info' %}{% endif %}
+{% if variant == 'error' %}
+	{% set icon = 'error' %}
+{% endif %}
+{% if variant == 'warning' %}
+	{% set icon = 'warning' %}
+{% endif %}
+{% if variant == 'validated' %}
+	{% set icon = 'check' %}
+{% endif %}
+{% if variant == 'informative' %}
+	{% set icon = 'info' %}
+{% endif %}
 
-<div class='SnackBar SnackBar-{{ size }} SnackBar--{{ variant }}'>
-  <div class='SnackBar-content'>
-    {% if withIcon and icon %}
-    <div class='SnackBar-icon'>{{ ux_icon(icon) }}</div>
-    {% endif %}
-    <div class='SnackBar-message'>{{ text|raw }}</div>
-  </div>
-  {% if button %}
-  <div class='SnackBar-button'>
-    {% include '@components/Molecules/Button/Button.html.twig' with
+<div class='SnackBar SnackBar-{{ size }} SnackBar--{{ variant }} {{classes}}'>
+	<div class='SnackBar-content'>
+		{% if withIcon and icon %}
+			<div class='SnackBar-icon'>{{ ux_icon(icon) }}</div>
+		{% endif %}
+		<div class='SnackBar-message'>{{ text|raw }}</div>
+	</div>
+	{% if button %}
+		<div class='SnackBar-button'>
+			{% include '@components/Molecules/Button/Button.html.twig' with
       {classes:'', variant:'secondary', text:button} %}
-  </div>
-  {% endif %}
+		</div>
+	{% endif %}
 </div>
