@@ -28,6 +28,13 @@
       required: form.vars.required,
     } %}
 			{% include "@components/Molecules/PasswordControls/PasswordControls.html.twig" %}
+    {% elseif type == 'textarea'  %}
+      {% include "@components/Molecules/Fields/FieldTextArea/FieldTextArea.html.twig" with {
+        label: label,
+        name: form.vars.full_name,
+        placeholder: placeholder,
+        required: form.vars.required,
+      } %}
 		{%  else %}
 			{# Appel du rendu par défaut si vous n'avez pas besoin de personnaliser davantage #}
 			{{ block('form_widget_simple') }}

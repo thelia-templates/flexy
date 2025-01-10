@@ -1,0 +1,48 @@
+{% set classes = classes|default('') %}
+{% set success = success|default(false) %}
+{% set size = size|default(false) %}
+{% set disabled = disabled|default(false) %}
+{% set optional = optional|default(false) %}
+{% set tooltip = tooltip|default(false) %}
+{% set name = name|default('') %}
+{% set label = label|default('') %}
+{% set value = value|default(null) %}
+{% set placeholder = placeholder|default(null) %}
+{% set button = button|default(null) %}
+{% set error = error|default(null) %}
+
+
+{% if error %}
+	{% set classes = classes ~ ' FieldInput--error' %}
+{% endif %}
+{% if success %}
+	{% set classes = classes ~ ' FieldInput--success' %}
+{% endif %}
+
+
+<div class='FieldInput FieldInput--textArea{{ classes }}' {% if disabled %} disabled {% endif %}>
+	<div class='FieldInput-header'>
+		<label for='{{ name }}' class='FieldInput-label'>
+			{{ label }}
+			{% if optional and label %}
+				({{'optional' | trans}})
+			{% endif %}
+		</label>
+		{% if tooltip %}
+			{% include '../../Tooltip/Tooltip.html.twig' with {tooltip: tooltip, position: 'bottom'} %}
+		{% endif %}
+	</div>
+	<div class='FieldInput-blockInput'>
+		<textarea
+      class='FieldInput-input'
+      name='{{ name }}'
+      id='{{ name }}'
+      {% if value %} value='{{ value }}' {% endif %}
+      {% if not optional %} required {% endif %}
+      {% if placeholder %} placeholder='{{ placeholder }}{% if optional and not label %} ({{'optional' | trans}}){% endif %}' {% endif %}
+    ></textarea>
+	</div>
+	{% if error %}
+		<span class='FieldInput-error'>{{ error }}</span>
+	{% endif %}
+</div>

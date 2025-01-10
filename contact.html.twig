@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Contact Us' | trans }}{% endblock %}
+
+{% block body %}
+  <div class="max-w-[400px] px-[25px] pt-[30px] pb-[54px] lg:px-0 lg:pt-[50px] lg:pb-[120px] mx-auto">
+    {% set form = getForm("thelia.front.contact") %}
+
+    {% block contactFormTitle %}
+      <h2 class="mb-4 h2">{{ 'Contact Us' | trans }}</h2>
+    {% endblock %}
+
+    {% block contactForm %}
+
+      {{ form_start(form) }}
+
+      {{form_rest(form)}}
+
+      {% include "@components/Molecules/Button/Button.html.twig" with { text: 'Send' | trans, classes: "w-max mt-6", type: "submit" } %}
+
+      {{ form_errors(form) }}
+
+      {{ form_end(form) }}
+    {% endblock %}
+
+  </div>
+{% endblock %}
