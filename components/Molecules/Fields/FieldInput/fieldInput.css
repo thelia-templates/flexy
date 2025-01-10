@@ -187,3 +187,11 @@
     }
   }
 }
+
+.FieldInput + .FieldInput {
+  @apply mt-6;
+}
+
+[class*='gap-'] > .FieldInput + .FieldInput {
+  margin-top: inherit;
+}
