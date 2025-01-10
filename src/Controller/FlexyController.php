@@ -45,7 +45,7 @@ class FlexyController extends BaseController
   public function checkAuth()
   {
     if ($this->customerIsLogged() == false) {
-      throw new RedirectException($this->generateUrl('customer_index'));
+      throw new RedirectException($this->generateUrl('customer_login'));
     }
   }
 

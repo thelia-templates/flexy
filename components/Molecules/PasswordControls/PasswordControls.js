@@ -4,7 +4,7 @@ export default function PasswordControlsFunction() {
   if (!controls.length) return;
 
   const getIndicators = (id) => ({
-    length: document.getElementById(id + '_length'),
+    size: document.getElementById(id + '_size'),
     uppercase: document.getElementById(id + '_uppercase'),
     lowercase: document.getElementById(id + '_lowercase'),
     number: document.getElementById(id + '_number'),
@@ -12,7 +12,7 @@ export default function PasswordControlsFunction() {
   });
 
   const conditions = {
-    length: (value) => value.length >= 12,
+    size: (value) => value.length >= 12,
     uppercase: (value) => /[A-Z]/.test(value),
     lowercase: (value) => /[a-z]/.test(value),
     number: (value) => /[0-9]/.test(value),
@@ -25,10 +25,13 @@ export default function PasswordControlsFunction() {
     } else {
       indicator.classList.remove('valid');
     }
+
+    return isValid;
   };
 
   controls.forEach((control) => {
     const input = document.getElementById(control.dataset.controlPassword);
+    const parent = input.closest('.FieldInput');
 
     if (!input) return;
 
@@ -39,9 +42,15 @@ export default function PasswordControlsFunction() {
     const indicators = getIndicators(input.id);
 
     input.addEventListener('input', function () {
+      const handleConditions = [];
       for (const [condition, check] of Object.entries(conditions)) {
         updateIndicator(indicators[condition], check(input.value));
+        handleConditions.push(check(input.value));
       }
+      parent?.classList.toggle(
+        'FieldInput--error',
+        handleConditions.filter((c) => !c).length
+      );
     });
   });
 }
