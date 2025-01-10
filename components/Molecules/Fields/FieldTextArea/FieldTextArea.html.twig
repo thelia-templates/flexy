@@ -9,10 +9,10 @@
 {% set value = value|default(null) %}
 {% set placeholder = placeholder|default(null) %}
 {% set button = button|default(null) %}
-{% set error = error|default(null) %}
+{% set errors = errors|default(null) %}
 
 
-{% if error %}
+{% if errors %}
 	{% set classes = classes ~ ' FieldInput--error' %}
 {% endif %}
 {% if success %}
@@ -42,7 +42,10 @@
       {% if placeholder %} placeholder='{{ placeholder }}{% if optional and not label %} ({{'optional' | trans}}){% endif %}' {% endif %}
     ></textarea>
 	</div>
-	{% if error %}
-		<span class='FieldInput-error'>{{ error }}</span>
+
+	{% if errors %}
+    {% for error in errors %}
+      <span class='FieldInput-error'>{{ error }}</span>
+    {% endfor %}
 	{% endif %}
 </div>

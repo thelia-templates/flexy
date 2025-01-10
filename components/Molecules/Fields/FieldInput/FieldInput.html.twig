@@ -18,7 +18,7 @@
 {% set unit = unit|default(null) %}
 {% set verificationCode = verificationCode|default(false) %}
 
-{% if error %}
+{% if errors %}
 	{% set classes = classes ~ ' FieldInput--error' %}
 {% endif %}
 {% if success %}
@@ -80,7 +80,9 @@
       </div>
     {% endif %}
 	</div>
-	{% if error %}
-		<span class='FieldInput-error'>{{ error }}</span>
+	{% if errors %}
+    {% for error in errors %}
+      <span class='FieldInput-error'>{{ error }}</span>
+    {% endfor %}
 	{% endif %}
 </div>

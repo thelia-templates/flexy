@@ -195,3 +195,7 @@
 [class*='gap-'] > .FieldInput + .FieldInput {
   margin-top: inherit;
 }
+
+.FieldInput + .SnackBar--error {
+  @apply mt-3 mb-6;
+}
