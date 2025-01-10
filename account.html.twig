@@ -44,7 +44,7 @@
 				{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'Your password has been updated'|trans, variant: 'validated', withIcon:true, size: "full"} %}
 			{% endif %}
 
-			{% set form = getForm("thelia.front.customer.password.update") %}
+			{% set form = getForm("thelia_customer_password_update") %}
 
 			{{ form_start(form, {attr : {
         class: 'flex flex-col gap-6 px-10 pt-8 pb-6 rounded-lg bg-theme-lighter',

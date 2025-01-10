@@ -12,6 +12,7 @@
 		<h2 class="mb-4 text-black h2">{{ 'Log in' | trans }}</h2>
 		<div class="flex flex-col gap-6 mb-3">
 			<div class="flex flex-col gap-6 mb-3">
+				{{ form_row(form.success_url, { value: path('account_index') }) }}
 				{{ form_row(form.email, { 'label': 'Email' | trans, placeholder: 'Your email' | trans }) }}
 				{{ form_row(form.password, { 'label': 'Password' | trans, placeholder: 'Your password' | trans }) }}
 				{{ form_row(form.remember_me) }}

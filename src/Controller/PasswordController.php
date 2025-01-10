@@ -17,11 +17,11 @@ use Thelia\Log\Tlog;
 
 class PasswordController extends FlexyController
 {
-  #[Route('', name: 'index', methods: ['GET'])]
-  public function noRoute(): Response
-  {
-    dd('todo');
-  }
+  // #[Route('', name: 'index', methods: ['GET'])]
+  // public function noRoute(): Response
+  // {
+  //   return;
+  // }
 
   #[Route('/forgotten', name: 'forgotten', methods: ['GET'])]
   public function forgotten(): Response
@@ -109,5 +109,11 @@ class PasswordController extends FlexyController
     return $this->generateRedirect($this->generateUrl('password_reset_link', [
       'resend_success' => true
     ]));
+  }
+
+  #[Route('/reset', name: 'reset_confirm', methods: ['GET'])]
+  public function resetConfirm(): Response
+  {
+    return $this->render('reset-password-confirm');
   }
 }
