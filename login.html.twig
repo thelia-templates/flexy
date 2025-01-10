@@ -9,23 +9,20 @@
 		{% set form = getForm("thelia.front.customer.login") %}
 
 		{{ form_start(form) }}
-		<h2 class="mb-4 h2">{{ 'Log in' | trans }}</h2>
+		<h2 class="mb-4 text-black h2">{{ 'Log in' | trans }}</h2>
 		<div class="flex flex-col gap-6 mb-3">
-
 			<div class="flex flex-col gap-6 mb-3">
 				{{ form_row(form.email, { 'label': 'Email' | trans, placeholder: 'Your email' | trans }) }}
 				{{ form_row(form.password, { 'label': 'Password' | trans, placeholder: 'Your password' | trans }) }}
+				{{ form_row(form.remember_me) }}
 			</div>
-
-
 			<input name="{{ field_name(form.account) }}" value="1" type='hidden'>
-
 		</div>
 
 		<div class="flex flex-col gap-[30px]">
 			{% include "@components/Molecules/Link/Link.html.twig" with {
         customText: 'Forgot password?' | trans,
-        href: '#'
+        href: path('password_forgotten')
       } %}
 
 			{% include "@components/Molecules/Button/Button.html.twig" with { text: 'Log in' | trans, classes: "w-max", type: "submit" } %}
@@ -36,7 +33,7 @@
 
 		<hr class="my-[40px]"/>
 
-		<h4 class="mb-4 h4">{{ 'Don’t have an account yet?' | trans }}</h4>
+		<h4 class="mb-4 text-black h4">{{ 'Don’t have an account yet?' | trans }}</h4>
 
 		{% include "@components/Molecules/Button/Button.html.twig" with { href: path('customer_register'), text: "Sign up" | trans, variant: "secondary" } %}
 	</div>
