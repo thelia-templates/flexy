@@ -14,7 +14,7 @@
     "symfony/ux-live-component": "^2.19",
     "symfony/twig-bundle": "6.4.*",
     "thelia/front-module": "2.5.*",
-    "thelia/thelia-library-module": "1.*",
+    "thelia/thelia-library-module": "dev-twig",
     "thelia/thelia-blocks-module": "dev-twig",
     "thelia/twig-engine-module": "dev-twig",
     "thelia/header-highlights-module": "dev-main",

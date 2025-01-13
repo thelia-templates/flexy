@@ -3,13 +3,13 @@
 {% set img = img|default({src:'/images/placeholder2.webp', alt:""}) %}
 
 <div class='Subheader Subheader--contentPage'>
-  <div class='Subheader-image'>
-    <img src='{{ img.src }}' alt='{{ img.alt }}'  loading="lazy" />
-  </div>
-  <div class='container mx-auto flex flex-col grow justify-center'>
-    <h1 class='Subheader-title'>{{ title }}</h1>
-    <div class='Subheader-description'>
-      {{ description }}
-    </div>
-  </div>
+	<div class='Subheader-image'>
+		<img src='{{ img.src }}' alt='{{ img.alt }}' loading="lazy"/>
+	</div>
+	<div class='container flex flex-col justify-center mx-auto grow'>
+		<h1 class='Subheader-title'>{{ title }}</h1>
+		<div class='Subheader-description'>
+			{{ description|raw }}
+		</div>
+	</div>
 </div>
