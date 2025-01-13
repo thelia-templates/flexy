@@ -1,8 +1,45 @@
-<div class="h-full">
-  {% include '@components/Molecules/HeaderButton/HeaderButton.html.twig' with {icon: 'account-logged',inactive: inactive|default(true), text: 'Prénom N.', classes:"HeaderNav-btn HeaderButton--theme profile" } %}
-  <ul class="DropdownProfile">
- <li>{% include '@components/Molecules/UserMenu/UserMenu.html.twig' with {customText: 'Mes commandes', href: '/account-orders', variant: 'white'} %}</li>
-    <li>{% include '@components/Molecules/UserMenu/UserMenu.html.twig' with {customText: 'Mon profil', href: '/account', variant: 'white'} %}</li>
-    <li>{% include '@components/Molecules/UserMenu/UserMenu.html.twig' with {customText: 'Mes adresses de livraison', href: '/account-address', variant: 'white'} %}</li>
-  </ul>
+{% set menuItems = [
+  { customText: "My orders"|trans, href: path('account_orders'), variant: 'white' },
+  { customText: "My Profil"|trans, href: path('account_index'), variant: 'white' },
+  { customText: "My delivery addresses"|trans, href: path('account_addresses'), variant: 'white' },
+  { customText: "Logout"|trans, href: path('customer_logout'), variant: 'white', icon: true, classes: "!justify-center !underline font-semibold" }
+] %}
+
+{% set customer = getCurrentCustomer() %}
+{% set headerButtonConfig = {
+  icon: 'account-logged',
+  inactive: inactive|default(true),
+  text: customer.firstname~' '~customer.lastname|first|upper~'.',
+  classes: "HeaderNav-btn HeaderButton--theme profile"
+} %}
+
+<div class="hidden h-full lg:block">
+	{% include '@components/Molecules/HeaderButton/HeaderButton.html.twig' with headerButtonConfig %}
+	<ul class="DropdownProfile">
+		{% for item in menuItems %}
+			<li class="DropdownProfile-item">
+				{% include '@components/Molecules/UserMenu/UserMenu.html.twig' with item %}
+			</li>
+		{% endfor %}
+	</ul>
+</div>
+
+{% include '@components/Molecules/HeaderButton/HeaderButton.html.twig'
+    with headerButtonConfig|merge({
+      attributes: { 'data-drawer-toggle': '#profil', 'type': 'button' },
+      classes:'HeaderNav-btn HeaderButton--theme profile lg:hidden'
+  }) %}
+
+<div class='block MobileDrawer lg:hidden' id='profil'>
+	<div class='MobileDrawer-header'>
+		<button class='MobileDrawer-close' type='button' data-drawer-close>{{ ux_icon("close") }}</button>
+	</div>
+	<strong class="block p-6 text-center text-black h3">{{'hy_customer'|trans({"%firstname%": customer.firstname})}}</strong>
+	<ul class="divide-y divide-gray-lighter">
+		{% for item in menuItems %}
+			<li class="">
+				{% include '@components/Molecules/UserMenu/UserMenu.html.twig' with item %}
+			</li>
+		{% endfor %}
+	</ul>
 </div>

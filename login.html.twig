@@ -11,7 +11,10 @@
 		{{ form_start(form) }}
 		<h2 class="mb-4 text-black h2">{{ 'Log in' | trans }}</h2>
 		<div class="flex flex-col gap-6 mb-3">
+			{{ form_errors(form) }}
+
 			<div class="flex flex-col gap-6 mb-3">
+				{{ form_row(form.error_url, { value: path('customer_login') }) }}
 				{{ form_row(form.success_url, { value: path('account_index') }) }}
 				{{ form_row(form.email, { 'label': 'Email' | trans, placeholder: 'Your email' | trans }) }}
 				{{ form_row(form.password, { 'label': 'Password' | trans, placeholder: 'Your password' | trans }) }}
@@ -28,7 +31,6 @@
 
 			{% include "@components/Molecules/Button/Button.html.twig" with { text: 'Log in' | trans, classes: "w-max", type: "submit" } %}
 		</div>
-		{{ form_errors(form) }}
 
 		{{ form_end(form) }}
 

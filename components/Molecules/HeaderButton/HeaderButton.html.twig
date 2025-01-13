@@ -7,22 +7,22 @@
 {% set text = text|default('') %}
 {% set link = link|default('') %}
 {% set type = 'button' %}
+{% set attributes = attributes|default({}) %}
 
 {% if link %}
-  {% set type = 'a' %}
+	{% set type = 'a' %}
 {% endif %}
 
 
-<{{ type }} {% if id %} id="{{ id }}" {% endif %} {% if link %} href="{{ link }}" {% endif %}
-class='HeaderButton {% if inactive %}HeaderButton--inactive{% endif %} {{ classes }} {% if small %}HeaderButton--small{% endif %}'>
-{% if icon %}
-  <span class='HeaderButton-icon'>{{ ux_icon(icon) }}</span>
-{% endif %}
+<{{type}} {% if id %} id="{{ id }}" {% endif %} {% if link %} href="{{ link }}" {% endif %} class='HeaderButton {% if inactive %}HeaderButton--inactive{% endif %} {{ classes }} {% if small %}HeaderButton--small{% endif %}' {% for attr, value in attributes %} {{ attr }}="{{ value }}" {% endfor %}>
+	{% if icon %}
+		<span class='HeaderButton-icon'>{{ ux_icon(icon) }}</span>
+	{% endif %}
 
-<div class='flex flex-col items-start HeaderButton-text'>
-  <span class="HeaderButton-text">{{ text }}</span>
-  {% if subText %}
-    <span class='HeaderButton-subText'>{{ subText }}</span>
-  {% endif %}
-</div>
-</{{ type }} >
+	<div class='flex flex-col items-start HeaderButton-text'>
+		<span class="HeaderButton-text">{{ text }}</span>
+		{% if subText %}
+			<span class='HeaderButton-subText'>{{ subText }}</span>
+		{% endif %}
+	</div>
+</{{type}}>
