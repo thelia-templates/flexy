@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Action\RedirectException;
 use Thelia\Core\Event\Customer\CustomerLoginEvent;
+use Thelia\Core\Event\DefaultActionEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\Authentication\CustomerUsernamePasswordFormAuthenticator;
@@ -21,11 +22,14 @@ use Thelia\Log\Tlog;
 use Thelia\Model\Base\Customer;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\Event\CustomerEvent;
+use Thelia\Tools\RememberMeTrait;
 
 #[Route('/customer', name: 'customer_')]
 
 class CustomerController extends FlexyController
 {
+  use RememberMeTrait;
+
   #[Route('', name: 'index', methods: ['GET'])]
   public function noRoute(): Response
   {
@@ -41,6 +45,7 @@ class CustomerController extends FlexyController
   #[Route('/login', name: 'login_action', methods: ['POST'])]
   public function loginAction(EventDispatcherInterface $eventDispatcher)
   {
+
     if (!$this->getSecurityContext()->hasCustomerUser()) {
       $request = $this->getRequest();
       $customerLoginForm = $this->createForm(CustomerLogin::class);
@@ -212,19 +217,22 @@ class CustomerController extends FlexyController
     return $this->render('customer-activation');
   }
 
-  #[Route('/password/forgotten', name: 'password_forgotten', methods: ['GET'])]
-  public function password(): Response
-  {
-    return $this->render('customer-password-forgotten');
-  }
-
-
-  /**
-   * Dispatch event for customer login action.
-   */
   protected function processLogin(EventDispatcherInterface $eventDispatcher, Customer $customer): void
   {
     $eventDispatcher->dispatch(new CustomerLoginEvent($customer), TheliaEvents::CUSTOMER_LOGIN);
+  }
+
+  #[Route('/logout', name: 'logout', methods: ['GET'])]
+  public function logout(EventDispatcherInterface $eventDispatcher)
+  {
+    if ($this->getSecurityContext()->hasCustomerUser()) {
+      $eventDispatcher->dispatch(new DefaultActionEvent(), TheliaEvents::CUSTOMER_LOGOUT);
+    }
+
+    $this->clearRememberMeCookie($this->getRememberMeCookieName());
+
+    // Redirect to home page
+    return $this->generateRedirect($this->generateUrl('index'));
   }
 
   protected function getRememberMeCookieName()

@@ -34,7 +34,7 @@ class FlexyController extends BaseController
     public TheliaFormValidator $theliaFormValidator,
     public RequestStack $requestStack,
     public TranslatorInterface $translator,
-    public TheliaFormFactory $theliaFormFactory
+    public TheliaFormFactory $theliaFormFactory,
   ) {}
 
   public function customerIsLogged()

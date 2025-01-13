@@ -3,13 +3,17 @@
   color: var(--black);
   text-decoration: none;
   outline: none;
-  padding: rem-convert(20px) rem-convert(24px);
+  padding: rem-convert(20px) 0;
   border-radius: rem-convert(8px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: rem-convert(64px);
+  cursor: pointer;
 
+  @screen lg {
+    padding: rem-convert(20px) rem-convert(24px);
+  }
   &--vermillon {
     background-color: var(--theme-lighter);
 
