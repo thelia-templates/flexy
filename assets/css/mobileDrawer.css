@@ -45,13 +45,10 @@
 
   &-overlay {
     position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--grey);
-    mix-blend-mode: multiply;
+    inset: 0;
     z-index: 10;
+    opacity: 0.8;
+    background-color: var(--black);
   }
 
   &--reset-sm {
