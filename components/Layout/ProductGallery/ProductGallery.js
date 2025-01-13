@@ -8,7 +8,7 @@ export default function ProductGallery() {
 
   const main = new Splide(galleryNode, {
     pagination: false,
-    arrows: true,
+    destroy: galleryNode.dataset?.count <= 1,
     breakpoints: {
       768: {
         pagination: true,

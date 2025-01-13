@@ -1,6 +1,7 @@
 {%  extends 'base.html.twig' %}
 
-{% block title %}index{% endblock %}
+{% block title %}index
+{% endblock %}
 
 {% block body %}
 
@@ -60,7 +61,7 @@
 	</div>
 
 	<div class="bg-theme-lighter">
-    {{ component('Flexy:Layout:SimilarContent', {title: 'Our news' | trans, button: {label: "See all news" | trans, href: "#"}}) }}
+		{{ component('Flexy:Layout:SimilarContent', {title: 'Our news' | trans, button: {label: "See all news" | trans, href: "#"}}) }}
 	</div>
 
 {% endblock %}

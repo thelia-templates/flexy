@@ -13,24 +13,34 @@
 namespace FlexyBundle\Twig;
 
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use TwigEngine\Service\DataAccess\DataAccessService;
+use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 
 #[AsTwigComponent(template: 'components/Layout/CrossSelling/CrossSelling.html.twig')]
 class CrossSelling
 {
-    public string $categoryId;
-    private DataAccessService $dataAccessService;
+  public string $categoryId;
+  public array $productIdsToIgnore = [];
+  private DataAccessService $dataAccessService;
 
-    public function __construct(DataAccessService $dataAccessService)
-    {
-        $this->dataAccessService = $dataAccessService;
-    }
+  #[ExposeInTemplate]
+  private array $products;
 
-    public function getProducts(): array
-    {
-        return $this->dataAccessService->resources('/api/front/products', [
-            'productCategories.category.id' => $this->categoryId,
-            'itemsPerPage' => 3,
-        ]);
-    }
+  public function __construct(DataAccessService $dataAccessService, private TranslatorInterface $translator)
+  {
+    $this->dataAccessService = $dataAccessService;
+  }
+
+  public function getProducts(): array
+  {
+
+    $this->products = $this->dataAccessService->resources('/api/front/products', [
+      'productCategories.category.id' => $this->categoryId,
+      'itemsPerPage' => 3,
+      'not_in[id]' => $this->productIdsToIgnore
+    ]);
+
+    return $this->products;
+  }
 }
