@@ -172,8 +172,10 @@ class CustomerController extends FlexyController
   {
     $registerData = $session->get('register_data');
 
+    // TODO BACK : vérifier si les données du form sont valides
+
     if (null === $registerData) {
-      throw new RedirectException($this->generateUrl('customer_index'));
+      throw new RedirectException($this->generateUrl('customer_register'));
     }
 
     return $this->render(
@@ -192,7 +194,7 @@ class CustomerController extends FlexyController
     try {
       $this->validateForm($form, 'post');
 
-      // TODO : Ajouter le customer en base sans adresse
+      // TODO BACK : Ajouter le customer en base sans adresse
 
       return $this->generateSuccessRedirect($form);
     } catch (FormValidationException $e) {
