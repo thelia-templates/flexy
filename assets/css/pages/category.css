@@ -2,7 +2,7 @@
   &-grid {
     display: grid;
     padding: 24px;
-
+    width: 100%;
     @screen md {
       padding: 24px 48px;
     }

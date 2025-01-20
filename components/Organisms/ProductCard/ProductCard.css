@@ -5,7 +5,7 @@
   justify-content: space-between;
   background: var(--white);
   @apply rounded-lg;
-
+  z-index: 0;
   .ButtonWishList {
     transition: 0.2s;
     display: none;
@@ -58,7 +58,7 @@
     justify-content: space-between;
     width: 100%;
     padding: 10px;
-    z-index: 9;
+    z-index: 1;
   }
 
   &-tagList {
@@ -91,7 +91,6 @@
       transition: all cubic-bezier(0, 0, 0, 0.7) 0.3s;
     }
   }
-
 
   &-footer {
     margin-top: rem-convert(13px);

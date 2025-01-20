@@ -23,81 +23,6 @@ class CategoryProducts extends AbstractController
   use DefaultActionTrait;
   use ComponentWithFormTrait;
 
-  public const FILTERS = [
-    [
-      'id' => 2,
-      'title' => 'Taille',
-      'type' => 'attribute',
-      'inputType' => 'checkbox',
-      'visible' => true,
-      'values' => [
-        [
-          'id' => 1,
-          'title' => 'S',
-          'value' => 1
-        ],
-        [
-          'id' => 2,
-          'title' => 'M',
-          'value' => 2
-        ],
-        [
-          'id' => 3,
-          'title' => 'L',
-          'value' => 3
-        ]
-      ]
-    ],
-    [
-      'id' => 1,
-      'title' => 'Couleurs',
-      'type' => 'feature',
-      'inputType' => 'checkbox',
-      'visible' => true,
-      'values' => [
-        [
-          'id' => 4,
-          'title' => 'Rouge',
-          'value' => 4
-        ],
-        [
-          'id' => 5,
-          'title' => 'Vert',
-          'value' => 5
-        ],
-        [
-          'id' => 6,
-          'title' => 'Bleu',
-          'value' => 6
-        ]
-      ]
-    ],
-    [
-      'id' => 3,
-      'title' => 'Marques',
-      'type' => 'brands',
-      'inputType' => 'checkbox',
-      'visible' => true,
-      'values' => [
-        [
-          'id' => 4,
-          'title' => 'Rouge',
-          'value' => 4
-        ],
-        [
-          'id' => 5,
-          'title' => 'Vert',
-          'value' => 5
-        ],
-        [
-          'id' => 6,
-          'title' => 'Bleu',
-          'value' => 6
-        ]
-      ]
-    ]
-  ];
-
   public const SORTS = [
     [
       'id' => 4,
@@ -163,7 +88,7 @@ class CategoryProducts extends AbstractController
 
     if (!empty($this->getFilters())) {
       $formBuilder->add($formBuilder->create(
-        'filters',
+        'tfilters',
         FieldsetType::class,
         [
           'by_reference' => true,
@@ -182,11 +107,16 @@ class CategoryProducts extends AbstractController
         $values = [];
 
         foreach ($filter['values'] as $value) {
-          $values[$value['title']] = $value['value'];
+          $values[$value['title']] = $value['id'];
         }
 
-        $formBuilder->get('filters')->add(
-          $filter['type'] . '_' . $filter['id'] . '',
+        $fieldName = $filter['type'];
+
+        if ($filter['id']) {
+          $fieldName .= '_' . $filter['id'];
+        }
+        $formBuilder->get('tfilters')->add(
+          $fieldName,
           $filter['inputType'] === 'select' ? SelectChoiceType::class : FilterChoiceType::class,
           [
             'label' => $filter['title'],
@@ -204,20 +134,16 @@ class CategoryProducts extends AbstractController
   #[LiveAction]
   public function save(#[LiveArg] ?string $order = 'asc', #[LiveArg] ?bool $reset = false)
   {
-
-    // TODO BACK
-    // - créer uns service pour map les entrées du formulaires sur les filtres dispo de l'api
-    // - Pour le tri, les maquette nous oblige à les déclarer à l'exterieur du formulaire,
-    //   mais on pourrait très bien imaginer en faire un champ.
-
     $this->submitForm();
 
     if ($reset) {
       $this->resetForm();
     }
 
+    $tfilters = $this->normalizeFormDataToFilters($this->getForm()->getData());
+
     $this->products = $this->dataAccessService->resources('/api/front/products', [
-      'productCategories.category.id' => $this->categoryId,
+      'tfilters' => $tfilters,
       'itemsPerPage' => 9,
       'page' => $this->page,
       'order' => [
@@ -230,12 +156,16 @@ class CategoryProducts extends AbstractController
 
   public function getFilters(): array
   {
-    $this->filters =  CategoryProducts::FILTERS;
+    $this->filters =  $this->dataAccessService->resources('/api/front/tfilters/products', [
+      'tfilters[categories]' => 1
+    ]);
+
     return $this->filters;
   }
+
   public function getSorts(): array
   {
-    $this->sorts =  CategoryProducts::SORTS;
+    $this->sorts =  [];
     return $this->sorts;
   }
 
@@ -252,5 +182,27 @@ class CategoryProducts extends AbstractController
       ]);
     }
     return $this->products;
+  }
+
+
+  public function normalizeFormDataToFilters(array $formData): array
+  {
+    $filters = [];
+
+    $provided_data = array_filter($formData, function ($filter) {
+      return count($filter) > 0;
+    });
+
+    foreach ($provided_data as $name => $value) {
+      $pathFilter = explode('_', $name);
+
+      if (count($pathFilter) > 1) {
+        $filters[$pathFilter[0]][$pathFilter[1]] = $value;
+      } else {
+        $filters[$name] = $value;
+      }
+    }
+
+    return $filters;
   }
 }

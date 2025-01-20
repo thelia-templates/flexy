@@ -14,6 +14,7 @@ use Thelia\Core\HttpKernel\Exception\RedirectException;
 use Thelia\Core\Template\ParserContext;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Thelia\Controller\BaseController;
+use TwigEngine\Service\SecurityService;
 
 class FlexyController extends BaseController
 {
@@ -35,16 +36,12 @@ class FlexyController extends BaseController
     public RequestStack $requestStack,
     public TranslatorInterface $translator,
     public TheliaFormFactory $theliaFormFactory,
+    private readonly SecurityService $securityService,
   ) {}
-
-  public function customerIsLogged()
-  {
-    return $this->getSecurityContext()->hasCustomerUser();
-  }
 
   public function checkAuth()
   {
-    if ($this->customerIsLogged() == false) {
+    if (!$this->securityService->isAuthenticatedFront()) {
       throw new RedirectException($this->generateUrl('customer_login'));
     }
   }
