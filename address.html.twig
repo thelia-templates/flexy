@@ -24,7 +24,7 @@
         'method': 'POST'
         }})}}
 
-			{{form_row(form.success_url, { value: path('account_index',{success : true}) }) }}
+			{{form_row(form.success_url, { value: path('account_addresses',{success : true}) }) }}
 			{{form_row(form.error_url, { value: path('account_address_create') }) }}
 			{{form_rest(form)}}
 			{{ form_errors(form) }}

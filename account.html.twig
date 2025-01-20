@@ -10,6 +10,9 @@
 {% endblock %}
 
 {% block body %}
+	{% set customerId = attr('customer', 'id') %}
+	{% set customer = resources('/api/front/account/customers/'~customerId) %}
+	{% set defaultAddress = resources('/api/front/account/addresses', {'customer.id': attr('customer', 'id')})|first %}
 	<div class="relative">
 		{% include "@components/Molecules/Button/Button.html.twig" with {
       text: 'My account' | trans,
@@ -24,17 +27,14 @@
 
 	<div class="grid w-full max-w-screen-lg grid-cols-1 gap-8 lg:gap-14 mx-auto md:grid-cols-2 mt-8 lg:mt-14 mb-20 lg:mb-32 px-[25px] lg:px-0">
 		<div class="flex flex-col gap-6">
-			<div class='h4'>{{'My contact information' | trans}}</div>
+			<div class='text-black h4'>{{'My contact information' | trans}}</div>
 			<form class="flex flex-col gap-6 px-10 pt-8 pb-6 rounded-lg bg-theme-lighter">
-				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "lastName", label: "Lastname" | trans} %}
-				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "firstName", label: "Firstname" | trans} %}
+				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "lastName", label: "Lastname" | trans, value : customer.lastname} %}
+				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "firstName", label: "Firstname" | trans,value : customer.lastname} %}
 				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "birthday", label: "Birthday" | trans, type: "date"} %}
-				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "email", label: "E-mail" | trans, disabled: true} %}
-				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "phone", label: "Phone number" | trans}  %}
+				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "email", label: "E-mail" | trans, disabled: true,value:customer.email} %}
+				{% include '@components/Molecules/Fields/FieldInput/FieldInput.html.twig' with {name: "phone", label: "Phone number" | trans, value: defaultAddress.cellphone}  %}
 				{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Edit my information' | trans, href: '#', classes: 'Button--large mt-1.5'} %}
-
-				{# Modal de success de modifications d'informations #}
-				{% include "@components/Molecules/Button/Button.html.twig" with {text: 'Edit my information' | trans, classes: 'Button--large mt-1.5 open-modal', name : 'updateInfosSuccess' } %}
 			</form>
 		</div>
 		<div class="flex flex-col gap-6" {{attributes}}>

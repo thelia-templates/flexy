@@ -106,7 +106,7 @@ class AccountController extends FlexyController
     }
   }
 
-  #[Route('/address', name: 'address_new', methods: ['GET'])]
+  #[Route('/address/new', name: 'address_new', methods: ['GET'])]
   public function addressNew(): Response
   {
     $this->checkAuth();
@@ -115,7 +115,7 @@ class AccountController extends FlexyController
   }
 
 
-  #[Route('/address', name: 'address_create', methods: ['POST'])]
+  #[Route('/address/new', name: 'address_create', methods: ['POST'])]
   public function addressCreate(EventDispatcherInterface $eventDispatcher): RedirectResponse
   {
     $this->checkAuth();

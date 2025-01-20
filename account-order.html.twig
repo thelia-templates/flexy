@@ -32,7 +32,6 @@
 						{% set image = resources('/api/front/product_images', {'product.id':product.id})|first.id %}
 					{% endif %}
 
-
 					{% include '@components/Organisms/OrderProductCard/OrderProductCard.html.twig'
             with orderProduct|merge({
               isOrderCard: true,
@@ -44,7 +43,7 @@
               imgHeight:'112',
               productTitle: product.i18ns.title,
               secondaryTitle: product.i18ns.chapo,
-              attributesAv:orderProduct.attributesAv
+              attributeCombinations:pse.attributeCombinations
             }) %}
 				{% endfor %}
 

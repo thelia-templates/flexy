@@ -35,6 +35,9 @@
     }
   }
 
+  &-secondaryTitle {
+    display: block;
+  }
   &-desc {
     margin-right: auto;
     padding: 0;

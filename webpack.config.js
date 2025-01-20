@@ -94,6 +94,12 @@ Encore.copyFiles({
   pattern: /\.(png|jpg|jpeg|gif|svg|webp)$/
 });
 
+Encore.copyFiles({
+  from: './assets/favicons',
+  to: 'favicons/[path][name].[ext]',
+  pattern: /\.(png|webmanifest|svg|ico)$/
+});
+
 Encore.configureImageRule({ type: 'javascript/auto' }, (loaderRule) => {
   loaderRule.test = /\.(png|jpg|jpeg|gif|ico|webp)$/;
   loaderRule.oneOf = [
