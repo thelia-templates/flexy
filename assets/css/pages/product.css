@@ -80,15 +80,23 @@
 }
 
 .PseSelector {
-  display: grid;
-  gap: 30px;
+  @media screen and (max-width: 640px) {
+    .FilterPill {
+      display: block;
+      border: none;
 
-  legend {
-    @sreen lg {
-      display: none;
+      &:hover {
+        background-color: white;
+      }
+      &:has(:checked) {
+        background-color: white;
+        background-image: url('/assets/icons/checkmark.svg');
+        background-repeat: no-repeat;
+        background-position: right 0 top 50%;
+        background-size: rem-convert(14px) auto;
+      }
     }
   }
-
   .Fieldset {
     &-group {
       @apply grid sm:gap-4;

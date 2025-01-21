@@ -1,47 +1,46 @@
-<div {{ attributes }}>
-  {{ form_start(form, {attr :{
+<div class="PseSelector" {{ attributes }}>
+	{{ form_start(form, {attr :{
     class: 'mt-[30px] flex flex-col gap-[30px]',
     'data-action': 'live#action:prevent',
     'data-live-action-param': 'save'
   } }) }}
-  <div class="flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      {% include '@components/Molecules/Score/Score.html.twig' with {score: 3} %}
-      <span class="indication text-grey">12
+	<div class="flex items-center justify-between">
+		<div class="flex items-center gap-2">
+			{% include '@components/Molecules/Score/Score.html.twig' with {score: 3} %}
+			<span class="indication text-grey">12
 				{{ 'reviews'|trans }}</span>
-    </div>
-    {% include '@components/Molecules/OrderTag/OrderTag.html.twig' with { customText: currentPse.quantity > 0 ? 'In stock'|trans : 'Out of stock'|trans, variant: currentPse.quantity > 0 ?'success': 'error', type: 'minimal' } %}
-  </div>
-  {% if currentPse.quantity == 0 %}
-    {% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'Unavailable product'|trans, variant: 'warning', withIcon:true, size: "full"} %}
-  {% endif %}
+		</div>
+		{% include '@components/Molecules/OrderTag/OrderTag.html.twig' with { customText: currentPse.quantity > 0 ? 'In stock'|trans : 'Out of stock'|trans, variant: currentPse.quantity > 0 ?'success': 'error', type: 'minimal' } %}
+	</div>
+	{% if currentPse.quantity == 0 %}
+		{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'Unavailable product'|trans, variant: 'warning', withIcon:true, size: "full"} %}
+	{% endif %}
 
-  <input type="hidden" name="{{ field_name(form.product) }}" value="{{ field_value(form.product) }}">
-  <input type="hidden" name="{{ field_name(form.product_sale_elements_id) }}"
-         value="{{ field_value(form.product_sale_elements_id) }}">
-  <input type="hidden" name="{{ field_name(form.append) }}" value="{{ field_value(form.append) }}">
-  <input type="hidden" name="{{ field_name(form.newness) }}" value="{{ field_value(form.newness) }}">
+	<input type="hidden" name="{{ field_name(form.product) }}" value="{{ field_value(form.product) }}">
+	<input type="hidden" name="{{ field_name(form.product_sale_elements_id) }}" value="{{ field_value(form.product_sale_elements_id) }}">
+	<input type="hidden" name="{{ field_name(form.append) }}" value="{{ field_value(form.append) }}">
+	<input type="hidden" name="{{ field_name(form.newness) }}" value="{{ field_value(form.newness) }}">
 
-  {{ form_row(form.currentCombination) }}
+	{{ form_row(form.currentCombination) }}
 
-  <div class="flex items-center gap-4">
-    <strong class="text-black h4">{{ currentPse.isPromo ? currentPse.promoPrice: currentPse.price }}
-      €</strong>
-    {% if currentPse.isPromo %}
-      <span class="line-through paragraph-4">{{ currentPse.price }}
+	<div class="flex items-center gap-4">
+		<strong class="text-black h4">{{ currentPse.isPromo ? currentPse.promoPrice: currentPse.price }}
+			€</strong>
+		{% if currentPse.isPromo %}
+			<span class="line-through paragraph-4">{{ currentPse.price }}
 				€</span>
-    {% endif %}
-  </div>
+		{% endif %}
+	</div>
 
 
-  {% if currentPse.quantity == 0 %}
-    {% include '@components/Molecules/Button/Button.html.twig' with {text: 'Alert me', classes:'Button--large self-start', icon_right: 'bell', liveAction: 'restockingAlert'} %}
-  {% else %}
-    {% include '@components/Molecules/Button/QuantityButton.html.twig' with {value: field_value(form.quantity), classes:'Button--large', text:'Add to cart'|trans, icon:'cart', fill:true, inLiveComp: true, btnLiveAction: 'getQuantity',name:field_name(form.quantity) } %}
-  {% endif %}
+	{% if currentPse.quantity == 0 %}
+		{% include '@components/Molecules/Button/Button.html.twig' with {text: 'Alert me', classes:'Button--large self-start', icon_right: 'bell', liveAction: 'restockingAlert'} %}
+	{% else %}
+		{% include '@components/Molecules/Button/QuantityButton.html.twig' with {value: field_value(form.quantity), classes:'Button--large', text:'Add to cart'|trans, icon:'cart', fill:true, inLiveComp: true, btnLiveAction: 'getQuantity',name:field_name(form.quantity) } %}
+	{% endif %}
 
-  {{ form_rest(form) }}
+	{{ form_rest(form) }}
 
-  {{ form_errors(form) }}
-  {{ form_end(form) }}
+	{{ form_errors(form) }}
+	{{ form_end(form) }}
 </div>
