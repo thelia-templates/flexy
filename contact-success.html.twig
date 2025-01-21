@@ -1,0 +1,13 @@
+{% extends 'contact.html.twig' %}
+
+{% block contactFormTitle %}
+  <div class="my-12 mb-12 text-center">
+      <h2 class="mb-4 h2">{{ 'Thanks !' | trans }}</h2>
+  </div>
+{% endblock %}
+
+{% block contactForm %}
+    <div class="my-12 mb-12 text-center">
+        <p class="text-lg font-medium">{{'Thanks for your message, we will contact as soon as possible.'|trans}}</p>
+    </div>
+{% endblock %}

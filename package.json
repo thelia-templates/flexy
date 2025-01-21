@@ -16,12 +16,10 @@
     "@openstudio/thelia-api-utils": "^0.5.2",
     "@splidejs/splide": "^4.1.4",
     "@storybook/addon-a11y": "^8.0.9",
-    "@symfony/ux-live-component": "https://gitpkg.vercel.app/symfony/ux-live-component/assets?2.x",
-    "@symfony/ux-react": "https://gitpkg.vercel.app/symfony/ux-react/assets?2.x",
-    "@symfony/ux-translator": "https://gitpkg.vercel.app/symfony/ux-translator/assets?2.x",
+    "@symfony/ux-live-component": "https://gitpkg.vercel.app/symfony/ux-live-component/assets?v2.22.1",
+    "@symfony/ux-react": "https://gitpkg.vercel.app/symfony/ux-react/assets?v2.22.1",
+    "@symfony/ux-translator": "https://gitpkg.vercel.app/symfony/ux-translator/assets?v2.22.1",
     "lodash": "^4.17.21",
-    "react-intl": "^6.6.8",
-    "react-query": "^3.39.3",
     "tailwindcss": "^3.4.1"
   },
   "devDependencies": {

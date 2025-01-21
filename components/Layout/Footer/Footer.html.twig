@@ -15,18 +15,18 @@
 	<div class='md:grid {{footerContainerClasses}}'>
 		{% if withNewsletter %}
 			<div class='Footer-newsletter mb-[50px] md:mb-0 md:pt-[50px] md:pl-[50px] lg:pt-[100px]'>
-				<div class='font-semibold paragraph-1'>Newsletter</div>
+				<div class='font-semibold paragraph-1'>{{'Newsletter'|trans}}</div>
 				<div class='mb-4 paragraph-5'>Suivez nos dernières actualités & promotions</div>
 				{% include '@components/Molecules/Button/Button.html.twig' with {text: 'Je m\'inscris', type: 'primary', isFill: true, classes: "Button--large w-full md:w-auto"} %}
       </div>
     {% endif %}
     <div class='Footer-store-infos mb-[30px] md:py-[50px] md:pl-[40px] md:mb-0 lg:pt-[100px] lg:pb-[90px] {{footerStoreInfosClasses}}'>
-      <div class='mb-1 font-semibold paragraph-1'>Nom de l'entreprise</div>
+      <div class='mb-1 font-semibold paragraph-1'>{{attr('config', 'store_name')}}</div>
       <div class='Footer-store-infos-address'>
-        <div class='paragraph-5'>Adresse première ligne <br> Complément d'adresse <br> 00000 Ville-sur-Fleuve <br> PAYS</div>
-        <div class='my-4 paragraph-5'>Tel. +33 00 00 00 00 00</div>
+        <div class='paragraph-5'>{{attr('config', 'store_address1')}} <br> {{attr('config', 'store_address2')}} <br> {{attr('config', 'store_zipcode')}} {{attr('config', 'store_city')}} <br> {{attr('config', 'store_country')}}</div>
+        <div class='my-4 paragraph-5'>Tel. {{attr('config', 'store_phone')}}</div>
       </div>
-      {% include '@components/Molecules/Button/Button.html.twig' with {text: 'Contactez nous', type: 'primary', icon_right: "email", isFill: true, classes: "w-full md:w-auto Button--secondary Button--large"} %}
+      {% include '@components/Molecules/Button/Button.html.twig' with {href:"/contact", text: 'Contact Us'|trans, type: 'primary', icon_right: "email", isFill: true, classes: "w-full md:w-auto Button--secondary Button--large"} %}
     </div>
     <ul class='lg:pt-[100px] {{footerLinksClasses}}'>
       {% set footerLinkClass = 'underline hover:no-underline focus:no-underline hover:opacity-75 focus:opacity-75' %}
@@ -60,6 +60,6 @@
       </div>
     </div>
 
-    <div class='text-grey indication indication-small'>© OpenStudio - {{ 'now' | date('Y') }}</div>
+    <div class='text-grey indication indication-small'>© <a href="https://www.openstudio.fr/">OpenStudio</a> - {{ 'now' | date('Y') }}</div>
   </div>
 </footer>

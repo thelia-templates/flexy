@@ -4,13 +4,23 @@
 	{% set widget_attr = form.vars.attr %}
 	{% set label = label is defined ? label : form.vars.label %}
 	{% set placeholder = placeholder is defined ? placeholder : form.vars.placeholder is defined ? form.vars.placeholder : null %}
+
+  {% set errors = [] %}
+
+  {% for error in form.vars.errors %}
+    {% set errors = errors + [error.message] %}
+  {% endfor %}
+
 	{% if type == 'checkbox' %}
 		{% elseif type == 'filter' %}
 			{% include '@formTwig/fields/filter.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value} %}
+      {{ form_errors(form) }}
 		{% elseif type == 'sort' %}
 			{% include '@formTwig/fields/sort.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value} %}
+      {{ form_errors(form) }}
 		{% elseif type == 'choice' %}
 			{% include '@formTwig/fields/choice.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value } %}
+      {{ form_errors(form) }}
 		{% elseif type == 'text' or type == 'email' %}
 			{% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
       label:  label,
@@ -18,7 +28,9 @@
       type: type,
       placeholder: placeholder,
       required: form.vars.required,
+      errors: errors
     } %}
+
 		{% elseif type == 'password' %}
 			{% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
       label: label,
@@ -26,14 +38,25 @@
       type: type,
       placeholder: placeholder,
       required: form.vars.required,
+      errors: errors
     } %}
 			{% include "@components/Molecules/PasswordControls/PasswordControls.html.twig" %}
+    {% elseif type == 'textarea'  %}
+      {% include "@components/Molecules/Fields/FieldTextArea/FieldTextArea.html.twig" with {
+        label: label,
+        name: form.vars.full_name,
+        placeholder: placeholder,
+        required: form.vars.required,
+        errors: errors
+      } %}
 		{%  else %}
 			{# Appel du rendu par défaut si vous n'avez pas besoin de personnaliser davantage #}
 			{{ block('form_widget_simple') }}
+      {{ form_errors(form) }}
 	{% endif %}
-	{# Erreurs #}
-	{{ form_errors(form) }}
+
+
+
 
 {% endblock %}
 
@@ -42,6 +65,7 @@
 		{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: error.message, variant: 'error', withIcon:true} %}
 	{% endfor %}
 {% endblock %}
+
 
 {% block fieldset_row %}
 	{% set class = form.vars.attr.class|default('') %}
