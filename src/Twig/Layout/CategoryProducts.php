@@ -140,7 +140,7 @@ class CategoryProducts extends AbstractController
       $this->resetForm();
     }
 
-    $tfilters = $this->normalizeFormDataToFilters($this->getForm()->getData());
+    $tfilters = $this->normalizeFormDataToFilters($this->getForm()->getData() ?? []);
 
     $this->products = $this->dataAccessService->resources('/api/front/products', [
       'tfilters' => $tfilters,

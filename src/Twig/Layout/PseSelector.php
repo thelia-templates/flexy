@@ -76,9 +76,6 @@ class PseSelector extends BaseFrontController
       [
         'by_reference' => true,
         'inherit_data' => true,
-        'attr' => [
-          'class' => 'PseSelector',
-        ],
       ]
     );
     foreach ($productAttributes as $attribute) {

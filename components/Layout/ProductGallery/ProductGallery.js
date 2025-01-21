@@ -22,7 +22,18 @@ export default function ProductGallery() {
     thumbnails.forEach((thumb, index) => {
       thumb.addEventListener('click', function () {
         main.go(index);
+        updateActiveThumnails(index);
       });
+    });
+  }
+
+  main.on('move', (newIndex) => {
+    updateActiveThumnails(newIndex);
+  });
+
+  function updateActiveThumnails(activeIndex) {
+    thumbnails.forEach((t, index) => {
+      t.parentNode.classList.toggle('is-active', index === activeIndex);
     });
   }
 }

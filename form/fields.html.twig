@@ -12,17 +12,30 @@
 	{% endfor %}
 
 	{% if type == 'checkbox' %}
-		{% elseif type == 'filter' %}
-			{% include '@formTwig/fields/filter.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value} %}
-			{{ form_errors(form) }}
-		{% elseif type == 'sort' %}
-			{% include '@formTwig/fields/sort.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value} %}
-			{{ form_errors(form) }}
-		{% elseif type == 'choice' %}
-			{% include '@formTwig/fields/choice.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value } %}
-			{{ form_errors(form) }}
-		{% elseif type == 'text' or type == 'email' %}
-			{% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
+		{% include "@components/Atoms/Form/Checkbox.html.twig" with {
+      name: form.vars.full_name,
+    } %}
+	{% elseif type == 'filter' %}
+		{% include '@formTwig/fields/filter.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value} %}
+		{{ form_errors(form) }}
+	{% elseif type == 'sort' %}
+		{% include '@formTwig/fields/sort.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value} %}
+		{{ form_errors(form) }}
+	{% elseif type == 'choice' %}
+		{% include "@components/Molecules/Fields/FieldSelect/FieldSelect.html.twig" with {
+      label:  label,
+      name: form.vars.full_name,
+      options: form.vars.choices,
+      id: form.vars.id,
+      type: type,
+      placeholder: widget_attr.placeholder,
+      required: form.vars.required,
+    } %}
+		{{ form_errors(form) }}
+	{% elseif type == 'pill' %}
+		{% include '@formTwig/fields/choice.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value } %}
+	{% elseif type == 'text' or type == 'email' %}
+		{% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
       label:  label,
       name: form.vars.full_name,
       id: form.vars.id,
@@ -32,8 +45,8 @@
       errors: errors
     } %}
 
-		{% elseif type == 'password' %}
-			{% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
+	{% elseif type == 'password' %}
+		{% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
       label: label,
       name: form.vars.full_name,
       id: form.vars.id,
@@ -42,23 +55,32 @@
       required: form.vars.required,
       errors: errors
     } %}
-			{% if widget_attr.password_control %}
-				{% include "@components/Molecules/PasswordControls/PasswordControls.html.twig" with {
+		{% if widget_attr.password_control %}
+			{% include "@components/Molecules/PasswordControls/PasswordControls.html.twig" with {
           control : form.vars.id,
         } %}
-			{% endif %}
-		{% elseif type == 'textarea'  %}
-			{% include "@components/Molecules/Fields/FieldTextArea/FieldTextArea.html.twig" with {
+		{% endif %}
+	{% elseif type == 'textarea'  %}
+		{% include "@components/Molecules/Fields/FieldTextArea/FieldTextArea.html.twig" with {
         label: label,
         name: form.vars.full_name,
         placeholder: placeholder,
         required: form.vars.required,
         errors: errors
       } %}
-		{%  else %}
-			{# Appel du rendu par défaut si vous n'avez pas besoin de personnaliser davantage #}
-			{{ block('form_widget_simple') }}
-			{{ form_errors(form) }}
+	{% elseif  type == 'tel' %}
+		{% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
+      label: label,
+      name: form.vars.full_name,
+      id: form.vars.id,
+      type,
+      placeholder: placeholder,
+      required: form.vars.required,
+    } %}
+	{%  else %}
+		{# Appel du rendu par défaut si vous n'avez pas besoin de personnaliser davantage #}
+		{{ block('form_widget_simple') }}
+		{{ form_errors(form) }}
 	{% endif %}
 
 
