@@ -16,6 +16,7 @@ use FlexyBundle\Form\Type\FilterChoiceType;
 use FlexyBundle\Form\Type\SelectChoiceType;
 use FlexyBundle\Form\Type\FieldsetType;
 use FlexyBundle\Form\Type\SortChoiceType;
+use Thelia\Core\HttpFoundation\Request;
 
 #[AsLiveComponent(template: '@components/Layout/CategoryProducts/CategoryProducts.html.twig')]
 class CategoryProducts extends AbstractController
@@ -36,11 +37,16 @@ class CategoryProducts extends AbstractController
     ]
   ];
 
+  const ITEMS_PER_PAGE = 30;
+
   #[LiveProp]
-  public int $categoryId;
+  public ?int $categoryId = null;
 
   #[LiveProp]
   public ?int $page = 1;
+
+  #[LiveProp(writable: false, url: true)]
+  public ?array $tfilters = [];
 
   #[ExposeInTemplate]
   public ?array $products = [];
@@ -51,7 +57,29 @@ class CategoryProducts extends AbstractController
   #[ExposeInTemplate]
   public ?array $sorts = [];
 
-  public function __construct(private DataAccessService $dataAccessService) {}
+  public function __construct(private DataAccessService $dataAccessService, private  Request $request) {}
+
+
+  public function mount(?int $initialCategoryId, ?int $initialPage): void
+  {
+    $this->categoryId = $initialCategoryId;
+    $this->page = $initialPage;
+    $tfilters = $this->request->get('tfilters');
+
+    if (is_array($tfilters) && count($tfilters) > 0) {
+      $this->tfilters = $tfilters;
+    }
+
+    $this->products = $this->dataAccessService->resources('/api/front/products', [
+      'productCategories.category.id' => $initialCategoryId,
+      'tfilters' =>  $this->tfilters,
+      'itemsPerPage' => self::ITEMS_PER_PAGE,
+      'page' => $initialPage,
+      'order' => [
+        'ref' => 'asc'
+      ]
+    ]);
+  }
 
   protected function instantiateForm(): FormInterface
   {
@@ -64,7 +92,6 @@ class CategoryProducts extends AbstractController
       foreach ($this->getSorts() as $sort) {
         $values[$sort['title']] = $sort['value'];
       }
-
       $formBuilder->add($formBuilder->create(
         'sorts',
         FieldsetType::class,
@@ -110,7 +137,7 @@ class CategoryProducts extends AbstractController
           $values[$value['title']] = $value['id'];
         }
 
-        $fieldName = $filter['type'];
+        $fieldName = 'tfilters_' . $filter['type'];
 
         if ($filter['id']) {
           $fieldName .= '_' . $filter['id'];
@@ -121,6 +148,7 @@ class CategoryProducts extends AbstractController
           [
             'label' => $filter['title'],
             'choices' => $values,
+            'data' => $this->tfilters[$filter['type']] ?? null,
             'multiple' => true,
             'required' => false,
           ]
@@ -137,21 +165,23 @@ class CategoryProducts extends AbstractController
     $this->submitForm();
 
     if ($reset) {
+      $this->tfilters = [];
       $this->resetForm();
     }
 
-    $tfilters = $this->normalizeFormDataToFilters($this->getForm()->getData() ?? []);
+    if ($this->getForm()->getData()) {
+      $this->tfilters = $this->normalizeFormDataToFilters($this->getForm()->getData());
+    }
 
     $this->products = $this->dataAccessService->resources('/api/front/products', [
-      'tfilters' => $tfilters,
-      'itemsPerPage' => 9,
+      'productCategories.category.id' => $this->categoryId,
+      'tfilters' =>  $this->tfilters  ?? [],
+      'itemsPerPage' => self::ITEMS_PER_PAGE,
       'page' => $this->page,
       'order' => [
         'ref' => $order
       ]
     ]);
-
-    return $this->products;
   }
 
   public function getFilters(): array
@@ -165,41 +195,27 @@ class CategoryProducts extends AbstractController
 
   public function getSorts(): array
   {
-    $this->sorts =  [];
+    $this->sorts = self::SORTS;
     return $this->sorts;
   }
-
-  public function getProducts(): array
-  {
-    if (empty($this->products)) {
-      $this->products = $this->dataAccessService->resources('/api/front/products', [
-        'productCategories.category.id' => $this->categoryId,
-        'itemsPerPage' => 9,
-        'page' => $this->page,
-        'order' => [
-          'ref' => 'asc'
-        ]
-      ]);
-    }
-    return $this->products;
-  }
-
 
   public function normalizeFormDataToFilters(array $formData): array
   {
     $filters = [];
 
     $provided_data = array_filter($formData, function ($filter) {
-      return count($filter) > 0;
+      return is_array($filter) && count($filter) > 0;
     });
 
-    foreach ($provided_data as $name => $value) {
+    foreach ($provided_data as $name => $values) {
       $pathFilter = explode('_', $name);
 
-      if (count($pathFilter) > 1) {
-        $filters[$pathFilter[0]][$pathFilter[1]] = $value;
+      if (count($pathFilter) > 1 && $pathFilter[0] === 'tfilters') {
+        foreach ($values as $value) {
+          $filters[$pathFilter[1]][] = $value;
+        }
       } else {
-        $filters[$name] = $value;
+        $filters[$name] = $values;
       }
     }
 

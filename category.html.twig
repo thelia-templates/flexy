@@ -16,8 +16,9 @@
 {% endblock %}
 
 {% block body %}
+
 	{% include '@components/Layout/Subheader/Category/SubheaderCategory.html.twig' with {title: attr('category', 'title'), description: attr('category', 'chapo'), nbProducts: 9, breadcrumb}  %}
-	{{ component('Flexy:Layout:CategoryProducts', {categoryId, page}) }}
+	{{ component('Flexy:Layout:CategoryProducts', {initialCategoryId: categoryId, initialPage: page}) }}
 	{% include '@components/Layout/Reinsurance/Reinsurance.html.twig' with { data: [
       {
         strongText: 'Free delivery' | trans,
