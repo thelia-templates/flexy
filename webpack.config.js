@@ -100,6 +100,11 @@ Encore.copyFiles({
   pattern: /\.(png|webmanifest|svg|ico)$/
 });
 
+Encore.copyFiles({
+  from: './node_modules/leaflet/dist/images',
+  to: 'images/[path][name].[ext]'
+});
+
 Encore.configureImageRule({ type: 'javascript/auto' }, (loaderRule) => {
   loaderRule.test = /\.(png|jpg|jpeg|gif|ico|webp)$/;
   loaderRule.oneOf = [

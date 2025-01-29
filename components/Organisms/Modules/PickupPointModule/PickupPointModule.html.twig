@@ -35,8 +35,8 @@
               type='button'>{{ ux_icon("pin-circle") }}{{ 'Select on map'|trans }}</button>
     </div>
     <div class='flex gap-1 md:gap-5'>
-      {% include '@components/Molecules/Button/Button.html.twig' with {classes: 'PickupPointModule-buttonView', text: 'Map view'|trans, sharp:true, icon_left: 'list', variant: 'secondary'} %}
-      {% include '@components/Molecules/Button/Button.html.twig' with {classes: 'PickupPointModule-buttonView', text: 'Map view'|trans, sharp:true, icon_left: 'pin-circle'} %}
+      {% include '@components/Molecules/Button/Button.html.twig' with {classes: 'PickupPointModule-buttonListView', text: 'List view'|trans, sharp:true, icon_left: 'list'} %}
+      {% include '@components/Molecules/Button/Button.html.twig' with {classes: 'PickupPointModule-buttonMapView', text: 'Map view'|trans, sharp:true, icon_left: 'pin-circle', variant: 'secondary'} %}
     </div>
     <div class='mt-5 paragraph-6'>{{ pickupServices|length }} {{ 'relay point(s) found'|trans }}</div>
     <div class='gap-10 mt-3 text-black xl:flex'>
@@ -56,10 +56,17 @@
         </label>
       {% endfor %}
     </div>
-    <div class='flex flex-col gap-2 mt-6'>
-      {% for pickup in pickups %}
-        {% include '../../Card/PickupPoint/PickupPoint.html.twig' with pickup %}
-      {% endfor %}
+    <div class="PickupPointModule-listView">
+      <div class='flex flex-col gap-2 mt-6'>
+        {% for pickup in pickups %}
+          {% include '../../Card/PickupPoint/PickupPoint.html.twig' with pickup %}
+        {% endfor %}
+      </div>
     </div>
+    <div class="PickupPointModule-mapView hidden">
+      <div id="map" style="height: 285px; width: 100%;"></div>
+
+    </div>
+
   </div>
 </div>

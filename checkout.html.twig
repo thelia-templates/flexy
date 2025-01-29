@@ -9,6 +9,11 @@
   {{ encore_entry_script_tags('checkout') }}
 {% endblock %}
 
+{% block stylesheets %}
+  {{ parent() }}
+  {{ encore_entry_link_tags('checkout') }}
+{% endblock %}
+
 {% block header %}
   {% include '@components/Layout/Header/HeaderCheckout.html.twig' %}
 {% endblock %}
@@ -18,7 +23,7 @@
   {% include '@components/Layout/CheckoutSteps/CheckoutSteps.html.twig' with {steps: ["Your cart", "Delivery", "Payment", "Confirmation"], current: current} %}
 
   {{ component('Flexy:Layout:Checkout', {page: page, step: current}) }}
-
+  
 {% endblock %}
 {% block footer %}
   {% include '@components/Layout/Footer/FooterCheckout.html.twig' %}

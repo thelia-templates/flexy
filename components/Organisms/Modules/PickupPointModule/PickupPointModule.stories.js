@@ -3,6 +3,7 @@ import {
   pickupPoint,
   pickupPointHours
 } from '../../Card/PickupPoint/PickupPoint';
+import { PickupMap } from '@components/Organisms/Modules/PickupPointModule/pickupMap';
 
 export default {
   title: 'Design System/Organisms/Modules/PickupPoint'
@@ -30,6 +31,7 @@ export const Base = {
   play: () => {
     pickupPointHours();
     pickupPoint();
+    PickupMap();
   },
   args: {
     selected: false,
