@@ -53,11 +53,11 @@
 				{% endif %}
 
 				{% for address in addresses %}
-					{% set country = resources(address.country) %}
+					{# {% set country = resources(address.country) %} #}
 					<li>
 						{% include '@components/Organisms/Card/Address/AddressCard.html.twig' with {
             address: address|merge({
-              country: country.isoalpha2
+              country: country.isoalpha2 ?? ''
               }),
               attributesDelete: {
                 'class': 'open-modal',

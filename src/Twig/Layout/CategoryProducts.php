@@ -187,9 +187,8 @@ class CategoryProducts extends AbstractController
   public function getFilters(): array
   {
     $this->filters =  $this->dataAccessService->resources('/api/front/tfilters/products', [
-      'tfilters[categories]' => 1
+      'tfilters[category]' => $this->categoryId
     ]);
-
     return $this->filters;
   }
 
