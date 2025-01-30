@@ -19,6 +19,7 @@
     height: 0;
     width: 0;
 
+
     &:focus-visible {
       & ~ .checkmark {
         outline: var(--checkbox-focus) solid 1px;
@@ -103,7 +104,7 @@
     height: 14px;
   }
   input {
-    &:checked {
+    &:checked, &.checked {
       & ~ .checkmark:after {
         content: '';
         position: absolute;
@@ -121,4 +122,20 @@
       }
     }
   }
+}
+
+
+/* Pour masquer la croix (X) dans les navigateurs comme Chrome, Edge */
+input[type="text"]::-webkit-search-cancel-button {
+  display: none;
+}
+input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
+/* Cacher la croix dans tous les navigateurs */
+input[type="text"]::-webkit-clear-button {
+  display: none;
+}
+input[type="search"]::-webkit-clear-button {
+  display: none;
 }

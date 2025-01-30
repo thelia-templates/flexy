@@ -4,7 +4,6 @@ import {
 } from '@components/Organisms/Card/PickupPoint/PickupPoint';
 import { deliveryModule } from '@utils/delivery';
 import { HomeDeliveryAddresses } from '@components/Organisms/Modules/HomeDelivery/HomeDelivery';
-import { PickupMap } from '@components/Organisms/Modules/PickupPointModule/pickupMap';
 import { PickupPointView } from '@components/Organisms/Modules/PickupPointModule/pickupPointView';
 
 function delivery() {
@@ -14,7 +13,6 @@ function delivery() {
   pickupPointHours();
   pickupPoint();
   HomeDeliveryAddresses();
-  PickupMap();
   PickupPointView();
 }
 

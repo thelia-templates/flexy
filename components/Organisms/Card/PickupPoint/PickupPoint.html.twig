@@ -1,9 +1,10 @@
 {% set title = title|default('') %}
+{% set id = id|default('') %}
 {% set date = date|default('') %}
 {% set selected = selected|default(false) %}
 {% set closed = closed|default(false) %}
-{% set img = img|default({src: '/images/placeholder2.webp', alt:'Logo Pickup'}) %}
-{% set hours = hours|default([]) %} {# hours: [{ day: 'lundi', hours: '14h - 19h' }, ...] #}
+{% set img = img|default(null) %}
+{% set openingHours = openingHours|default([]) %}
 {% set address = address|default({
   title: "",
   name: "",
@@ -11,15 +12,18 @@
   zipCode: '',
   city: ''
 }) %}
+{% set days = ['monday'|trans, 'tuesday'|trans, 'wednesday'|trans, 'thursday'|trans, 'friday'|trans, 'saturday'|trans, 'sunday'|trans] %}
+
 
 <div class='PickupPoint {% if selected %}selected{% endif %}'>
   <label class='PickupPoint-content'>
-    {% include '@components/Atoms/Form/Radio.html.twig' with {type:"span", name:"PickupPoint", value:1, checked:selected} %}
+    {% include '@components/Atoms/Form/Radio.html.twig' with {type:"span", name:"PickupPoint", value:id, checked:selected,props: {'data-action': "live#action","data-live-action-param":"updateOption", "data-live-id-param":id},} %}
 
     <span>
         <span class='PickupPoint-title'>{{ title }}</span>
         <span class='PickupPoint-description'>{{ 'Estimated delivery on'|trans }}{{ date }}</span>
-        <span class='PickupPoint-opening {% if closed %}closed{% endif %}'>{% if closed %}{{ 'Close'|trans }}{% else %}{{ 'Open'|trans }}{% endif %}{{ 'currently'|trans }}</span>
+        <span
+          class='PickupPoint-opening {% if closed %}closed{% endif %}'>{% if closed %}{{ 'Close'|trans }}{% else %}{{ 'Open'|trans }}{% endif %}{{ 'currently'|trans }}</span>
         <span class='PickupPoint-address'>
           <span>{{ address.address1 }},</span>
           {% if address.address2 %}<span>{{ address.address2 }},</span>{% endif %}
@@ -29,19 +33,27 @@
     </span>
   </label>
   <div class='PickupPoint-bottom'>
-          <button class='PickupPoint-hours underline-with-icon' type='button'>{{ ux_icon("clock") }}{{ 'Opening hours'|trans }}</button>
-          {% if img.src %}
-            <img src="{{ img.src }}" alt="{{ img.alt }}" loading="lazy">
-          {% endif %}
+    <button class='PickupPoint-hours underline-with-icon'
+            type='button'>{{ ux_icon("clock") }}{{ 'Opening hours'|trans }}</button>
+    {% if img and img.src %}
+      <img src="{{ img.src }}" alt="{{ img.alt }}" loading="lazy">
+    {% endif %}
   </div>
   <div class='PickupPoint-hoursListing md:hidden'>
     <table>
-      {% for hour in hours %}
+      {% for i in 0..6 %}
         <tr>
-          <td>{{ hour.day }}</td>
-          <td>{{ hour.hours }}</td>
+          <td>{{ days[i] }}</td>
+          <td>
+            {% if openingHours[i] is not null %}
+              {{ openingHours[i]|replace({':00' : 'h', ':' : 'h'})|trim }}
+            {% else %}
+              fermé
+            {% endif %}
+          </td>
         </tr>
       {% endfor %}
+
     </table>
   </div>
   <div class='mt-4 md:hidden'>

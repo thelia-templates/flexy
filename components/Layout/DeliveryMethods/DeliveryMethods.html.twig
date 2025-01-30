@@ -1,6 +1,6 @@
 <div class='flex flex-col gap-3.5'>
   {% set modules = resources('/api/front/delivery_modules', {'by_code': 1}) %}
-  
+
   {% if modules.localPickup  is defined %}
     {% include '@components/Organisms/Modules/StoreDelivery/StoreDelivery.html.twig' with {
       name: 'delivery_method',

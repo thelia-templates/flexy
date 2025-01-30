@@ -3,7 +3,7 @@
   {% set widget_value = form.vars.value %}
   {% set widget_attr = form.vars.attr %}
   {% set label = label is defined ? label : form.vars.label %}
-  {% set placeholder = placeholder is defined ? placeholder : form.vars.placeholder is defined ? form.vars.placeholder : null %}
+  {% set placeholder = placeholder is defined ? placeholder : form.vars.placeholder is defined ? form.vars.placeholder :  form.vars.help is defined ? form.vars.help : null %}
 
   {% set errors = [] %}
 
@@ -28,6 +28,17 @@
   {% elseif type == 'pill' %}
     {% include '@formTwig/fields/choice.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value } %}
     {{ form_errors(form) }}
+  {% elseif type == 'search' %}
+    {% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
+      label:  label,
+      name: form.vars.full_name,
+      id: form.vars.id,
+      type: type,
+      placeholder: placeholder,
+      required: form.vars.required,
+      errors: errors,
+      iconButton: "search"
+    } %}
   {% elseif type == 'text' or type == 'email' %}
     {% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {
       label:  label,

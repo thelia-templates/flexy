@@ -7,16 +7,18 @@
 {% set checked = checked|default(false) %}
 {% set label = label|default('') %}
 {% set type = type|default('label') %}
-
-<{{ type }} class="Radio {{ classes }} {{ error ? 'error'  : ''}}">
-  <input
-    type="radio"
-    name='{{ name }}'
-    value='{{ value }}'
-    {% if id %}id='{{ id }}'{% endif %}
-    {% if disabled %}disabled{% endif %}
-    {% if checked %}checked{% endif %}
-  >
-  <span class="checkmark"></span>
-  <span>{{ label }}</span>
+{% set props = props|default([]) %}
+<{{ type }} class="Radio {{ classes }} {{ error ? 'error'  : '' }}">
+<input
+  type="radio"
+  name='{{ name }}'
+  value='{{ value }}'
+  class="{% if checked %}checked{% endif %}"
+  {% if id %}id='{{ id }}'{% endif %}
+  {% if disabled %}disabled{% endif %}
+  {% if checked %}checked{% endif %}
+   {% for key,value in props %} {{ key }}="{{ value }}" {% endfor %}
+>
+<span class="checkmark"></span>
+<span>{{ label }}</span>
 </{{ type }}>
