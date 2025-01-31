@@ -81,6 +81,8 @@ class PickupPointSearch extends AbstractController
     });
 
     $this->selectedPickup = reset($current);
+
+    $this->dispatchBrowserEvent('pickup:selected', ['pickup' => $this->selectedPickup]);
   }
 
 }

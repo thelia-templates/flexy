@@ -13,7 +13,6 @@ export function PickupPointView() {
   }
 
   buttonMapView.addEventListener('click', function () {
-    console.log('View');
     mapView.classList.remove('hidden');
     listView.classList.add('hidden');
     buttonListView.classList.add('Button--secondary');
@@ -22,7 +21,6 @@ export function PickupPointView() {
     window.dispatchEvent(event);
   });
   buttonListView.addEventListener('click', function () {
-    console.log('buttonList');
     listView.classList.remove('hidden');
     mapView.classList.add('hidden');
     buttonMapView.classList.add('Button--secondary');
