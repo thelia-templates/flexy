@@ -1,6 +1,7 @@
 {% set title = title|default('') %}
 {% set breadcrumb = breadcrumb|default([]) %}
 {% set description = description|default('') %}
+{% set postscriptum = postscriptum|default('') %}
 {% set nbProducts = nbProducts|default(0) %}
 
 <div class='text-black Subheader Subheader--category'>
@@ -13,7 +14,7 @@
 			<div class='Subheader-description'>
 				{{ description }}
 			</div>
-			{% if attr('category', 'description') or  attr('category', 'postscriptum') %}
+			{% if description or postscriptum %}
 				<div class='underline Subheader-link'>
 					<a href='#description' class='link-large'>{{ 'Read more'|trans }}</a>
 				</div>

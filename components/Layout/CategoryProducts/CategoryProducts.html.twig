@@ -3,6 +3,7 @@
 
 <section class="Category-grid" {{ attributes.defaults(stimulus_controller('filters')) }}>
 	{% if filters %}
+		{% set ActiveFiltersCount = filters_count(formValues|filter(f => f is iterable)) %}
 		<div id="FilterDrawer" class="CategoryFilter MobileDrawer MobileDrawer--reset-lg" data-action="change->filters#filterChange">
 			<div class='MobileDrawer-header lg:hidden'>
 				<button class='MobileDrawer-close' type='button' data-drawer-close>{{ ux_icon("close") }}</button>
@@ -20,9 +21,13 @@
 		{% endif %}
 		<div class="flex-1">
 			<div class="justify-between items-end mb-[29px] hidden lg:flex">
-				<span>{{ products|length }}
-					{{ 'item(s)'|trans }}</span>
-				<div class="w-[250px]">
+				{% if products|length %}
+					<span>{{ products|length }}
+						{{ 'item(s)'|trans }}</span>
+				{% endif %}
+
+
+				<div class="ml-auto w-[250px]">
 					{% include '@components/Molecules/Fields/FieldSelect/FieldSelect.html.twig' with {
               label: "Sort by" | trans,
               placeholder: "Sort by" | trans,
@@ -33,19 +38,38 @@
 			</div>
 
 			<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-8 mb-[40px] transition" data-loading="addClass(opacity-50)">
-				{% for product in products %}
-					{% include '@components/Organisms/ProductCard/ProductCard.html.twig' with  product|merge({displayWishButton: true}) %}
-				{% endfor %}
+				{% if products|length %}
+					{% for product in products %}
+						{% include '@components/Organisms/ProductCard/ProductCard.html.twig' with product|merge({displayWishButton: true}) %}
+					{% endfor %}
+				{% else %}
+					<div class="flex justify-center flex-col items-center h-[400px] col-span-full">
+						<div class="w-[250px] h-[150px] lg:w-[300px] lg:h-[200px] mb-6">
+							{{ source('@assets/images/not-found.svg') }}
+						</div>
+						<h3 class="text-center h4">{{"No products found"|trans}}</h3>
+						{% if ActiveFiltersCount %}
+							<button type="button" class="mt-4 Button--medium Button Button--secondary" data-action="click->filters#resetForm">
+								{{'Erase filters'|trans}}
+								({{filtersCount}})
+							</button>
+						{% else %}
+							<a href="/" class="mt-4 Button--medium Button Button--secondary">
+								{{'Home'|trans}}
+							</a>
+						{% endif %}
+					</div>
+				{% endif %}
 			</div>
 
-			<div class='mx-auto lg:mx-0 lg:ml-auto w-max'>
-				{% include '@components/Molecules/Pagination/Pagination.html.twig' with {
-          prevText: 'Previous' | trans,
-          nextText: 'Next' | trans,
-          currentPage: page,
-          totalPages: 3
-        } %}
-			</div>
+			{# <div class='mx-auto lg:mx-0 lg:ml-auto w-max'>
+												        {% include '@components/Molecules/Pagination/Pagination.html.twig' with {
+												          prevText: 'Previous' | trans,
+												          nextText: 'Next' | trans,
+												          currentPage: page,
+												          totalPages: 3
+												        } %}
+												      </div> #}
 			<div id="description" class="lg:pt-[56px] lg:pb-[96px] max-w-[664px] pt-[102px] pb-[52px] mx-auto">
 				{% if attr('category', 'description') %}
 					<div class=" paragraph-4 lg:paragraph-2">

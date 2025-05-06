@@ -47,7 +47,7 @@
 {% endif %}
 
 {% if id is defined and img is not defined %}
-	{% set images = resources('/api/front/product_images', {'product.id':id, itemsPerPage:1}) %}
+	{% set images = resources('/api/front/product_images', {'product.id':id,'position':'ASC', itemsPerPage:1}) %}
 	{% if images %}
 		{% set img = {url: '/legacy-image-library/product_image_'~ images|first.id ~'/full/%5E*!386,280/0/default.webp', alt: product.i18ns.title} %}
 	{% endif %}
