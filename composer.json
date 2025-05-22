@@ -1,6 +1,6 @@
 {
   "name": "thelia/flexy",
-  "type": "symfony-bundle",
+  "type": "thelia-frontoffice-template",
   "description": "thelia design system",
   "keywords": [
     "thelia-frontoffice-template"
