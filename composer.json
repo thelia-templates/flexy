@@ -7,6 +7,9 @@
   ],
   "license": "LGPL-3.0+",
   "require": {
+        "thelia/installer": "~1.1"
+  },
+  "require": {
     "symfony/webpack-encore-bundle": "^2.1",
     "symfony/ux-twig-component": "^2.19",
     "symfony/stimulus-bundle": "^2.19",
