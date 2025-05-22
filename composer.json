@@ -26,7 +26,7 @@
     "twig/extra-bundle": "^3.17",
     "twig/intl-extra": "^3.17",
     "symfony/http-client": "*",
-    "thelia/installer": "~1.1"
+    "composer/installers": "~1.0"
   },
   "autoload": {
     "psr-4": {
