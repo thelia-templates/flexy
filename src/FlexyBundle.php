@@ -20,6 +20,17 @@ use Thelia\Model\ConfigQuery;
 
 class FlexyBundle extends AbstractBundle
 {
+    public function loadExtension(array $config, ContainerConfigurator $containerConfigurator, ContainerBuilder $builder): void
+    {
+        $serviceConfigurator = $containerConfigurator->services();
+
+        $resourcePath = THELIA_TEMPLATE_DIR.TemplateDefinition::FRONT_OFFICE_SUBDIR.DS.ConfigQuery::read(TemplateDefinition::FRONT_OFFICE_CONFIG_NAME, 'default').DS.'src';
+
+        $serviceConfigurator->load('FlexyBundle\\', $resourcePath)
+          ->autowire()
+          ->autoconfigure();
+    }
+  
     public function prependExtension(ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void
     {
         $containerConfigurator->import('../config/packages/*.yaml');
