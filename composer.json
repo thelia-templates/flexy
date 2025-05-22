@@ -3,7 +3,8 @@
   "type": "thelia-frontoffice-template",
   "description": "thelia design system",
   "keywords": [
-    "thelia-frontoffice-template"
+    "thelia-frontoffice-template",
+    "thelia-flexy"
   ],
   "license": "LGPL-3.0+",
   "require": {
@@ -26,7 +27,7 @@
     "twig/extra-bundle": "^3.17",
     "twig/intl-extra": "^3.17",
     "symfony/http-client": "*",
-    "composer/installers": "~1.0"
+    "thelia/installer": "~1.1"
   },
   "autoload": {
     "psr-4": {
@@ -35,6 +36,6 @@
     }
   },
   "extra": {
-    "installer-name": "Flexy"
+    "installer-name": "flexy"
   }
 }
