@@ -7,9 +7,6 @@
   ],
   "license": "LGPL-3.0+",
   "require": {
-        "thelia/installer": "~1.1"
-  },
-  "require": {
     "symfony/webpack-encore-bundle": "^2.1",
     "symfony/ux-twig-component": "^2.19",
     "symfony/stimulus-bundle": "^2.19",
@@ -28,12 +25,16 @@
     "thelia/open-api-module": "*",
     "twig/extra-bundle": "^3.17",
     "twig/intl-extra": "^3.17",
-    "symfony/http-client": "*"
+    "symfony/http-client": "*",
+    "thelia/installer": "~1.1"
   },
   "autoload": {
     "psr-4": {
       "FlexyBundle\\": "src/",
       "FlexyBundle\\Twig\\": "src/Twig/"
     }
+  },
+  "extra": {
+    "installer-name": "Flexy"
   }
 }
