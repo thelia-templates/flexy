@@ -6,7 +6,6 @@
 
 {% block javascripts %}
 	{{ parent() }}
-	{{ encore_entry_script_tags('addresses') }}
 {% endblock %}
 
 {% block body %}
@@ -58,10 +57,6 @@
               address: address|merge({
                 country
               }),
-              attributesDelete: {
-                'class': 'open-modal',
-                'data-id': 'confirmDeleteAdresse'
-              },
               classes: 'h-full'
             } %}
 					</li>
@@ -92,46 +87,26 @@
 	{% set deleteModalContent %}
 	<div class='h4'>{{ 'Are you sure you want to delete this address ?'|trans }}</div>
 	<div class='flex flex-col gap-4 mt-8 md:flex-row'>
-		{% include '@components/Molecules/Button/Button.html.twig' with {
-        text: 'Cancel'| trans,
-        variant: 'secondary',
-        fill: true,
-        classes: 'close-button'
-      } %}
-		{% include '@components/Molecules/Button/Button.html.twig' with {
-        text: 'Yes'| trans,
-        fill: true,
-        href: '#0',
-        id:"DeleteAddressBtn"
-      } %}
+		<button type="button" class="Button Button--secondary Button--fill" data-action="modal#toggle">{{'Cancel'| trans}}</button>
+		<a href="#" class="Button Button--fill" data-modal-target="confirm">{{'Yes'| trans}}</a>
 	</div>
 	{% endset %}
 
 	{% include '@components/Molecules/Modal/Modal.html.twig' with {
-    name: 'confirmDeleteAdresse',
-    content: deleteModalContent
-  } %}
+		name: 'confirmDeleteAddress',
+		content: deleteModalContent
+	} %}
 
 	{% set setDefaultModalContent %}
 	<div class='h4'>{{ 'Are you sure you want to choose this address by default ?'|trans }}</div>
 	<div class='flex flex-col gap-4 mt-8 md:flex-row'>
-		{% include '@components/Molecules/Button/Button.html.twig' with {
-        text: 'Cancel'| trans,
-        variant: 'secondary',
-        fill: true,
-        classes: 'close-button'
-      } %}
-		{% include '@components/Molecules/Button/Button.html.twig' with {
-        text: 'Yes'| trans,
-        fill: true,
-        href: '#0',
-        id:"ConfirmDefaultAddressBtn"
-      } %}
+		<button type="button" class="Button Button--secondary Button--fill" data-action="modal#toggle">{{'Cancel'| trans}}</button>
+		<a href="#" class="Button Button--fill" data-modal-target="confirm">{{'Yes'| trans}}</a>
 	</div>
 	{% endset %}
 
 	{% include '@components/Molecules/Modal/Modal.html.twig' with {
-    name: 'confirmDefaultAdresse',
+    name: 'confirmDefaultAdress',
     content: setDefaultModalContent
   } %}
 {% endblock %}

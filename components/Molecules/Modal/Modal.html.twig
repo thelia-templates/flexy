@@ -1,11 +1,11 @@
 {% set content = content|default('') %}
 {% set name = name|default('') %}
 
-<div class="Modal" data-id="{{ name }}">
-  <div class="Modal-content">
-    <button type="button" class="close-icon" aria-label="{{ name }}" data-id="{{ name }}">
-      {{ ux_icon('close') }}
-    </button>
-    {{ content }}
-  </div>
+<div id="{{ name }}" class="Modal" {{stimulus_controller('modal')}} data-address-card-target="modal">
+	<div class="Modal-content">
+		<button type="button" class="close-icon" aria-label="{{ name }}" data-action="modal#toggle">
+			{{ ux_icon('close') }}
+		</button>
+		{{ content }}
+	</div>
 </div>

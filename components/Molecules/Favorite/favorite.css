@@ -15,7 +15,10 @@
     @apply indication indication-small;
   }
 
-  &.selected .star{
-    color: var(--theme);
+  &.selected {
+    pointer-events: none;
+    .star {
+      color: var(--theme);
+    }
   }
 }
