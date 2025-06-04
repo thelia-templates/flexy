@@ -39,8 +39,6 @@ Encore
   .addEntry('category', './assets/js/routes/category.js')
   .addEntry('checkout', './assets/js/routes/checkout.js')
   .addEntry('register', './assets/js/routes/register.js')
-  .addEntry('account', './assets/js/routes/account.js')
-  .addEntry('addresses', './assets/js/routes/addresses.js')
   .addEntry('email_verification', './assets/js/routes/email_verification.js')
 
   // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.

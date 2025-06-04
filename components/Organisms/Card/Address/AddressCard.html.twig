@@ -1,13 +1,9 @@
 {% set title = title|default('') %}
 {% set disabled = disabled|default(false) %}
 {% set purchaseFunnel = purchaseFunnel|default(false) %}
-{% set attributesDelete = attributesDelete|default({
-  'class': '',
-  'data-id': ''
-}) %}
 {% set classes = classes|default('') %}
 
-<div class='AddressCard {% if selected %}selected{% endif %} {{ classes }}'>
+<div class='AddressCard {% if selected %}selected{% endif %} {{ classes }}' {{stimulus_controller('address-card')}} data-address-card-modal-outlet=".Modal">
 	<div class='AddressCard-top'>
 		{% include '@components/Molecules/Favorite/Favorite.html.twig' with {text: 'Favourite'|trans, selected: address.isDefault, addressId : address.id} %}
 	</div>
@@ -25,7 +21,7 @@
 			{{ 'Modify'|trans }}
 		</a>
 		{% if not address.isDefault %}
-			<button {% if disabled %} disabled {% endif %} class='hover:text-theme{% if attributesDelete.class|default(' ') %} {{ attributesDelete.class }}{% endif %}' type='button' {% if attributesDelete['data-id']|default('') %} data-id="{{ attributesDelete['data-id'] }}" {% endif %} data-url="{{ path('account_address_delete', {'addressId': address.id}) }}">
+			<button {% if disabled %} disabled {% endif %} class='hover:text-theme' type='button' data-action="address-card#openModal" data-modal="confirmDeleteAddress" data-confirm="{{ path('account_address_delete', {'addressId': address.id}) }}">
 				<span>{{ ux_icon("delete") }}</span>
 				{{ 'Delete'|trans }}
 			</button>
