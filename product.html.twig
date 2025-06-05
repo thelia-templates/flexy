@@ -2,14 +2,8 @@
 
 {% block stylesheets %}
 	{{ parent() }}
-	{{ encore_entry_link_tags('product') }}
+	{{ encore_entry_link_tags('product-css') }}
 {% endblock %}
-
-{% block javascripts %}
-	{{ parent() }}
-	{{ encore_entry_script_tags('product') }}
-{% endblock %}
-
 
 {% set productId = attr('product', 'id') %}
 

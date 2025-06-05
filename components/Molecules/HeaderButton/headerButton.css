@@ -72,19 +72,22 @@
 }
 
 .DropdownProfile {
-  opacity: 0;
-  visibility: hidden;
-  transition: 300ms;
-  position: absolute;
-  right: 18px;
+  transition: 0.2s opacity linear;
   background: var(--white);
   border-radius: 0 0 8px 8px;
-  box-shadow: 0px 3px 5px 0px rgba(84, 84, 84, 0.12);
+
+  @screen md {
+    opacity: 0;
+    visibility: hidden;
+    width: max-content;
+    transform: translate(-50%, 0);
+    position: absolute;
+    box-shadow: 0px 3px 5px 0px rgba(84, 84, 84, 0.12);
+  }
 
   &.active {
     opacity: 1;
     visibility: visible;
-    width: max-content;
   }
 
   &-item {
@@ -93,12 +96,16 @@
       &:before {
         position: absolute;
         content: '';
-        width: calc(100% - rem-convert(48px));
+        width: 100%;
         top: 0;
         height: 1px;
         left: 50%;
         background-color: var(--grey-lighter);
         transform: translate(-50%, -50%);
+
+        @screen md {
+          width: calc(100% - rem-convert(48px));
+        }
       }
     }
   }

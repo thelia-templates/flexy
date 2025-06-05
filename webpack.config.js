@@ -35,11 +35,9 @@ Encore
    * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
    */
   .addEntry('app', './assets/app.js')
-  .addEntry('product', './assets/js/routes/product.js')
-  .addEntry('category', './assets/js/routes/category.js')
   .addEntry('checkout', './assets/js/routes/checkout.js')
-  .addEntry('register', './assets/js/routes/register.js')
-  .addEntry('email_verification', './assets/js/routes/email_verification.js')
+  .addEntry('category-css', './assets/css/pages/category.css')
+  .addEntry('product-css', './assets/css/pages/product.css')
 
   // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
   .splitEntryChunks()

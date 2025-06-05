@@ -29,14 +29,16 @@
   }
 
   &-header {
+  }
+
+  &-close {
+    width: rem-convert(38px);
+    height: rem-convert(38px);
     position: absolute;
     top: 0;
     right: 0;
     padding: rem-convert(10px);
-  }
-  &-close {
-    width: rem-convert(38px);
-    height: rem-convert(38px);
+    box-sizing: content-box;
   }
 
   /* Navigation au clavier */
@@ -50,5 +52,20 @@
     z-index: 10;
     opacity: 0.8;
     background-color: var(--black);
+  }
+}
+
+body.locked {
+  &:has(.MobileDrawer.is-open.sm\:reset-drawer) {
+    @apply sm:overflow-auto;
+  }
+  &:has(.MobileDrawer.is-open.md\:reset-drawer) {
+    @apply md:overflow-auto;
+  }
+  &:has(.MobileDrawer.is-open.lg\:reset-drawer) {
+    @apply lg:overflow-auto;
+  }
+  &:has(.MobileDrawer.is-open.xl\:reset-drawer) {
+    @apply xl:overflow-auto;
   }
 }

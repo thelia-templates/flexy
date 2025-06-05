@@ -17,10 +17,13 @@ class DrawerController extends Controller {
 
   toggleOverlay(open) {
     if (open) {
-      const overlay = document.createElement('div');
-      overlay.classList.add('MobileDrawer-overlay');
-      overlay.addEventListener('click', () => this.close());
-      return this.element.appendChild(overlay);
+      if (!this.element.querySelector('.MobileDrawer-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.classList.add('MobileDrawer-overlay');
+        overlay.addEventListener('click', () => this.close());
+        return this.element.appendChild(overlay);
+      }
+      return;
     }
 
     document.querySelector('.MobileDrawer-overlay')?.remove();

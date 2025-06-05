@@ -10,31 +10,25 @@
   icon: 'account-logged',
   inactive: inactive|default(true),
   text: customer.firstname~' '~customer.lastname|first|upper~'.',
-  classes: "HeaderNav-btn HeaderButton--theme profile"
+  classes: "HeaderNav-btn HeaderButton--theme profile w-full",
+  attributes: {
+    'data-action':'drawer#toggle profile#toggle'
+  }
 } %}
 
-<div class="hidden h-full lg:block">
+<div class="relative flex-1 h-full" {{stimulus_controller('drawer profile')}}>
 	{% include '@components/Molecules/HeaderButton/HeaderButton.html.twig' with headerButtonConfig %}
-	<ul class="DropdownProfile">
-		{% for item in menuItems %}
-			<li class="DropdownProfile-item">
-				{% include '@components/Molecules/UserMenu/UserMenu.html.twig' with item %}
-			</li>
-		{% endfor %}
-	</ul>
-</div>
-
-
-<div class='block MobileDrawer lg:hidden' id='profil'>
-	<div class='MobileDrawer-header'>
-		<button class='MobileDrawer-close' type='button' data-drawer-close>{{ ux_icon("close") }}</button>
+	<div class="MobileDrawer md:reset-drawer" data-drawer-target="drawer">
+		<div class='MobileDrawer-header'>
+			<strong class="block text-center text-black h3">{{'hy_customer'|trans({"%firstname%": customer.firstname})}}</strong>
+			<button class='MobileDrawer-close' type='button' data-action="drawer#close">{{ ux_icon("close") }}</button>
+		</div>
+		<ul class="DropdownProfile" data-profile-target="dropdown">
+			{% for item in menuItems %}
+				<li class="DropdownProfile-item">
+					{% include '@components/Molecules/UserMenu/UserMenu.html.twig' with item %}
+				</li>
+			{% endfor %}
+		</ul>
 	</div>
-	<strong class="block p-6 text-center text-black h3">{{'hy_customer'|trans({"%firstname%": customer.firstname})}}</strong>
-	<ul class="divide-y divide-gray-lighter">
-		{% for item in menuItems %}
-			<li class="">
-				{% include '@components/Molecules/UserMenu/UserMenu.html.twig' with item %}
-			</li>
-		{% endfor %}
-	</ul>
 </div>

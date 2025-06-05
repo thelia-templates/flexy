@@ -2,10 +2,9 @@
 {% set page = app.request.get('page')|default(1) %}
 {% set categoryId = attr('category', 'id') %}
 
-
 {% block stylesheets %}
 	{{ parent() }}
-	{{ encore_entry_link_tags('category') }}
+	{{ encore_entry_link_tags('category-css') }}
 {% endblock %}
 
 {% block stimulus_controller %}

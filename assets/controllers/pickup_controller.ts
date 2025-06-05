@@ -17,5 +17,5 @@ export default class extends Controller<HTMLFormElement> {
   pickupPointClick(pickup: PickupLocationType): void {
     console.log({ pickup });
     this.component.action('pickupPointClick', { pickup });
-  }
+  } 
 }

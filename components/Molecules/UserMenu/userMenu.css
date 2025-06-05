@@ -4,14 +4,13 @@
   text-decoration: none;
   outline: none;
   padding: rem-convert(20px) 0;
-  border-radius: rem-convert(8px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: rem-convert(64px);
   cursor: pointer;
 
-  @screen lg {
+  @screen md {
     padding: rem-convert(20px) rem-convert(24px);
   }
   &--vermillon {

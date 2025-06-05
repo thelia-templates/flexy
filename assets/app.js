@@ -10,17 +10,8 @@ import '@components/base.css';
 
 import './bootstrap.js';
 
-import { quantityButton } from '@components/Molecules/Button/button';
-import headerButtonProfileFunction from '@components/Molecules/HeaderButton/HeaderButtonProfile';
-
-import StepsFunction from '@components/Molecules/Step/Steps.js';
-
 function main() {
   document.body.classList.remove('no-js');
-
-  quantityButton();
-  StepsFunction();
-  headerButtonProfileFunction();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
