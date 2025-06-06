@@ -3,34 +3,10 @@
 {% block breadcrumb_json %}{% endblock %}
 
 {% block body %}
-	{%
-  set blocks = [
-    {
-      "image": asset("dist/images/placeholder.webp"),
-      alt: "Image desc",
-      "title": "Ici une phrase d’accroche pour accompagner le visuel",
-      "href": "#",
-      "linkLabel": "Discover" | trans
-    },
-    {
-      "image": asset("dist/images/placeholder.webp"),
-      alt: "Image desc",
-      "title": "Ici une phrase d’accroche pour accompagner le visuel",
-      "href": "#",
-      "linkLabel": "Discover" | trans
-    },
-    {
-      "image": asset("dist/images/placeholder.webp"),
-      alt: "Image desc",
-      "title": "Ici une phrase d’accroche pour accompagner le visuel",
-      "href": "#",
-      "linkLabel": "Discover" | trans
-    }
-  ]
-%}
 
-	{% include '@components/Layout/Hero/Hero.html.twig' with { blocks: blocks } %}
+	{{ component('HeaderHighlights') }}
 
+	{{ component('Flexy:CrossSelling', {categoryId: 1, title: 'Last seen products' | trans}) }}
 	{{ component('Flexy:CrossSelling', {categoryId: 1, title: 'Last seen products' | trans}) }}
 
 
