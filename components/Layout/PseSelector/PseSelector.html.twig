@@ -1,4 +1,4 @@
-<div class="PseSelector" {{ attributes }}>
+<div class="PseSelector">
 	{{ form_start(form, {attr :{
     class: 'mt-[30px] flex flex-col gap-[30px]',
     'data-action': 'live#action:prevent',
@@ -15,7 +15,6 @@
 	{% if currentPse.quantity == 0 %}
 		{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'Unavailable product'|trans, variant: 'warning', withIcon:true, size: "full"} %}
 	{% endif %}
-
 	<input type="hidden" name="{{ field_name(form.product) }}" value="{{ field_value(form.product) }}">
 	<input type="hidden" name="{{ field_name(form.product_sale_elements_id) }}" value="{{ field_value(form.product_sale_elements_id) }}">
 	<input type="hidden" name="{{ field_name(form.append) }}" value="{{ field_value(form.append) }}">

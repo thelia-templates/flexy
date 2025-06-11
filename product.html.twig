@@ -22,48 +22,8 @@
 		</div>
 		<div class="container">
 			<div class="ProductPage-grid">
-				<section id="infos" class="ProductPage-infos">
-					<h1 class="mb-3 h3">{{ attr('product', 'title') }}</h1>
-					{% set chapo = attr('product', 'chapo') %}
-					{% if chapo %}
-						<div class="paragraph-3 text-grey">{{ chapo }}</div>
-					{% endif %}
+				{{ component('Flexy:Page:Product', {product}) }}
 
-					{% set attributes = getAttributesAndValues(productId) %}
-
-					{{ component('Flexy:Layout:PseSelector', {product}) }}
-
-					{#     TODO : ajouter les couleurs aux attributs (voir ex commenté)    #}
-					{#          {% set colors = [ #}
-					{#            { value: 1, color: '#6969B3', label: 'State Blue' }, #}
-					{#            { value: 2, color: '#FFB698', label: 'Vermillon' }, #}
-					{#            { value: 3, color: '#767676', label: 'Grey' }, #}
-					{#            { value: 4, color: '#84DCC6', label: 'Tiffany Blue', disabled: true }, #}
-					{#            { value: 5, color: '#DD6E42', label: 'Sienna' }, #}
-					{#            { value: 6, color: '#C17767', label: 'Old Rose' }, #}
-					{#          ] %} #}
-					{#          <div class="mt-4"> #}
-					{#            {% include '@components/Organisms/Modules/Filters/FilterColor.html.twig' with {options: colors, name: 'color', label: 'Couleur',id: 'filterColor'} %} #}
-					{#          </div> #}
-
-
-						<div class="mt-[30px]"> {% include '@components/Organisms/Reinsurance/Reinsurance.html.twig' with {data: [
-              {
-                strongText: 'Free delivery'|trans,
-                text: ' from 50€'|trans,
-                icon: 'reinsurance-delivery'
-              },
-              {
-                strongText: 'Shipping'|trans,
-                text: ' within 24 hours'|trans,
-                icon: 'reinsurance-shipping'
-              }
-            ]} %}
-					</div>
-				</section>
-				<section id="gallery" class="ProductPage-gallery">
-					{% include '@components/Layout/ProductGallery/ProductGallery.html.twig' with {productId:productId, currrentPse } %}
-				</section>
 				<section id="description" class="ProductPage-description">
 					{% set descriptionContent %}
 					<p>toto 2</p>

@@ -2,43 +2,57 @@ import { Controller } from '@hotwired/stimulus';
 import Splide from '@splidejs/splide';
 import '@splidejs/splide/css/core';
 
-class GalleryContoller extends Controller {
+class GalleryController extends Controller {
   static targets = ['thumbnail', 'root'];
+  static values = { currentPseId: Number };
 
-  constructor(arg) {
-    super(arg);
-    this.main = null;
-  }
-
-  initialize() {
-    this.main = new Splide(this.rootTarget, {
-      pagination: false,
-      destroy: this.rootTarget.dataset?.count <= 1,
-      breakpoints: {
-        768: {
-          pagination: true,
-          arrows: false
-        }
-      }
-    });
-  }
   connect() {
-    this.main.mount();
+    if (!this.main) {
+      this.main = new Splide(this.rootTarget, {
+        pagination: false,
+        destroy: this.rootTarget.dataset?.count <= 1,
+        breakpoints: {
+          768: {
+            pagination: true,
+            arrows: false
+          }
+        }
+      });
 
-    this.main.on('move', (index) => {
-      this.update({ params: { index } });
-    });
+      this.main.mount();
+      this.goToCurrentPse();
+    }
+  }
+
+  disconnect() {
+    if (this.main) {
+      this.main.destroy();
+      this.main = null;
+    }
+  }
+
+  currentPseIdValueChanged() {
+    this.goToCurrentPse();
+  }
+
+  goToCurrentPse() {
+    if (!this.main || !this.hasCurrentPseIdValue) return;
+
+    const index = this.thumbnailTargets.findIndex(
+      (thumb) =>
+        parseInt(thumb.parentNode.dataset.pseId) === this.currentPseIdValue
+    );
+
+    if (index !== -1) {
+      this.main.go(index);
+    }
   }
 
   update({ params }) {
-    const { index: activeIndex } = params;
-
-    this.main.go(activeIndex);
-
-    this.thumbnailTargets.forEach((thumbnail, index) => {
-      thumbnail.parentNode.classList.toggle('is-active', index === activeIndex);
-    });
+    if (this.main) {
+      this.main.go(params.index);
+    }
   }
 }
 
-export default GalleryContoller;
+export default GalleryController;
