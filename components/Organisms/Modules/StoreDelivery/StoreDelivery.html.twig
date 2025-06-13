@@ -18,7 +18,7 @@
 
 <div class='StoreDelivery DeliveryModule {% if selected %}selected{% endif %}'>
 	<label class='StoreDelivery-content'>
-		{% include '@components/Atoms/Form/Radio.html.twig' with {type:"span", value:1, checked:selected, model: 'deliveryMode'} %}
+		{% include '@components/Atoms/Form/Radio.html.twig' with {type:"span", value:'localPickup', checked:selected, model: 'deliveryMode', liveEvent: 'forceDeliveryAddress'} %}
 
 		<span>
 			<div class='flex justify-between'>
@@ -89,4 +89,7 @@
 			</table>
 		</div>
 	{% endif %}
+    {%if selected%}
+        {% include '@components/Molecules/Button/Button.html.twig' with {text: 'Choose'|trans, classes:'Button--fill lg:w-1/4 mt-4', liveEvent: 'forceCustomerDefaultDeliveryAddress'} %}
+    {% endif %}
 </div>

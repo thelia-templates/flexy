@@ -4,17 +4,24 @@
 {% set id = id|default(null) %}
 
 <div class='AddressCard AddressCard--module {% if selected %}selected{% endif %}'>
-	<label class='cursor-pointer AddressCard-content'>
-		{% include '@components/Atoms/Form/Radio.html.twig' with {classes, type:"span", name:"delivery_module_option", value:id, checked: selected, model : 'selectedDeliveryModuleId'}  %}
-		<div>
-			<strong class="block mb-[2px] text-black">{{module.title}}</strong>
-			<span class=" paragraph-6">{{'delivery_estimation'|trans({'%min%': "02/02/02", '%max%': "05/02/02"})}}</span>
-			<div class="flex justify-between mt-4">
-				<span class="font-semibold text-black">{{module.postage|format_currency('EUR', locale: lang_code)}}</span>
-				{% if module.image %}
-					<img src="{{module.image}}" alt="{{module.title}}" title="{{module.title}}"/>
-				{% endif %}
-			</div>
-		</div>
-	</label>
+    <label class='cursor-pointer AddressCard-content'>
+        {% include '@components/Atoms/Form/Radio.html.twig' with {
+            classes, type:"span",
+            name:"delivery_module_option",
+            value:id,
+            checked: selected,
+            model : 'deliveryModuleId'
+        }  %}
+        <div>
+            <strong class="block mb-[2px] text-black">{{module.title}}</strong>
+            <span class=" paragraph-6">{{'delivery_estimation'|trans({'%min%': "02/02/02", '%max%': "05/02/02"})}}</span>
+            <div class="flex justify-between mt-4">
+                <span class="font-semibold text-black">{{module.postage|format_currency('EUR', locale: lang_code)}}</span>
+                {% if module.image %}
+                    <img src="{{module.image}}" alt="{{module.title}}" title="{{module.title}}"/>
+                {% endif %}
+            </div>
+        </div>
+    </label>
 </div>
+

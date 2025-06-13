@@ -1,3 +1,15 @@
 <div class="block mx-auto text-center text-black">
 	<strong>{{"Payment processing..."|trans}}</strong>
 </div>
+
+<form id="payment-form" method="post" action="{{ gateway_url }}" target="_top" style="display: none;">
+    {% for name, value in payment_form_data %}
+        <input type="hidden" name="{{ name }}" value="{{ value }}" />
+    {% endfor %}
+</form>
+
+<script>
+    setTimeout(() => {
+        document.getElementById('payment-form').submit();
+    }, 5000);
+</script>

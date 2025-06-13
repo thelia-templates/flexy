@@ -22,7 +22,7 @@
 							{% if deliveryAddressId == address.id %}
 
 								<div class='my-4'>
-									{% include '@components/Atoms/Form/Checkbox.html.twig' with { label: "Use this address for billing"|trans, checked : order.invoiceOrderAddressId == address.id,value: address.id, model: "invoiceAddressId" } %}
+									{% include '@components/Atoms/Form/Checkbox.html.twig' with { label: "Use this address for billing"|trans, checked : invoiceAddressId == address.id,value: address.id, model: "invoiceAddressId" } %}
 								</div>
 							{% endif %}
 						</li>
@@ -36,5 +36,4 @@
 			</div>
 		{% endif %}
 	</div>
-
 </div>

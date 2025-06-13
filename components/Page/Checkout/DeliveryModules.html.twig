@@ -1,10 +1,9 @@
 <h1 class='text-black h4'>{{ 'Choose a carrier'|trans }}</h1>
-{{ component('Flexy:Organisms:Modules:HomeDeliveryModules') }}
-<button type="button" class="Link" data-action="live#emit" data-live-event-param="hideDeliveryModuleView">
-	<span class="Link-icon">
-		<svg viewbox="0 0 44 44" fill="currentColor" aria-hidden="true">
-			<path d="M17.286 22c0-.22.077-.439.23-.606l7.857-8.571a.74.74 0 0 1 1.111 0 .913.913 0 0 1 0 1.211L19.182 22l7.302 7.965a.913.913 0 0 1 0 1.212.74.74 0 0 1-1.11 0l-7.858-8.571a.896.896 0 0 1-.23-.606Z" fill="currentColor"></path>
-		</svg>
-	</span>
-	{{'Previous Step'|trans}}
-</button>
+{{ component('Flexy:Layout:DeliveryModuleList', {deliveryMode: this.deliveryMode}) }}
+
+{% include "@components/Molecules/Link/Link.html.twig" with {
+    iconLeft: 'chevron-left',
+    customText: 'Previous Step' | trans,
+    href: path('checkout_delivery'),
+    classes:'gap-2'
+} %}

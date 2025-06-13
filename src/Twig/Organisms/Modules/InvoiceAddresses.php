@@ -60,7 +60,8 @@ class InvoiceAddresses extends BaseFrontController
         $addresses = $user->getAddresses()?->toArray(null, false, TableMap::TYPE_CAMELNAME);
 
         $this->addresses = $addresses;
-        $this->invoiceAddressId = $this->cartService->getCart()->getAddressInvoiceId() ?? 2;
+        $this->invoiceAddressId = $this->cartService->getCart()->getAddressInvoiceId();
+        $this->switchView = !$this->invoiceAddressId;
     }
 
     #[LiveListener('InvoiceAddresses:refresh')]
@@ -87,7 +88,7 @@ class InvoiceAddresses extends BaseFrontController
     #[LiveAction]
     public function setInvoiceOrderAddressId(): void
     {
-        $this->cartService->getCart()->setAddressInvoiceId($this->invoiceAddressId);
+        $this->cartService->setInvoiceAddress($this->invoiceAddressId);
         $this->emit('resetCart');
     }
 

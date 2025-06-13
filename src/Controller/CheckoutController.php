@@ -12,13 +12,21 @@
 
 namespace FlexyBundle\Controller;
 
-use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Thelia\Controller\Front\BaseFrontController;
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Thelia\Core\HttpKernel\Exception\RedirectException;
+use Thelia\Core\Translation\Translator;
+use Thelia\Exception\Checkout\EmptyCartException;
+use Thelia\Exception\Checkout\InvalidDeliveryException;
+use Thelia\Exception\Checkout\MissingAddressException;
+use Thelia\Log\Tlog;
+use Thelia\Service\Model\CartService;
+use Thelia\Service\Model\CheckoutService;
+use Thelia\Service\Model\DeliveryService;
 
 #[Route('/checkout', name: 'checkout_')]
-class CheckoutController extends BaseFrontController
+class CheckoutController extends FlexyController
 {
     public const STEP_CART = 'cart';
     public const STEP_DELIVERY = 'delivery';
@@ -40,8 +48,10 @@ class CheckoutController extends BaseFrontController
     }
 
     #[Route('/cart', name: 'cart')]
-    public function cartAction(): Response
+    public function cartAction(CheckoutService $checkoutService): Response
     {
+        $checkoutService->resetCheckout();
+
         return $this->render('checkout', [
             'page' => self::STEP_CART,
             'current' => self::STEPS[self::STEP_CART],
@@ -49,38 +59,81 @@ class CheckoutController extends BaseFrontController
     }
 
     #[Route('/delivery', name: 'delivery')]
-    public function deliveryAction(EventDispatcherInterface $eventDispatcher): Response
+    public function deliveryAction(CartService $cartService, DeliveryService $deliveryService): Response
     {
         $this->checkAuth();
-        $this->checkCartNotEmpty($eventDispatcher);
 
-        return $this->render('checkout', [
-            'page' => self::STEP_DELIVERY,
-            'current' => self::STEPS[self::STEP_DELIVERY],
-        ]);
+        try {
+            $cartService->checkCartNotEmpty();
+
+            $cart = $cartService->getCart();
+            if ($cart->isVirtual()) {
+                $deliveryService->setupVirtualDelivery();
+            }
+
+            return $this->render('checkout', [
+                'page' => self::STEP_DELIVERY,
+                'current' => self::STEPS[self::STEP_DELIVERY],
+            ]);
+
+        } catch (EmptyCartException $e) {
+            throw new RedirectException(
+                $this->generateUrl('checkout_cart'),
+                Response::HTTP_FOUND,
+                $e->getMessage()
+            );
+        } catch (Exception $e) {
+            Tlog::getInstance()->error(sprintf('Failed to set delivery part : %s', $e->getMessage()));
+
+            throw new RedirectException(
+                $this->generateUrl('checkout_cart'),
+                Response::HTTP_FOUND,
+                Translator::getInstance()->trans('Critical delivery error, check logs for more information !')
+            );
+        }
     }
 
     #[Route('/payment', name: 'payment')]
-    public function paymentAction(EventDispatcherInterface $eventDispatcher): Response
+    public function paymentAction(CartService $cartService): Response
     {
         $this->checkAuth();
-        $this->checkCartNotEmpty($eventDispatcher);
 
-        // TODO le paiment n'est accessible que lorsqu'on a une adresse de livraison et un module dans le cart
+        try {
+            $cartService->checkCartNotEmpty();
+            $cartService->checkValidDelivery();
 
-        return $this->render('checkout', [
-            'page' => self::STEP_PAYMENT,
-            'current' => self::STEPS[self::STEP_PAYMENT],
-        ]);
+            return $this->render('checkout', [
+                'page' => self::STEP_PAYMENT,
+                'current' => self::STEPS[self::STEP_PAYMENT],
+            ]);
+
+        } catch (EmptyCartException $e) {
+            throw new RedirectException(
+                $this->generateUrl('checkout_cart'),
+                Response::HTTP_FOUND,
+                $e->getMessage()
+            );
+        } catch (MissingAddressException|InvalidDeliveryException $e) {
+            throw new RedirectException(
+                $this->generateUrl('checkout_delivery'),
+                Response::HTTP_FOUND,
+                $e->getMessage()
+            );
+        } catch (Exception $e) {
+            Tlog::getInstance()->error(sprintf('Failed to set payment part : %s', $e->getMessage()));
+
+            throw new RedirectException(
+                $this->generateUrl('checkout_cart'),
+                Response::HTTP_FOUND,
+                Translator::getInstance()->trans('Critical payment error, check logs for more information !')
+            );
+        }
     }
 
     #[Route('/gateway', name: 'gateway')]
-    public function gatewayAction(EventDispatcherInterface $eventDispatcher): Response
+    public function gatewayAction(): Response
     {
         $this->checkAuth();
-        $this->checkCartNotEmpty($eventDispatcher);
-
-        // TODO page affiché en attendant la liasion avec le module de payment
 
         return $this->render('checkout', [
             'page' => self::STEP_GATEWAY,
@@ -89,10 +142,9 @@ class CheckoutController extends BaseFrontController
     }
 
     #[Route('/confirm', name: 'confirm')]
-    public function confirmAction(EventDispatcherInterface $eventDispatcher): Response
+    public function confirmAction(): Response
     {
         $this->checkAuth();
-        $this->checkCartNotEmpty($eventDispatcher);
 
         return $this->render('checkout', [
             'page' => self::STEP_CONFIRM,

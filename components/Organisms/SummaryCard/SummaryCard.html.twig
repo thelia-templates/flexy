@@ -2,7 +2,7 @@
 {% set giftCard = giftCard|default(null) %}
 {% set totalItems = totalItems|default(0) %}
 {% set subTotal = subTotal|default('') %}
-{% set delivery = delivery|default(0) %}
+{% set taxed_postage = taxed_postage|default(null) %}
 {% set total = total|default('') %}
 {% set tax = tax|default('') %}
 {% set cgvLink = cgvLink|default('') %}
@@ -19,7 +19,7 @@
     </div>
     <div class='SummaryCard-line'>
       <div>{{ 'Delivery'|trans }}</div>
-      <div>{{ delivery  ? delivery : 'Free'|trans }}</div>
+      <div>{{ taxed_postage ? taxed_postage : 'Free'|trans }}</div>
     </div>
     {% if not noPromo %}
       <div class='SummaryCard-line'>

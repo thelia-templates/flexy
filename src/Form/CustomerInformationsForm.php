@@ -43,22 +43,9 @@ class CustomerInformationsForm extends CustomerRegisterForm
               ],
           ])
           ->add(
-              'newsletter',
-              CheckboxType::class,
-              [
-                  'label' => Translator::getInstance()->trans('I would like to receive the newsletter or the latest news.'),
-                  'label_attr' => [
-                      'for' => 'newsletter',
-                  ],
-              ]
-          )
-          ->add(
               'accept_privacy_policy',
               CheckboxType::class,
               [
-                  'constraints' => [
-                      new Constraints\NotBlank(),
-                  ],
                   'label' => Translator::getInstance()->trans('By subscribing to our newsletter, you agree to our privacy policy.*'),
                   'label_attr' => [
                       'for' => 'accept_privacy_policy',

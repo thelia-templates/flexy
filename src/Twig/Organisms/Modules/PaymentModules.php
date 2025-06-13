@@ -28,21 +28,23 @@ class PaymentModules extends BaseFrontController
 {
     use ComponentToolsTrait;
     use DefaultActionTrait;
+
     #[LiveProp()]
     public ?array $modules = [];
 
     #[LiveProp(writable: true, onUpdated: 'setCartPaymentModuleId')]
-    public ?int $paymentModuleId = 3;
+    public ?int $paymentModuleId = null;
 
-    #[LiveProp(writable: true)]
+    #[LiveProp]
     public ?int $invoiceAddressId = null;
 
     public function __construct(
-        private readonly Session $session,
+        private readonly Session        $session,
         private readonly AddressService $addressService,
-        private readonly CartService $cartService,
-        private DataAccessService $dataAccessService,
-    ) {
+        private readonly CartService    $cartService,
+        private DataAccessService       $dataAccessService,
+    )
+    {
     }
 
     public function mount(): void
@@ -54,6 +56,9 @@ class PaymentModules extends BaseFrontController
     #[LiveAction]
     public function setCartPaymentModuleId(): void
     {
-        // $this->cartService->getCart()->setPaymentModuleId($this->paymentModuleId);
+        if ($this->paymentModuleId) {
+            $this->cartService->setPaymentModule($this->paymentModuleId);
+            $this->emit('resetCart');
+        }
     }
 }

@@ -12,27 +12,25 @@
 
 namespace FlexyBundle\Controller;
 
+use Exception;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Thelia\Action\RedirectException;
-use Thelia\Core\Event\Customer\CustomerLoginEvent;
-use Thelia\Core\Event\DefaultActionEvent;
 use Thelia\Core\Event\TheliaEvents;
-use Symfony\Component\HttpFoundation\Response;
-use Thelia\Core\Security\Authentication\CustomerUsernamePasswordFormAuthenticator;
-use Thelia\Core\Security\Exception\AuthenticationException;
+use Thelia\Core\HttpFoundation\Response;
+use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\Exception\CustomerNotConfirmedException;
 use Thelia\Core\Security\Exception\UsernameNotFoundException;
 use Thelia\Core\Security\Exception\WrongPasswordException;
+use Thelia\Core\Template\ParserContext;
 use Thelia\Form\CustomerLogin;
 use Thelia\Form\Exception\FormValidationException;
 use Thelia\Log\Tlog;
-use Thelia\Model\Base\Customer;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\Event\CustomerEvent;
+use Thelia\Service\Model\CustomerService;
 use Thelia\Tools\RememberMeTrait;
+use Thelia\Tools\URL;
 
 #[Route('/customer', name: 'customer_')]
 class CustomerController extends FlexyController
@@ -52,94 +50,70 @@ class CustomerController extends FlexyController
     }
 
     #[Route('/login', name: 'login_action', methods: ['POST'])]
-    public function loginAction(EventDispatcherInterface $eventDispatcher)
+    public function loginAction(
+        ParserContext            $parserContext,
+        CustomerService          $customerService,
+        EventDispatcherInterface $eventDispatcher
+    )
     {
-        if (!$this->getSecurityContext()->hasCustomerUser()) {
-            $request = $this->getRequest();
-            $customerLoginForm = $this->createForm(CustomerLogin::class);
+        if ($this->getSecurityContext()->hasCustomerUser()) {
+            return new RedirectResponse(URL::getInstance()->absoluteUrl('/'));
+        }
+
+        /** @var CustomerLogin $customerLoginForm */
+        $customerLoginForm = $this->createForm(CustomerLogin::class);
+
+        try {
+            $form = $this->validateForm($customerLoginForm, 'post');
+
+            if ($form->get('account')->getData() == 0 && $form->get('email')->getErrors()->count() == 0) {
+                return new RedirectResponse(URL::getInstance()->absoluteUrl('login'));
+            }
 
             try {
-                $form = $this->validateForm($customerLoginForm, 'post');
+                $customerService->login($customerLoginForm);
 
-                // If User is a new customer
-                if ($form->get('account')->getData() == 0 && $form->get('email')->getErrors()->count() == 0) {
-                    return $this->generateRedirectFromRoute(
-                        'customer.create.process',
-                        ['email' => $form->get('email')->getData()]
+                return $this->generateSuccessRedirect($customerLoginForm);
+            } catch (UsernameNotFoundException $e) {
+                $message = $this->getTranslator()->trans('Wrong email or password. Please try again');
+            } catch (WrongPasswordException $e) {
+                $message = $this->getTranslator()->trans('Wrong email or password. Please try again');
+            } catch (CustomerNotConfirmedException $e) {
+                if ($e->getUser() !== null) {
+                    // Send the confirmation email again
+                    $eventDispatcher->dispatch(
+                        new CustomerEvent($e->getUser()),
+                        TheliaEvents::SEND_ACCOUNT_CONFIRMATION_EMAIL
                     );
                 }
-                try {
-                    $authenticator = new CustomerUsernamePasswordFormAuthenticator($request, $customerLoginForm);
-
-                    /** @var Customer $customer */
-                    $customer = $authenticator->getAuthentifiedUser();
-
-                    $this->processLogin($eventDispatcher, $customer);
-
-                    if ((int) $form->get('remember_me')->getData() > 0) {
-                        $this->createRememberMeCookie(
-                            $customer,
-                            $this->getRememberMeCookieName(),
-                            $this->getRememberMeCookieExpiration()
-                        );
-                    }
-
-                    return $this->generateSuccessRedirect($customerLoginForm);
-                } catch (UsernameNotFoundException $e) {
-                    $message = $this->getTranslator()->trans(
-                        'Wrong email or password. Please try again',
-                        [],
-                    );
-                } catch (WrongPasswordException $e) {
-                    $message = $this->getTranslator()->trans(
-                        'Wrong email or password. Please try again',
-                        [],
-                    );
-                } catch (CustomerNotConfirmedException $e) {
-                    if ($e->getUser() !== null) {
-                        // Send the confirmation email again
-                        $eventDispatcher->dispatch(
-                            new CustomerEvent($e->getUser()),
-                            TheliaEvents::SEND_ACCOUNT_CONFIRMATION_EMAIL
-                        );
-                    }
-                    $message = $this->getTranslator()->trans(
-                        'Your account is not yet confirmed. A confirmation email has been sent to your email address, please check your mailbox',
-                        [],
-                    );
-                } catch (AuthenticationException $e) {
-                    $message = $this->getTranslator()->trans(
-                        'Wrong email or password. Please try again',
-                        [],
-                    );
-                }
-            } catch (FormValidationException $e) {
-                $message = $this->getTranslator()->trans(
-                    'Please check your input: %s',
-                    ['%s' => $e->getMessage()],
-                );
-            } catch (\Exception $e) {
-                $message = $this->getTranslator()->trans(
-                    'Sorry, an error occured: %s',
-                    ['%s' => $e->getMessage()],
-                );
+                $message = $this->getTranslator()->trans('Your account is not yet confirmed. A confirmation email has been sent to your email address, please check your mailbox');
             }
-
-            Tlog::getInstance()->error(
-                \sprintf(
-                    'Error during customer login process : %s. Exception was %s',
-                    $message,
-                    $e->getMessage()
-                )
+        } catch (FormValidationException $e) {
+            $message = $this->getTranslator()->trans(
+                'Please check your input: %s',
+                ['%s' => $e->getMessage()],
             );
+        } catch (Exception $e) {
+            $message = $this->getTranslator()->trans(
+                'Sorry, an error occured: %s',
+                ['%s' => $e->getMessage()],
+            );
+        }
 
-            $customerLoginForm->setErrorMessage($message);
+        Tlog::getInstance()->error(
+            \sprintf(
+                'Error during customer login process : %s. Exception was %s',
+                $message,
+                $e->getMessage()
+            )
+        );
 
-            $this->getParserContext()->addForm($customerLoginForm);
+        $customerLoginForm->setErrorMessage($message);
 
-            if ($customerLoginForm->hasErrorUrl()) {
-                return $this->generateErrorRedirect($customerLoginForm);
-            }
+        $parserContext->addForm($customerLoginForm);
+
+        if ($customerLoginForm->hasErrorUrl()) {
+            return $this->generateErrorRedirect($customerLoginForm);
         }
     }
 
@@ -150,7 +124,7 @@ class CustomerController extends FlexyController
     }
 
     #[Route('/register', name: 'register_create', methods: ['POST'])]
-    public function registerCreate(SessionInterface $session): RedirectResponse
+    public function registerCreate(Session $session): RedirectResponse
     {
         $form = $this->createForm('flexybundle_form_customer_register_form');
 
@@ -164,27 +138,25 @@ class CustomerController extends FlexyController
             $message = $this->translator->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
         }
 
-        Tlog::getInstance()->error(\sprintf('Error during address creation process : %s', $message));
+        Tlog::getInstance()->error(sprintf('Error during address creation process : %s', $message));
         $form->setErrorMessage($message);
 
         $this->parserContext
-          ->addForm($form)
-          ->setGeneralError($message);
+            ->addForm($form)
+            ->setGeneralError($message);
 
-        if ($form->hasErrorUrl()) {
-            return $this->generateErrorRedirect($form);
-        }
+        return $this->generateErrorRedirect($form);
     }
 
     #[Route('/informations', name: 'informations', methods: ['GET'])]
-    public function informations(SessionInterface $session): Response
+    public function informations(Session $session): Response|RedirectResponse
     {
         $registerData = $session->get('register_data');
 
-        // TODO BACK : vérifier si les données du form sont valides
-
         if (null === $registerData) {
-            throw new RedirectException($this->generateUrl('customer_register'));
+            $session->set('register_data', null);
+
+            return new RedirectResponse(URL::getInstance()->absoluteUrl('/customer/register'));
         }
 
         return $this->render(
@@ -196,69 +168,85 @@ class CustomerController extends FlexyController
     }
 
     #[Route('/informations', name: 'informations_create', methods: ['POST'])]
-    public function informationsCreate(EventDispatcherInterface $eventDispatcher): RedirectResponse
+    public function informationsCreate(CustomerService $customerService, Session $session): RedirectResponse
     {
         $form = $this->createForm('flexybundle_form_customer_informations_form');
 
         try {
             $this->validateForm($form, 'post');
 
-            // TODO BACK : Ajouter le customer en base sans adresse
+            $newCustomer = $customerService->createCustomerMinimal($form->getForm());
+
+            $session->set('register_data', null);
+
+            if (!ConfigQuery::isCustomerEmailConfirmationEnable() && $newCustomer->getEnable()) {
+                $customerService->processLogin($newCustomer);
+                return new RedirectResponse(URL::getInstance()->absoluteUrl(''));
+            }
+
+            return $this->generateSuccessRedirect($form);
+        } catch (FormValidationException|Exception $e) {
+            $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
+        }
+
+        $session->set('register_data', null);
+
+        Tlog::getInstance()->error(sprintf('Error during address creation process : %s', $message));
+        $form->setErrorMessage($message);
+
+        $this->getParserContext()
+            ->addForm($form)
+            ->setGeneralError($message);
+
+        return $this->generateErrorRedirect($form);
+    }
+
+    #[Route('/informations/update', name: 'information_update', methods: ['POST'])]
+    public function updateInformations(CustomerService $customerService): RedirectResponse
+    {
+        $form = $this->createForm('flexybundle_form_customer_informations_form');
+
+        try {
+            $customerService->updateCustomerMinimal($form->getForm());
 
             return $this->generateSuccessRedirect($form);
         } catch (FormValidationException $e) {
             $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
+        } catch (Exception $e) {
+            Tlog::getInstance()->error(sprintf('Error : %s', $e->getMessage()));
+            $message = $this->getTranslator()->trans('Critical error on customer informations update, check logs !');
         }
 
-        Tlog::getInstance()->error(\sprintf('Error during address creation process : %s', $message));
         $form->setErrorMessage($message);
 
         $this->getParserContext()
-          ->addForm($form)
-          ->setGeneralError($message);
+            ->addForm($form)
+            ->setGeneralError($message);
 
-        if ($form->hasErrorUrl()) {
-            return $this->generateErrorRedirect($form);
-        }
+        return $this->generateErrorRedirect($form);
     }
 
-    #[Route('/activation', name: 'activation', methods: ['GET'])]
-    public function activation(): Response
+    #[Route('/activation', name: 'show_activation', methods: ['GET'])]
+    public function showActivation(): Response
     {
         return $this->render('customer-activation');
     }
 
-    protected function processLogin(EventDispatcherInterface $eventDispatcher, Customer $customer): void
-    {
-        $eventDispatcher->dispatch(new CustomerLoginEvent($customer), TheliaEvents::CUSTOMER_LOGIN);
-    }
-
     #[Route('/logout', name: 'logout', methods: ['GET'])]
-    public function logout(EventDispatcherInterface $eventDispatcher)
+    public function logout(CustomerService $customerService): RedirectResponse
     {
-        if ($this->getSecurityContext()->hasCustomerUser()) {
-            $eventDispatcher->dispatch(new DefaultActionEvent(), TheliaEvents::CUSTOMER_LOGOUT);
+        if (!$this->getSecurityContext()->hasCustomerUser()) {
+            return new RedirectResponse(URL::getInstance()->absoluteUrl('/'));
         }
 
-        $this->clearRememberMeCookie($this->getRememberMeCookieName());
+        $customerService->logout();
 
-        // Redirect to home page
-        return $this->generateRedirect($this->generateUrl('index'));
+        return new RedirectResponse(URL::getInstance()->absoluteUrl('/'));
     }
 
     #[Route('/send-code', name: 'send_code', methods: ['GET'])]
     public function sendCode(): Response
     {
         dd('send code');
-    }
-
-    protected function getRememberMeCookieName()
-    {
-        return ConfigQuery::read('customer_remember_me_cookie_name', 'crmcn');
-    }
-
-    protected function getRememberMeCookieExpiration()
-    {
-        return ConfigQuery::read('customer_remember_me_cookie_expiration', 2592000 /* 1 month */);
     }
 }

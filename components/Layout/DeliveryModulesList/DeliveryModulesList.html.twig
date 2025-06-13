@@ -1,0 +1,23 @@
+<div class="my-5" {{attributes}}>
+    {% set noValidOptions = 0 %}
+    <ul class="flex flex-col gap-2">
+        {% for module in modules %}
+            {% for option in module.options|filter(option => option.valid) %}
+                <li>
+                    {% include '@components/Organisms/Card/DeliveryModule/DeliveryModule.html.twig' with {
+                        module: option,
+                        selected: deliveryModuleId == module.id,
+                        id: module.id
+                    } %}
+                </li>
+                {% set noValidOptions = noValidOptions+1 %}
+            {% endfor %}
+        {% endfor %}
+        {% if noValidOptions == 0 %}
+            {% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'No available carrier for your current address. Please choose an another one.'|trans, variant: 'warning', withIcon:true, size: "full"} %}
+            <button type="button" class="self-start Button Button--primary Button--medium" data-action="live#emit" data-live-event-param="hideDeliveryModuleView">
+                {{'Choose another address'|trans}}
+            </button>
+        {% endif %}
+    </ul>
+</div>

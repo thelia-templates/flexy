@@ -1,35 +1,37 @@
 <div class='flex flex-col gap-3.5 my-5'>
-	{% set modules = resources('/api/front/delivery_modules', {'by_code': 1}) %}
-	{% if modules.localPickup  is defined %}
-		{% include '@components/Organisms/Modules/StoreDelivery/StoreDelivery.html.twig' with {
-      name: 'delivery_method',
-      title: 'Store delivery'|trans,
-      date: '25/12',
-      address: {
-        address1: attr('config', 'store_address1'),
-        address2: attr('config', 'store_address2'),
-        address3: attr('config', 'store_address3'),
-        zipCode: attr('config', 'store_zipcode'),
-        city: attr('config', 'store_city')
-      },
-      selected : deliveryMode == 'store'
-    } %}
-	{% endif %}
-	{% if modules.pickup  is defined %}
-		{% set pickupServices = modules.pickup|map((pickup) => {name:pickup.i18ns.title, value: pickup.code, img: ''}) %}
-		{% include '@components/Organisms/Modules/PickupPointModule/PickupPointModule.html.twig' with {
-      title: 'Pick-up point'|trans,
-      pickupServices,
-      selected : deliveryMode == 'pickup'
-    } %}
-	{% endif %}
-
-	{% if modules.delivery  is defined %}
-		{% include '@components/Organisms/Modules/HomeDelivery/HomeDelivery.html.twig' with {
-      title: 'Home Delivery'|trans,
-      selected : deliveryMode == 'delivery'
-
-    } %}
-	{% endif %}
-
+    {% if (deliveryModules.hasDelivery or deliveryModules.hasPickup or deliveryModules.hasLocalPickup) %}
+        {% if deliveryModules.hasLocalPickup %}
+            {% include '@components/Organisms/Modules/StoreDelivery/StoreDelivery.html.twig' with {
+                name: 'delivery_method',
+                title: 'Store delivery'|trans,
+                date: '25/12',
+                address: {
+                    address1: attr('config', 'store_address1'),
+                    address2: attr('config', 'store_address2'),
+                    address3: attr('config', 'store_address3'),
+                    zipCode: attr('config', 'store_zipcode'),
+                    city: attr('config', 'store_city')
+                },
+                selected : deliveryMode == 'localPickup'
+            } %}
+        {% endif %}
+        {% if deliveryModules.hasPickup %}
+            {% set pickupServices = deliveryModules.pickup|map((pickup) => {name:pickup.i18ns.title, value: pickup.code, img: ''}) %}
+            {% include '@components/Organisms/Modules/PickupPointModule/PickupPointModule.html.twig' with {
+                title: 'Pick-up point'|trans,
+                pickupServices,
+                selected : deliveryMode == 'pickup'
+            } %}
+        {% endif %}
+        {% if deliveryModules.hasDelivery %}
+            {% include '@components/Organisms/Modules/HomeDelivery/HomeDelivery.html.twig' with {
+                title: 'Home Delivery'|trans,
+                selected : deliveryMode == 'delivery'
+            } %}
+        {% endif %}
+    {% else %}
+        <div class="alert alert-warning">
+            {{ "No delivery method is available for this order."|trans }}
+        </div>
+    {% endif %}
 </div>

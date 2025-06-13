@@ -44,6 +44,7 @@ class HomeDeliveryAddresses extends BaseFrontController
 
     #[LiveProp]
     public ?int $update = null;
+
     #[LiveProp]
     public bool $create = false;
 
@@ -58,9 +59,7 @@ class HomeDeliveryAddresses extends BaseFrontController
     {
         /** @var Customer $user */
         $user = $this->session->getCustomerUser();
-        $addresses = $user->getAddresses()?->toArray(null, false, TableMap::TYPE_CAMELNAME);
-
-        $this->addresses = $addresses;
+        $this->addresses = $user->getAddresses()?->toArray(null, false, TableMap::TYPE_CAMELNAME);
         $this->deliveryAddressId = $this->cartService->getCart()->getAddressDeliveryId();
         $this->invoiceAddressId = $this->cartService->getCart()->getAddressInvoiceId();
     }
@@ -82,14 +81,14 @@ class HomeDeliveryAddresses extends BaseFrontController
     #[LiveAction]
     public function setDeliveryOrderAddressId(): void
     {
-        $this->cartService->getCart()->setAddressDeliveryId($this->deliveryAddressId);
+        $this->cartService->setDeliveryAddress($this->deliveryAddressId);
         $this->emit('resetCart');
     }
 
     #[LiveAction]
     public function setInvoiceOrderAddressId(): void
     {
-        $this->cartService->getCart()->setAddressInvoiceId($this->invoiceAddressId);
+        $this->cartService->setInvoiceAddress($this->invoiceAddressId);
         $this->emit('resetCart');
     }
 

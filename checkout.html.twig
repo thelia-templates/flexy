@@ -21,7 +21,7 @@
 {% block body %}
 
 	{% include '@components/Layout/CheckoutSteps/CheckoutSteps.html.twig' with {steps: ["Your cart", "Delivery", "Payment", "Confirmation"], current: current} %}
-	{{ component('Flexy:Layout:Checkout', {page, step: current}) }}
+	{{ component('Flexy:Layout:Checkout', {page: page, step: current}) }}
 
 {% endblock %}
 {% block footer %}
