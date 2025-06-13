@@ -1,5 +1,7 @@
-<div class="col-span-full ProductPage-grid" {{attributes}}>
-
+<div class="col-span-full ProductPage-grid" {{ attributes.defaults(stimulus_controller('product')) }} data-product-current-pse-id-value="{{ currentPse.id }}">
+	<section id="gallery" class="ProductPage-gallery">
+		{% include '@components/Layout/ProductGallery/ProductGallery.html.twig' with {images : psesImgs} %}
+	</section>
 	<section id="infos" class="ProductPage-infos">
 		<h1 class="mb-3 h3">{{product.i18ns.title}}</h1>
 		{% if product.i18ns.chapo %}

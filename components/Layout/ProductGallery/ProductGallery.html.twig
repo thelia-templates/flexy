@@ -1,8 +1,8 @@
-<div class="ProductGallery" data-controller="gallery" data-gallery-current-pse-id-value="{{ currentPse.id }}">
+<div class="ProductGallery">
 	<ul class="ProductGallery-list">
 		{% for image in images %}
 			<li class="ProductGallery-item cursor-pointer{% if image.productSaleElementsId == currentPse.id  %} is-active{% endif %}">
-				<button type="button" {{ live_action('refreshForm', {pseId : image.productSaleElementsId} ) }}>
+				<button type="button" data-action="live#action" data-live-pse-id-param="{{image.productSaleElementsId}}" data-live-action-param="updateCurrentPseFromId" data-gallery-item="thumbnail">
 					{{getImages({
             'img_id': image.productImageId,
             'source_type': 'product',
@@ -16,12 +16,12 @@
 			</li>
 		{% endfor %}
 	</ul>
-	<div class="ProductGallery-main">
-		<section id="ProductGallery" class="splide" aria-label="{{"Product's visuals"|trans}}" data-count={{images|length}} data-gallery-target='root' data-live-ignore>
+	<div class="ProductGallery-main" data-live-ignore>
+		<section class="splide" aria-label="{{"Product's visuals"|trans}}" data-product-target='slider'>
 			<div class="splide__track">
 				<ul class="splide__list">
 					{% for image in images %}
-						<li class="splide__slide">
+						<li class="splide__slide" data-product-target="slide" data-pse-id="{{image.productSaleElementsId}}">
 							{{getImages({
                 'img_id': image.productImageId,
                 'source_type': 'product',

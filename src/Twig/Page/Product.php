@@ -12,8 +12,6 @@
 
 namespace FlexyBundle\Twig\Page;
 
-use FlexyBundle\Form\Type\FieldsetType;
-use FlexyBundle\Form\Type\PillType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -25,7 +23,6 @@ use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
-use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Form\Definition\FrontForm;
 use Thelia\Service\Model\CartService;
 use TwigEngine\Service\DataAccess\DataAccessService;
@@ -33,7 +30,7 @@ use TwigEngine\Service\DataAccess\ProductSaleElementsAccessService;
 use TwigEngine\Service\FormService;
 
 #[AsLiveComponent(template: '@components/Page/Product.html.twig')]
-class Product extends BaseFrontController
+class Product
 {
     use ComponentToolsTrait;
     use ComponentWithFormTrait;
@@ -45,7 +42,19 @@ class Product extends BaseFrontController
     #[ExposeInTemplate]
     public ?array $pses = [];
 
-    #[ExposeInTemplate]
+    #[LiveProp]
+    public ?array $psesImgs = [];
+
+    #[LiveProp]
+    public ?array $productImgs = [];
+
+    #[LiveProp]
+    public ?array $productAttrs = [];
+
+    #[LiveProp]
+    public ?array $currentCombination = [];
+
+    #[LiveProp]
     public ?array $currentPse = null;
 
     #[LiveProp]
@@ -61,41 +70,23 @@ class Product extends BaseFrontController
     ) {
     }
 
+    public function mount(array $product): void
+    {
+        $this->product = $product;
+        $this->productAttrs = $this->pseAccessService->attrAvByProduct($this->product['id']);
+        $this->setInitialCurrentPse();
+        $this->setImages();
+    }
+
     protected function instantiateForm(): FormInterface
     {
-        $productAttributes = $this->pseAccessService->attrAvByProduct($this->product['id']);
-        $form = $this->formService->getFormByName(FrontForm::CART_ADD, [
+        return $this->formService->getFormByName(FrontForm::CART_ADD, [
             'product' => $this->product['id'],
-            'product_sale_elements_id' => $this->getCurrentPse()['id'],
+            'product_sale_elements_id' => $this->currentPse['id'],
             'quantity' => 1,
             'append' => 1,
             'newness' => 0,
         ]);
-        $form->add(
-            'currentCombination',
-            FieldsetType::class,
-            [
-                'by_reference' => true,
-                'inherit_data' => true,
-            ]
-        );
-        foreach ($productAttributes as $attribute) {
-            $choices = [];
-            foreach ($attribute['values'] as $value) {
-                $choices[$value['label']] = $value['id'];
-            }
-            $form->get('currentCombination')->add($attribute['id'], PillType::class, [
-                'label' => $attribute['label'],
-                'choices' => $choices,
-                'data' => array_values(array_filter($choices, function ($choice) use (&$attribute) {
-                    return $choice === $this->getCurrentPse()['combination'][$attribute['id']];
-                }))[0],
-                'multiple' => false,
-                'required' => false,
-            ]);
-        }
-
-        return $form;
     }
 
     public function getPses(): array
@@ -107,40 +98,6 @@ class Product extends BaseFrontController
         $this->pses = json_decode($this->pseAccessService->psesByProduct($this->product['id']), true);
 
         return $this->pses;
-    }
-
-    #[LiveAction]
-    public function getCurrentPse()
-    {
-        $pses = $this->getPses();
-
-        if (0 === \count($pses)) {
-            return [];
-        }
-        $pseRef = $this->requestStack->getCurrentRequest()->query->get('ref');
-
-        if (null === $this->currentPse) {
-            $matchingPses = array_values(array_filter($pses, function ($pse) use (&$pseRef) {
-                return $pse['ref'] === $pseRef;
-            }));
-            if (!\count($matchingPses)) {
-                $matchingPses = array_values(array_filter($pses, function ($pse) {
-                    return $pse['isDefault'];
-                }));
-            }
-
-            $this->currentPse = $matchingPses[0];
-        } else {
-            foreach ($pses as $pse) {
-                if (isset($this->formValues['currentCombination']) && $pse['combination'] == $this->formValues['currentCombination']) {
-                    $this->currentPse = $pse;
-                    break;
-                }
-            }
-        }
-        $this->formValues['product_sale_elements_id'] = $this->currentPse['id'];
-
-        return $this->currentPse;
     }
 
     #[LiveAction]
@@ -156,6 +113,37 @@ class Product extends BaseFrontController
     }
 
     #[LiveAction]
+    public function updateCurrentPseFromId(#[LiveArg] int $pseId): void
+    {
+        $pses = array_values(array_filter($this->getPses(), function ($pse) use (&$pseId) {
+            return $pse['id'] === $pseId;
+        }));
+        $this->currentPse = $pses[0];
+        $this->currentCombination = $this->currentPse['combination'];
+        $this->formValues['product_sale_elements_id'] = $this->currentPse['id'];
+    }
+
+    #[LiveAction]
+    public function updateCurrentCombination(#[LiveArg] $attr, #[LiveArg] $value): void
+    {
+        $newCombination = $this->currentCombination;
+        $newCombination[$attr] = $value;
+
+        $this->currentCombination = $newCombination;
+
+        $this->updateCurrentPseFromCombination();
+    }
+
+    public function updateCurrentPseFromCombination(): void
+    {
+        $matchingCombinations = array_filter($this->getPses(), function ($pse) {
+            return $pse['combination'] === $this->currentCombination;
+        });
+        $this->currentPse = reset($matchingCombinations);
+        $this->formValues['product_sale_elements_id'] = $this->currentPse['id'];
+    }
+
+    #[LiveAction]
     public function save(): void
     {
         $this->submitForm();
@@ -168,5 +156,38 @@ class Product extends BaseFrontController
     #[LiveAction]
     public function restockingAlert(): void
     {
+    }
+
+    private function setInitialCurrentPse(): void
+    {
+        $pseRef = $this->requestStack->getCurrentRequest()?->query->get('ref');
+        $pses = $this->getPses();
+
+        $match = [];
+
+        if ($pseRef) {
+            $match = array_values(array_filter($pses, fn ($pse) => $pse['ref'] === $pseRef))[0] ?? null;
+        }
+
+        if (!$match) {
+            $match = array_values(array_filter($pses, fn ($pse) => $pse['isDefault'] ?? false))[0] ?? null;
+        }
+
+        if ($match) {
+            $this->currentPse = $match;
+            $this->currentCombination = $match['combination'];
+        }
+    }
+
+    private function setImages(): void
+    {
+        $pseIds = array_column($this->pses, 'id');
+
+        if (!empty($pseIds)) {
+            $this->psesImgs = $this->dataAccessService->resources(
+                '/api/front/product_sale_elements_product_image',
+                ['productSaleElementsId[]' => $pseIds]
+            );
+        }
     }
 }

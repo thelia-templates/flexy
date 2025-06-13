@@ -84,11 +84,13 @@
     .FilterPill {
       display: block;
       border: none;
-
+      width: 100%;
+      text-align: left;
       &:hover {
         background-color: white;
       }
-      &:has(:checked) {
+      &:has(:checked),
+      &.active {
         background-color: white;
         background-image: url('/assets/icons/checkmark.svg');
         background-repeat: no-repeat;

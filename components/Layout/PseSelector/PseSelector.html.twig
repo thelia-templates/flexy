@@ -20,7 +20,33 @@
 	<input type="hidden" name="{{ field_name(form.append) }}" value="{{ field_value(form.append) }}">
 	<input type="hidden" name="{{ field_name(form.newness) }}" value="{{ field_value(form.newness) }}">
 
-	{{ form_row(form.currentCombination) }}
+	{% if productAttrs|length %}
+		<fieldset>
+			<ul class="Fieldset-group">
+				{% for attr in productAttrs %}
+					<li>
+						<div class="FilterChoice FilterChoice--drawer" data-controller="drawer filter-choice">
+							<div class="FilterChoice-label" data-action="click->drawer#toggle" data-select-label="Colors" data-filter-choice-target="label">{{attr.label}}</div>
+							<div class="MobileDrawer sm:reset-drawer" data-drawer-target="drawer">
+								<div class="MobileDrawer-header lg:hidden">
+									<button class='MobileDrawer-close' type='button' data-action="drawer#close">{{ ux_icon("close") }}</button>
+								</div>
+								<ul class="FilterChoice-list">
+									{% for value in attr.values %}
+										<li>
+											<button type="button" class="FilterPill FilterPill--drawer {% if currentCombination[attr.id] == value.id %}active{% endif %}" data-action="filter-choice#updateLabel drawer#close live#action" data-live-action-param="updateCurrentCombination" data-live-attr-param="{{attr.id}}" data-live-value-param="{{value.id}}" data-filter-choice-label-param="{{value.label}}">{{value.label}}</button>
+										</li>
+									{% endfor %}
+								</ul>
+							</div>
+						</div>
+					</li>
+				{% endfor %}
+			</ul>
+		</fieldset>
+
+	{% endif %}
+
 
 	<div class="flex items-center gap-4">
 		<strong class="text-black h4">{{ currentPse.isPromo ? currentPse.promoPrice: currentPse.price }}

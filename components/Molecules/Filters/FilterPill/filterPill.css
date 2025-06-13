@@ -23,7 +23,8 @@
     margin-left: rem-convert(4px);
   }
 
-  &:has(:checked) {
+  &:has(:checked),
+  &.active {
     background-color: var(--theme-light);
     border: 1.5px solid var(--theme-medium);
     .FilterPill-iconClose {
