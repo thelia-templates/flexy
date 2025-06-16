@@ -4,27 +4,21 @@ import '@splidejs/splide/css/core';
 import { getComponent } from '@symfony/ux-live-component';
 
 class ProductController extends Controller {
-  static targets = ['slide', 'slider', 'thumbnail', 'thumblist'];
+  static targets = ['slide', 'slider', 'thumbnail', 'thumblist', 'productImg'];
 
   async initialize() {
     this.component = await getComponent(this.element);
 
     window.addEventListener('change:pse', (e) => {
-      let currentThumb = null;
-      let index = -1;
-      this.thumbnailTargets.forEach((thumb, i) => {
-        if (parseInt(thumb.dataset.pseId) === e.detail.pseId) {
-          currentThumb = thumb;
-          index = i;
-        }
-      });
+      let currentThumb = this.thumbnailTargets.find((thumb) =>
+        thumb.dataset.pseId?.split(',').includes(e.detail.pseId.toString())
+      );
 
       if (!currentThumb) {
-        this.fallbackImg();
-        return;
+        currentThumb = this.productImgTarget;
       }
 
-      this.goToSlide(currentThumb, index);
+      this.goToSlide(currentThumb);
     });
   }
 
@@ -43,17 +37,19 @@ class ProductController extends Controller {
     this.main = new Splide(this.sliderTarget, {
       pagination: false,
       destroy: this.slideTargets.length <= 1,
+      drag: false,
       breakpoints: {
         768: {
           pagination: true,
-          arrows: false
+          arrows: false,
+          drag: true
         }
       }
     });
 
-    this.thumbnailTargets.forEach((thumbnail, index) => {
+    this.thumbnailTargets.forEach((thumbnail) => {
       thumbnail.addEventListener('click', () => {
-        this.goToSlide(thumbnail, index);
+        this.goToSlide(thumbnail);
       });
     });
 
@@ -72,15 +68,15 @@ class ProductController extends Controller {
     this.manageActiveClass(index);
   }
 
-  goToSlide(thumbnail, index) {
-    this.main?.go(index);
-    this.manageActiveClass(index);
+  goToSlide(thumbnail) {
+    this.main?.go(parseInt(thumbnail.dataset.index));
+    this.manageActiveClass(thumbnail.dataset.index);
     this.scrollToCurrentThumbnail(thumbnail);
   }
 
   manageActiveClass(index) {
     this.thumbnailTargets.forEach((thumbnail, i) => {
-      thumbnail.parentNode.classList.toggle('is-active', index === i);
+      thumbnail.parentNode.classList.toggle('is-active', parseInt(index) === i);
     });
   }
 
@@ -90,7 +86,6 @@ class ProductController extends Controller {
       behavior: 'smooth'
     });
   }
-  fallbackImg() {}
 }
 
 export default ProductController;

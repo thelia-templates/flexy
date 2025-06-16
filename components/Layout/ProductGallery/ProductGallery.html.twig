@@ -3,9 +3,9 @@
 		<ul>
 			{% for image in images %}
 				<li class="ProductGallery-item cursor-pointer{% if loop.first  %} is-active{% endif %}">
-					<button type="button" data-product-target="thumbnail" {% if image.productSaleElementsId %} {{ live_action('updateCurrentPseFromId', {pseId: image.productSaleElementsId} ) }} data-pse-id="{{image.productSaleElementsId}}" {% endif %}>
+					<button type="button" data-product-target="thumbnail{% if image.isProductImg %} productImg{% endif %}" {% if image.pseIds|length %} {{ live_action('updateCurrentPseFromId', {pseIds: image.pseIds|join(',')} ) }} data-pse-id="{{image.pseIds|join(',')}}" {% endif %} data-index="{{loop.index - 1}}">
 						{{getImages({
-            'img_id': image.productImageId,
+            'img_id': image.id,
             'source_type': 'product',
             filters: 'default',
             'img_attrs': {
@@ -24,15 +24,14 @@
 			<div class="splide__track">
 				<ul class="splide__list">
 					{% for image in images %}
-						<li class="splide__slide" data-product-target="slide" data-pse-id="{{image.productSaleElementsId}}">
+						<li class="splide__slide" data-product-target="slide" data-pse-id="{{image.pseIds|length}}">
 							{{getImages({
-                'img_id': image.productImageId,
+                'img_id': image.id,
                 'source_type': 'product',
                 filters: 'default',
                 'img_attrs': {
-                  'class' : 'ProductGallery-thumbnail',
                   loading: 'lazy',
-                  'data-image-id': image.productImageId,
+                  'data-image-id': image.id,
                 },
                 placeholder: asset('dist/images/placeholder.webp')
               })|raw}}

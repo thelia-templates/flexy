@@ -26,7 +26,7 @@
 				{% for attr in productAttrs %}
 					<li>
 						<div class="FilterChoice FilterChoice--drawer" data-controller="drawer filter-choice">
-							<div class="FilterChoice-label" data-action="click->drawer#toggle" data-select-label="Colors" data-filter-choice-target="label">{{attr.label}}</div>
+							<div class="FilterChoice-label" data-action="click->drawer#toggle" data-select-label="{{attr.label}}" data-filter-choice-target="label">{{attr.label}}</div>
 							<div class="MobileDrawer sm:reset-drawer" data-drawer-target="drawer">
 								<div class="MobileDrawer-header lg:hidden">
 									<button class='MobileDrawer-close' type='button' data-action="drawer#close">{{ ux_icon("close") }}</button>

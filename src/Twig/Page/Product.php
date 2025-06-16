@@ -113,21 +113,19 @@ class Product
     }
 
     #[LiveAction]
-    public function updateCurrentPseFromId(#[LiveArg] ?string $pseId = null): void
+    public function updateCurrentPseFromId(#[LiveArg] ?string $pseIds = null): void
     {
-        if (!$pseId) {
+        if (!$pseIds) {
             return;
         }
 
-        $pses = array_values(array_filter($this->getPses(), function ($pse) use (&$pseId) {
-            return $pse['id'] == $pseId;
+        $pses = array_values(array_filter($this->getPses(), function ($pse) use (&$pseIds) {
+            return in_array($pse['id'], explode(',', $pseIds));
         }));
 
         $this->currentPse = $pses[0];
         $this->currentCombination = $this->currentPse['combination'];
         $this->formValues['product_sale_elements_id'] = $this->currentPse['id'];
-
-
     }
 
     #[LiveAction]
@@ -192,22 +190,38 @@ class Product
 
     private function setImages(): void
     {
-        $pseIds = array_column($this->pses, 'id');
 
-        if (!empty($pseIds)) {
-            $this->psesImgs = $this->dataAccessService->resources(
-                '/api/front/product_sale_elements_product_image',
-                ['productSaleElements.product.id' => $this->product['id']]
-            );
-        }
+        $imgs  = $this->dataAccessService->resources(
+            '/api/front/product_sale_elements_product_image',
+            ['productSaleElements.product.id' => $this->product['id']]
+        );
+
+        $this->psesImgs = $this->getUniquePseImg($imgs);
 
         $this->productImgs = $this->dataAccessService->resources(
             '/api/front/product_images',
             [
-              'not_in[id]' => array_column($this->psesImgs, 'productImageId'),
+              'not_in[id]' => array_column($this->psesImgs, 'id'),
               'product.id' => $this->product['id']
             ]
         );
 
+    }
+
+    private function getUniquePseImg(array $imgs): array
+    {
+        $grouped = array_reduce($imgs, function ($carry, $item) {
+            $imageId = $item['productImageId'];
+            $pseId = (string) $item['productSaleElementsId'];
+
+            if (!isset($carry[$imageId])) {
+                $carry[$imageId] = ['pseIds' => [], 'id' => $imageId];
+            }
+
+            $carry[$imageId]['pseIds'][] = $pseId;
+            return $carry;
+        }, []);
+
+        return array_values($grouped);
     }
 }
