@@ -29,7 +29,7 @@ use TwigEngine\Service\DataAccess\DataAccessService;
 use TwigEngine\Service\DataAccess\ProductSaleElementsAccessService;
 use TwigEngine\Service\FormService;
 
-#[AsLiveComponent(template: '@components/Page/Product.html.twig')]
+#[AsLiveComponent(template: '@components/Page/ProductPage.html.twig')]
 class Product
 {
     use ComponentToolsTrait;
@@ -113,14 +113,21 @@ class Product
     }
 
     #[LiveAction]
-    public function updateCurrentPseFromId(#[LiveArg] int $pseId): void
+    public function updateCurrentPseFromId(#[LiveArg] ?string $pseId = null): void
     {
+        if (!$pseId) {
+            return;
+        }
+
         $pses = array_values(array_filter($this->getPses(), function ($pse) use (&$pseId) {
-            return $pse['id'] === $pseId;
+            return $pse['id'] == $pseId;
         }));
+
         $this->currentPse = $pses[0];
         $this->currentCombination = $this->currentPse['combination'];
         $this->formValues['product_sale_elements_id'] = $this->currentPse['id'];
+
+
     }
 
     #[LiveAction]
@@ -141,6 +148,10 @@ class Product
         });
         $this->currentPse = reset($matchingCombinations);
         $this->formValues['product_sale_elements_id'] = $this->currentPse['id'];
+
+        $this->dispatchBrowserEvent('change:pse', [
+            'pseId' => $this->currentPse['id'],
+        ]);
     }
 
     #[LiveAction]
@@ -186,8 +197,17 @@ class Product
         if (!empty($pseIds)) {
             $this->psesImgs = $this->dataAccessService->resources(
                 '/api/front/product_sale_elements_product_image',
-                ['productSaleElementsId[]' => $pseIds]
+                ['productSaleElements.product.id' => $this->product['id']]
             );
         }
+
+        $this->productImgs = $this->dataAccessService->resources(
+            '/api/front/product_images',
+            [
+              'not_in[id]' => array_column($this->psesImgs, 'productImageId'),
+              'product.id' => $this->product['id']
+            ]
+        );
+
     }
 }

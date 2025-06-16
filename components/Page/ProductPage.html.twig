@@ -1,6 +1,8 @@
-<div class="col-span-full ProductPage-grid" {{ attributes.defaults(stimulus_controller('product')) }} data-product-current-pse-id-value="{{ currentPse.id }}">
+<div class="col-span-full ProductPage-grid" {{ attributes.defaults(stimulus_controller('product')) }}>
 	<section id="gallery" class="ProductPage-gallery">
-		{% include '@components/Layout/ProductGallery/ProductGallery.html.twig' with {images : psesImgs} %}
+		{% include '@components/Layout/ProductGallery/ProductGallery.html.twig' with {images : psesImgs|merge(productImgs|map(img => ({
+      productImageId: img.id
+    })))} %}
 	</section>
 	<section id="infos" class="ProductPage-infos">
 		<h1 class="mb-3 h3">{{product.i18ns.title}}</h1>

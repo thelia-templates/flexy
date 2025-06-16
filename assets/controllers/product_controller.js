@@ -4,67 +4,79 @@ import '@splidejs/splide/css/core';
 import { getComponent } from '@symfony/ux-live-component';
 
 class ProductController extends Controller {
-  static targets = ['slide', 'slider'];
-  static values = { currentPseId: Number };
+  static targets = ['slide', 'slider', 'thumbnail'];
 
   async initialize() {
     this.component = await getComponent(this.element);
+
+    window.addEventListener('change:pse', (e) => {
+      const index = this.thumbnailTargets.findIndex(
+        (slide) => parseInt(slide.dataset.pseId) === e.detail.pseId
+      );
+
+      if (index === -1) {
+        this.fallbackImg();
+        return;
+      }
+
+      this.goToSlide(index);
+    });
   }
 
   connect() {
-    console.log(this.sliderTarget);
-
-    if (!this.main) {
-      this.main = new Splide(this.sliderTarget, {
-        pagination: false,
-        destroy: this.slideTargets.length <= 1,
-        breakpoints: {
-          768: {
-            pagination: true,
-            arrows: false
-          }
-        }
-      });
-
-      this.main.mount();
-      console.log('test');
-
-      this.goToCurrentPse();
-
-      this.main.on('move', (index) => {
-        const slide = this.slideTargets.find((_, i) => i === index);
-
-        if (slide && parseInt(slide.dataset.pseId) !== this.currentPseIdValue) {
-          this.component.action('updateCurrentPseFromId', {
-            pseId: slide.dataset.pseId
-          });
-        }
-      });
-    }
+    this.initSlider();
   }
 
   disconnect() {
-    if (this.main) {
-      this.main.destroy();
-      this.main = null;
+    this.main?.destroy();
+    this.main = null;
+  }
+
+  initSlider() {
+    if (this.main || this.slideTargets.length <= 1) return;
+
+    this.main = new Splide(this.sliderTarget, {
+      pagination: false,
+      destroy: this.slideTargets.length <= 1,
+      breakpoints: {
+        768: {
+          pagination: true,
+          arrows: false
+        }
+      }
+    });
+
+    this.thumbnailTargets.forEach((thumbnail, index) => {
+      thumbnail.addEventListener('click', () => this.goToSlide(index));
+    });
+
+    this.main.mount();
+    this.main.on('moved', (index) => this.onSliderMove(index));
+  }
+
+  onSliderMove(index) {
+    const slide = this.slideTargets[index];
+    const pseId = slide?.dataset?.pseId;
+
+    if (pseId && parseInt(pseId) !== this.currentPseIdValue) {
+      this.component.action('updateCurrentPseFromId', { pseId });
     }
+
+    this.manageActiveClass(index);
   }
 
-  currentPseIdValueChanged() {
-    this.goToCurrentPse();
+  goToSlide(index) {
+    this.main?.go(index);
+    this.manageActiveClass(index);
   }
 
-  goToCurrentPse() {
-    if (!this.main || !this.hasCurrentPseIdValue) return;
-
-    const index = this.slideTargets.findIndex(
-      (slide) => parseInt(slide.dataset.pseId) === this.currentPseIdValue
-    );
-
-    if (index !== -1) {
-      this.main.go(index);
-    }
+  manageActiveClass(index) {
+    this.thumbnailTargets.forEach((thumbnail, i) => {
+      thumbnail.parentNode.classList.toggle('is-active', index === i);
+    });
   }
+
+  fallbackImg() {}
 }
 
 export default ProductController;
