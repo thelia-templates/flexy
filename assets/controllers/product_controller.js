@@ -4,22 +4,27 @@ import '@splidejs/splide/css/core';
 import { getComponent } from '@symfony/ux-live-component';
 
 class ProductController extends Controller {
-  static targets = ['slide', 'slider', 'thumbnail'];
+  static targets = ['slide', 'slider', 'thumbnail', 'thumblist'];
 
   async initialize() {
     this.component = await getComponent(this.element);
 
     window.addEventListener('change:pse', (e) => {
-      const index = this.thumbnailTargets.findIndex(
-        (slide) => parseInt(slide.dataset.pseId) === e.detail.pseId
-      );
+      let currentThumb = null;
+      let index = -1;
+      this.thumbnailTargets.forEach((thumb, i) => {
+        if (parseInt(thumb.dataset.pseId) === e.detail.pseId) {
+          currentThumb = thumb;
+          index = i;
+        }
+      });
 
-      if (index === -1) {
+      if (!currentThumb) {
         this.fallbackImg();
         return;
       }
 
-      this.goToSlide(index);
+      this.goToSlide(currentThumb, index);
     });
   }
 
@@ -47,7 +52,9 @@ class ProductController extends Controller {
     });
 
     this.thumbnailTargets.forEach((thumbnail, index) => {
-      thumbnail.addEventListener('click', () => this.goToSlide(index));
+      thumbnail.addEventListener('click', () => {
+        this.goToSlide(thumbnail, index);
+      });
     });
 
     this.main.mount();
@@ -65,9 +72,10 @@ class ProductController extends Controller {
     this.manageActiveClass(index);
   }
 
-  goToSlide(index) {
+  goToSlide(thumbnail, index) {
     this.main?.go(index);
     this.manageActiveClass(index);
+    this.scrollToCurrentThumbnail(thumbnail);
   }
 
   manageActiveClass(index) {
@@ -76,6 +84,12 @@ class ProductController extends Controller {
     });
   }
 
+  scrollToCurrentThumbnail(thumbnail) {
+    this.thumblistTarget.scrollTo({
+      top: thumbnail.offsetTop,
+      behavior: 'smooth'
+    });
+  }
   fallbackImg() {}
 }
 
