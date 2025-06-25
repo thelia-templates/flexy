@@ -33,8 +33,10 @@
 								</div>
 								<ul class="FilterChoice-list">
 									{% for value in attr.values %}
+										{% set indicator = replaceMerge(currentCombination,{ (attr.id): value.id }) %}
+										{% set isDisabled = pse.find(pse => pse.currentCombination == indicator) %}
 										<li>
-											<button type="button" class="FilterPill FilterPill--drawer {% if currentCombination[attr.id] == value.id %}active{% endif %}" data-action="filter-choice#updateLabel drawer#close live#action" data-live-action-param="updateCurrentCombination" data-live-attr-param="{{attr.id}}" data-live-value-param="{{value.id}}" data-filter-choice-label-param="{{value.label}}">{{value.label}}</button>
+											<button type="button" class="FilterPill FilterPill--drawer {% if currentCombination[attr.id] == value.id %}active{% endif %}" data-action="filter-choice#updateLabel drawer#close live#action" data-live-action-param="updateCurrentCombination" data-live-attr-param="{{attr.id}}" data-live-value-param="{{value.id}}" data-filter-choice-label-param="{{value.label}}" {% if isDisabled %} disabled {% endif %}>{{value.label}}</button>
 										</li>
 									{% endfor %}
 								</ul>
@@ -44,28 +46,17 @@
 				{% endfor %}
 			</ul>
 		</fieldset>
-
 	{% endif %}
-
-
 	<div class="flex items-center gap-4">
-		<strong class="text-black h4">{{ currentPse.isPromo ? currentPse.promoPrice: currentPse.price }}
-			€</strong>
+		<strong class="text-black h4">{{ currentPse.isPromo ? currentPse.promoPrice: currentPse.price }}€</strong>
 		{% if currentPse.isPromo %}
 			<span class="line-through paragraph-4">{{ currentPse.price }}
 				€</span>
 		{% endif %}
 	</div>
-
-
 	{% if currentPse.quantity == 0 %}
 		{% include '@components/Molecules/Button/Button.html.twig' with {text: 'Alert me', classes:'Button--large self-start', icon_right: 'bell', liveAction: 'restockingAlert'} %}
 	{% else %}
 		{% include '@components/Molecules/Button/QuantityButton.html.twig' with {value: field_value(form.quantity), classes:'Button--large', text:'Add to cart'|trans, icon:'cart', fill:true, inLiveComp: true, btnLiveAction: 'getQuantity',name:field_name(form.quantity) } %}
 	{% endif %}
-
-	{{ form_rest(form) }}
-
-	{{ form_errors(form) }}
-	{{ form_end(form) }}
-</div>
+	{{ form_rest(form) }}{{ form_errors(form) }}{{ form_end(form) }}</div>
