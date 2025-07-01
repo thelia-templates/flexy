@@ -4,9 +4,13 @@ class AddressCardController extends Controller {
   static outlets = ['modal'];
 
   openModal(e) {
-    console.log(this.findModal(e.currentTarget.id));
+    const modal = this.findModal(e.currentTarget.dataset.modal);
 
-    this.findModal(e.currentTarget.dataset.modal).toggle(e);
+    if (modal) {
+      modal.confirmTarget.href = e.currentTarget.dataset.confirm;
+
+      this.findModal(e.currentTarget.dataset.modal).open(e);
+    }
   }
 
   findModal(id) {

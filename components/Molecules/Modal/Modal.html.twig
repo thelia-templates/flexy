@@ -1,11 +1,11 @@
 {% set content = content|default('') %}
 {% set name = name|default('') %}
+{% set classes = classes|default(null) %}
+{% set props = props|default([]) %}
 
-<div id="{{ name }}" class="Modal" {{stimulus_controller('modal')}} data-address-card-target="modal">
-	<div class="Modal-content">
-		<button type="button" class="close-icon" aria-label="{{ name }}" data-action="modal#toggle">
-			{{ ux_icon('close') }}
-		</button>
-		{{ content }}
-	</div>
-</div>
+<dialog id="{{ name }}" class="Modal {{classes}}" data-controller="modal" {% for key,value in props %} {{ key }}="{{ value }}" {% endfor %}>
+	<button type="button" class="close-icon" aria-label="{{ name }}" data-action="modal#close" autofocus>
+		{{ ux_icon('close') }}
+	</button>
+	{{ content }}
+</dialog>

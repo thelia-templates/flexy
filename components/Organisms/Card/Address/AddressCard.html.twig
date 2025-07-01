@@ -3,7 +3,7 @@
 {% set purchaseFunnel = purchaseFunnel|default(false) %}
 {% set classes = classes|default('') %}
 
-<div class='AddressCard {% if selected %}selected{% endif %} {{ classes }}' {{stimulus_controller('address-card')}} data-address-card-modal-outlet=".Modal">
+<div class='AddressCard {% if selected %}selected{% endif %} {{ classes }}' {{stimulus_controller('address-card',{} ,{}, {'modal' : '.Modal' } )}}>
 	<div class='AddressCard-top'>
 		{% include '@components/Molecules/Favorite/Favorite.html.twig' with {text: 'Favourite'|trans, selected: address.isDefault, addressId : address.id} %}
 	</div>

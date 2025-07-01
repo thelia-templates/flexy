@@ -3,10 +3,15 @@ import { Controller } from '@hotwired/stimulus';
 class ModalController extends Controller {
   static targets = ['confirm'];
 
-  toggle({ currentTarget }) {
-    this.confirmTarget.href = currentTarget.dataset.confirm;
+  initialize() {
+    window.addEventListener('modal:open', () => this.open());
+  }
 
-    this.element.classList.toggle('show-modal');
+  open() {
+    this.element.showModal();
+  }
+  close() {
+    this.element.close();
   }
 }
 
