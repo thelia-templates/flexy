@@ -1,5 +1,15 @@
 <?php
 
+/*
+ * This file is part of the Thelia package.
+ * http://www.thelia.net
+ *
+ * (c) OpenStudio <info@thelia.net>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FlexyBundle\Twig;
 
 use FlexyBundle\Service\ProductSaleElementsService;
@@ -20,9 +30,8 @@ class FlexyBundleExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-          new TwigFunction('attributeAv', [$this, 'attributeAv']),
-          new TwigFunction('getCurrentCustomer', [$this, 'getCurrentCustomer']),
-          new TwigFunction('replaceMerge', [$this, 'replaceMerge']),
+            new TwigFunction('attributeAv', [$this, 'attributeAv']),
+            new TwigFunction('getCurrentCustomer', [$this, 'getCurrentCustomer']),
         ];
     }
 
@@ -36,11 +45,7 @@ class FlexyBundleExtension extends AbstractExtension
         if (null === $pse) {
             return [];
         }
-        return $this->pseService->getAttributesAvFromPse($pse);
-    }
 
-    public function replaceMerge(): array
-    {
-        dd('blamerob');
+        return $this->pseService->getAttributesAvFromPse($pse);
     }
 }

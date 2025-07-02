@@ -33,10 +33,9 @@
 								</div>
 								<ul class="FilterChoice-list">
 									{% for value in attr.values %}
-										{% set indicator = replaceMerge(currentCombination,{ (attr.id): value.id }) %}
-										{% set isDisabled = pse.find(pse => pse.currentCombination == indicator) %}
+										{% set available = this.isAvailableAttrValue({(attr.id): value.id}) %}
 										<li>
-											<button type="button" class="FilterPill FilterPill--drawer {% if currentCombination[attr.id] == value.id %}active{% endif %}" data-action="filter-choice#updateLabel drawer#close live#action" data-live-action-param="updateCurrentCombination" data-live-attr-param="{{attr.id}}" data-live-value-param="{{value.id}}" data-filter-choice-label-param="{{value.label}}" {% if isDisabled %} disabled {% endif %}>{{value.label}}</button>
+											<button type="button" class="FilterPill FilterPill--drawer {{currentCombination[attr.id] == value.id ? 'active' : ''}}" data-action="filter-choice#updateLabel drawer#close live#action" data-live-action-param="updateCurrentCombination" data-live-attr-param="{{attr.id}}" data-live-value-param="{{value.id}}" data-filter-choice-label-param="{{value.label}}" {% if not available %} disabled {% endif %}>{{value.label}}</button>
 										</li>
 									{% endfor %}
 								</ul>

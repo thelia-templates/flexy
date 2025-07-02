@@ -39,7 +39,7 @@
     margin-right: rem-convert(4px);
   }
 
-  &:has(:disabled) {
+  &:disabled {
     border-color: var(--grey-lighter);
     color: var(--grey-lighter);
     cursor: not-allowed;

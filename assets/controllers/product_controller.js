@@ -1,6 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 import Splide from '@splidejs/splide';
-import 'splide@js/splide/css/core';
+import '@splidejs/splide/css/core';
 import { getComponent } from '@symfony/ux-live-component';
 
 class ProductController extends Controller {

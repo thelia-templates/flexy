@@ -42,6 +42,9 @@ class Product
     #[ExposeInTemplate]
     public ?array $pses = [];
 
+    #[ExposeInTemplate]
+    public ?array $availablePses = [];
+
     #[LiveProp]
     public ?array $psesImgs = [];
 
@@ -120,7 +123,7 @@ class Product
         }
 
         $pses = array_values(array_filter($this->getPses(), function ($pse) use (&$pseIds) {
-            return in_array($pse['id'], explode(',', $pseIds));
+            return \in_array($pse['id'], explode(',', $pseIds));
         }));
 
         $this->currentPse = $pses[0];
@@ -162,11 +165,6 @@ class Product
         ]);
     }
 
-    #[LiveAction]
-    public function restockingAlert(): void
-    {
-    }
-
     private function setInitialCurrentPse(): void
     {
         $pseRef = $this->requestStack->getCurrentRequest()?->query->get('ref');
@@ -190,8 +188,7 @@ class Product
 
     private function setImages(): void
     {
-
-        $imgs  = $this->dataAccessService->resources(
+        $imgs = $this->dataAccessService->resources(
             '/api/front/product_sale_elements_product_image',
             ['productSaleElements.product.id' => $this->product['id']]
         );
@@ -201,11 +198,10 @@ class Product
         $this->productImgs = $this->dataAccessService->resources(
             '/api/front/product_images',
             [
-              'not_in[id]' => array_column($this->psesImgs, 'id'),
-              'product.id' => $this->product['id']
+                'not_in[id]' => array_column($this->psesImgs, 'id'),
+                'product.id' => $this->product['id'],
             ]
         );
-
     }
 
     private function getUniquePseImg(array $imgs): array
@@ -219,9 +215,20 @@ class Product
             }
 
             $carry[$imageId]['pseIds'][] = $pseId;
+
             return $carry;
         }, []);
 
         return array_values($grouped);
+    }
+
+    public function isAvailableAttrValue($variant): bool
+    {
+        $combination = array_replace($this->currentCombination, $variant);
+        $matchingPses = array_filter($this->getPses(), function ($pse) use (&$combination) {
+            return $pse['combination'] === $combination;
+        });
+
+        return \count($matchingPses) > 0;
     }
 }
