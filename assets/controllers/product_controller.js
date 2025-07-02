@@ -59,10 +59,12 @@ class ProductController extends Controller {
 
   onSliderMove(index) {
     const slide = this.slideTargets[index];
-    const pseId = slide?.dataset?.pseId;
+    const pseIds = slide?.dataset?.pseIds.split(',').map((p) => parseInt(p));
 
-    if (pseId && parseInt(pseId) !== this.currentPseIdValue) {
-      this.component.action('updateCurrentPseFromId', { pseId });
+    if (pseIds.length && !pseIds.includes(this.currentPseIdValue)) {
+      this.component.action('updateCurrentPseFromId', {
+        pseIds: slide?.dataset?.pseIds
+      });
     }
 
     this.manageActiveClass(index);
