@@ -11,30 +11,36 @@ use Twig\TwigFunction;
 
 class FlexyBundleExtension extends AbstractExtension
 {
-
-  public function __construct(
-    private ProductSaleElementsService $pseService,
-    public SecurityContext $securityContext,
-  ) {}
-
-  public function getFunctions(): array
-  {
-    return [
-      new TwigFunction('attributeAv', [$this, 'attributeAv']),
-      new TwigFunction('getCurrentCustomer', [$this, 'getCurrentCustomer']),
-    ];
-  }
-
-  public function getCurrentCustomer(): ?Customer
-  {
-    return $this->securityContext->getCustomerUser();
-  }
-
-  public function attributeAv(ProductSaleElements $pse): array
-  {
-    if (null === $pse) {
-      return [];
+    public function __construct(
+        private ProductSaleElementsService $pseService,
+        public SecurityContext $securityContext,
+    ) {
     }
-    return $this->pseService->getAttributesAvFromPse($pse);
-  }
+
+    public function getFunctions(): array
+    {
+        return [
+          new TwigFunction('attributeAv', [$this, 'attributeAv']),
+          new TwigFunction('getCurrentCustomer', [$this, 'getCurrentCustomer']),
+          new TwigFunction('replaceMerge', [$this, 'replaceMerge']),
+        ];
+    }
+
+    public function getCurrentCustomer(): ?Customer
+    {
+        return $this->securityContext->getCustomerUser();
+    }
+
+    public function attributeAv(ProductSaleElements $pse): array
+    {
+        if (null === $pse) {
+            return [];
+        }
+        return $this->pseService->getAttributesAvFromPse($pse);
+    }
+
+    public function replaceMerge(): array
+    {
+        dd('blamerob');
+    }
 }

@@ -1,27 +1,45 @@
-{% set images = resources('/api/front/product_images', {'product.id':productId}) %}
-{% if images %}
-	{% set imgId = images|last.id  %}
-{% endif %}
-<div class="ProductGallery" {{stimulus_controller('gallery')}}>
-	<ul class="ProductGallery-list">
-		{% for image in images %}
-			<li class="ProductGallery-item cursor-pointer{% if loop.index== 1 %} is-active{% endif %}">
-				<img class="ProductGallery-thumbnail" data-image-id="{{ image.id }}" src="{{ "/legacy-image-library/product_image_"~image.id~"/full/%5E*!92,92/0/default.webp"}}" loading="lazy" data-gallery-target="thumbnail" data-action="click->gallery#update" data-gallery-index-param="{{loop.index - 1}}"/>
-			</li>
-		{% endfor %}
-	</ul>
-	<div class="ProductGallery-main">
-		<section id="ProductGallery" class="splide" aria-label="{{"Product's visuals"|trans}}" data-count={{images|length}} data-gallery-target='root'>
+<div class="ProductGallery">
+	<div class="ProductGallery-list" data-product-target="thumblist">
+		<ul>
+			{% for image in images %}
+				<li class="ProductGallery-item cursor-pointer{% if loop.first  %} is-active{% endif %}">
+					<button type="button" data-product-target="thumbnail{% if image.isProductImg %} productImg{% endif %}" {% if image.pseIds|length %} {{ live_action('updateCurrentPseFromId', {pseIds: image.pseIds|join(',')} ) }} data-pse-id="{{image.pseIds|join(',')}}" {% endif %} data-index="{{loop.index - 1}}">
+						{{getImages({
+            'img_id': image.id,
+            'source_type': 'product',
+            filters: 'default',
+            'img_attrs': {
+              'class' : 'ProductGallery-thumbnail',
+              loading: 'lazy',
+            },
+            placeholder: asset('dist/images/placeholder.webp')
+          })|raw}}
+					</button>
+				</li>
+			{% endfor %}
+		</ul>
+	</div>
+	<div class="ProductGallery-main" data-live-ignore>
+		<section class="splide" aria-label="{{"Product's visuals"|trans}}" data-product-target='slider'>
 			<div class="splide__track">
 				<ul class="splide__list">
 					{% for image in images %}
-						<li class="splide__slide">
-							<img src="{{ image.id ? "/legacy-image-library/product_image_"~image.id~"/full/%5E*!594,594/0/default.webp" : "@assets/images/placeholder2.webp"}}" class="w-full" loading="lazy"/>
+						<li class="splide__slide" data-product-target="slide" data-pse-id="{{image.pseIds|length}}">
+							{{getImages({
+                'img_id': image.id,
+                'source_type': 'product',
+                filters: 'default',
+                'img_attrs': {
+                  loading: 'lazy',
+                  'data-image-id': image.id,
+                },
+                placeholder: asset('dist/images/placeholder.webp')
+              })|raw}}
 						</li>
 					{% endfor %}
 				</ul>
 			</div>
-			{% if images|length > 1 %}
+			{% if images|length %}
 				<div class="splide__arrows">
 					<button class="splide__arrow splide__arrow--prev">
 						{{ ux_icon('arrow-left') }}

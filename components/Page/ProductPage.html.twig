@@ -1,0 +1,29 @@
+<div class="col-span-full ProductPage-grid" {{ attributes.defaults(stimulus_controller('product')) }}>
+	<section id="gallery" class="ProductPage-gallery">
+		{% include '@components/Layout/ProductGallery/ProductGallery.html.twig' with {images : psesImgs|merge(productImgs|map(img => ({
+      id: img.id,
+      isProductImg : true
+    })))} %}
+	</section>
+	<section id="infos" class="ProductPage-infos">
+		<h1 class="mb-3 h3">{{product.i18ns.title}}</h1>
+		{% if product.i18ns.chapo %}
+			<div class="paragraph-3 text-grey">{{product.i18ns.chapo}}</div>
+		{% endif %}
+		{% include '@components/Layout/PseSelector/PseSelector.html.twig' with {currentPse} %}
+		<div class="mt-[30px]">
+			{% include '@components/Organisms/Reinsurance/Reinsurance.html.twig' with {data: [
+              {
+                strongText: 'Free delivery'|trans,
+                text: ' from 50€'|trans,
+                icon: 'reinsurance-delivery'
+              },
+              {
+                strongText: 'Shipping'|trans,
+                text: ' within 24 hours'|trans,
+                icon: 'reinsurance-shipping'
+              }
+            ]} %}
+		</div>
+	</section>
+</div>

@@ -3,6 +3,7 @@
   @screen md {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: 460px;
     gap: 20px;
     width: auto;
     margin: 0;
@@ -12,9 +13,8 @@
     display: flex;
     align-items: center;
     background-color: var(--white);
-    aspect-ratio: 1/1;
     grid-column: 1 /-1;
-
+    height: 100%;
     @screen lg {
       grid-column: 2 /7;
     }
@@ -22,29 +22,50 @@
 
   &-list {
     display: none;
-    flex-direction: column;
-    gap: 20px;
     display: none;
     position: absolute;
     left: 0;
     top: 0;
     transform: translate(calc(-100% - 1rem), 0);
     width: 54px;
+    margin-top: -20px;
+    scrollbar-width: none;
+    overflow: auto;
 
     @screen md {
-      display: flex;
+      display: block;
     }
 
     @screen lg {
-      position: static;
+      position: relative;
       width: auto;
       transform: none;
+    }
+    > ul {
+      display: flex;
+      flex-direction: column;
+    }
+    &:before,
+    &:after {
+      background: linear-gradient(#fff, 45%, transparent);
+      content: '';
+      display: block;
+      height: 20px;
+      position: sticky;
+      top: 0;
+      width: 100%;
+    }
+
+    &:after {
+      background: linear-gradient(180deg, transparent, 45%, #fff);
+      bottom: 0;
+      top: auto;
     }
   }
 
   &-item {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     width: 100%;
     border: 2px solid transparent;
@@ -120,6 +141,12 @@
         width: 24px;
         height: 12px;
       }
+    }
+
+    &__slide {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
 }
