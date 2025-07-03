@@ -39,8 +39,8 @@
 			{% set defaultPse = pse %}
 		{% endif %}
 	{% endfor %}
-	{% set price = defaultPse.productPrices|first.price ~ '€' %}
-	{% set promoPrice = defaultPse.productPrices|first.promoPrice ~ '€' %}
+	{% set price = defaultPse.productPrices|first.price|format_currency('EUR', locale: lang_code) %}
+	{% set promoPrice = defaultPse.productPrices|first.promoPrice|format_currency('EUR', locale: lang_code) %}
 
 	{% set isPromo = defaultPse ? defaultPse.promo|default(false) : false %}
 	{% set isNew = defaultPse ? defaultPse.newness|default(false) : false %}

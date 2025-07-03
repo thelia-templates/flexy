@@ -17,10 +17,10 @@
   & > span.icon {
     @apply w-5 h-5;
     &-left {
-      padding-right: rem-convert(6px);
+      margin-right: rem-convert(6px);
     }
     &-right {
-      padding-left: rem-convert(6px);
+      margin-left: rem-convert(6px);
     }
   }
 
@@ -47,12 +47,15 @@
     transform: scaleX(-1);
   }
 
-  &:not(.Button--minimal):not(.Button--secondary):not(.Button--error):not(.Button-quantity) {
+  &:not(.Button--minimal):not(.Button--secondary):not(.Button--error):not(
+      .Button-quantity
+    ) {
     &:hover:not(:focus):not(:disabled) {
       background: var(--grey-dark);
     }
   }
-  &:focus-visible, &:has(:focus-visible) {
+  &:focus-visible,
+  &:has(:focus-visible) {
     outline: var(--theme-medium) solid 2px;
   }
   &:disabled {
@@ -73,7 +76,8 @@
         color: var(--white);
       }
     }
-    &:focus-visible, &:has(:focus-visible){
+    &:focus-visible,
+    &:has(:focus-visible) {
       background: var(--white);
       border: transparent solid 1px;
       &:hover {
@@ -101,11 +105,12 @@
     }
     &:hover:not(:disabled) {
       color: var(--grey);
-      span{
+      span {
         color: var(--grey);
       }
     }
-    &:focus, &:focus:hover {
+    &:focus,
+    &:focus:hover {
       background: var(--theme-lightest);
       outline: none;
     }
@@ -123,7 +128,8 @@
     &:hover:not(:focus):not(:disabled) {
       background: var(--error-light);
     }
-    &:focus-visible, &:has(:focus-visible){
+    &:focus-visible,
+    &:has(:focus-visible) {
       outline: var(--error-dark) solid 2px;
     }
     &:disabled {
@@ -148,19 +154,20 @@
     border-radius: rem-convert(7px);
   }
   &--sharp {
-    border-radius:0;
+    border-radius: 0;
   }
 }
-
 
 .Button-quantity {
   input {
     -moz-appearance: textfield;
-    &::-webkit-outer-spin-button, &::-webkit-inner-spin-button {
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
-    &:focus,&:focus-visible {
+    &:focus,
+    &:focus-visible {
       --tw-ring-color: transparent;
       outline: 0;
     }
@@ -180,7 +187,8 @@
     padding-left: 3px;
     padding-right: 3px;
   }
-  &.disabled, &.disabled:hover {
+  &.disabled,
+  &.disabled:hover {
     cursor: default;
     background: var(--grey-lighter);
     input {
@@ -218,7 +226,8 @@
       }
     }
 
-    &.disabled, &.disabled:hover {
+    &.disabled,
+    &.disabled:hover {
       background: var(--white);
       color: var(--grey-lighter);
       border: var(--grey-lighter) solid 1px;
@@ -235,7 +244,7 @@
   height: rem-convert(48px);
   border-radius: 9999px;
   padding: 0;
-  gap:0;
+  gap: 0;
 
   &.Button--small {
     width: rem-convert(40px);
@@ -266,9 +275,8 @@
     position: relative;
     border-left: 1px solid var(--white);
     &:after {
-      content: "";
+      content: '';
       position: absolute;
-
     }
   }
   .Button-quantity {

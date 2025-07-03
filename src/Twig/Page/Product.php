@@ -63,6 +63,9 @@ class Product
     #[LiveProp]
     public ?array $initialFormData = null;
 
+    #[LiveProp]
+    public ?bool $noAvailablePse = false;
+
     public function __construct(
         private DataAccessService $dataAccessService,
         private ProductSaleElementsAccessService $pseAccessService,
@@ -122,13 +125,17 @@ class Product
             return;
         }
 
-        $pses = array_values(array_filter($this->getPses(), function ($pse) use (&$pseIds) {
-            return \in_array($pse['id'], explode(',', $pseIds));
-        }));
-
-        $this->currentPse = $pses[0];
-        $this->currentCombination = $this->currentPse['combination'];
-        $this->formValues['product_sale_elements_id'] = $this->currentPse['id'];
+        try {
+            $pses = array_values(array_filter($this->getPses(), function ($pse) use (&$pseIds) {
+                return \in_array($pse['id'], explode(',', $pseIds));
+            }));
+            $this->currentPse = $pses[0];
+            $this->currentCombination = $this->currentPse['combination'];
+            $this->formValues['product_sale_elements_id'] = $this->currentPse['id'];
+            $this->noAvailablePse = false;
+        } catch (\Throwable $th) {
+            $this->noAvailablePse = true;
+        }
     }
 
     #[LiveAction]
@@ -147,12 +154,18 @@ class Product
         $matchingCombinations = array_filter($this->getPses(), function ($pse) {
             return $pse['combination'] === $this->currentCombination;
         });
-        $this->currentPse = reset($matchingCombinations);
-        $this->formValues['product_sale_elements_id'] = $this->currentPse['id'];
 
-        $this->dispatchBrowserEvent('change:pse', [
-            'pseId' => $this->currentPse['id'],
-        ]);
+        try {
+            $this->currentPse = reset($matchingCombinations);
+            $this->formValues['product_sale_elements_id'] = $this->currentPse['id'];
+
+            $this->dispatchBrowserEvent('change:pse', [
+                'pseId' => $this->currentPse['id'],
+            ]);
+            $this->noAvailablePse = false;
+        } catch (\Throwable $th) {
+            $this->noAvailablePse = true;
+        }
     }
 
     #[LiveAction]

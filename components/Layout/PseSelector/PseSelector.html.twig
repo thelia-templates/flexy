@@ -13,7 +13,7 @@
 		{% include '@components/Molecules/OrderTag/OrderTag.html.twig' with { customText: currentPse.quantity > 0 ? 'In stock'|trans : 'Out of stock'|trans, variant: currentPse.quantity > 0 ?'success': 'error', type: 'minimal' } %}
 	</div>
 	{% if currentPse.quantity == 0 %}
-		{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'Unavailable product'|trans, variant: 'warning', withIcon:true, size: "full"} %}
+		{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'This product combination is currently out of stock.'|trans, variant: 'warning', withIcon:true, size: "full"} %}
 	{% endif %}
 	<input type="hidden" name="{{ field_name(form.product) }}" value="{{ field_value(form.product) }}">
 	<input type="hidden" name="{{ field_name(form.product_sale_elements_id) }}" value="{{ field_value(form.product_sale_elements_id) }}">
@@ -33,7 +33,8 @@
 								</div>
 								<ul class="FilterChoice-list">
 									{% for value in attr.values %}
-										{% set available = this.isAvailableAttrValue({(attr.id): value.id}) %}
+										{# {% set available = this.isAvailableAttrValue({(attr.id): value.id}) %} #}
+										{% set available = true %}
 										<li>
 											<button type="button" class="FilterPill FilterPill--drawer {{currentCombination[attr.id] == value.id ? 'active' : ''}}" data-action="filter-choice#updateLabel drawer#close live#action" data-live-action-param="updateCurrentCombination" data-live-attr-param="{{attr.id}}" data-live-value-param="{{value.id}}" data-filter-choice-label-param="{{value.label}}" {% if not available %} disabled {% endif %}>{{value.label}}</button>
 										</li>
@@ -46,16 +47,22 @@
 			</ul>
 		</fieldset>
 	{% endif %}
-	<div class="flex items-center gap-4">
-		{% set mainPrice = currentPse.isPromo ? currentPse.promoPrice: currentPse.price %}
-		<strong class="text-black h4">{{mainPrice|format_currency('EUR', locale: lang_code)}}</strong>
-		{% if currentPse.isPromo %}
-			<span class="line-through paragraph-4">{{ currentPse.price|format_currency('EUR', locale: lang_code) }}</span>
-		{% endif %}
-	</div>
-	{% if currentPse.quantity == 0 %}
-		{% include '@components/Molecules/Button/Button.html.twig' with {text: 'Alert me', classes:'Button--large self-start', icon_right: 'bell', liveAction: 'restockingAlert'} %}
+
+	{% if noAvailablePse %}
+		{% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {text: 'This product combination is not available'|trans, variant: 'warning', withIcon:true, size: "full"} %}
+		<input type="hidden" name="{{ field_name(form.quantity) }}" value="{{ field_value(form.quantity) }}">
 	{% else %}
-		{% include '@components/Molecules/Button/QuantityButton.html.twig' with {value: field_value(form.quantity), classes:'Button--large', text:'Add to cart'|trans, icon:'cart', fill:true, inLiveComp: true, btnLiveAction: 'getQuantity',name:field_name(form.quantity) } %}
+		{% if currentPse.quantity  %}
+			<div class="flex items-center gap-4">
+				{% set mainPrice = currentPse.isPromo ? currentPse.promoPrice: currentPse.price %}
+				<strong class="text-black h4">{{mainPrice|format_currency('EUR', locale: lang_code)}}</strong>
+				{% if currentPse.isPromo %}
+					<span class="line-through paragraph-4">{{ currentPse.price|format_currency('EUR', locale: lang_code) }}</span>
+				{% endif %}
+			</div>
+			{% include '@components/Molecules/Button/QuantityButton.html.twig' with {value: field_value(form.quantity), classes:'Button--large', text:'Add to cart'|trans, icon:'cart', fill:true, inLiveComp: true, btnLiveAction: 'getQuantity',name:field_name(form.quantity) } %}
+		{% else %}
+			<input type="hidden" name="{{ field_name(form.quantity) }}" value="{{ field_value(form.quantity) }}">
+		{% endif %}
 	{% endif %}
 	{{ form_rest(form) }}{{ form_errors(form) }}{{ form_end(form) }}</div>
