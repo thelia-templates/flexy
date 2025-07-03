@@ -49,9 +49,9 @@
 
 				{% include '@components/Organisms/SummaryCard/SummaryCard.html.twig' with {
           nbArticles: order.orderProducts|length,
-          subTotal: order.totalAmountWithoutTaxes|format_currency('EUR', locale: 'fr'),
-          total: order.totalAmountWithTaxesAfterDiscount|format_currency('EUR', locale: 'fr'),
-          tax: (order.totalAmount  - order.totalAmountWithoutTaxes)|format_currency('EUR', locale: 'fr'),
+          subTotal: order.totalAmountWithoutTaxes|format_currency('EUR', locale: lang_code),
+          total: order.totalAmountWithTaxesAfterDiscount|format_currency('EUR', locale: lang_code),
+          tax: (order.totalAmount  - order.totalAmountWithoutTaxes)|format_currency('EUR', locale: lang_code),
           delivery: order.postage + order.postageTax,
           noGiftCard: true,
           noPromo: true} %}

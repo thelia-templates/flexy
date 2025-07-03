@@ -30,9 +30,9 @@
 				<h2 class='text-black h3'>{{ 'Summary'|trans }}</h2>
 				{% include '@components/Organisms/SummaryCard/SummaryCard.html.twig' with {
         totalItems: summary.item_count,
-        subTotal: summary.total_price_without_discount|format_currency('EUR', locale: 'fr'),
-        total: summary.total_taxed_price|format_currency('EUR', locale: 'fr'),
-        tax: summary.total_tax_amount|format_currency('EUR', locale: 'fr'),
+        subTotal: summary.total_price_without_discount|format_currency('EUR', locale: lang_code),
+        total: summary.total_taxed_price|format_currency('EUR', locale: lang_code),
+        tax: summary.total_tax_amount|format_currency('EUR', locale: lang_code),
       } %}
 
 				{% include '@components/Layout/Checkout/NextButton.html.twig' with {page, totalItems:summary.item_count} %}

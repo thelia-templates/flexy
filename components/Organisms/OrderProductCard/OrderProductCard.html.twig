@@ -40,11 +40,11 @@
 			</div>
 			{% if isPromo %}
 				<div class="OrderProductCard-footerRight">
-					<div class="OrderProductCard-price">{{ promoPrice|format_currency('EUR', locale: 'fr') }}</div>
-					<div class="OrderProductCard-originalPrice">{{ price|format_currency('EUR', locale: 'fr') }}</div>
+					<div class="OrderProductCard-price">{{ promoPrice|format_currency('EUR', locale: lang_code) }}</div>
+					<div class="OrderProductCard-originalPrice">{{ price|format_currency('EUR', locale: lang_code) }}</div>
 				</div>
 			{% else %}
-				<div class="OrderProductCard-price">{{ price|format_currency('EUR', locale: 'fr') }}</div>
+				<div class="OrderProductCard-price">{{ price|format_currency('EUR', locale: lang_code) }}</div>
 			{% endif %}
 		</div>
 	</div>

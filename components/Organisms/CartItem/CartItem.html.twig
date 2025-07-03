@@ -67,11 +67,11 @@
 					<div class="CartItem-footer">
 						{% if cartItem.promo %}
 							<div class="CartItem-footerRight">
-								<div class="CartItem-price">{{ cartItem.promoPrice|format_currency('EUR', locale: 'fr') }}</div>
-								<div class="CartItem-originalPrice">{{ cartItem.price|format_currency('EUR', locale: 'fr') }}</div>
+								<div class="CartItem-price">{{ cartItem.promoPrice|format_currency('EUR', locale: lang_code) }}</div>
+								<div class="CartItem-originalPrice">{{ cartItem.price|format_currency('EUR', locale: lang_code) }}</div>
 							</div>
 						{% else %}
-							<div class="CartItem-price">{{ cartItem.price|format_currency('EUR', locale: 'fr') }}</div>
+							<div class="CartItem-price">{{ cartItem.price|format_currency('EUR', locale: lang_code) }}</div>
 						{% endif %}
 
 

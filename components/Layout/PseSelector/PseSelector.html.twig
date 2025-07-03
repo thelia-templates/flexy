@@ -47,10 +47,10 @@
 		</fieldset>
 	{% endif %}
 	<div class="flex items-center gap-4">
-		<strong class="text-black h4">{{ currentPse.isPromo ? currentPse.promoPrice: currentPse.price }}€</strong>
+		{% set mainPrice = currentPse.isPromo ? currentPse.promoPrice: currentPse.price %}
+		<strong class="text-black h4">{{mainPrice|format_currency('EUR', locale: lang_code)}}</strong>
 		{% if currentPse.isPromo %}
-			<span class="line-through paragraph-4">{{ currentPse.price }}
-				€</span>
+			<span class="line-through paragraph-4">{{ currentPse.price|format_currency('EUR', locale: lang_code) }}</span>
 		{% endif %}
 	</div>
 	{% if currentPse.quantity == 0 %}
