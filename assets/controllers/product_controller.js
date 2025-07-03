@@ -6,6 +6,10 @@ import { getComponent } from '@symfony/ux-live-component';
 class ProductController extends Controller {
   static targets = ['slide', 'slider', 'thumbnail', 'thumblist', 'productImg'];
 
+  static values = {
+    currentPseId: Number
+  };
+
   async initialize() {
     this.component = await getComponent(this.element);
 

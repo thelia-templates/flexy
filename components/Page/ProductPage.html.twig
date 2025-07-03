@@ -1,4 +1,4 @@
-<div class="col-span-full ProductPage-grid" {{ attributes.defaults(stimulus_controller('product')) }}>
+<div class="col-span-full ProductPage-grid" {{ attributes.defaults(stimulus_controller('product')) }} data-product-current-pse-id-value="{{currentPse.id}}">
 	<section id="gallery" class="ProductPage-gallery">
 		{% include '@components/Layout/ProductGallery/ProductGallery.html.twig' with {images : psesImgs|merge(productImgs|map(img => ({
       id: img.id,
