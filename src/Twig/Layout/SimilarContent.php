@@ -39,7 +39,7 @@ class SimilarContent
 
         return array_map(function ($item) {
             return [
-                'title' => $item['i18ns']['title'],
+                'title' => $item['i18ns']['title'] ?? '',
                 'date' => $item['createdAt'],
                 'url' => $item['publicUrl'],
             ];
