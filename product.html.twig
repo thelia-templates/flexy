@@ -25,34 +25,37 @@
 				{{ component('Flexy:Page:Product', {product}) }}
 
 				<section id="description" class="ProductPage-description">
-					{% set descriptionContent %}
-					<p>toto 2</p>
-					{% endset %}
 
-					{% include '@components/Molecules/Accordion/Accordion.html.twig' with {
+					{% if product.i18ns.description %}
+						{% set descriptionContent %}
+						<div>{{product.i18ns.description|raw}}</div>
+						{% endset %}
+
+						{% include '@components/Molecules/Accordion/Accordion.html.twig' with {
             title: 'Description'|trans,
             content: descriptionContent,
             iconPlus: "plus",
             iconMinus: "minus",
+            open: true,
           } %}
+					{% endif %}
+
+					{% set featuresContent %}
+					{% for featuresProduct in product.featureProducts %}
+						<dl class="flex gap-2">
+							<dt>{{featuresProduct.feature.i18ns.title}}
+								:
+							</dt>
+							<dd>{{featuresProduct.featureAv.i18ns.title}}</dd>
+						</dl>
+					{% endfor %}
+					{% endset %}
 					{% include '@components/Molecules/Accordion/Accordion.html.twig' with {
-            title: 'Features'|trans,
-            content: "tata",
-            iconPlus: "plus",
-            iconMinus: "minus",
-          } %}
-					{% include '@components/Molecules/Accordion/Accordion.html.twig' with {
-            title: 'Shipping & Returns'|trans,
-            content: "",
-            iconPlus: "plus",
-            iconMinus: "minus",
-          } %}
-					{% include '@components/Molecules/Accordion/Accordion.html.twig' with {
-            title: 'Verified Reviews'|trans,
-            content: "",
-            iconPlus: "plus",
-            iconMinus: "minus",
-          } %}
+              title: 'Features'|trans,
+              content: featuresContent,
+              iconPlus: "plus",
+              iconMinus: "minus",
+            } %}
 				</section>
 			</div>
 		</div>
