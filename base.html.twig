@@ -1,7 +1,7 @@
 {% set breadcrumb = SEOneBreadcrumb() %}
 
 <!DOCTYPE html>
-<html>
+<html lang="{{ lang_code }}">
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -16,11 +16,15 @@
 		{% block breadcrumb_json %}
 			{{SEOneBreadcrumbJsonLd(breadcrumb)|raw}}
 		{% endblock %}
+
 		<link rel="icon" type=" image/png" href="{{asset("dist/favicons/favicon-96x96.png")}} " sizes=" 96x96"/>
 		<link rel="icon" type=" image/svg+xml" href="{{asset("dist/favicons/favicon.svg")}}"/>
 		<link rel="shortcut icon" href="{{asset('dist/favicons/favicon.ico')}}"/>
 		<link rel="apple-touch-icon" sizes=" 180x180" href="{{asset(" dist/favicons/apple-touch-icon.png")}} "/>
 		<link rel="manifest" href="{{asset("dist/favicons/site.webmanifest")}}"/>
+    {% block hreflang %}
+      {{SEOneHreflang()|raw}}
+    {% endblock %}
 		{% block stylesheets %}
 			{{ encore_entry_link_tags('app') }}
 		{% endblock %}
@@ -34,12 +38,11 @@
 			{% include '@components/Layout/Header/Header.html.twig' %}
 		{% endblock %}
 
-		<main {% block stimulus_controller %} {% endblock %}> {% block body %}{% endblock %}
-			</main>
+		<main {% block stimulus_controller %} {% endblock %}> {% block body %}{% endblock %}</main>
 
-			{% block footer %}
-				{% include '@components/Layout/Footer/Footer.html.twig' %}
-			{% endblock %}
+    {% block footer %}
+      {% include '@components/Layout/Footer/Footer.html.twig' %}
+    {% endblock %}
 
 			{% block modals %}{% endblock %}
 		</body>

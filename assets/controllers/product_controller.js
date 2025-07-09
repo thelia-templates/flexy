@@ -36,7 +36,6 @@ class ProductController extends Controller {
   }
 
   initSlider() {
-    if (this.main || this.slideTargets.length <= 1) return;
 
     this.main = new Splide(this.sliderTarget, {
       pagination: false,

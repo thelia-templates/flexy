@@ -1,9 +1,10 @@
 .ProductGallery {
+  --height : 460px;
   position: relative;
   @screen md {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: 460px;
+    grid-template-rows: var(--height);
     gap: 20px;
     width: auto;
     margin: 0;
@@ -21,7 +22,6 @@
   }
 
   &-list {
-    display: none;
     display: none;
     position: absolute;
     left: 0;
@@ -88,6 +88,12 @@
 
   .splide {
     position: static;
+    max-height: 100%;
+    width: 100%;
+
+    img {
+      max-height: var(--height);
+    }
 
     &__pagination {
       position: absolute;

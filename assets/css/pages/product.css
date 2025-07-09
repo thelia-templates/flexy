@@ -23,7 +23,6 @@
       grid-template-rows: auto auto;
       grid-template-columns: repeat(12, 1fr);
       gap: 46px 54px;
-      margin-bottom: 90px;
     }
     @screen xl {
       gap: 16px 20px;
