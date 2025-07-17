@@ -14,9 +14,11 @@ namespace FlexyBundle\Twig\Layout;
 
 use FlexyBundle\Form\Type\FieldsetType;
 use FlexyBundle\Form\Type\FilterChoiceType;
+use FlexyBundle\Form\Type\RangeGroupType;
 use FlexyBundle\Form\Type\SelectChoiceType;
 use FlexyBundle\Form\Type\SortChoiceType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -28,8 +30,8 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 use TwigEngine\Service\DataAccess\DataAccessService;
 
-#[AsLiveComponent(template: '@components/Layout/CategoryProducts/CategoryProducts.html.twig')]
-class CategoryProducts extends AbstractController
+#[AsLiveComponent(template: '@components/Layout/CategoryFilters/CategoryFilters.html.twig')]
+class CategoryFilters extends AbstractController
 {
     use ComponentWithFormTrait;
     use DefaultActionTrait;
@@ -47,6 +49,7 @@ class CategoryProducts extends AbstractController
         ],
     ];
 
+    public const RANGE_SUB_INPUTS = ['min','max'];
     public const ITEMS_PER_PAGE = 12;
 
     #[LiveProp]
@@ -62,7 +65,7 @@ class CategoryProducts extends AbstractController
     public ?array $products = [];
 
     #[ExposeInTemplate]
-    public ?array $filters = [];
+    public ?array $filters = null;
 
     #[ExposeInTemplate]
     public ?array $sorts = [];
@@ -70,7 +73,7 @@ class CategoryProducts extends AbstractController
     #[ExposeInTemplate]
     public ?array $sourceData = [];
 
-    public function __construct(private DataAccessService $dataAccessService, private RequestStack $requestStack)
+    public function __construct(readonly private DataAccessService $dataAccessService, readonly private RequestStack $requestStack)
     {
     }
 
@@ -80,7 +83,6 @@ class CategoryProducts extends AbstractController
         $this->page = $initialPage;
         $this->sourceData = $sourceData;
         $tfilters = $this->requestStack->getCurrentRequest()->get('tfilters');
-
         if (\is_array($tfilters) && \count($tfilters) > 0) {
             $this->tfilters = $tfilters;
         }
@@ -143,15 +145,19 @@ class CategoryProducts extends AbstractController
                     ],
                 ]
             ));
-
             foreach ($this->getFilters() as $filter) {
-                $values = [];
+
+              $fieldName = 'tfilters_'.$filter['type'];
+              $values = [];
+
+                if($filter['inputType'] === 'range') {
+                  $this->addRangeInput($filter, $formBuilder->get('tfilters'));
+                  continue;
+                }
 
                 foreach ($filter['values'] as $value) {
                     $values[$value['title']] = $value['id'];
                 }
-
-                $fieldName = 'tfilters_'.$filter['type'];
 
                 if ($filter['id']) {
                     $fieldName .= '_'.$filter['id'];
@@ -187,11 +193,10 @@ class CategoryProducts extends AbstractController
             $this->tfilters = $this->normalizeFormDataToFilters($this->getForm()->getData());
         }
 
-        $filters = $this->tfilters;
-        $filters['category'] = $this->categoryId;
+        $this->tfilters = array_merge($this->tfilters, ['category' => $this->categoryId]);
 
         $request = $this->dataAccessService->resources('/api/front/products', [
-            'tfilters' => $filters,
+            'tfilters' => $this->tfilters,
             'itemsPerPage' => self::ITEMS_PER_PAGE,
             'page' => $this->page,
             'category_depth' => 3,
@@ -202,9 +207,8 @@ class CategoryProducts extends AbstractController
     public function getFilters(): array
     {
         $this->filters = $this->dataAccessService->resources('/api/front/tfilters/products', [
-            'tfilters[categories]' => $this->categoryId,
+            'tfilters[category]' => $this->categoryId,
         ]);
-
         return $this->filters;
     }
 
@@ -237,4 +241,39 @@ class CategoryProducts extends AbstractController
 
         return $filters;
     }
+
+  private function addRangeInput( array $filter, $fieldset) : void
+  {
+    $groupName = 'tfilters_'.$filter['type'].'_'. $filter['id'];
+    $fieldset->add($fieldset->create(
+      $groupName,
+      RangeGroupType::class,
+      [
+        'by_reference' => false,
+        'label' => $filter['title'],
+        'inherit_data' => false,
+        'mapped' => true
+      ]
+    ));
+
+    $min =  min(array_column($filter['values'], 'title'));
+    $max =  max(array_column($filter['values'], 'title'));
+    foreach (self::RANGE_SUB_INPUTS as $range) {
+      $fieldset->get($groupName)->add(
+        $range,
+        RangeType::class,
+        [
+          'attr' => [
+            'min' => $min,
+            'max' => $max,
+            'step' => 10,
+            'data-range-target' => $range,
+            'data-action' => 'range#updateInput'
+          ],
+          'label' => $range,
+          'property_path' => '[' . $range . ']'
+        ]
+      );
+    }
+  }
 }

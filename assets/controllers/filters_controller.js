@@ -14,7 +14,8 @@ class FiltersController extends Controller {
     this.component.action('save', { order: e.target.value });
   }
   resetForm() {
-    this.component.action('save', { reset: true });
+    const event = new CustomEvent("live:form:reset");
+    this.component.action('save', { reset: true }).then(() => window.dispatchEvent(event));
   }
 }
 

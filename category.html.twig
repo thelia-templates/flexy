@@ -13,7 +13,7 @@
 
 {% block body %}
 	{% include '@components/Layout/Subheader/Category/SubheaderCategory.html.twig' with {title: attr('category', 'title'), description: attr('category', 'chapo'), nbProducts: 9, breadcrumb}  %}
-	{{ component('Flexy:Layout:CategoryProducts', {initialCategoryId: categoryId, initialPage: page, sourceData : {
+	{{ component('Flexy:Layout:CategoryFilters', {initialCategoryId: categoryId, initialPage: page, sourceData : {
       title: category.i18ns.title|default(null),
       chapo: category.i18ns.chapo|default(null),
       description: category.i18ns.description|default(null)

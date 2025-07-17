@@ -96,8 +96,6 @@
 		{{ block('form_widget_simple') }}
 		{{ form_errors(form) }}
 	{% endif %}
-
-
 {% endblock %}
 
 {% block form_errors %}
@@ -122,4 +120,28 @@
 			{% endfor %}
 		</ul>
 	</fieldset>
+{% endblock %}
+
+
+{% block rangeGroup_row %}
+  {% set content %}
+    <div class="Range" {{stimulus_controller('range')}}>
+      {% for row in form.vars.form.children %}
+        {% set backupValue = row.vars.attr['data-range-target'] =="min" ?  row.vars.attr['min'] : row.vars.attr['max'] %}
+        {{ form_row(row,{ 'value': row.vars.data ?? backupValue }) }}
+      {% endfor %}
+      <div class="Range-slider">
+        <div class="Range-progress" data-range-target="progress"></div>
+      </div>
+    </div>
+
+  {% endset %}
+
+  {% include '@components/Molecules/Accordion/Accordion.html.twig' with {
+    title : label,
+    variant: 'filter',
+    content,
+    open: true,
+    classes: class,
+  } %}
 {% endblock %}

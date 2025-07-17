@@ -1,10 +1,9 @@
 {% set products = products|default([]) %}
 {% set filtersCount = filters_count(formValues|filter(f => f is iterable)) %}
-
 <section class="Category-grid" {{ attributes.defaults(stimulus_controller('filters')) }}>
 	{% if filters %}
 		{% set ActiveFiltersCount = filters_count(formValues|filter(f => f is iterable)) %}
-		<div class="CategoryFilter MobileDrawer lg:reset-drawer" data-action="change->filters#filterChange" data-drawer-target="drawer">
+		<div class="CategoryFilters MobileDrawer lg:reset-drawer" data-action="change->filters#filterChange" data-drawer-target="drawer">
 			<div class='MobileDrawer-header lg:hidden'>
 				<button class='MobileDrawer-close' type='button' data-action="drawer#close">{{ ux_icon("close") }}</button>
 			</div>
@@ -12,7 +11,7 @@
 				<div class="flex items-center mt-[30px] flex-row-reverse">
 					<button type="button" class="ml-auto leading-3 Button Button--primary Button--large lg:hidden" data-action="drawer#close">{{'Apply'|trans}}</button>
 					{% if filtersCount %}
-						<button type="button" class="leading-3 Button Button--secondary CategoryFilter-erase" data-action="filters#resetForm drawer#close">{{'Erase'|trans}}
+						<button type="button" class="leading-3 Button Button--secondary CategoryFilters-erase" data-action="filters#resetForm drawer#close">{{'Erase'|trans}}
 							({{filtersCount}})
 						{% endif %}
 					</button>
