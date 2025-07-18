@@ -147,7 +147,7 @@ class CategoryFilters extends AbstractController
             ));
             foreach ($this->getFilters() as $filter) {
 
-              $fieldName = 'tfilters_'.$filter['type'];
+              $fieldName = $filter['type'];
               $values = [];
 
                 if($filter['inputType'] === 'range') {
@@ -164,11 +164,11 @@ class CategoryFilters extends AbstractController
                 }
                 $formBuilder->get('tfilters')->add(
                     $fieldName,
-                    $filter['inputType'] === 'select' ? SelectChoiceType::class : FilterChoiceType::class,
+                    FilterChoiceType::class,
                     [
                         'label' => $filter['title'],
                         'choices' => $values,
-                        'data' => $this->tfilters[$filter['type']] ?? null,
+                        'data' => $this->tfilters[$filter['type']][$value['id']] ?? null,
                         'multiple' => true,
                         'required' => false,
                     ]
@@ -230,9 +230,9 @@ class CategoryFilters extends AbstractController
         foreach ($provided_data as $name => $values) {
             $pathFilter = explode('_', $name);
 
-            if (\count($pathFilter) > 2) {
+            if (\count($pathFilter) > 1) {
                 foreach ($values as $key => $value) {
-                    $tfilters[$pathFilter[1]][$pathFilter[2]][$key] = $value;
+                    $tfilters[$pathFilter[0]][$pathFilter[1]][$key] = $value;
                 }
             } else {
                 $tfilters[$name] = $values;
@@ -244,7 +244,7 @@ class CategoryFilters extends AbstractController
 
   private function addRangeInput( array $filter, $fieldset) : void
   {
-    $groupName = 'tfilters_'.$filter['type'].'_'. $filter['id'];
+    $groupName = $filter['type'].'_'. $filter['id'];
     $fieldset->add($fieldset->create(
       $groupName,
       RangeGroupType::class,
@@ -267,6 +267,7 @@ class CategoryFilters extends AbstractController
             'min' => $min,
             'max' => $max,
             'step' => 10,
+            'data' =>  $range === 'min' ? $min : $max,
             'data-range-target' => $range,
             'data-action' => 'range#updateInput'
           ],
