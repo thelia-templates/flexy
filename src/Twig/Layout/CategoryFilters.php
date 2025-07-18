@@ -221,7 +221,7 @@ class CategoryFilters extends AbstractController
 
     public function normalizeFormDataToFilters(array $formData): array
     {
-        $filters = [];
+        $tfilters = [];
 
         $provided_data = array_filter($formData, function ($filter) {
             return \is_array($filter) && \count($filter) > 0;
@@ -230,16 +230,16 @@ class CategoryFilters extends AbstractController
         foreach ($provided_data as $name => $values) {
             $pathFilter = explode('_', $name);
 
-            if (\count($pathFilter) > 1 && $pathFilter[0] === 'tfilters') {
-                foreach ($values as $value) {
-                    $filters[$pathFilter[1]][] = $value;
+            if (\count($pathFilter) > 2) {
+                foreach ($values as $key => $value) {
+                    $tfilters[$pathFilter[1]][$pathFilter[2]][$key] = $value;
                 }
             } else {
-                $filters[$name] = $values;
+                $tfilters[$name] = $values;
             }
         }
 
-        return $filters;
+        return $tfilters;
     }
 
   private function addRangeInput( array $filter, $fieldset) : void
