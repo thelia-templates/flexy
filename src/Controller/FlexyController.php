@@ -3,12 +3,12 @@
 namespace FlexyBundle\Controller;
 
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Thelia\Controller\BaseController;
 use Thelia\Core\Form\TheliaFormFactory;
 use Thelia\Core\Form\TheliaFormValidator;
-use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\HttpKernel\Exception\RedirectException;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Template\Parser\ParserResolver;
@@ -54,17 +54,17 @@ class FlexyController extends BaseController
         return $this->container->get('router')?->generate($route, $parameters, $referenceType);
     }
 
-    protected function render($templateName, $args = [], $status = 200)
+    protected function render(string $templateName, array $args = [], int $status = 200): Response
     {
         return new Response($this->renderRaw($templateName, $args), $status);
     }
 
-    protected function renderRaw($templateName, $args = [], $templateDir = null)
+    protected function renderRaw(string $templateName, array $args = [], ?string $templateDir = null): string
     {
         return $this->getParser()->render($templateName, $args);
     }
 
-    protected function getParser($template = null)
+    protected function getParser(?string $template = null)
     {
         $path = $this->getTemplateHelper()->getActiveFrontTemplate()->getAbsolutePath();
         $parser = $this->parserResolver->getParser($path, $template);
