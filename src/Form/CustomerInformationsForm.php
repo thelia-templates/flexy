@@ -16,13 +16,12 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints;
 use Thelia\Core\Translation\Translator;
+use Thelia\Form\BaseForm;
 
-class CustomerInformationsForm extends CustomerRegisterForm
+class CustomerInformationsForm extends BaseForm
 {
     protected function buildForm(): void
     {
-        parent::buildForm();
-
         $this->formBuilder
           ->add('firstname', TextType::class, [
               'constraints' => [

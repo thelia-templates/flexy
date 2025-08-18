@@ -14,7 +14,7 @@
 
 		<div class="mt-[40px] pt-[40px] border-t border-gray-700 text-center">
 			<strong class="block">{{"Dont't have receive code ?"|trans}}</strong>
-			<span>{{"resend_code"|trans({'%h': path('customer_send_code')})|raw}}</span>
+			<span>{{"resend_code"|trans({'%h': path('customer_send_code', {'email': email} )})|raw}}</span>
 		</div>
 
 	</div>

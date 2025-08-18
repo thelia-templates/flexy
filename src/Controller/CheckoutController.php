@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Thelia package.
  * http://www.thelia.net
@@ -12,7 +14,6 @@
 
 namespace FlexyBundle\Controller;
 
-use Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Core\HttpKernel\Exception\RedirectException;
@@ -62,7 +63,6 @@ class CheckoutController extends FlexyController
     public function deliveryAction(CartService $cartService, DeliveryService $deliveryService): Response
     {
         $this->checkAuth();
-
         try {
             $cartService->checkCartNotEmpty();
 
@@ -75,21 +75,12 @@ class CheckoutController extends FlexyController
                 'page' => self::STEP_DELIVERY,
                 'current' => self::STEPS[self::STEP_DELIVERY],
             ]);
-
         } catch (EmptyCartException $e) {
-            throw new RedirectException(
-                $this->generateUrl('checkout_cart'),
-                Response::HTTP_FOUND,
-                $e->getMessage()
-            );
-        } catch (Exception $e) {
-            Tlog::getInstance()->error(sprintf('Failed to set delivery part : %s', $e->getMessage()));
+            throw new RedirectException($this->generateUrl('checkout_cart'), Response::HTTP_FOUND, $e->getMessage());
+        } catch (\Exception $e) {
+            Tlog::getInstance()->error(\sprintf('Failed to set delivery part : %s', $e->getMessage()));
 
-            throw new RedirectException(
-                $this->generateUrl('checkout_cart'),
-                Response::HTTP_FOUND,
-                Translator::getInstance()->trans('Critical delivery error, check logs for more information !')
-            );
+            throw new RedirectException($this->generateUrl('checkout_cart'), Response::HTTP_FOUND, Translator::getInstance()->trans('Critical delivery error, check logs for more information !'));
         }
     }
 
@@ -97,7 +88,6 @@ class CheckoutController extends FlexyController
     public function paymentAction(CartService $cartService): Response
     {
         $this->checkAuth();
-
         try {
             $cartService->checkCartNotEmpty();
             $cartService->checkValidDelivery();
@@ -106,27 +96,14 @@ class CheckoutController extends FlexyController
                 'page' => self::STEP_PAYMENT,
                 'current' => self::STEPS[self::STEP_PAYMENT],
             ]);
-
         } catch (EmptyCartException $e) {
-            throw new RedirectException(
-                $this->generateUrl('checkout_cart'),
-                Response::HTTP_FOUND,
-                $e->getMessage()
-            );
+            throw new RedirectException($this->generateUrl('checkout_cart'), Response::HTTP_FOUND, $e->getMessage());
         } catch (MissingAddressException|InvalidDeliveryException $e) {
-            throw new RedirectException(
-                $this->generateUrl('checkout_delivery'),
-                Response::HTTP_FOUND,
-                $e->getMessage()
-            );
-        } catch (Exception $e) {
-            Tlog::getInstance()->error(sprintf('Failed to set payment part : %s', $e->getMessage()));
+            throw new RedirectException($this->generateUrl('checkout_delivery'), Response::HTTP_FOUND, $e->getMessage());
+        } catch (\Exception $e) {
+            Tlog::getInstance()->error(\sprintf('Failed to set payment part : %s', $e->getMessage()));
 
-            throw new RedirectException(
-                $this->generateUrl('checkout_cart'),
-                Response::HTTP_FOUND,
-                Translator::getInstance()->trans('Critical payment error, check logs for more information !')
-            );
+            throw new RedirectException($this->generateUrl('checkout_cart'), Response::HTTP_FOUND, Translator::getInstance()->trans('Critical payment error, check logs for more information !'));
         }
     }
 

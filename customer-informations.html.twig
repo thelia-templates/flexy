@@ -15,7 +15,7 @@
 		<p class="mb-8">
 			{{'With your account, you can track your orders, manage your profile, receive the newsletter, manage your wish lists...'|trans}}
 		</p>
-		{% set form = getForm('flexybundle_form_customer_informations_form', register_data) %}
+		{% set form = getForm('flexybundle_form_customer_informations_form') %}
 		<div class="flex flex-col gap-6 mb-3">
 			{{ form_start(form, {attr : {
           class: 'flex flex-col gap-6',
@@ -24,12 +24,7 @@
         }})}}
 			{{ form_errors(form) }}
 
-			<input type="hidden" name="{{ field_name(form.email) }}" value="{{ field_value(form.email) }}">
-
-			<input type="hidden" name="{{ field_name(form.password) }}" value="{{register_data.password}}">
-			<input type="hidden" name="{{ field_name(form.password_confirm) }}" value="{{register_data.password_confirm}}">
-
-			{{form_row(form.success_url, { value: path('customer_show_activation') }) }}
+			{{form_row(form.success_url, { value: path('customer_activation', {'email': email}) }) }}
 			{{form_row(form.error_url, { value: path('customer_informations') }) }}
 			{{form_rest(form)}}
 			<div class="flex flex-col items-start">

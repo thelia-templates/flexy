@@ -82,11 +82,11 @@ class CustomerRegisterForm extends BaseForm
           ]);
     }
 
-    protected function getLocale()
+    protected function getLocale(): ?string
     {
         $session = $this->request?->getSession();
 
-        return $session?->getLang()->getLocale();
+        return $session?->getLang()?->getLocale();
     }
 
     public function verifyExistingEmail($value, ExecutionContextInterface $context): void
