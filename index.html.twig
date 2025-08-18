@@ -6,15 +6,15 @@
 
 	{{ component('HeaderHighlights') }}
 
-	{{ component('Flexy:CrossSelling', {categoryId: 1, title: 'Last seen products' | trans}) }}
-	{{ component('Flexy:CrossSelling', {categoryId: 1, title: 'Last seen products' | trans}) }}
+	{{ component('Flexy:Layout:CrossSelling', {categoryId: 1, title: 'Last seen products' | trans}) }}
+	{{ component('Flexy:Layout:CrossSelling', {categoryId: 1, title: 'Last seen products' | trans}) }}
 
 
 	<div class="bg-theme-lighter">
-		{{ component('Flexy:CrossSelling', {categoryId: 2, title: 'Popular products' | trans}) }}
+		{{ component('Flexy:Layout:CrossSelling', {categoryId: 2, title: 'Popular products' | trans}) }}
 	</div>
 	<div class="bg-theme-lightest">
-		{{ component('Flexy:CrossSelling', {categoryId: 3, title: 'Promotions' | trans}) }}
+		{{ component('Flexy:Layout:CrossSelling', {categoryId: 3, title: 'Promotions' | trans}) }}
 	</div>
 	{{ component('Flexy:ProductCategory', {title: 'Our product categories' | trans})   }}
 
