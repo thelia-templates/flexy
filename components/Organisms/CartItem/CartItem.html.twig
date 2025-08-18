@@ -16,22 +16,22 @@
 			<div class="CartItem-mainContent">
 				<a class="CartItem-imgLink" href="{{ product.publicUrl }}">
 					{{getImages({
-            'source_type': 'product',
-            'img_id': pseImage.productImageId,
-            'filters': 'add_to_cart',
-            'limit':1,
-            'wrapper': 'figure',
-            'wrapper_attrs': {
-              'class': 'CartItem-img'
-            },
-            'img_attrs': {
-                'class': 'mx-auto',
-                'loading': 'lazy',
-                'widht': '105',
-                'height': '112'
-            },
-            'placeholder': asset('dist/images/placeholder.webp')
-          })|raw}}
+						'source_type': 'product',
+						'img_id': pseImage.productImageId,
+						'filters': 'add_to_cart',
+						'limit':1,
+						'wrapper': 'figure',
+						'wrapper_attrs': {
+							'class': 'CartItem-img'
+						},
+						'img_attrs': {
+							'class': 'mx-auto',
+							'loading': 'lazy',
+							'widht': '105',
+							'height': '112'
+						},
+						'placeholder': asset('dist/images/placeholder.webp')
+					})|raw}}
 				</a>
 				<div class="CartItem-desc">
 					<a href="{{ product.publicUrl }}" class="ProductCard-title">{{ product.i18ns.title }}</a>

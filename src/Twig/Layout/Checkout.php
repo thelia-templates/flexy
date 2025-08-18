@@ -43,6 +43,7 @@ class Checkout
 
     #[LiveProp]
     public array $cart;
+
     #[LiveProp]
     public bool $deliveryModuleView = false;
 

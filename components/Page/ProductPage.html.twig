@@ -10,6 +10,7 @@
 		{% if product.i18ns.chapo %}
 			<div class="paragraph-3 text-grey">{{product.i18ns.chapo}}</div>
 		{% endif %}
+    
 		{% include '@components/Layout/PseSelector/PseSelector.html.twig' with {currentPse} %}
 		<div class="mt-[30px]">
 			{% include '@components/Organisms/Reinsurance/Reinsurance.html.twig' with {data: [
