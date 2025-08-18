@@ -25,7 +25,7 @@
 		{% if form.vars.expanded %}
 			{% include '@formTwig/fields/choice.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value } %}
 		{% else %}
-			{% include '@formTwig/fields/select.html.twig' with {choices: form.vars.choices, title: form.vars.label,  value: form.vars.value, required: form.vars.required } %}
+			{% include '@formTwig/fields/select.html.twig' with {name: form.vars.full_name, choices: form.vars.choices, title: form.vars.label,  value: form.vars.value, required: form.vars.required } %}
 		{% endif %}
 		{{ form_errors(form) }}
 	{% elseif type == 'pill' %}

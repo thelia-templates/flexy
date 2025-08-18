@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Thelia package.
  * http://www.thelia.net
@@ -12,7 +14,6 @@
 
 namespace FlexyBundle\Twig\Layout;
 
-use Exception;
 use Propel\Runtime\Map\TableMap;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
@@ -31,8 +32,8 @@ use TwigEngine\Service\DataAccess\DataAccessService;
 #[AsLiveComponent(template: '@components/Layout/Checkout/Checkout.html.twig')]
 class Checkout
 {
-    use DefaultActionTrait;
     use ComponentToolsTrait;
+    use DefaultActionTrait;
 
     #[LiveProp]
     public string $page = 'cart';
@@ -54,27 +55,26 @@ class Checkout
         'raw_taxed_total_price' => null,
         'total_taxed_price' => null,
         'total_tax_amount' => null,
-        'taxed_postage' => null
+        'taxed_postage' => null,
     ];
 
     #[LiveProp]
     public array $deliveryModules = [];
 
     public function __construct(
-        private readonly DataAccessService      $dataAccessService,
-        private readonly Session                $session,
+        private readonly DataAccessService $dataAccessService,
+        private readonly Session $session,
         private readonly AttributeAccessService $attributeAccessService,
-        private readonly CartService            $cartService,
-        private readonly CheckoutService        $checkoutService,
-        private readonly DeliveryService $deliveryModuleService
-    )
-    {
+        private readonly CartService $cartService,
+        private readonly CheckoutService $checkoutService,
+        private readonly DeliveryService $deliveryModuleService,
+    ) {
     }
 
     public function mount(string $page, string $step): void
     {
         $this->page = $page;
-        $this->step = (int)$step;
+        $this->step = (int) $step;
 
         $this->resetCart();
 
@@ -97,7 +97,7 @@ class Checkout
         ];
 
         $selectedDeliveryModuleId = $this->cartService->getCart()->getDeliveryModuleId();
-        if($selectedDeliveryModuleId){
+        if ($selectedDeliveryModuleId) {
             $this->deliveryMode = $this->deliveryModuleService->findDeliveryModeByModuleId($selectedDeliveryModuleId, $collection);
         }
     }
@@ -172,6 +172,7 @@ class Checkout
     public function setPage(string $page): string
     {
         $this->page = $page;
+
         return $this->page;
     }
 
@@ -183,7 +184,7 @@ class Checkout
             $this->cartService->checkValidPayment();
 
             return true;
-        } catch (MissingAddressException|InvalidDeliveryException|Exception) {
+        } catch (MissingAddressException|InvalidDeliveryException|\Exception) {
             return false;
         }
     }
@@ -196,6 +197,7 @@ class Checkout
     public function setDeliveryMode(?string $deliveryMode): self
     {
         $this->deliveryMode = $deliveryMode;
+
         return $this;
     }
 

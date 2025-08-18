@@ -1,5 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Thelia package.
+ * http://www.thelia.net
+ *
+ * (c) OpenStudio <info@thelia.net>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace FlexyBundle\Controller;
 
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -24,17 +36,16 @@ class FlexyController extends BaseController
     protected string $currentRouter = 'router.front';
 
     public function __construct(
-        public SecurityContext           $securityContext,
-        public ParserContext             $parserContext,
-        public TemplateHelperInterface   $templateHelper,
-        public ParserResolver            $parserResolver,
-        public TheliaFormValidator       $theliaFormValidator,
-        public RequestStack              $requestStack,
-        public TranslatorInterface       $translator,
-        public TheliaFormFactory         $theliaFormFactory,
+        public SecurityContext $securityContext,
+        public ParserContext $parserContext,
+        public TemplateHelperInterface $templateHelper,
+        public ParserResolver $parserResolver,
+        public TheliaFormValidator $theliaFormValidator,
+        public RequestStack $requestStack,
+        public TranslatorInterface $translator,
+        public TheliaFormFactory $theliaFormFactory,
         private readonly SecurityService $securityService,
-    )
-    {
+    ) {
     }
 
     public function getControllerType(): string

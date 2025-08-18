@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Thelia package.
  * http://www.thelia.net
@@ -12,12 +14,11 @@
 
 namespace FlexyBundle\Controller;
 
-use Exception;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Core\Event\TheliaEvents;
-use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\Exception\CustomerNotConfirmedException;
 use Thelia\Core\Security\Exception\UsernameNotFoundException;
@@ -51,11 +52,10 @@ class CustomerController extends FlexyController
 
     #[Route('/login', name: 'login_action', methods: ['POST'])]
     public function loginAction(
-        ParserContext            $parserContext,
-        CustomerService          $customerService,
-        EventDispatcherInterface $eventDispatcher
-    )
-    {
+        ParserContext $parserContext,
+        CustomerService $customerService,
+        EventDispatcherInterface $eventDispatcher,
+    ) {
         if ($this->getSecurityContext()->hasCustomerUser()) {
             return new RedirectResponse(URL::getInstance()->absoluteUrl('/'));
         }
@@ -93,7 +93,7 @@ class CustomerController extends FlexyController
                 'Please check your input: %s',
                 ['%s' => $e->getMessage()],
             );
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $message = $this->getTranslator()->trans(
                 'Sorry, an error occured: %s',
                 ['%s' => $e->getMessage()],
@@ -138,7 +138,7 @@ class CustomerController extends FlexyController
             $message = $this->translator->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
         }
 
-        Tlog::getInstance()->error(sprintf('Error during address creation process : %s', $message));
+        Tlog::getInstance()->error(\sprintf('Error during address creation process : %s', $message));
         $form->setErrorMessage($message);
 
         $this->parserContext
@@ -181,17 +181,18 @@ class CustomerController extends FlexyController
 
             if (!ConfigQuery::isCustomerEmailConfirmationEnable() && $newCustomer->getEnable()) {
                 $customerService->processLogin($newCustomer);
+
                 return new RedirectResponse(URL::getInstance()->absoluteUrl(''));
             }
 
             return $this->generateSuccessRedirect($form);
-        } catch (FormValidationException|Exception $e) {
+        } catch (FormValidationException|\Exception $e) {
             $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
         }
 
         $session->set('register_data', null);
 
-        Tlog::getInstance()->error(sprintf('Error during address creation process : %s', $message));
+        Tlog::getInstance()->error(\sprintf('Error during address creation process : %s', $message));
         $form->setErrorMessage($message);
 
         $this->getParserContext()
@@ -212,8 +213,8 @@ class CustomerController extends FlexyController
             return $this->generateSuccessRedirect($form);
         } catch (FormValidationException $e) {
             $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
-        } catch (Exception $e) {
-            Tlog::getInstance()->error(sprintf('Error : %s', $e->getMessage()));
+        } catch (\Exception $e) {
+            Tlog::getInstance()->error(\sprintf('Error : %s', $e->getMessage()));
             $message = $this->getTranslator()->trans('Critical error on customer informations update, check logs !');
         }
 

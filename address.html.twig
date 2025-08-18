@@ -19,10 +19,10 @@
 			{% set form = getForm("thelia_address_creation") %}
 
 			{{ form_start(form, {attr : {
-        class: 'flex flex-col gap-6',
-        'action': path('account_address_create'),
-        'method': 'POST'
-        }})}}
+				class: 'flex flex-col gap-6',
+				'action': path('account_address_create'),
+				'method': 'POST'
+			}})}}
 
 			{{form_row(form.success_url, { value: path('account_addresses',{success : true}) }) }}
 			{{form_row(form.error_url, { value: path('account_address_create') }) }}
