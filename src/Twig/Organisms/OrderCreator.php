@@ -5,12 +5,12 @@ namespace FlexyBundle\Twig\Organisms;
 use FlexyBundle\Form\CheckoutForm;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
-use Thelia\Core\HttpFoundation\Response;
 use Thelia\Service\Model\CartService;
 use Thelia\Service\Model\CheckoutService;
 
