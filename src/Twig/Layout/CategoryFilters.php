@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Thelia package.
  * http://www.thelia.net
@@ -13,17 +15,13 @@
 namespace FlexyBundle\Twig\Layout;
 
 use FlexyBundle\Form\Type\FieldsetType;
-use FlexyBundle\Form\Type\FilterChoiceType;
-use FlexyBundle\Form\Type\RangeGroupType;
-use FlexyBundle\Form\Type\SelectChoiceType;
 use FlexyBundle\Form\Type\SortChoiceType;
+use FlexyBundle\Service\FormService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
-use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
@@ -49,7 +47,7 @@ class CategoryFilters extends AbstractController
         ],
     ];
 
-    public const RANGE_SUB_INPUTS = ['min','max'];
+
     public const ITEMS_PER_PAGE = 12;
 
     #[LiveProp]
@@ -73,8 +71,11 @@ class CategoryFilters extends AbstractController
     #[ExposeInTemplate]
     public ?array $sourceData = [];
 
-    public function __construct(readonly private DataAccessService $dataAccessService, readonly private RequestStack $requestStack)
-    {
+    public function __construct(
+        private readonly DataAccessService $dataAccessService,
+        private readonly RequestStack $requestStack,
+        private readonly FormService $formService,
+    ) {
     }
 
     public function mount(?int $initialCategoryId, ?int $initialPage, ?array $sourceData): void
@@ -92,8 +93,8 @@ class CategoryFilters extends AbstractController
             'tfilters' => $this->tfilters,
             'itemsPerPage' => self::ITEMS_PER_PAGE,
             'page' => $initialPage,
-            'order[productCategories.position]' => 'asc',
         ], 'jsonld');
+
         $this->products = $request['hydra:member'];
     }
 
@@ -107,7 +108,6 @@ class CategoryFilters extends AbstractController
             foreach ($this->getSorts() as $sort) {
                 $values[$sort['title']] = $sort['value'];
             }
-
             $formBuilder->add($formBuilder->create(
                 'sorts',
                 FieldsetType::class,
@@ -129,12 +129,13 @@ class CategoryFilters extends AbstractController
             ]));
         }
 
-        if (!empty($this->getFilters())) {
+        $fitlers = $this->getFilters();
+
+        if ($fitlers) {
             $formBuilder->add($formBuilder->create(
                 'tfilters',
                 FieldsetType::class,
                 [
-                    'by_reference' => true,
                     'label' => 'Filter By',
                     'inherit_data' => true,
                     'label_attr' => [
@@ -145,34 +146,8 @@ class CategoryFilters extends AbstractController
                     ],
                 ]
             ));
-            foreach ($this->getFilters() as $filter) {
-
-              $fieldName = $filter['type'];
-              $values = [];
-
-                if($filter['inputType'] === 'range') {
-                  $this->addRangeInput($filter, $formBuilder->get('tfilters'));
-                  continue;
-                }
-
-                foreach ($filter['values'] as $value) {
-                    $values[$value['title']] = $value['id'];
-                }
-
-                if ($filter['id']) {
-                    $fieldName .= '_'.$filter['id'];
-                }
-                $formBuilder->get('tfilters')->add(
-                    $fieldName,
-                    FilterChoiceType::class,
-                    [
-                        'label' => $filter['title'],
-                        'choices' => $values,
-                        'data' => $this->tfilters[$filter['type']][$value['id']] ?? null,
-                        'multiple' => true,
-                        'required' => false,
-                    ]
-                );
+            foreach ($fitlers as $filter) {
+                $this->formService->renderFieldFromFieldType($filter, $formBuilder->get('tfilters'));
             }
         }
 
@@ -180,27 +155,19 @@ class CategoryFilters extends AbstractController
     }
 
     #[LiveAction]
-    public function save(#[LiveArg] ?string $order = 'asc', #[LiveArg] ?bool $reset = false): void
+    public function save(): void
     {
         $this->submitForm();
 
-        if ($reset) {
-            $this->tfilters = [];
-            $this->resetForm();
-        }
-
-        if ($this->getForm()->getData()) {
-            $this->tfilters = $this->normalizeFormDataToFilters($this->getForm()->getData());
-        }
-
-        $this->tfilters = array_merge($this->tfilters, ['category' => $this->categoryId]);
+        $this->tfilters = $this->formService->clearData($this->getForm()->getData());
 
         $request = $this->dataAccessService->resources('/api/front/products', [
+            'productCategories.category.id' => $this->categoryId,
             'tfilters' => $this->tfilters,
             'itemsPerPage' => self::ITEMS_PER_PAGE,
             'page' => $this->page,
-            'category_depth' => 3,
         ], 'jsonld');
+
         $this->products = $request['hydra:member'];
     }
 
@@ -209,6 +176,7 @@ class CategoryFilters extends AbstractController
         $this->filters = $this->dataAccessService->resources('/api/front/tfilters/products', [
             'tfilters[category]' => $this->categoryId,
         ]);
+
         return $this->filters;
     }
 
@@ -218,63 +186,4 @@ class CategoryFilters extends AbstractController
 
         return $this->sorts;
     }
-
-    public function normalizeFormDataToFilters(array $formData): array
-    {
-        $tfilters = [];
-
-        $provided_data = array_filter($formData, function ($filter) {
-            return \is_array($filter) && \count($filter) > 0;
-        });
-
-        foreach ($provided_data as $name => $values) {
-            $pathFilter = explode('_', $name);
-
-            if (\count($pathFilter) > 1) {
-                foreach ($values as $key => $value) {
-                    $tfilters[$pathFilter[0]][$pathFilter[1]][$key] = $value;
-                }
-            } else {
-                $tfilters[$name] = $values;
-            }
-        }
-
-        return $tfilters;
-    }
-
-  private function addRangeInput( array $filter, $fieldset) : void
-  {
-    $groupName = $filter['type'].'_'. $filter['id'];
-    $fieldset->add($fieldset->create(
-      $groupName,
-      RangeGroupType::class,
-      [
-        'by_reference' => false,
-        'label' => $filter['title'],
-        'inherit_data' => false,
-        'mapped' => true
-      ]
-    ));
-
-    $min =  min(array_column($filter['values'], 'title'));
-    $max =  max(array_column($filter['values'], 'title'));
-    foreach (self::RANGE_SUB_INPUTS as $range) {
-      $fieldset->get($groupName)->add(
-        $range,
-        RangeType::class,
-        [
-          'attr' => [
-            'min' => $min,
-            'max' => $max,
-            'step' => 10,
-            'data' =>  $range === 'min' ? $min : $max,
-            'data-range-target' => $range,
-            'data-action' => 'range#updateInput'
-          ],
-          'label' => $range,
-          'property_path' => '[' . $range . ']'
-        ]
-      );
-    }
-  }
 }
