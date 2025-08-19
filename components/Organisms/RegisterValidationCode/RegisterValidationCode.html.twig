@@ -2,14 +2,18 @@
     {{ form_start(form) }}
 
     <div class="flex justify-center gap-[10px] lg:gap-4">
-        {{ form_widget(form.customer_email) }}
+        {{ form_widget(form.customer_email, {'value': email}) }}
         {{ form_widget(form.activation_code) }}
         {{ form_rest(form) }}
     </div>
     {% include '@components/Molecules/Button/Button.html.twig' with {
         text: 'Validate Code'|trans,
         classes:'md:Button--unfill Button--fill',
-        props: {'data-action': "live#action", "data-live-action-param":"save"}
+        props: {
+             type: 'button',
+            'data-action': "live#action:prevent",
+            "data-live-action-param":"save"
+        }
     } %}
 
     {{ form_end(form) }}

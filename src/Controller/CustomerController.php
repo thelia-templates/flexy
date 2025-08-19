@@ -62,12 +62,14 @@ class CustomerController extends FlexyController
     public function loginAction(
         EventDispatcherInterface $eventDispatcher,
         CustomerLoginProcessor $customerLoginProcessor,
-    ) {
+    ): ?Response
+    {
         if ($this->getSecurityContext()->hasCustomerUser()) {
             return $this->generateRedirectFromRoute('index');
         }
 
         $request = $this->getRequest();
+        /** @var CustomerLogin $customerLoginForm */
         $customerLoginForm = $this->createForm(CustomerLogin::class);
 
         try {
@@ -143,7 +145,9 @@ class CustomerController extends FlexyController
         }
         $this->addFlash('error', $message);
 
-        return $this->generateRedirectFromRoute('customer_login');
+        return $this->generateRedirect(
+            $this->generateUrl('customer_login')
+        );
     }
 
     #[Route('/register', name: 'register', methods: ['GET'])]
@@ -187,7 +191,9 @@ class CustomerController extends FlexyController
             return $this->generateErrorRedirect($form);
         }
 
-        return $this->generateRedirectFromRoute('customer_register');
+        return $this->generateRedirect(
+            $this->generateUrl('customer_register')
+        );
     }
 
     #[Route('/informations', name: 'informations', methods: ['GET'])]
@@ -224,7 +230,9 @@ class CustomerController extends FlexyController
             $formValidated = $this->validateForm($form, 'post');
             $customer = $this->retrieveCustomerFromSession($session);
             if (!$customer instanceof Customer) {
-                return $this->generateRedirectFromRoute('customer_register');
+                return $this->generateRedirect(
+                    $this->generateUrl('customer_register')
+                );
             }
 
             if ($formValidated->get('accept_privacy_policy')->getData()) {
@@ -258,21 +266,61 @@ class CustomerController extends FlexyController
 
         $this->addFlash('error', $this->getTranslator()->trans($message));
 
-        return $this->generateRedirectFromRoute('customer_informations');
+        return $this->generateRedirect(
+            $this->generateUrl('customer_informations')
+        );
     }
 
-    #[Route('/activation/{email}', name: 'activation', methods: ['GET'])]
+    #[Route(
+        '/activation/{email}',
+        name: 'activation',
+        requirements: [
+            'email' => '[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}'
+        ],
+        methods: ['GET']
+    )]
     public function activation(
         string $email,
     ): Response {
         $customer = CustomerQuery::create()->findOneByEmail($email);
         if (!$customer instanceof Customer) {
-            return $this->generateRedirectFromRoute('customer_register');
+            return $this->generateRedirect(
+                $this->generateUrl('customer_register')
+            );
         }
 
         return $this->render('customer-activation', [
             'email' => $email,
         ]);
+    }
+
+    /**
+     * @throws PropelException
+     */
+    #[Route('/send-code/{email}', name: 'send_code', methods: ['GET'])]
+    public function sendCode(
+        string $email,
+        CustomerCodeProcessor $customerCodeProcessor,
+    ): Response {
+        $customer = CustomerQuery::create()->findOneByEmail($email);
+        if (!$customer instanceof Customer) {
+            return $this->generateRedirect(
+                $this->generateUrl('customer_register')
+            );
+        }
+
+        $customerCodeProcessor->createCodeAndSendIt($customer);
+
+        $this->addFlash(
+            'information',
+            $this->translator->trans(
+                'A new activation code has been sent to your email address. Please check your mailbox. It\'s valid for 24 hours.'
+            )
+        );
+
+        return $this->generateRedirect(
+            $this->generateUrl('customer_activation', ['email' => $email])
+        );
     }
 
     #[Route('/logout', name: 'logout', methods: ['GET'])]
@@ -288,30 +336,6 @@ class CustomerController extends FlexyController
         return $this->generateRedirect($this->generateUrl('index'));
     }
 
-    /**
-     * @throws PropelException
-     */
-    #[Route('/send-code/{email}', name: 'send_code', methods: ['GET'])]
-    public function sendCode(
-        string $email,
-        CustomerCodeProcessor $customerCodeProcessor,
-    ): Response {
-        $customer = CustomerQuery::create()->findOneByEmail($email);
-        if (!$customer instanceof Customer) {
-            return $this->generateRedirectFromRoute('customer_register');
-        }
-
-        $customerCodeProcessor->createCodeAndSendIt($customer);
-
-        $this->addFlash(
-            'information',
-            $this->translator->trans(
-                'A new activation code has been sent to your email address. Please check your mailbox. It\'s valid for 24 hours.'
-            )
-        );
-
-        return $this->generateRedirectFromRoute('customer_activation');
-    }
 
     protected function getRememberMeCookieName()
     {

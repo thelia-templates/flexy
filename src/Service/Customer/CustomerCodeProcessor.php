@@ -17,6 +17,7 @@ namespace FlexyBundle\Service\Customer;
 use Propel\Runtime\Exception\PropelException;
 use Thelia\Mailer\MailerFactory;
 use Thelia\Model\Customer;
+use Thelia\Model\CustomerQuery;
 
 readonly class CustomerCodeProcessor
 {
@@ -44,5 +45,23 @@ readonly class CustomerCodeProcessor
                 'customer' => $customer,
             ]
         );
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function activateCustomerByCode(string $email, string $code): void
+    {
+        $customer = CustomerQuery::create()->findOneByEmail($email);
+        if (!$customer) {
+            throw new \Exception('Customer not found');
+        }
+
+        $customer->verifyActivationCode($code);
+
+        $customer->setConfirmationToken(null);
+        $customer->setConfirmationTokenExpiresAt(null);
+
+        $customer->setEnable(1)->save();
     }
 }

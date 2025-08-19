@@ -26,8 +26,9 @@ readonly class CustomerLoginProcessor
     ) {
     }
 
-  public function processLogin(Customer $customer): void
+    public function processLogin(Customer $customer): void
     {
         $this->eventDispatcher->dispatch(new CustomerLoginEvent($customer), TheliaEvents::CUSTOMER_LOGIN);
     }
+
 }

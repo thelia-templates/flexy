@@ -14,13 +14,13 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Form;
 
+use FlexyBundle\Twig\Organisms\RegisterValidationCode;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints;
 use Thelia\Core\Translation\Translator;
-use Thelia\Form\BaseForm;
 
 class CustomerActivationForm extends AbstractType
 {
@@ -41,24 +41,24 @@ class CustomerActivationForm extends AbstractType
             )
             ->add('activation_code', IntegerType::class, [
                 'attr' => [
-                    'maxlength' => 4,
-                    'pattern' => '[0-9]{4}',
-                    'placeholder' => '0000',
+                    'maxlength' => RegisterValidationCode::CODE_CHARSETS_COUNT,
+                    'pattern' => '[0-9]{'.RegisterValidationCode::CODE_CHARSETS_COUNT.'}',
+                    'placeholder' => '000000',
                 ],
                 'constraints' => [
                     new Constraints\NotBlank([
                         'message' => Translator::getInstance()->trans('Activation code is required'),
                     ]),
                     new Constraints\Length([
-                        'min' => 4,
-                        'max' => 4,
+                        'min' => RegisterValidationCode::CODE_CHARSETS_COUNT,
+                        'max' => RegisterValidationCode::CODE_CHARSETS_COUNT,
                         'exactMessage' => Translator::getInstance()->trans('Activation code must be exactly {{ limit }} digits'),
                         'minMessage' => Translator::getInstance()->trans('Activation code is too short ({{ limit }} digits required)'),
                         'maxMessage' => Translator::getInstance()->trans('Activation code is too long ({{ limit }} digits maximum)'),
                     ]),
                     new Constraints\Regex([
-                        'pattern' => '/^[0-9]{4}$/',
-                        'message' => Translator::getInstance()->trans('Activation code must contain only 4 digits'),
+                        'pattern' => '/^[0-9]{'.RegisterValidationCode::CODE_CHARSETS_COUNT.'}$/',
+                        'message' => Translator::getInstance()->trans('Activation code must contain only '.RegisterValidationCode::CODE_CHARSETS_COUNT.' digits'),
                     ]),
                 ],
             ]);
