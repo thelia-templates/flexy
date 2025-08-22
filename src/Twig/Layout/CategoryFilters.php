@@ -22,7 +22,9 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
@@ -31,6 +33,7 @@ use TwigEngine\Service\DataAccess\DataAccessService;
 #[AsLiveComponent(template: '@components/Layout/CategoryFilters/CategoryFilters.html.twig')]
 class CategoryFilters extends AbstractController
 {
+    use ComponentToolsTrait;
     use ComponentWithFormTrait;
     use DefaultActionTrait;
 
@@ -47,7 +50,6 @@ class CategoryFilters extends AbstractController
         ],
     ];
 
-
     public const ITEMS_PER_PAGE = 12;
 
     #[LiveProp]
@@ -56,7 +58,7 @@ class CategoryFilters extends AbstractController
     #[LiveProp]
     public ?int $page = 1;
 
-    #[LiveProp(writable: false, url: true)]
+    #[LiveProp(writable: true, url: true)]
     public ?array $tfilters = [];
 
     #[ExposeInTemplate]
@@ -83,7 +85,9 @@ class CategoryFilters extends AbstractController
         $this->categoryId = $initialCategoryId;
         $this->page = $initialPage;
         $this->sourceData = $sourceData;
+
         $tfilters = $this->requestStack->getCurrentRequest()->get('tfilters');
+
         if (\is_array($tfilters) && \count($tfilters) > 0) {
             $this->tfilters = $tfilters;
         }
@@ -147,7 +151,7 @@ class CategoryFilters extends AbstractController
                 ]
             ));
             foreach ($fitlers as $filter) {
-                $this->formService->renderFieldFromFieldType($filter, $formBuilder->get('tfilters'));
+                $this->formService->renderFieldFromFieldType($filter, $formBuilder->get('tfilters'), $this->tfilters ?? []);
             }
         }
 
@@ -155,11 +159,18 @@ class CategoryFilters extends AbstractController
     }
 
     #[LiveAction]
-    public function save(): void
+    public function save(#[LiveArg] $reset = false): void
     {
         $this->submitForm();
 
-        $this->tfilters = $this->formService->clearData($this->getForm()->getData());
+        if ($reset) {
+            $this->resetForm();
+            $this->tfilters = [];
+        }
+
+        if ($this->tfilters = $this->getForm()->getData()) {
+            $this->tfilters = $this->getForm()->getData();
+        }
 
         $request = $this->dataAccessService->resources('/api/front/products', [
             'productCategories.category.id' => $this->categoryId,

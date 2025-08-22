@@ -24,7 +24,7 @@ class FormService
 {
     public const RANGE_SUB_INPUTS = ['min', 'max'];
 
-    public function renderFieldFromFieldType(array $filter, $fieldset): void
+    public function renderFieldFromFieldType(array $filter, $fieldset, array $tfilters): void
     {
         if (!$fieldset->has($filter['type'])) {
             $fieldset->add($fieldset->create(
@@ -37,14 +37,14 @@ class FormService
             ));
         }
         match ($filter['fieldType']) {
-            'checkbox', 'radio' => $this->renderCheckbox($filter, $fieldset->get($filter['type'])),
+            'checkbox', 'radio' => $this->renderCheckbox($filter, $fieldset->get($filter['type']), $tfilters),
             'input' => $this->renderInput($filter, $fieldset),
-            'range' => $this->renderRange($filter, $fieldset),
-            'delta' => $this->renderDelta($filter, $fieldset->get($filter['type'])),
+            'range' => $this->renderRange($filter, $fieldset->get($filter['type']), $tfilters),
+            'delta' => $this->renderDelta($filter, $fieldset->get($filter['type']), $tfilters),
         };
     }
 
-    private function renderCheckbox(array $filter, $fieldset): void
+    private function renderCheckbox(array $filter, $fieldset, array $tfilters): void
     {
         $values = [];
 
@@ -58,7 +58,7 @@ class FormService
             [
                 'label' => $filter['title'],
                 'choices' => $values,
-                //                'data' => $this->tfilters[$filter['type']][$value['id']] ?? null,
+                'data' => $tfilters[$filter['type']][$filter['id']] ?? [],
                 'multiple' => true,
                 'required' => false,
             ]
@@ -72,7 +72,7 @@ class FormService
         ]);
     }
 
-    private function renderDelta(array $filter, $fieldset): void
+    private function renderDelta(array $filter, $fieldset, $tfilters): void
     {
         $groupName = \sprintf('%d', $filter['id']);
 
@@ -80,15 +80,16 @@ class FormService
             $groupName,
             RangeGroupType::class,
             [
-                'by_reference' => false,
                 'label' => $filter['title'],
-                'inherit_data' => false,
                 'mapped' => true,
             ]
         ));
 
         $min = min(array_column($filter['values'], 'title'));
         $max = max(array_column($filter['values'], 'title'));
+
+        $currentMin = $tfilters[$filter['type']][$filter['id']]['min'] ?? $min;
+        $currentMax = $tfilters[$filter['type']][$filter['id']]['max'] ?? $max;
 
         foreach (self::RANGE_SUB_INPUTS as $range) {
             $fieldset->get($groupName)->add(
@@ -99,39 +100,32 @@ class FormService
                         'min' => $min,
                         'max' => $max,
                         'step' => 10,
-                        'data' => $range === 'min' ? $min : $max,
                         'data-range-target' => $range,
                         'data-action' => 'range#updateInput',
                     ],
+                    'empty_data' => $range === 'min' ? $currentMin : $currentMax,
                     'label' => $range,
-                    'property_path' => '['.$range.']',
                 ]
             );
         }
     }
 
-    private function renderRange(array $filter, $fieldset): void
+    private function renderRange(array $filter, $fieldset, $tfilters): void
     {
-    }
+        $min = min(array_column($filter['values'], 'title'));
+        $max = max(array_column($filter['values'], 'title'));
 
-    public function clearData(array $data): array
-    {
-        $cleaned = [];
-
-        foreach ($data as $key => $value) {
-            if (\is_array($value)) {
-                $cleanedSub = $this->clearData($value);
-
-                if (!empty($cleanedSub)) {
-                    $cleaned[$key] = $cleanedSub;
-                }
-            } else {
-                if ($value) {
-                    $cleaned[$key] = $value;
-                }
-            }
-        }
-
-        return $cleaned;
+        $fieldset->add(
+            \sprintf('%d', $filter['id']),
+            RangeType::class,
+            [
+                'attr' => [
+                    'min' => $min,
+                    'max' => $max,
+                    'step' => 10,
+                ],
+                'data' => $tfilters[$filter['type']][$filter['id']] ?? null,
+            ]
+        );
     }
 }
