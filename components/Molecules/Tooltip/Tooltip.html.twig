@@ -4,10 +4,10 @@
 {% set classes = '' %}
 {% set classes = classes ~ ' Tooltip-text--' ~ position %}
 
-<div class='Tooltip'>
-  <span class='Tooltip-icon'>{{ ux_icon("help") }}</span>
-  <span class='Tooltip-text{{ classes }}'>
-    <span class='Tooltip-close'>{{ ux_icon("close") }}</span>
+<div class='Tooltip' {{ stimulus_controller('tooltip') }}>
+  <button type="button" class='Tooltip-icon' data-action="tooltip#toggle">{{ ux_icon("help") }}</button>
+  <span class='Tooltip-text {{ classes }}' data-tooltip-target="text">
+    <button type="button" class='Tooltip-close' data-action="tooltip#toggle">{{ ux_icon("close") }}</button>
     {{ tooltip }}
   </span>
 </div>

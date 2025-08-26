@@ -1,5 +1,4 @@
 const TooltipFunction = () => {
-  const icon = document.querySelector('.Tooltip-icon')
   const tooltip = document.querySelector(".Tooltip-text");
   const close = document.querySelector('.Tooltip-close');
 
