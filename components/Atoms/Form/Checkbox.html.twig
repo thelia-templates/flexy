@@ -1,15 +1,9 @@
-{% set classes = classes|default('') %}
-{% set error = error|default('') %}
-{% set name = name|default('') %}
-{% set value = value|default('') %}
-{% set disabled = disabled|default(false) %}
-{% set checked = checked|default(false) %}
-{% set label = label|default('') %}
+{% use 'flexy_form_theme.html.twig' %}
 
 <label class="Checkbox {{ classes }} {{ error ? 'error'  : ''}}">
-	<input type="checkbox" {% if name %} name='{{ name }}' {% endif %} value='{{ value }}' {% if disabled %} disabled {% endif %} {% if checked %} checked {% endif %} {% if model %} data-model="{{model}}" {% endif %}>
+	<input type="checkbox" {{ block('widget_attributes') }}{% if value is defined %} value="{{ value }}"{% endif %}{% if checked %} checked="checked"{% endif %}>
 	<div class="checkmark">
 		{{ ux_icon('checkbox') }}
 	</div>
-	<span class="paragraph-5">{{ label|raw }}</span>
+	<span class="paragraph-5">{{ label }}</span>
 </label>

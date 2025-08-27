@@ -1,15 +1,5 @@
-{% set error = error|default(false) %}
-{% set disabled = disabled|default(false) %}
-{% set required = required|default(false) %}
-{% set name = name|default('') %}
-{% set label = label|default('') %}
-{% set value = value|default(null) %}
-{% set tooltip = tooltip|default(null) %}
-{% set placeholder = placeholder|default(null) %}
-{% set options = options|default([]) %}
-{% set success = success|default(false) %}
-{% set size = success|default(false) %}
-{% set dataAction = dataAction|default(null) %}
+{% use 'flexy_form_theme.html.twig' %}
+
 
 {% set classes = '' %}
 {% if error %}
@@ -21,34 +11,18 @@
 {% if size %}
   {% set classes = classes ~ ' FieldSelect--' ~ size %}
 {% endif %}
-
 <div class='FieldSelect{{ classes }}' {% if disabled %} disabled {% endif %}>
-  <div class='FieldSelect-header'>
-    <label for='{{ name }}' class='FieldSelect-label'>
-      {{ label }}
-      {% if not required and label %}
-        ({{ 'optional' | trans }})
-      {% endif %}
-    </label>
-    {% if tooltip %}
-      {% include '@components/Molecules/Tooltip/Tooltip.html.twig' with {tooltip: tooltip, position: 'bottom'} %}
-    {% endif %}
-  </div>
-  <select class='FieldSelect-select' name='{{ name }}'
-          id='{{ name }}' {% if required %} required {% endif %} {% if dataAction %} data-action="{{ dataAction }}" {% endif %}>
-    {% if placeholder %}
-      <option value="" hidden class='FieldSelect-placeholder' selected>
-        {{ placeholder }}
+  <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
+    {% if attr.placeholder %}
+      <option class='FieldSelect-placeholder' selected>
+        {{ attr.placeholder }}
         {% if not required and not label %}
           ({{ 'optional' | trans }})
         {% endif %}
       </option>
     {% endif %}
-    {% for option in options %}
-      <option value="{{ option.value }}" {% if value == option.value %}selected{% endif %}>{{ option.label }}</option>
+    {% for choice in choices %}
+      <option value="{{ choice.value }}" {% if value == choice.value %}selected{% endif %}>{{ choice.label }}</option>
     {% endfor %}
   </select>
-  {% if error %}
-    <span class='FieldSelect-error'>{{ error }}</span>
-  {% endif %}
 </div>

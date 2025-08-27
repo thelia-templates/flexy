@@ -1,0 +1,102 @@
+{% use 'form_div_layout.html.twig' %}
+
+{%- block form_row -%}
+  {%- set default_attr = {class : 'FieldInput-input'} -%}
+  {% set row_attr = row_attr|merge({class :'flex flex-col gap-1'}) %}
+
+  {%- if help -%}
+    {%- set default_attr = default_attr|merge({'aria-describedby': id ~"_help"}) -%}
+  {%- endif -%}
+
+  <div{% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+    {{- form_label(form) -}}
+    {{- form_widget(form, {attr: default_attr}) -}}
+    {{- form_errors(form) -}}
+  </div>
+{%- endblock form_row -%}
+
+{%- block form_label -%}
+  <div class="FieldInput-header">
+    {%- set label_attr = label_attr|merge({ class: label_attr.class|default(label_class|default('FieldInput-label')) }) -%}
+    {{- parent() -}}
+    {% if tooltip %}
+      {% include '@components/Molecules/Tooltip/Tooltip.html.twig' with {tooltip: tooltip, position: 'bottom'} %}
+    {% endif %}
+    {{- form_help(form) -}}
+  </div>
+{%- endblock form_label -%}
+
+{% block form_help -%}
+  {%- if help -%}
+    {% include '@components/Molecules/Tooltip/Tooltip.html.twig' with {tooltip: help, position: 'bottom'} %}
+  {%- endif -%}
+{%- endblock form_help %}
+
+{%- block form_widget_simple -%}
+  {%- set type = type|default('text') -%}
+  <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+{%- endblock form_widget_simple -%}
+
+{%- block text_widget -%}
+  {% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" %}
+{%- endblock text_widget -%}
+
+{%- block password_widget -%}
+  {% set attr = attr|merge({
+    type: "password",
+    'data-password-target' : "input",
+    'data-action' : 'input->password#control'
+  }) %}
+  <div {{ stimulus_controller('password') }}>
+    {% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig"%}
+    {% if attr.password_control %}
+      {% include "@components/Molecules/PasswordControls/PasswordControls.html.twig" %}
+    {% endif %}
+  </div>
+{%- endblock password_widget -%}
+
+{%- block money_widget -%}
+  {% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {unit: '€'} %}
+{%- endblock money_widget -%}
+
+{%- block percent_widget -%}
+  {% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {unit: '%'} %}
+{%- endblock percent_widget -%}
+
+
+
+{%- block choice_widget_collapsed -%}
+  {% set attr = attr|merge({'class' : "FieldSelect-select"}) %}
+  {% include "@components/Molecules/Fields/FieldSelect/FieldSelect.html.twig" %}
+{%- endblock choice_widget_collapsed -%}
+
+{%- block choice_widget_expanded -%}
+  {% set attr = attr|merge({'class' : "flex flex-col gap-2"}) %}
+  <div {{ block('widget_container_attributes') }}>
+    {%- for child in form %}
+      {{- form_widget(child) -}}
+    {% endfor -%}
+  </div>
+{%- endblock choice_widget_expanded -%}
+
+{%- block checkbox_widget -%}
+  {% include "@components/Atoms/Form/Checkbox.html.twig"  %}
+{%- endblock checkbox_widget -%}
+
+{%- block radio_widget -%}
+  {% include "@components/Atoms/Form/Radio.html.twig"  %}
+{%- endblock radio_widget -%}
+
+
+{%- block range_widget -%}
+  {% set attr = attr|merge({'class' : "FieldRange"}) %}
+  {% set type = "range" %}
+  <div>
+  {{- block('form_widget_simple') -}}
+  </div>
+{%- endblock range_widget %}
+
+{%- block file_widget -%}
+  {% set attr = attr|merge({'class' : 'FieldFile'}) %}
+  {{- block('form_widget_simple') -}}
+{%- endblock file_widget %}

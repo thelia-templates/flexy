@@ -29,11 +29,11 @@
     padding: rem-convert(16px) rem-convert(10px);
     appearance: none;
     background: url('/assets/icons/chevron-small-down.svg');
+    background-color: var(--white);
     background-repeat: no-repeat;
     background-position: right 0 top 50%;
     background-size: rem-convert(40px) auto;
     transition: 0.2s ease all;
-    background-color: var(--white);
     cursor: pointer;
     &:hover {
       background-color: var(--theme-lightest);

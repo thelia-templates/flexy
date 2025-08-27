@@ -5,7 +5,7 @@ twig:
     "%kernel.project_dir%/templates/frontOffice/%thelia_front_template%/assets": assets
     "%kernel.project_dir%/templates/frontOffice/%thelia_front_template%/form": formTwig
   form_themes:
-    - "frontOffice/%thelia_front_template%/form/fields.html.twig"
+    - "frontOffice/%thelia_front_template%/flexy_form_theme.html.twig"
 
 when@test:
   twig:

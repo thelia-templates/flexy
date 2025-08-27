@@ -1,0 +1,18 @@
+.FieldFile {
+  @apply paragraph-4;
+  display: block;
+  border-radius: 0.5rem;
+  border-width: 1px;
+  border-color: var(--theme);
+  color: var(--black);
+  background-color: var(--white);
+  cursor: pointer;
+
+  &::file-selector-button {
+    appearance: none;
+    background-color: var(--theme);
+    border: none;
+    padding:0.625rem  1rem;
+    color: white;
+  }
+}

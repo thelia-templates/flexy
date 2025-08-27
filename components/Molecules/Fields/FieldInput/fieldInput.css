@@ -45,7 +45,7 @@
     }
 
     &--unit {
-      padding-right: rem-convert(50px);
+      padding-right: 3rem;
     }
     &--verificationCode {
       font-size: rem-convert(18px);
@@ -175,14 +175,6 @@
     }
   }
 
-  &-blockInputIconRight {
-    .FieldInput-buttonIcon {
-      right: 10px;
-    }
-    .FieldInput-input {
-      padding-right: rem-convert(40px);
-    }
-  }
 
   &-togglePassword {
     position: relative;

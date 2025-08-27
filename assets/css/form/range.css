@@ -1,0 +1,19 @@
+.FieldRange {
+  position: relative;
+  appearance: none;
+  background-color: var(--theme-light);
+  border-radius: 4px;
+  height: 6px;
+  width: 100%;
+
+  &::-webkit-slider-thumb, &::-moz-range-thumb {
+    pointer-events: auto;
+    appearance: none;
+    border: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: var(--theme);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+}

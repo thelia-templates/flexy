@@ -1,7 +1,7 @@
 .Checkbox,
 .Radio {
-  display: flex;
-  align-items: flex-start;
+  display: inline-flex;
+  align-items: center;
   position: relative;
   cursor: pointer;
   gap: 0.5rem;
