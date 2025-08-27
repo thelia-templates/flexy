@@ -47,9 +47,11 @@
     &--unit {
       padding-right: 3rem;
     }
+
     &--verificationCode {
       font-size: rem-convert(18px);
       text-align: center;
+      text-transform: uppercase;
       height: 59px;
     }
   }

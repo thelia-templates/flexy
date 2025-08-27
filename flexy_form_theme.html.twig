@@ -87,7 +87,6 @@
   {% include "@components/Atoms/Form/Radio.html.twig"  %}
 {%- endblock radio_widget -%}
 
-
 {%- block range_widget -%}
   {% set attr = attr|merge({'class' : "FieldRange"}) %}
   {% set type = "range" %}
@@ -102,11 +101,12 @@
 {%- endblock file_widget %}
 
 {%- block code_group_row -%}
-  <div class="flex justify-center gap-[10px] lg:gap-4">
+  {% set attr = attr|merge({class : 'flex justify-center gap-[10px] lg:gap-4'}) %}
+  <div {{ block('attributes') }}>
     {%- for child in form %}
       {{- form_widget(child, {
         attr: {
-          class: "FieldInput-input",
+          class: "FieldInput-input FieldInput-input--verificationCode",
           "data-register-validation-code-target" : 'input',
           "data-action" : "register-validation-code#input"
         }}) -}}

@@ -40,7 +40,7 @@ class RegisterValidationCode extends AbstractController
     {
         $formBuilder = $this->createFormBuilder(null);
 
-        $formBuilder->add('code', CodeGroupType::class);
+        $formBuilder->add('code', CodeGroupType::class,['attr' => ['class' => 'mt-4']]);;
 
         for ($i = 1; $i <= self::CODE_CHARSETS_COUNT; ++$i) {
             $formBuilder->get('code')->add($formBuilder->create('code'.$i, TextType::class));
