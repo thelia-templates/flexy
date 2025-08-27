@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Thelia package.
  * http://www.thelia.net
@@ -12,17 +14,17 @@
 
 namespace FlexyBundle\Form\Type;
 
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 
-class CodeType extends TextType
+class CodeGroupType extends FormType
 {
     public static function getExtendedTypes(): iterable
     {
-        return [TextType::class];
+        return [FormType::class];
     }
 
     public function getBlockPrefix(): string
     {
-        return 'code';
+        return 'code_group';
     }
 }

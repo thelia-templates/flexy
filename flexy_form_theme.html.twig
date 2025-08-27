@@ -16,14 +16,16 @@
 {%- endblock form_row -%}
 
 {%- block form_label -%}
-  <div class="FieldInput-header">
-    {%- set label_attr = label_attr|merge({ class: label_attr.class|default(label_class|default('FieldInput-label')) }) -%}
-    {{- parent() -}}
-    {% if tooltip %}
-      {% include '@components/Molecules/Tooltip/Tooltip.html.twig' with {tooltip: tooltip, position: 'bottom'} %}
-    {% endif %}
-    {{- form_help(form) -}}
-  </div>
+  {% if label %}
+    <div class="FieldInput-header">
+      {%- set label_attr = label_attr|merge({ class: label_attr.class|default(label_class|default('FieldInput-label')) }) -%}
+      {{- parent() -}}
+      {% if tooltip %}
+        {% include '@components/Molecules/Tooltip/Tooltip.html.twig' with {tooltip: tooltip, position: 'bottom'} %}
+      {% endif %}
+      {{- form_help(form) -}}
+    </div>
+  {% endif %}
 {%- endblock form_label -%}
 
 {% block form_help -%}
@@ -63,8 +65,6 @@
   {% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {unit: '%'} %}
 {%- endblock percent_widget -%}
 
-
-
 {%- block choice_widget_collapsed -%}
   {% set attr = attr|merge({'class' : "FieldSelect-select"}) %}
   {% include "@components/Molecules/Fields/FieldSelect/FieldSelect.html.twig" %}
@@ -100,3 +100,17 @@
   {% set attr = attr|merge({'class' : 'FieldFile'}) %}
   {{- block('form_widget_simple') -}}
 {%- endblock file_widget %}
+
+{%- block code_group_row -%}
+  <div class="flex justify-center gap-[10px] lg:gap-4">
+    {%- for child in form %}
+      {{- form_widget(child, {
+        attr: {
+          class: "FieldInput-input",
+          "data-register-validation-code-target" : 'input',
+          "data-action" : "register-validation-code#input"
+        }}) -}}
+    {% endfor -%}
+  </div>
+{%- endblock code_group_row %}
+

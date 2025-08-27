@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Thelia package.
  * http://www.thelia.net
@@ -12,8 +14,9 @@
 
 namespace FlexyBundle\Twig\Organisms;
 
-use FlexyBundle\Form\Type\CodeType;
+use FlexyBundle\Form\Type\CodeGroupType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
@@ -37,8 +40,10 @@ class RegisterValidationCode extends AbstractController
     {
         $formBuilder = $this->createFormBuilder(null);
 
+        $formBuilder->add('code', CodeGroupType::class);
+
         for ($i = 1; $i <= self::CODE_CHARSETS_COUNT; ++$i) {
-            $formBuilder->add($i, CodeType::class);
+            $formBuilder->get('code')->add($formBuilder->create('code'.$i, TextType::class));
         }
 
         return $formBuilder->getForm();
