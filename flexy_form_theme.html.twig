@@ -16,7 +16,7 @@
 {%- endblock form_row -%}
 
 {%- block form_label -%}
-  {% if label %}
+  {% if label and not hideLabel %}
     <div class="FieldInput-header">
       {%- set label_attr = label_attr|merge({ class: label_attr.class|default(label_class|default('FieldInput-label')) }) -%}
       {{- parent() -}}
@@ -90,10 +90,10 @@
 {%- block range_widget -%}
   {% set attr = attr|merge({'class' : "FieldRange"}) %}
   {% set type = "range" %}
-  <div>
   {{- block('form_widget_simple') -}}
-  </div>
 {%- endblock range_widget %}
+
+
 
 {%- block file_widget -%}
   {% set attr = attr|merge({'class' : 'FieldFile'}) %}
@@ -114,3 +114,31 @@
   </div>
 {%- endblock code_group_row %}
 
+{% block fieldset_row %}
+  {% set attr = attr|merge({class : attr.class~' Fieldset'}) %}
+
+  <fieldset {{ block('attributes') }}>
+    {% if label %}
+      <legend class="Fieldset-legend {{ form.vars.label_attr.class|default('') }}">{{ label }}</legend>
+    {% endif %}
+    <ul class="Fieldset-group">
+      {% for child in form %}
+        <li>
+          {{ form_row(child, {hideLabel: true}) }}
+        </li>
+      {% endfor %}
+    </ul>
+  </fieldset>
+{% endblock %}
+
+{% block rangeGroup_row %}
+  {% include '@formTwig/fields/delta.html.twig' %}
+{% endblock rangeGroup_row %}
+
+{% block pill_widget %}
+  {% include '@formTwig/fields/pill.html.twig' %}
+{% endblock %}
+
+{% block range_filter_row %}
+  {% include '@formTwig/fields/range_filter.html.twig' %}
+{% endblock %}

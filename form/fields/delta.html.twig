@@ -1,0 +1,17 @@
+{% set content %}
+  <div class="Delta" {{stimulus_controller('delta')}}>
+    {% for widget in form %}
+      {{ form_widget(widget,{attr: {class: ''}}) }}
+    {% endfor %}
+    <div class="Delta-slider">
+      <div class="Delta-progress" data-delta-target="progress"></div>
+    </div>
+  </div>
+{% endset %}
+
+{% include '@components/Molecules/Accordion/Accordion.html.twig' with {
+    title: label,
+    variant: 'filter',
+    content,
+    open
+} %}

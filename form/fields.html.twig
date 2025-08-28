@@ -16,7 +16,7 @@
       name: form.vars.full_name,
     } %}
 	{% elseif type == 'filter' %}
-		{% include '@formTwig/fields/filter.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value} %}
+		{% include '@formTwig/fields/pill.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value} %}
 		{{ form_errors(form) }}
 	{% elseif type == 'sort' %}
 		{% include '@formTwig/fields/sort.html.twig' with {choices: form.vars.choices, title: form.vars.label, values: widget_value} %}
@@ -128,7 +128,7 @@
     <div class="Range" {{stimulus_controller('range')}}>
       {% for row in form.vars.form.children %}
         {% set backupValue = row.vars.attr['data-range-target'] =="min" ?  row.vars.attr['min'] : row.vars.attr['max'] %}
-        {{ form_row(row,{ 'value': row.vars.data ?? backupValue }) }}
+        {{ form_row(row,{'value': row.vars.data ?? backupValue }) }}
       {% endfor %}
       <div class="Range-slider">
         <div class="Range-progress" data-range-target="progress"></div>

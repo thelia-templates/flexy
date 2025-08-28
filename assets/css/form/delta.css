@@ -1,0 +1,34 @@
+.Delta {
+  width: 100%;
+  display: grid;
+  position: relative;
+  z-index: 5;
+
+  [type="range"] {
+    background: transparent;
+    grid-row: 2;
+    grid-column: 1;
+    height: auto;
+    pointer-events: none;
+    appearance: none;
+  }
+
+  &-slider {
+    position: absolute;
+    height: 6px;
+    width: 100%;
+    background: var(--theme-lighter);
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 5px;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  &-progress {
+    position: absolute;
+    height: 100%;
+    background: var(--theme);
+    border-radius: 50px;
+  }
+}

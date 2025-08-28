@@ -15,7 +15,8 @@ class FiltersController extends Controller {
   }
 
   filterChange() {
-    this.component.action('save');
+    const event = new CustomEvent('live:form:save');
+    this.component.action('save').then(() => window.dispatchEvent(event));
   }
 
   sortChange(e) {

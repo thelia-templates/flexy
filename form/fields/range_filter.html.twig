@@ -1,0 +1,16 @@
+{% use 'frontOffice/work/flexy_form_theme.html.twig' %}
+{% set content %}
+  {%- block range_widget -%}
+    <div>
+      {{ parent() }}
+    </div>
+
+  {%- endblock range_widget %}
+{% endset %}
+
+{% include '@components/Molecules/Accordion/Accordion.html.twig' with {
+  title: label,
+  variant: 'filter',
+  content,
+  open
+} %}

@@ -1,17 +1,12 @@
-{% set id = id|default('') %}
-{% set value = value|default('') %}
-{% set model = model|default(null) %}
-{% set name = name|default(model)|default('') %}
-{% set customText = customText|default('') %}
-{% set selected = selected|default(false) %}
-{% set disabled = disabled|default(false) %}
+{% use 'frontOffice/work/flexy_form_theme.html.twig' %}
+
 {% set icon = icon|default(null) %}
 {% set closeButton = closeButton|default(null) %}
 {% set iconColor = iconColor|default(null) %}
-{% set inputType = inputType|default('checkbox') %}
+{% set type = type|default('checkbox') %}
 {% set inDrawer = inDrawer|default(false) %}
+{% set classes = classes|default(null) %}
 
-{% set classes = '' %}
 {% if icon %}
 	{% set classes = classes ~ ' FilterPill--withIcon' %}
 {% endif %}
@@ -19,12 +14,14 @@
 	{% set classes = classes ~ ' FilterPill--drawer' %}
 {% endif %}
 
-<label class="FilterPill{{ classes }}" {% if inDrawer %} data-action="click->filter-choice#updateLabel click->drawer#close" data-filter-choice-label-param="{{customText}}" {% endif %}>
-	<input type='{{ inputType }}' class='hidden' value='{{ value }}' name='{{ name }}' {% if disabled %} disabled {% endif %} {% if model %} data-model="{{model}}" {% endif %} {% if selected %} checked {% endif %}/>
-	{% if icon %}
-		<span class="FilterPill-icon" {% if iconColor %} style="color:{{ iconColor }}" {% endif %}>{{ ux_icon(icon) }}</span>
-	{% endif %}
-	{{ customText }}
+{% set attr = choice.attr|merge({class : choice.attr.class~ 'hidden'}) %}
+
+<label class="FilterPill{{ classes }}" {% if inDrawer %} data-action="click->filter-choice#updateLabel click->drawer#close" data-filter-choice-label-param="{{choice.label}}" {% endif %}>
+	<input type='{{ type }}' class="hidden" {{ block('widget_attributes') }} value="{{ choice.value }}" {% if choice.value in value  %}checked{% endif %}/>
+    {% if icon %}
+      <span class="FilterPill-icon" {% if iconColor %} style="color:{{ iconColor }}" {% endif %}>{{ ux_icon(icon) }}</span>
+    {% endif %}
+	{{ choice.label }}
 	{% if closeButton %}
 		<span class='FilterPill-iconClose'>{{ ux_icon("close") }}</span>
 	{% endif %}

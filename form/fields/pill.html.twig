@@ -1,0 +1,23 @@
+{% if choices|length > 0 %}
+  {% set open = false %}
+
+	{% set content %}
+	<ul class="flex flex-wrap gap-2">
+		{% for choice in choices %}
+			{% if choice.value in value %}
+				{% set open = true %}
+			{% endif %}
+			<li>
+				{% include '@components/Molecules/Filters/FilterPill/FilterPill.html.twig' with [choice]|merge({closeButton: true}) %}
+			</li>
+		{% endfor %}
+	</ul>
+	{% endset %}
+
+	{% include '@components/Molecules/Accordion/Accordion.html.twig' with {
+    title: label,
+    variant: 'filter',
+    content,
+    open,
+  } %}
+{% endif %}

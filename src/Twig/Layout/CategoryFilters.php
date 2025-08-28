@@ -18,6 +18,7 @@ use FlexyBundle\Form\Type\FieldsetType;
 use FlexyBundle\Form\Type\SortChoiceType;
 use FlexyBundle\Service\FormService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -112,6 +113,7 @@ class CategoryFilters extends AbstractController
             foreach ($this->getSorts() as $sort) {
                 $values[$sort['title']] = $sort['value'];
             }
+
             $formBuilder->add($formBuilder->create(
                 'sorts',
                 FieldsetType::class,
@@ -126,7 +128,7 @@ class CategoryFilters extends AbstractController
                         'class' => 'block mb-6 h4',
                     ],
                 ]
-            )->add('sort', SortChoiceType::class, [
+            )->add('sort', ChoiceType::class, [
                 'label' => 'Choose',
                 'choices' => $values,
                 'required' => false,

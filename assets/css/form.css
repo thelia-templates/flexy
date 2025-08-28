@@ -46,53 +46,6 @@
   }
 }
 
-
-.Range {
-  width: 100%;
-  display: grid;
-  position: relative;
-  z-index: 5;
-
-  [type="range"] {
-    grid-row: 2;
-    grid-column: 1;
-    pointer-events: none;
-    appearance: none;
-    background: transparent;
-
-    &::-webkit-slider-thumb, &::-moz-range-thumb {
-      pointer-events: auto;
-      appearance: none;
-      border: none;
-      width: 1.25rem;
-      height: 1.25rem;
-      background: var(--theme-medium);
-      border-radius: 50%;
-      cursor: pointer;
-    }
-  }
-
-  &-slider {
-    position: absolute;
-    height: 10px;
-    width: 100%;
-    background: var(--theme-lighter);
-    top: 50%;
-    transform: translateY(-50%);
-    border-radius: 5px;
-    overflow: hidden;
-    z-index: -1;
-  }
-
-  &-progress {
-    position: absolute;
-    height: 100%;
-    background: var(--theme);
-    border-radius: 50px;
-  }
-}
-
-
 form {
   hr {
     height: 1px;

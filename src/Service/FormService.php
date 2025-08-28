@@ -16,6 +16,8 @@ namespace FlexyBundle\Service;
 
 use FlexyBundle\Form\Type\FieldsetType;
 use FlexyBundle\Form\Type\FilterChoiceType;
+use FlexyBundle\Form\Type\PillType;
+use FlexyBundle\Form\Type\RangeFilterType;
 use FlexyBundle\Form\Type\RangeGroupType;
 use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -54,7 +56,7 @@ class FormService
 
         $fieldset->add(
             \sprintf('%d', $filter['id']),
-            FilterChoiceType::class,
+            PillType::class,
             [
                 'label' => $filter['title'],
                 'choices' => $values,
@@ -99,11 +101,10 @@ class FormService
                     'attr' => [
                         'min' => $min,
                         'max' => $max,
-                        'step' => 10,
-                        'data-range-target' => $range,
-                        'data-action' => 'range#updateInput',
+                        'data-delta-target' => $range,
+                        'data-action' => 'delta#updateInput',
                     ],
-                    'empty_data' => $range === 'min' ? $currentMin : $currentMax,
+                    'data' => $range === 'min' ? $currentMin : $currentMax,
                     'label' => $range,
                 ]
             );
@@ -117,8 +118,9 @@ class FormService
 
         $fieldset->add(
             \sprintf('%d', $filter['id']),
-            RangeType::class,
+            RangeFilterType::class,
             [
+                'label' => $filter['title'],
                 'attr' => [
                     'min' => $min,
                     'max' => $max,
