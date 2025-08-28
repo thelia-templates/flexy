@@ -1,6 +1,10 @@
 {% use '@formTwig/flexy_form_theme.html.twig' %}
 
-{% set classes = '' %}
+{% set classes = classes|default(null) %}
+{% set attr = attr|default({}) %}
+
+{% set attr = attr|merge({class: attr.class~' FieldSelect-select'}) %}
+
 {% if errors|length %}
   {% set attr = attr|merge({class: attr.class~' is-error'}) %}
 {% endif %}

@@ -1,7 +1,7 @@
 {% use 'form_div_layout.html.twig' %}
 
 {%- block form_row -%}
-  {%- set default_attr = {class : 'FieldInput-input'} -%}
+  {%- set default_attr = {} -%}
   {% set row_attr = row_attr|merge({class :'flex flex-col gap-1'}) %}
 
   {%- if help -%}
@@ -37,16 +37,12 @@
 {%- block form_widget_simple -%}
   {%- set type = type|default('text') -%}
 
-  {% if errors|length %}
-    {% set attr = attr|merge({class: attr.class~' is-error'}) %}
+  {% if  type in ['range','file'] %}
+    <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+    {% else %}
+    {% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" %}
   {% endif %}
-
-  <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
-{%- endblock form_widget_simple -%}
-
-{%- block text_widget -%}
-  {% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" %}
-{%- endblock text_widget -%}
+{%- endblock form_widget_simple -%}a
 
 {%- block password_widget -%}
   {% set attr = attr|merge({
@@ -62,6 +58,10 @@
   </div>
 {%- endblock password_widget -%}
 
+{%- block textarea_widget -%}
+  {% include "@components/Molecules/Fields/FieldTextArea/FieldTextArea.html.twig" %}
+{%- endblock textarea_widget -%}
+
 {%- block money_widget -%}
   {% include "@components/Molecules/Fields/FieldInput/FieldInput.html.twig" with {unit: '€'} %}
 {%- endblock money_widget -%}
@@ -71,7 +71,6 @@
 {%- endblock percent_widget -%}
 
 {%- block choice_widget_collapsed -%}
-  {% set attr = attr|merge({'class' : "FieldSelect-select"}) %}
   {% include "@components/Molecules/Fields/FieldSelect/FieldSelect.html.twig" %}
 {%- endblock choice_widget_collapsed -%}
 
@@ -110,7 +109,7 @@
     {%- for child in form %}
       {{- form_widget(child, {
         attr: {
-          class: "FieldInput-input FieldInput-input--verificationCode",
+          class: "FieldInput-input--verificationCode",
           "data-register-validation-code-target" : 'input',
           "data-action" : "register-validation-code#input"
         }}) -}}

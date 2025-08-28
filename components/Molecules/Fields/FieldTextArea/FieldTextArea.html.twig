@@ -1,5 +1,9 @@
 {% use '@formTwig/flexy_form_theme.html.twig' %}
 
+{% set attr = attr|default({}) %}
+
+{% set attr = attr|merge({class: attr.class~' FieldInput-input'}) %}
+
 <div class='FieldInput-blockInput'>
 		<textarea {{ block('widget_attributes') }} {% if value is not empty %} value="{{ value }}" {% endif %}></textarea>
 </div>

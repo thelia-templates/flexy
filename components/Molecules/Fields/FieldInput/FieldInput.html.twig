@@ -1,6 +1,9 @@
 {% use '@formTwig/flexy_form_theme.html.twig' %}
 {% set type = type|default(attr.type|default('text')) %}
 {% set unit = unit|default(null) %}
+{% set attr = attr|default({}) %}
+
+{% set attr = attr|merge({class: attr.class~' FieldInput-input'}) %}
 
 {% if errors|length %}
   {% set attr = attr|merge({class: attr.class~' is-error'}) %}
