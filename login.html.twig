@@ -8,11 +8,10 @@
 	<div class="max-w-[400px] px-[25px] pt-[30px] pb-[54px] lg:px-0 lg:pt-[50px] lg:pb-[120px] mx-auto">
 		{% set form = getForm("thelia.front.customer.login") %}
 
-		{{ form_start(form) }}
+		{{ form_start(form, {attr: {novalidate: true}}) }}
 		<h2 class="mb-4 text-black h2">{{ 'Log in' | trans }}</h2>
 		<div class="flex flex-col gap-6 mb-3">
 			{{ form_errors(form) }}
-
 			<div class="flex flex-col gap-6 mb-3">
 				{{ form_row(form.error_url, { value: path('customer_login') }) }}
 				{{ form_row(form.success_url, { value: path('account_index') }) }}

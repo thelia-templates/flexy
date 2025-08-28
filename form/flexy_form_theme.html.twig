@@ -36,6 +36,11 @@
 
 {%- block form_widget_simple -%}
   {%- set type = type|default('text') -%}
+
+  {% if errors|length %}
+    {% set attr = attr|merge({class: attr.class~' is-error'}) %}
+  {% endif %}
+
   <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
 {%- endblock form_widget_simple -%}
 
@@ -74,14 +79,14 @@
   {% set attr = attr|merge({'class' : "flex flex-col gap-2"}) %}
   <div {{ block('widget_container_attributes') }}>
     {%- for child in form %}
-      {{- form_widget(child) -}}
+      {{- form_row(child) -}}
     {% endfor -%}
   </div>
 {%- endblock choice_widget_expanded -%}
 
-{%- block checkbox_widget -%}
+{%- block checkbox_row -%}
   {% include "@components/Atoms/Form/Checkbox.html.twig"  %}
-{%- endblock checkbox_widget -%}
+{%- endblock checkbox_row -%}
 
 {%- block radio_widget -%}
   {% include "@components/Atoms/Form/Radio.html.twig"  %}
@@ -130,9 +135,9 @@
   </fieldset>
 {% endblock %}
 
-{% block rangeGroup_row %}
+{% block range_group_row %}
   {% include '@formTwig/fields/delta.html.twig' %}
-{% endblock rangeGroup_row %}
+{% endblock range_group_row %}
 
 {% block pill_widget %}
   {% include '@formTwig/fields/pill.html.twig' %}
@@ -141,3 +146,29 @@
 {% block range_filter_row %}
   {% include '@formTwig/fields/range_filter.html.twig' %}
 {% endblock %}
+
+{% block form_errors %}
+  {% if errors|length > 0 %}
+    {% if compound %}
+      {% set content %}
+        <ul class="flex flex-col gap-2">
+          {%- for error in errors -%}
+            <li>{{ error.message }}</li>
+          {%- endfor -%}
+        </ul>
+      {% endset %}
+
+      {% include "@components/Organisms/SnackBar/SnackBar.html.twig" with {
+        text: content,
+        variant: 'error',
+        withIcon: true,
+        size: "full"
+      } %}
+    {% else %}
+      {% for error in errors %}
+        <span class='FieldInput-error'>{{ error.message }}</span>
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+{% endblock form_errors %}
+

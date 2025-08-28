@@ -17,15 +17,11 @@ namespace FlexyBundle\Form;
 use Symfony\Component\Form\Extension\Core\Type\BirthdayType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\ColorType;
-use Symfony\Component\Form\Extension\Core\Type\CountryType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\LanguageType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -56,15 +52,19 @@ class CustomerRegisterForm extends BaseForm
           ])
           ->add('email', EmailType::class, [
               'label' => 'Adresse email',
+            'required' =>true,
           ])
           ->add('tel', TelType::class, [
               'label' => 'Numéro de téléphone',
+            'required' =>true,
           ])
           ->add('password', PasswordType::class, [
               'label' => 'Mot de passe',
+            'required' =>true,
           ])
           ->add('textarea', TextareaType::class, [
               'label' => 'Texte long',
+              'required' =>true,
               'attr' => [
                   'rows' => 5,
               ],
@@ -73,44 +73,54 @@ class CustomerRegisterForm extends BaseForm
           // Champs numériques
           ->add('integer', IntegerType::class, [
               'label' => 'Nombre entier',
+            'required' =>true,
           ])
           ->add('number', NumberType::class, [
               'label' => 'Nombre décimal',
+            'required' =>true,
           ])
           ->add('money', MoneyType::class, [
               'label' => 'Montant',
+              'required' =>true,
               'currency' => 'EUR',
           ])
           ->add('percent', PercentType::class, [
               'label' => 'Pourcentage',
+              'required' =>true,
               'scale' => 2,
           ])
 
           // Champs de date et heure
           ->add('date', DateType::class, [
               'label' => 'Date',
+              'required' =>true,
               'widget' => 'single_text',
           ])
           ->add('datetime', DateTimeType::class, [
               'label' => 'Date et heure',
+              'required' =>true,
               'widget' => 'single_text',
           ])
           ->add('time', TimeType::class, [
               'label' => 'Heure',
+              'required' =>true,
               'widget' => 'single_text',
           ])
           ->add('birthday', BirthdayType::class, [
               'label' => 'Date de naissance',
+              'required' =>true,
               'widget' => 'single_text',
           ])
 
           // Champs de choix
           ->add('checkbox', CheckboxType::class, [
               'label' => 'Case à cocher',
+              'required' =>true,
               'required' => false,
           ])
           ->add('choice', ChoiceType::class, [
               'label' => 'Liste déroulante',
+              'required' =>true,
               'attr' => [
                   'placeholder' => 'Choisissez une option',
               ],
@@ -119,10 +129,11 @@ class CustomerRegisterForm extends BaseForm
                   'Option 2' => 'option2',
                   'Option 3' => 'option3',
               ],
-            'data' => 'option3'
+              'data' => 'option3',
           ])
           ->add('multiple_choice', ChoiceType::class, [
               'label' => 'Choix multiples checkbox',
+              'required' =>true,
               'multiple' => true,
               'expanded' => true,
               'choices' => [
@@ -133,6 +144,7 @@ class CustomerRegisterForm extends BaseForm
           ])
           ->add('multiple_choice_radio', ChoiceType::class, [
               'label' => 'Choix multiples radio',
+              'required' =>true,
               'multiple' => false,
               'expanded' => true,
               'choices' => [
@@ -145,11 +157,13 @@ class CustomerRegisterForm extends BaseForm
           // Champs spéciaux
           ->add('file', FileType::class, [
               'label' => 'Fichier',
+              'required' =>true,
               'required' => false,
           ])
 
           ->add('range', RangeType::class, [
               'label' => 'Curseur',
+              'required' =>true,
               'attr' => [
                   'min' => 0,
                   'max' => 100,
@@ -157,9 +171,11 @@ class CustomerRegisterForm extends BaseForm
           ])
           ->add('url', UrlType::class, [
               'label' => 'URL',
+            'required' =>true,
           ])
           ->add('search', SearchType::class, [
               'label' => 'Recherche',
+            'required' =>true,
           ])
           // Bouton de soumission
           ->add('submit', SubmitType::class, [

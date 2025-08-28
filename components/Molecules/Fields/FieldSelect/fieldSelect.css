@@ -49,25 +49,8 @@
       font-style: italic;
       color: var(--grey-dark);
     }
-  }
 
-  &-placeholder {
-    color: var(--grey-dark);
-    font-style: italic;
-  }
-
-  &--small {
-    .FieldSelect-select {
-      padding: rem-convert(10px);
-    }
-  }
-
-  &--error {
-    .FieldSelect-label {
-      color: var(--error-dark);
-    }
-
-    .FieldSelect-select {
+    &.is-error {
       border: 1px solid var(--error-light);
       color: var(--error);
 
@@ -78,6 +61,17 @@
       &:focus-visible{
         outline: 1px solid var(--error-dark);
       }
+    }
+  }
+
+  &-placeholder {
+    color: var(--grey-dark);
+    font-style: italic;
+  }
+
+  &--small {
+    .FieldSelect-select {
+      padding: rem-convert(10px);
     }
   }
 

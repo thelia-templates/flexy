@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace FlexyBundle\Twig\Layout;
 
 use FlexyBundle\Form\Type\FieldsetType;
-use FlexyBundle\Form\Type\SortChoiceType;
 use FlexyBundle\Service\FormService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;

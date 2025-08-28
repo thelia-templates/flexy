@@ -1,8 +1,8 @@
-{% use 'frontOffice/work/flexy_form_theme.html.twig' %}
+{% use '@formTwig/flexy_form_theme.html.twig' %}
 
 {% set classes = '' %}
-{% if error %}
-  {% set classes = classes ~ ' FieldSelect--error' %}
+{% if errors|length %}
+  {% set attr = attr|merge({class: attr.class~' is-error'}) %}
 {% endif %}
 {% if success %}
   {% set classes = classes ~ ' FieldSelect--success' %}

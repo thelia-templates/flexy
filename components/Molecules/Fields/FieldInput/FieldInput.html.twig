@@ -1,15 +1,14 @@
-{% use 'frontOffice/work/flexy_form_theme.html.twig' %}
+{% use '@formTwig/flexy_form_theme.html.twig' %}
 {% set type = type|default(attr.type|default('text')) %}
 {% set unit = unit|default(null) %}
 
-{% if errors.errors|length %}
-	{% set classes = classes ~ ' FieldInput--error' %}
+{% if errors|length %}
+  {% set attr = attr|merge({class: attr.class~' is-error'}) %}
 {% endif %}
 
 {% if unit or type == 'password' %}
   {% set attr = attr|merge({class: attr.class~' FieldInput-input--unit'}) %}
 {% endif %}
-
 <div class='FieldInput-blockInput' {% if type == 'password' %}data-password-target="wrapper"{% endif %}>
   <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %} value="{{ value }}" {% endif %}/>
   {% if unit %}

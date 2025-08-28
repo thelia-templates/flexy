@@ -15,6 +15,6 @@ class RangeGroupType extends FormType
 
     public function getBlockPrefix(): string
     {
-        return 'rangeGroup';
+        return 'range_group';
     }
 }

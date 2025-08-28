@@ -1,4 +1,4 @@
-{% use 'flexy_form_theme.html.twig' %}
+{% use '@formTwig/flexy_form_theme.html.twig' %}
 
 <label class="Checkbox {{ classes }} {{ error ? 'error'  : ''}}">
 	<input type="checkbox" {{ block('widget_attributes') }}{% if value is defined %} value="{{ value }}"{% endif %}{% if checked %} checked="checked"{% endif %}>

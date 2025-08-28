@@ -15,4 +15,12 @@
     padding:0.625rem  1rem;
     color: white;
   }
+
+  &.is-error {
+    color: var(--error);
+
+    &::file-selector-button {
+      background-color: var(--error);
+    }
+  }
 }

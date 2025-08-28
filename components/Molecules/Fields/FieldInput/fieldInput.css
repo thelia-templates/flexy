@@ -54,6 +54,19 @@
       text-transform: uppercase;
       height: 59px;
     }
+
+    &.is-error {
+      border: 1px solid var(--error-light);
+      color: var(--error);
+
+      &:hover {
+        background-color: var(--error-lightest);
+      }
+
+      &:focus-visible {
+        outline: 1px solid var(--error-dark);
+      }
+    }
   }
 
   &-unit {
@@ -76,29 +89,6 @@
       &--unit {
         padding-right: rem-convert(50px);
       }
-    }
-  }
-
-  &--error {
-    .FieldInput-label {
-      color: var(--error-dark);
-    }
-
-    .FieldInput-input {
-      border: 1px solid var(--error-light);
-      color: var(--error);
-
-      &:hover {
-        background-color: var(--error-lightest);
-      }
-
-      &:focus-visible {
-        outline: 1px solid var(--error-dark);
-      }
-    }
-
-    ::placeholder {
-      color: var(--error);
     }
   }
 
