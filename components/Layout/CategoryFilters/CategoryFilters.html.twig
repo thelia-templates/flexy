@@ -25,15 +25,22 @@
 						{{ 'item(s)'|trans }}</span>
 				{% endif %}
 
+        {% if sorts|length %}
 
 				<div class="ml-auto w-[250px]">
-					{% include '@components/Molecules/Fields/FieldSelect/FieldSelect.html.twig' with {
-              label: "Sort by" | trans,
-              placeholder: "Sort by" | trans,
-              options: sorts|map(sort => sort|merge({'label':sort.title})),
-              dataAction: 'change->filters#sortChange'
-            } %}
+          <div class="FieldSelect">
+            <label for="sort" class="FieldSelect-label">{{ "Sort by" | trans }}</label>
+            <select id="sort" class="FieldSelect-select" data-action="filters#sortChange">
+                <option class='FieldSelect-placeholder' selected disabled>
+                  {{ "Sort by" | trans }}
+                </option>
+              {% for choice in sorts|map(sort => sort|merge({'label':sort.title})) %}
+                <option value="{{ choice.value }}" {% if false %}selected{% endif %}>{{ choice.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
 				</div>
+        {% endif %}
 			</div>
 
 			<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-8 mb-[40px] transition" data-loading="addClass(opacity-50)">

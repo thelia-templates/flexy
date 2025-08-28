@@ -107,10 +107,11 @@ class CategoryFilters extends AbstractController
     {
         $formBuilder = $this->createFormBuilder(null, ['attr' => ['class' => 'relative flex flex-col gap-[30px]']]);
 
-        if (empty($this->getSorts())) {
-            $values = [];
+        $sorts = $this->getSorts();
 
-            foreach ($this->getSorts() as $sort) {
+        if ($sorts) {
+            $values = [];
+            foreach ($sorts as $sort) {
                 $values[$sort['title']] = $sort['value'];
             }
 
