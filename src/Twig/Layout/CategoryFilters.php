@@ -50,7 +50,7 @@ class CategoryFilters extends AbstractController
         ],
     ];
 
-    public const ITEMS_PER_PAGE = 12;
+    public const ITEMS_PER_PAGE = 1;
 
     #[LiveProp]
     public ?int $categoryId = null;
@@ -63,6 +63,9 @@ class CategoryFilters extends AbstractController
 
     #[ExposeInTemplate]
     public ?array $products = [];
+
+    #[LiveProp]
+    public ?array $pagination = [];
 
     #[ExposeInTemplate]
     public ?array $filters = null;
@@ -99,6 +102,7 @@ class CategoryFilters extends AbstractController
             'page' => $initialPage,
         ], 'jsonld');
 
+        $this->getPagination($request);
         $this->products = $request['hydra:member'];
     }
 
@@ -181,6 +185,8 @@ class CategoryFilters extends AbstractController
             'page' => $this->page,
         ], 'jsonld');
 
+
+        $this->getPagination($request);
         $this->products = $request['hydra:member'];
     }
 
@@ -198,5 +204,24 @@ class CategoryFilters extends AbstractController
         $this->sorts = self::SORTS;
 
         return $this->sorts;
+    }
+
+    public function getPagination(array $request): void
+    {
+        preg_match('/\d+/', $request['hydra:view']['@id'], $matches);
+
+        $baseUrl = $this->getProductUrl($this->requestStack->getCurrentRequest()->headers->get('referer') ?? '', $this->tfilters);
+
+        $this->pagination = [
+            'totalItems' => $request['hydra:totalItems'],
+            'itemsPerPage' => self::ITEMS_PER_PAGE,
+            'currentPage' => $matches[0] ?? 1,
+            'baseUrl' => $baseUrl,
+        ];
+    }
+
+    public function getProductUrl(string $base, $params = []): string
+    {
+        return $base.(\count($params) ? '?' : '').http_build_query($params);
     }
 }

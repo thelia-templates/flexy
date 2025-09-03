@@ -48,6 +48,12 @@
 					{% for product in products %}
 						{% include '@components/Organisms/ProductCard/ProductCard.html.twig' with product|merge({displayWishButton: true}) %}
 					{% endfor %}
+          {% if pagination %}
+            <div class="col-span-full">
+              {{ dump(pagination.baseUrl) }}
+              {% include '@components/Molecules/Pagination/Pagination.html.twig' with pagination %}
+            </div>
+          {% endif %}
 				{% else %}
 					<div class="flex justify-center flex-col items-center h-[400px] col-span-full">
 						<div class="w-[250px] h-[150px] lg:w-[300px] lg:h-[200px] mb-6">

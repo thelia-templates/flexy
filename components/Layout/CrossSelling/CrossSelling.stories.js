@@ -1,6 +1,5 @@
 import CrossSelling from './CrossSelling.html.twig';
 import { slider } from '../../../assets/js/slider';
-import { MAX_SECTION_PRODUCT } from '../../base';
 
 export default {
   title: 'Design System/Layout/CrossSelling'
@@ -20,7 +19,7 @@ const standardProduct = {
 
 const products = [];
 
-for (let i = 0; i < MAX_SECTION_PRODUCT; i++) {
+for (let i = 0; i < 3; i++) {
   products.push(standardProduct);
 }
 

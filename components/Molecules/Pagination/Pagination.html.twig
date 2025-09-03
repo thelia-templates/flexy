@@ -1,11 +1,4 @@
-{% set totalPages = totalPages|default(1) %}
-{% set currentPage = currentPage|default(1) %}
-{% set prevText = prevText|default('') %}
-{% set nextText = nextText|default('') %}
-
-
-{# Nombre de pages à afficher de chaque côté de la page actuelle #}
-{% set range = 2 %}
+{% set totalPages = (totalItems / itemsPerPage)|round  %}
 
 {% if totalPages > 1 %}
   <nav class="Pagination">
@@ -14,43 +7,23 @@
         <li class="Pagination-listItemPrev">
           <a href="?page={{ currentPage - 1 }}" class="Pagination-item Pagination-item--isPrev">
             <span class='Pagination-icon'>{{ ux_icon("chevron-left") }}</span>
-            <span class='Pagination-text'>{{ prevText }}</span>
+            <span class='Pagination-text'>{{ 'Previous'|trans }}</span>
           </a>
         </li>
       {% endif %}
-
-      {% if currentPage != 1 and currentPage - 1 != 1 %}
-        <li>
-          <a href="?page=1" class="Pagination-item">1</a>
-        </li>
-      {% endif %}
-
-      {% if currentPage > range + 1 %}
-        <li><span class="Pagination-item">...</span></li>
-      {% endif %}
-
+      {{ app.request.requesturi }}
       {% for page in 1..totalPages %}
-        {% if page == currentPage %}
-          <li><span class="Pagination-item Pagination-item--active">{{ page }}</span></li>
-        {% elseif page > currentPage - range and page < currentPage + range %}
-          <li><a href="?page={{ page }}" class="Pagination-item">{{ page }}</a></li>
-        {% endif %}
+          <li>
+            <a href="{{ baseUrl }}&page={{ page }}" class="Pagination-item  {{ page == currentPage ? 'Pagination-item--active' }}">
+              {{ page }}
+            </a>
+          </li>
       {% endfor %}
-
-      {% if totalPages > currentPage + range %}
-        <li><span class="Pagination-item">...</span></li>
-      {% endif %}
-
-      {% if currentPage != totalPages and currentPage + 1 != totalPages  %}
-        <li>
-          <a href="?page={{ totalPages }}" class="Pagination-item">{{ totalPages }}</a>
-        </li>
-      {% endif %}
 
       {% if currentPage != totalPages %}
         <li class="Pagination-listItemNext">
           <a href="?page={{ currentPage + 1 }}" class="Pagination-item Pagination-item--isNext">
-            <span class='Pagination-text'>{{ nextText }}</span>
+            <span class='Pagination-text'>{{ 'Next'|trans }}</span>
             <span class='Pagination-icon'>{{ ux_icon("chevron-right") }}</span>
           </a>
         </li>
