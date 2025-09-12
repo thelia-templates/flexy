@@ -1,0 +1,28 @@
+<div class="OrderProductCard">
+    <div class="OrderProductCard-mainContent">
+        {{ this.image|raw }}
+        <div class="OrderProductCard-desc">
+            <a href="{{ this.product.publicUrl ~ '?ref=' ~ this.orderProduct.productSaleElementsRef  }}" class="OrderProductCard-title">{{ this.product.i18ns.title }}</a>
+            <div class="OrderProductCard-orderInfos paragraph-6">
+                <span class="OrderProductCard-secondaryTitle basis-full">{{ this.product.i18ns.chapo }}</span>
+                {% for combination in this.pse.attributeCombinations %}
+                    <span class="OrderProductCard-secondarySize">{{ combination.attribute.i18ns.title }}
+                        :
+                        {{ combination.attributeAv.i18ns.title }}</span>
+                {% endfor %}
+                {% if this.orderProduct.quantity %}
+                    <span>{{ 'Quantity:'|trans }}
+                        {{ this.orderProduct.quantity }}</span>
+                {% endif %}
+            </div>
+            {% if orderProduct.wasInPromo %}
+                <div class="OrderProductCard-footer">
+                    <div class="OrderProductCard-price">{{ orderProduct.promoPrice|format_currency('EUR', locale: lang_code) }}</div>
+                    <div class="OrderProductCard-originalPrice">{{ orderProduct.price|format_currency('EUR', locale: lang_code) }}</div>
+                </div>
+            {% else %}
+                <div class="OrderProductCard-price">{{ orderProduct.price|format_currency('EUR', locale: lang_code) }}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>

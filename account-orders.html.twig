@@ -19,12 +19,11 @@
         {{ include('@components/Layout/Subheader/Orders/SubheaderOrders.html.twig', {title: 'My orders'|trans}) }}
     </div>
 
-    {% if orders|length > 0 %}
+    {% if orders|length > 5000 %}
         <div class="container">
             <div class="grid gap-6 mx-auto md:grid-cols-2 mt-2 md:mt-11 mb-[80px] md:mb-[120px]">
                 {% for order in orders %}
-                    {% set order = resources('/api/front/account/orders/' ~ order.id) %}
-                    {{ include('@components/Organisms/Card/Order/OrderCard.html.twig', order) }}
+                    {{ component('Flexy:OrderCard', {orderId: order.id}) }}
                 {% endfor %}
             </div>
         </div>

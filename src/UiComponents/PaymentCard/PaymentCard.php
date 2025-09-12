@@ -37,6 +37,7 @@ class PaymentCard
     public function postMount(): void
     {
         $this->checked = $this->module['id'] === $this->cartFacade->getPaymentModuleId();
+
     }
 
 

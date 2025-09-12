@@ -17,6 +17,7 @@ namespace FlexyBundle\UiComponents\AddressCard;
 use Propel\Runtime\Map\TableMap;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Model\AddressQuery;
+use Thelia\Model\OrderAddressQuery;
 
 #[AsTwigComponent(name: 'Flexy:AddressCard', template: '@UiComponents/AddressCard/AddressCard.html.twig')]
 class AddressCard
@@ -24,17 +25,23 @@ class AddressCard
     public int $addressId;
     public ?array $address;
     public bool $withModal;
+    public bool $inOrder = false;
 
-    public function mount(int $addressId, ?bool $withModal = false): void
+    public function mount(int $addressId, ?bool $inOrder = false, ?bool $withModal = false): void
     {
-        $this->address = AddressQuery::create()
-            ->useCountryQuery()
+        $addressQuery = $inOrder ? OrderAddressQuery::create() : AddressQuery::create();
+
+        $this->address = $addressQuery->useCountryQuery()
             ->endUse()
             ->findOneById($addressId)
             ->toArray(TableMap::TYPE_CAMELNAME);
 
         if ($withModal) {
             $this->withModal = $withModal;
+        }
+
+        if ($inOrder) {
+            $this->inOrder = $inOrder;
         }
 
         $this->addressId = $addressId;

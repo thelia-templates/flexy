@@ -22,23 +22,25 @@
         {% endblock %}
     </label>
 
-    <div class="mt-auto bottom-card-buttons">
-        {% block bottom %}
-            <a {% if disabled %} disabled {% endif %} href="{{ path('account_address_update', {addressId: address.id}) }}" class="hover:text-theme" type="button">
-                <span>
-                    {{ ux_icon('edit') }}
-                </span>
-                {{ 'Modify'|trans }}
-            </a>
-            {% if not address.isDefault %}
-                <button {% if disabled %} disabled {% endif %} class="hover:text-theme" type="button" data-action="address-card#openModal" data-modal="confirmDeleteAddress" data-confirm="{{ path('account_address_delete', {addressId: address.id}) }}">
+    {% if not this.inOrder %}
+        <div class="mt-auto bottom-card-buttons">
+            {% block bottom %}
+                <a {% if disabled %} disabled {% endif %} href="{{ path('account_address_update', {addressId: address.id}) }}" class="hover:text-theme" type="button">
                     <span>
-                        {{ ux_icon('delete') }}
+                        {{ ux_icon('edit') }}
                     </span>
-                    {{ 'Delete'|trans }}
-                </button>
-            {% endif %}
-        {% endblock %}
-    </div>
+                    {{ 'Modify'|trans }}
+                </a>
+                {% if not address.isDefault %}
+                    <button {% if disabled %} disabled {% endif %} class="hover:text-theme" type="button" data-action="address-card#openModal" data-modal="confirmDeleteAddress" data-confirm="{{ path('account_address_delete', {addressId: address.id}) }}">
+                        <span>
+                            {{ ux_icon('delete') }}
+                        </span>
+                        {{ 'Delete'|trans }}
+                    </button>
+                {% endif %}
+            {% endblock %}
+        </div>
+    {% endif %}
 
 </div>

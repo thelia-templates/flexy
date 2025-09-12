@@ -1,8 +1,3 @@
-{% set number = number|default('') %}
-{% set status = status|default(0) %}
-{% set trackLink = trackLink|default(null) %}
-{% set steps = ['Order validated', 'Order in preparation', 'Order shipped', 'Order delivered'] %}
-
 <div class="DeliveryTracking">
     <div class="DeliveryTracking-content">
         <div>
@@ -11,16 +6,20 @@
             </div>
             <div class="DeliveryTracking-desc">
                 {{ 'Tracking number'|trans }}
-                {{ number }}
+                {{ ref }}
             </div>
         </div>
         {% if trackLink %}
-            {{ include('@components/Molecules/Button/Button.html.twig', {classes: 'Button--small', text: 'Track my package'|trans, href: trackLink}) }}
+            {{ component('Flexy:Button', {
+                text: 'Track my package'|trans|trans,
+                href: trackLink,
+                size: 'small',
+            }) }}
         {% endif %}
     </div>
     <hr/>
     <ul class="DeliveryTracking-steps">
-        {% for index, step in steps %}
+        {% for index, step in this.steps %}
             <li class="DeliveryTracking-step {% if index == status %}DeliveryTracking-step--active{% endif %}">
                 <span class="DeliveryTracking-icon">
                     {% if index <= status %}

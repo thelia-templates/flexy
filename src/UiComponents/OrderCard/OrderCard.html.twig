@@ -1,0 +1,66 @@
+<div class="OrderCard">
+    <div class="justify-between 2xl:flex">
+        <div>
+            <div class="OrderCard-title">
+                {{ 'Order N°'|trans }}
+                {{ this.order.ref }}
+            </div>
+            <div class="OrderCard-date">
+                {{ 'of'|trans }}
+                {{ this.order.createdAt|format_date() }}
+            </div>
+        </div>
+        <div class="flex justify-between mt-1 2xl:block 2xl:mt-0">
+            <div class="text-black paragraph-3">
+                {{ this.order.orderProducts|length }}
+                {{ (this.order.orderProducts|length > 1 ? 'items': 'item')|trans }}
+            </div>
+            <div class="font-semibold text-black paragraph-1">
+                {{ this.order.totalAmount|format_currency('EUR', locale: lang_code) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="2xl:flex 2xl:items-center 2xl:gap-4 2xl:mb-4 2xl:mt-2">
+        <div class="mt-1 mb-2 2xl:mt-0 2xl:mb-0">
+            {{ include('@components/Molecules/OrderTag/OrderTag.html.twig', {customText: this.order.orderStatus.i18ns.title, classes: 'OrderTag--' ~ this.order.orderStatus.code}) }}
+        </div>
+        {% if this.order.deliveryDate is defined %}
+            <div class="OrderCard-delivery">
+                {{ 'Scheduled for delivery on'|trans }}
+                {{ this.order.deliveryDate }}
+            </div>
+        {% endif %}
+    </div>
+    <div class="OrderCard-images">
+        {% for orderProduct in this.order.orderProducts %}
+            {% set imageId = resources('/api/front/product_sale_elements_product_image', {productSaleElementsId: orderProduct.productSaleElementsId})|first.productImageId %}
+            {% if not imageId %}
+                {% set imageId = resources('/api/front/product_images', {'product.id': orderProduct.productId})|first.id %}
+            {% endif %}
+            <a href="{{ orderProduct.publicUrl ~'?ref=' ~ orderProduct.productSaleElementsRef }}" class="OrderCard-image">
+                {{ getImages({
+                    source_type: 'product',
+                    img_id: imageId,
+                    filters: 'order_card',
+                    limit: 1,
+                    img_attrs: {
+                        class: 'w-full h-full object-center object-contain',
+                        loading: 'lazy',
+                        widht: '72',
+                        height: '72',
+                    },
+                    placeholder: asset('dist/images/placeholder.webp'),
+                })|raw }}
+            </a>
+
+        {% endfor %}
+        <div class="OrderCard-nbImages"></div>
+    </div>
+    <div class="mt-6 text-center md:text-left">
+        {{ component('Flexy:Button', {
+            text: 'See order details'|trans,
+            href: '/account/order/' ~ this.order.id
+        }) }}
+    </div>
+</div>

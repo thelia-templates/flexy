@@ -34,4 +34,8 @@
         align-items:baseline;
         gap: 0.5rem;
     }
+
+    .RadioButton {
+        align-self: baseline;
+    }
 }

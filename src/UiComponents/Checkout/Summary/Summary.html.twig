@@ -1,5 +1,4 @@
 <div {{ attributes }}>
-
         {% set totalItems = this.summary.item_count %}
         {% set subTotal = this.summary.raw_taxed_total_price|format_currency('EUR', locale: 'fr') %}
         {% set total = this.summary.total_taxed_price|format_currency('EUR', locale: 'fr') %}

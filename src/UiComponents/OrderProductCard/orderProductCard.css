@@ -95,7 +95,11 @@
     margin-top: 0;
   }
   &-footer {
-    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+      margin-top: 10px;
   }
 
   &:hover,

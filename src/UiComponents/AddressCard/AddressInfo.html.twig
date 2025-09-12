@@ -1,5 +1,5 @@
 {% if title %}
-    {% set name = address.label %}
+    {% set name = address.label ? address.label : address.firstname ~ ' ' ~ address.lastname %}
 {% else %}
     {% set title = address.label %}
     {% set name = address.firstname ~ ' ' ~ address.lastname %}
