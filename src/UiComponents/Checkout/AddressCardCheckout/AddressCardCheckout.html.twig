@@ -1,5 +1,15 @@
 {% extends '@UiComponents/AddressCard/AddressCard.html.twig'  %}
 
+{% block header %}
+    {% if this.address.isDefault %}
+        {{ include('@components/Molecules/Favorite/Favorite.html.twig', {
+            text: 'Favourite'|trans,
+            selected: this.address.isDefault,
+            addressId: address.id,
+        }) }}
+    {% endif %}
+{% endblock %}
+
 {% block form %}
     {% set event_name = this.type == "delivery" ? 'SET_DELIVERY_ORDER_ADDRESS_ID' : 'SET_INVOICE_ORDER_ADDRESS_ID'%}
     {{ component('Flexy:RadioButton', {

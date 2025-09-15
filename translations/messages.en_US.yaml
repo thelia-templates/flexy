@@ -180,6 +180,7 @@ Newsletter: Newsletter
 Update my password: Update my password
 Your password has been updated: Your password has been updated
 My addresses: My addresses
+My address: My address
 Your address has been deleted: Your address has been deleted
 Your address has been created: Your address has been created
 Are you sure you want to delete this address ?: Are you sure you want to delete this address ?
@@ -245,3 +246,6 @@ State: State
 Register me: Register me
 I agree to receive promotional offers by newsletter: I agree to receive promotional offers by newsletter
 I agree to our privacy policy: I agree to the privacy policy.*
+This name will allow you to easily identify each of your addresses: This name will allow you to easily identify each of your addresses
+Choose a delivery method: Choose a delivery method
+In case we need to contact you about your order: In case we need to contact you about your order

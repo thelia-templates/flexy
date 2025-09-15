@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Controller;
 
+use FlexyBundle\Form\AddressEditForm;
 use Front\Front;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -64,7 +65,8 @@ class AccountController extends FlexyController
     public function addressUpdate(EventDispatcherInterface $eventDispatcher, ?int $addressId = null): RedirectResponse
     {
         $this->checkAuth();
-        $addressUpdate = $this->createForm(FrontForm::ADDRESS_UPDATE);
+
+        $addressUpdate = $this->createForm(AddressEditForm::FORM_NAME);
 
         try {
             $customer = $this->getSecurityContext()->getCustomerUser();
@@ -92,7 +94,6 @@ class AccountController extends FlexyController
         } catch (\Exception $e) {
             $message = $this->getTranslator()->trans('Sorry, an error occured: %s', ['%s' => $e->getMessage()], Front::MESSAGE_DOMAIN);
         }
-
         $this->getParserContext()->set('address_id', $addressId);
 
         Tlog::getInstance()->error(\sprintf('Error during address creation process : %s', $message));
@@ -122,7 +123,7 @@ class AccountController extends FlexyController
     {
         $this->checkAuth();
 
-        $addressCreate = $this->createForm(FrontForm::ADDRESS_CREATE);
+        $addressCreate = $this->createForm(AddressEditForm::FORM_NAME);
 
         try {
             $form = $this->validateForm($addressCreate, 'post');

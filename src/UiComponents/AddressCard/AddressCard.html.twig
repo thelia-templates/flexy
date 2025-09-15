@@ -2,13 +2,11 @@
 <div {{ attributes.defaults({class: 'AddressCard ' ~ (this.checked ? 'selected' : '')}) }} {{ this.withModal ? stimulus_controller('address-card', {}, {}, {modal: '.Modal'}) }}>
     <div class="AddressCard-top">
         {% block header %}
-            {% if this.address.isDefault %}
-                {{ include('@components/Molecules/Favorite/Favorite.html.twig', {
-                    text: 'Favourite'|trans,
-                    selected: this.address.isDefault,
-                    addressId: address.id,
-                }) }}
-            {% endif %}
+            {{ include('@components/Molecules/Favorite/Favorite.html.twig', {
+                text: 'Favourite'|trans,
+                selected: this.address.isDefault,
+                addressId: address.id,
+            }) }}
         {% endblock %}
     </div>
 

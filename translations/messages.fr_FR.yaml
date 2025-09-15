@@ -180,6 +180,7 @@ Newsletter: Lettre d'information
 Update my password: Modifier mon mot de passe
 Your password has been updated: Votre mot de passe a été mis à jour,
 My addresses: Mes adresses
+My address: Mon adress
 Your address has been deleted: Votre adresse a été supprimée
 Your address has been created: Votre nouvelle adresse a été créée
 Are you sure you want to delete this address?: Êtes-vous sûr de vouloir supprimer cette adresse ?
@@ -243,3 +244,6 @@ State: État
 Register me: Valider mon inscription
 I agree to receive promotional offers by newsletter: J'accepte de recvoir des offres promotionnelles par le biais de la newsletter.
 I agree to our privacy policy: J'accepte les conditions générales d'utilisation.
+This name will allow you to easily identify each of your addresses: Ce label vous permettra d'identifier chacune de vos adresses
+Choose a delivery method: Votre mode de livraison
+In case we need to contact you about your order: Si nous avons besoin de vous contacter au sujet de votre commande

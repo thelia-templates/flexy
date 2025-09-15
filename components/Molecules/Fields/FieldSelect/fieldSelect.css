@@ -21,7 +21,7 @@
 
     &-select {
         @apply paragraph-4;
-        border: 1px solid var(--theme);
+        border: 1px solid var(--theme-medium);
         border-radius: 8px;
         color: var(--black);
         font-style: normal;

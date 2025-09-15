@@ -18,28 +18,9 @@
             <div class="text-black h3 mb-6 lg:mb-[44px]">
                 {{ 'New Address'|trans }}
             </div>
-
-            {% set form = getForm('thelia_address_creation') %}
-
-            {{ form_start(form, {attr: {
-                class: 'flex flex-col gap-6',
-                action: path('account_address_create'),
-                method: 'POST',
-            }},
-            ) }}
-
-            {{ form_row(form.success_url, {value: path('account_addresses', {success: true})}) }}
-            {{ form_row(form.error_url, {value: path('account_address_create')}) }}
-            {{ form_rest(form) }}
-            {{ form_errors(form) }}
-            <div class="flex justify-center mt-4">
-                {{ component('Flexy:Button', {
-                    text: 'Create address'|trans,
-                    class: 'Button--large lg:w-full',
-                    type: 'submit',
-                }) }}
-            </div>
-            {{ form_end(form) }}
+            {{ component('Flexy:AccountAddressForm',{
+                successParam: 'create_success'
+            }) }}
         </div>
     </main>
 {% endblock %}
