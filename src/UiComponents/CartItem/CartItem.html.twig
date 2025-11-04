@@ -62,10 +62,10 @@
                     {% if this.pse.promo %}
                         <div class="CartItem-footerRight">
                             <div class="CartItem-price">
-                                {{ this.prices.totalPromoTaxedPrice|format_currency('EUR', locale: lang_code) }}
+                                {{ this.prices.promoTaxedPrice|format_currency('EUR', locale: lang_code) }}
                             </div>
                             <div class="CartItem-originalPrice">
-                                {{ this.prices.totalTaxedPrice|format_currency('EUR', locale: lang_code) }}
+                                {{ this.prices.taxedPrice|format_currency('EUR', locale: lang_code) }}
                             </div>
                         </div>
                     {% else %}
