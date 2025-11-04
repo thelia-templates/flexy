@@ -67,6 +67,7 @@ class CartItem
 
         $this->title = $cartItemModel->getProduct()->getTitle();
         $this->desc = $cartItemModel->getProduct()->getChapo();
+        $this->url = $cartItemModel->getProduct()->getUrl($this->langService->getLocale());
 
         $this->outOfStock = $this->cartItem->stock <= 0;
         $this->attributesAv = $this->pseService->getAttributesAvFromPse($cartItemModel->getProductSaleElements());
