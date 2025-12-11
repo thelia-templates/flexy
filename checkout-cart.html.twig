@@ -18,7 +18,7 @@
     {%- if not emptyCart -%}
         {{ component('Flexy:Checkout:NextButton', {
             href: path('checkout_delivery'),
-            step: constant('FlexyBundle\\UiComponents\\Checkout\\CheckoutSteps::CART'),
+            step: constant('FlexyBundle\\UiComponents\\Checkout\\CheckoutSteps\\CheckoutSteps::CART'),
         }) }}
     {%- endif -%}
 {%- endblock -%}
