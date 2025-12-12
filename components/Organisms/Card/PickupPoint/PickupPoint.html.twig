@@ -16,18 +16,12 @@
 
 <div class="PickupPoint {% if selected %}selected{% endif %}">
     <label class="PickupPoint-content">
-        {{ include('@components/Atoms/Form/Radio.html.twig', {
-                type: 'span',
-                name: 'PickupPoint',
-                value: id,
-                checked: selected,
-                props: {
-                    'data-action': 'live#action',
-                    'data-live-action-param': 'updateOption',
-                    'data-live-id-param': id,
-                },
-            })
-        }}
+        {{ component('Flexy:RadioButton', {
+            'data-action': 'live#action',
+            'data-live-action-param': 'updateOption',
+            'data-live-id-param': id,
+            checked : selected
+        }) }}
 
         <span>
             <span class="PickupPoint-title">
@@ -98,7 +92,7 @@
     <div class="mt-4 md:hidden">
         {{ component('Flexy:Button', {
             text: 'Choose this relay point'|trans,
-            liveEvent: 'forceCustomerDefaultDeliveryAddress'
+            liveEvent: 'forceCustomerDefaultDeliveryAddress',
             fill: true,
         }) }}
     </div>

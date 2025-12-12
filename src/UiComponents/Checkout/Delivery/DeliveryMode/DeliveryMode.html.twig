@@ -1,5 +1,5 @@
 
-<div {{attributes.defaults({class: 'DeliveryMode DeliveryModule ' ~ (this.checked ? 'selected ' : '') ~ type })}}>
+<div {{attributes.defaults({class: 'DeliveryMode DeliveryModule ' ~ (this.checked ? 'selected ' : '') ~ type })}}  {% block stimulus %}{% endblock %}>
 
     <label class='DeliveryMode-content'>
         {{ component('Flexy:RadioButton', {
@@ -14,8 +14,9 @@
 			<div class='flex justify-between'>
 				<div>
 					<span class='DeliveryMode-title'>{{ this.title }}</span>
-					{% if this.date %}
-                        <span class='DeliveryMode-description'>{{ 'Estimated delivery on'|trans }} {{ this.date }}</span>
+		            <span class='DeliveryMode-description'>{{ this.description }}</span>
+                    {% if moduleDescription %}
+                        <span class='DeliveryMode-moduleDescription'>{{ moduleDescription|raw }}</span>
                     {% endif %}
 				</div>
 				{% if icon %}
@@ -24,12 +25,15 @@
 				</div>
                 {% endif %}
 			</div>
-			<div class='flex items-center justify-between mt-6'>
+			<div class='flex items-center mt-6'>
 				<span class='DeliveryMode-price'>{{ this.price ? this.price|format_currency('EUR', locale: lang_code) : 'Free'|trans }}</span>
-				{% include '@components/Molecules/Tag/Tag.html.twig' with { icon: "carbone", customText: "TODO CO2" } %}
 			</div>
 
             {% block content %}{% endblock %}
+
+            <div class="DeliveryMode-children {% if not this.checked %}hidden{% endif %}">
+                {% block children %}{% endblock %}
+            </div>
 
 		</span>
     </label>

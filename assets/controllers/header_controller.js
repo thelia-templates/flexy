@@ -9,6 +9,10 @@ class HeaderController extends Controller {
   }
 
   connect() {
+    if (!this.hasTogglerTarget) {
+      return;
+    }
+
     this.togglerTarget?.addEventListener('click', () => {
       this.menuTarget.classList.toggle('is-open');
       this.togglerTarget.classList.toggle('is-selected');
@@ -17,6 +21,10 @@ class HeaderController extends Controller {
   }
 
   close() {
+    if (!this.hasTogglerTarget) {
+      return;
+    }
+
     this.menuTarget.classList.remove('is-open');
     this.backTarget.dataset.menuBack = -1;
     this.togglerTarget.classList.remove('is-selected');

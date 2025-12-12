@@ -12,9 +12,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace FlexyBundle\UiComponents\PickupPointSearch;
+namespace FlexyBundle\UiComponents\Checkout\PickupPointSearch;
 
 use FlexyBundle\Form\Type\PickupAddressType;
+use FlexyBundle\Service\DeliveryService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -27,8 +28,9 @@ use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Thelia\Api\Service\DataAccess\DataAccessService;
+use Thelia\Core\HttpFoundation\Session\Session;
 
-#[AsLiveComponent(name: 'Flexy:PickupPointSearch', template: '@UiComponents/PickupPointSearch/PickupPointSearch.html.twig')]
+#[AsLiveComponent(name: 'Flexy:Checkout:PickupPointSearch', template: '@UiComponents/Checkout/PickupPointSearch/PickupPointSearch.html.twig')]
 class PickupPointSearch extends AbstractController
 {
     use ComponentToolsTrait;
@@ -46,13 +48,22 @@ class PickupPointSearch extends AbstractController
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
-        private DataAccessService $dataAccessService,
+        private readonly DataAccessService $dataAccessService,
+        private readonly ?DeliveryService $deliveryService,
+        private readonly Session $session
     ) {
     }
 
     protected function instantiateForm(): FormInterface
     {
         return $this->createForm(PickupAddressType::class, $this->initialFormData);
+    }
+
+    public function mount()
+    {
+        if ($this->session->has('pickup')) {
+            $this->selectedPickup = $this->session->get('pickup');
+        }
     }
 
     /**
@@ -81,10 +92,17 @@ class PickupPointSearch extends AbstractController
         $this->dispatchBrowserEvent('pickuppoint:update', ['pickups' => $this->pickups, 'coordinates' => $coordinates]);
     }
 
+    private function setSelectedPickup($pickup)
+    {
+       $this->selectedPickup = $pickup;
+       $this->deliveryService->setPickupSession($pickup);
+       $this->emit('updateNextButton');
+    }
+
     #[LiveAction]
     public function pickupPointClick(#[LiveArg] $pickup): void
     {
-        $this->selectedPickup = $pickup;
+        $this->setSelectedPickup($pickup);
     }
 
     #[LiveAction]
@@ -92,7 +110,7 @@ class PickupPointSearch extends AbstractController
     {
         $current = array_filter($this->pickups, fn ($item) => $item['id'] === $id);
 
-        $this->selectedPickup = reset($current);
+        $this->setSelectedPickup(reset($current));
 
         $this->dispatchBrowserEvent('pickup:selected', ['pickup' => $this->selectedPickup]);
     }

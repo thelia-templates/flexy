@@ -3,7 +3,8 @@ import { getComponent, Component } from '@symfony/ux-live-component';
 import {
   PickupLocationType,
   PickupMap
-} from '@components/Organisms/Modules/PickupPointModule/pickupMap';
+} from '../../src/UiComponents/Checkout/Delivery/PickupDelivery/pickupMap';
+import { PickupPointView } from '../../src/UiComponents/Checkout/Delivery/PickupDelivery/pickupPointView';
 
 export default class extends Controller<HTMLFormElement> {
   private component!: Component;
@@ -12,10 +13,10 @@ export default class extends Controller<HTMLFormElement> {
     this.component = await getComponent(this.element);
     //this.component.action
     PickupMap(this.pickupPointClick.bind(this));
+    PickupPointView();
   }
 
   pickupPointClick(pickup: PickupLocationType): void {
-    console.log({ pickup });
     this.component.action('pickupPointClick', { pickup });
-  } 
+  }
 }

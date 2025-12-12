@@ -114,10 +114,13 @@
                 {% endif %}
                 {% if option.deliveryMode == enum('Thelia\\Domain\\Checkout\\Enum\\DeliveryMode').PICKUP.value %}
                     {{ component('Flexy:Checkout:Delivery:PickupDelivery', {
-                        title: option.title~' '~moduleName,
+                        title: option.title,
+                        description: 'Delivery within 24 to 48 hours in France'|trans,
                         optionCode: option.code,
                         moduleId: option.moduleId,
                         price: option.postage,
+                        deliveryAddressId: this.deliveryAddressId,
+                        invoiceAddressId: this.invoiceAddressId,
                         icon: 'reinsurance-pickup',
                     }) }}
                 {% endif %}

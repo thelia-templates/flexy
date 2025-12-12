@@ -9,23 +9,18 @@
         {{ form_row(form.address) }}
         {{ form_end(form) }}
     </div>
-    <div>
-        <button class="text-black underline-with-icon" type="button">
-            {{ ux_icon('pin-circle') }}
-            {{ 'Select on map'|trans }}
-        </button>
-    </div>
-    <div class="flex gap-1 md:gap-5">
+
+    <div class="flex gap-1 mt-4 md:gap-5">
         {{ component('Flexy:Button',{
             text: 'List view'|trans,
-            classes :'PickupPointModule-buttonListView',
+            class :'PickupPointModule-buttonListView',
             sharp: true,
             icon_left: 'list'
         }) }}
         {{ component('Flexy:Button',{
             color: "secondary",
             text: 'Map view'|trans,
-            classes :'PickupPointModule-buttonListView',
+            class :'PickupPointModule-buttonMapView',
             sharp: true,
             icon_left: 'pin-circle'
         }) }}

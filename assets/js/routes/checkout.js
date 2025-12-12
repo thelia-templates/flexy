@@ -1,10 +1,4 @@
-import { pickupPoint } from '@components/Organisms/Card/PickupPoint/PickupPoint';
-import { PickupPointView } from '@components/Organisms/Modules/PickupPointModule/pickupPointView';
-
-function delivery() {
-  pickupPoint();
-  PickupPointView();
-}
+function delivery() {}
 
 document.addEventListener('DOMContentLoaded', () => {
   delivery();

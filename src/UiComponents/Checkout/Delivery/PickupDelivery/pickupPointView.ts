@@ -2,6 +2,7 @@ export function PickupPointView() {
   const buttonMapView = document.querySelector(
     '.PickupPointModule-buttonMapView'
   );
+  console.log('buttonMapView: ', buttonMapView);
   const buttonListView = document.querySelector(
     '.PickupPointModule-buttonListView'
   );

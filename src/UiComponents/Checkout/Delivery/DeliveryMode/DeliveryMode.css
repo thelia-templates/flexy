@@ -1,11 +1,10 @@
 .DeliveryMode {
-  background: var(--theme-lightest);
-  border: 1px solid var(--theme-lightest);
+  background: var(--white);
   border-radius: rem-convert(8px);
-
+  box-shadow: 0 3px 30px 0 rgba(0, 0, 0, 0.1);
   &.checked,
   &.selected {
-    background: var(--theme-lighter);
+    background: var(--theme-light);
     border: 1px solid var(--theme-medium);
   }
 
@@ -24,6 +23,12 @@
     @apply paragraph-6;
     font-weight: 400;
     color: var(--grey);
+  }
+  &-moduleDescription {
+    @apply paragraph-4;
+    font-weight: 400;
+    color: var(--grey);
+    margin-top: 17px;
   }
 
   &-price {

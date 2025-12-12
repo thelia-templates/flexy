@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\UiComponents\Checkout\NextButton;
 
+use FlexyBundle\Service\DeliveryService;
 use FlexyBundle\UiComponents\Checkout\CheckoutEvents;
 use FlexyBundle\UiComponents\Checkout\CheckoutSteps\CheckoutSteps;
 use Propel\Runtime\Exception\PropelException;
@@ -40,6 +41,7 @@ class NextButton
     public function __construct(
         private readonly CartFacade $cartFacade,
         private readonly ShippingFacade $shippingFacade,
+        private readonly DeliveryService $deliveryService,
     ) {
     }
 
@@ -75,12 +77,13 @@ class NextButton
     private function isDeliveryValid(): bool
     {
         $cart = $this->cartFacade->getOrCreateFromSession();
-        // test home delivery
+        $isPickupOk = $this->deliveryService->isValid($cart->getDeliveryModuleId());
 
         if (
             $this->isCartValid()
             && $cart->getAddressDeliveryId()
             && $cart->getDeliveryModuleId()
+            && $isPickupOk
         ) {
             return true;
         }

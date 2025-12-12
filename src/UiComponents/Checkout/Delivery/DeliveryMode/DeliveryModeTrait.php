@@ -21,4 +21,5 @@ trait DeliveryModeTrait
     public string $title;
     public string $date;
     public string $price;
+    public string $description;
 }
