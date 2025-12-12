@@ -1,22 +1,27 @@
 {% props
-    imgWidth = 300,
-    imgHeight = 300,
     wishButton = false,
     inWishlist = false,
     reviewCount = 0
 %}
 
-
-{% if this.product.id is defined and img is not defined %}
-	{% set images = resources('/api/front/product_images', {'product.id': this.product.id, position: 'ASC', itemsPerPage: 1}) %}
-	{% if images %}
-		{% set img = {url: '/legacy-image-library/product_image_' ~ images|first.id ~ '/full/%5E*!386,280/0/default.webp', alt: this.product.i18ns.title} %}
-	{% endif %}
-{% endif %}
-
-{% if img is not defined %}
-	{% set img = img|default({url: asset('dist/images/placeholder2.webp'), alt: ''}) %}
-{% endif %}
+{% set imageConfig = {
+    source_type: 'product',
+    source_id: this.product.id,
+    filters: {
+        '1024px': 'product_card',
+        'default': 'product_card_mobile',
+    },
+    wrapper: 'picture',
+    wrapper_attrs: {
+        class: 'ProductCard-img',
+    },
+    position: 1,
+    img_attrs: {
+        loading: 'lazy',
+    },
+    limit: 1,
+    placeholder: asset('dist/images/placeholder2.webp'),
+} %}
 
 <div class="ProductCard {{ attributes.render('class') }}" {{attributes}}>
 	<div class="ProductCard-header">
@@ -42,12 +47,10 @@
 	</div>
 	<div class="ProductCard-mainContent">
 		<a class="ProductCard-imgLink" href="{{ this.product.publicUrl }}">
-			<figure class="ProductCard-img">
-				<img src="{{ img.url }}" alt="{{ img.alt }}" title="{{ img.alt }}" loading="lazy">
-			</figure>
+            {{getImages(imageConfig)|raw}}
 		</a>
 		<div class="ProductCard-desc">
-			<a href="{{ this.product.publicUrl }}" class="ProductCard-title">{{ this.product.i18ns.title }}</a>
+			<a href="{{ this.product.publicUrl }}" class="ProductCard-title">{{ this.product.title }}</a>
 
 			{% if this.product.i18ns.chapo %}
 				<div class="ProductCard-subTitle paragraph-3">{{ this.product.i18ns.chapo }}</div>

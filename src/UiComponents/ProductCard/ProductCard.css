@@ -4,6 +4,8 @@
   flex-direction: column;
   justify-content: space-between;
   background: var(--white);
+  overflow: hidden;
+
   @apply rounded-lg;
   z-index: 0;
   .ButtonWishList {
@@ -74,9 +76,13 @@
 
   &-img {
     overflow: hidden;
-    height: 187px;
-    @screen sm {
-      height: 280px;
+    display: block;
+    height: 190px;
+
+    @screen lg {
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      height: auto;
     }
 
     &:focus-visible {

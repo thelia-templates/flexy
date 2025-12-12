@@ -1,29 +1,38 @@
-{% set title = category.i18ns.title|default('') %}
-{% set href = category.publicUrl|default('#0') %}
+{% set title = title|default('') %}
+{% set href = href|default('#0') %}
 {% set classes = classes|default('') %}
 {% set id = id|default(null) %}
+
+
+{% set image_params = {
+    source_type: 'category',
+    source_id: id,
+    filters: {
+        '1024px': 'category_card',
+        'default': 'category_card_mobile',
+    },
+    alt: ('Category'|trans) ~ ' ' ~ title,
+    wrapper: 'picture',
+    wrapper_attrs: {
+        class: 'CategoryCard-img',
+    },
+    'img_attrs': {
+        loading: 'lazy',
+        width: 374,
+        height: 190
+    },
+    position: 1,
+    limit: 1,
+    placeholder: asset('dist/images/placeholder.webp'),
+} %}
+
+{% set categoryImage = getImages(image_params) %}
 
 <div class="CategoryCard {{ classes }}">
 
   <div class="CategoryCard-mainContent">
     <a class="CategoryCard-imgLink" href="{{ href }}">
-      {{getImages({
-        'source_id': id,
-        'source_type': 'category',
-        filters: 'default',
-        alt: ('Category'|trans)~' '~title,
-        'img_attrs': {
-          loading: 'lazy',
-          width: 190,
-          height: 190
-        },
-        wrapper: 'figure',
-        'wrapper_attrs': {
-          'class' : 'CategoryCard-img'
-        },
-        placeholder: asset('dist/images/placeholder.webp'),
-        limit: 1
-      })|raw}}
+       {{ categoryImage|raw }}
     </a>
     <div class="CategoryCard-desc">
       <span class="CategoryCard-title">{{ title }}</span>

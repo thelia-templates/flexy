@@ -18,26 +18,26 @@
                     {% for folder in childFolders %}
                         <li>
                             {{ include('@components/Organisms/Card/Article/Article.html.twig', {
-                id: folder.id,
-                source: 'folder',
-                href: folder.publicUrl,
-                title: 'Titre',
-                }) }}
+                                id: folder.id,
+                                source: 'folder',
+                                href: folder.publicUrl,
+                                title: 'Titre',
+                            }) }}
                         </li>
                     {% endfor %}
                 </ul>
             {% endif %}
 
             {% if contents|length %}
-                <ul class="grid grid-cols-3 gap-4 my-8">
+                <ul class="grid md:grid-cols-3 gap-4 my-8">
                     {% for content in contents %}
                         <li>
                             {{ include('@components/Organisms/Card/Article/Article.html.twig', {
-                id: content.id,
-                source: 'content',
-                href: content.publicUrl,
-                title: content.i18ns.title,
-                }) }}
+                                id: content.id,
+                                source: 'content',
+                                href: content.publicUrl,
+                                title: content.i18ns.title,
+                            }) }}
                         </li>
                     {% endfor %}
                 </ul>

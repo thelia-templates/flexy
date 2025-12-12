@@ -43,8 +43,12 @@
 
   &-img {
     overflow: hidden;
-    height: 187px;
-    @screen sm {
+    width: 100%;
+    height: 190px;
+    display: block;
+
+    @screen lg {
+      aspect-ratio: 374 / 280;
       height: 280px;
     }
 

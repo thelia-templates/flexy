@@ -15,7 +15,60 @@ liip_imagine:
 
   filter_sets:
     default:
+      quality: 90
     add_to_cart:
+      quality: 90
     order_card:
-    add_to_cart:
+      quality: 90
     order_card_detail:
+      quality: 90
+    similar_content:
+      quality: 90
+      filters:
+        thumbnail:
+          size: [90, 90]
+          mode: outbound
+    # ProductCard
+    product_card_mobile:
+      quality: 90
+      filters:
+        thumbnail:
+          size: [187, 187]
+          mode: inset
+          allow_upscale: true
+    product_card:
+      quality: 90
+      filters:
+        thumbnail:
+          size: [386, 386]
+          mode: inset
+          allow_upscale: true
+    # ProductGallery
+    product_gallery_thumbnail:
+      quality: 90
+    product_gallery_thumbnail_mobile:
+      quality: 90
+    product_gallery_main:
+      quality: 90
+    product_gallery_main_mobile:
+      quality: 90
+    # CategoryCard
+    category_card:
+      quality: 90
+      filters:
+        thumbnail:
+          size: [374, 280]
+          mode: outbound
+    category_card_mobile:
+      quality: 90
+      filters:
+        thumbnail:
+          size: [374, 190]
+          mode: outbound
+    # ArticleCard
+    article_card:
+      quality: 90
+      filters:
+        thumbnail:
+          size: [98, 98]
+          mode: outbound

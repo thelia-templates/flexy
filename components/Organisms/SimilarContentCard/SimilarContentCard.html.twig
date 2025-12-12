@@ -3,24 +3,27 @@
 {% set date = date|default('') %}
 {% set url = url|default('') %}
 
+ {% set product_image_params = {
+    source_type: 'content',
+    source_id: id,
+    wrapper: 'figure',
+    wrapper_attrs: {
+        class: 'SimilarContentCard-img',
+    },
+    filters: 'similar_content',
+    position: 1,
+    img_attrs: {
+        loading: 'lazy',
+        width: 98,
+        height: 98
+    },
+    placeholder: asset('dist/images/placeholder.webp'),
+} %}
+
+{% set productImage = getImages(product_image_params) %}
+
 <div class="SimilarContentCard {{ classes }}">
     <div class="SimilarContentCard-imgLink">
-        {% set product_image_params = {
-      source_type: 'content',
-      source_id: id,
-      filters: 'similar_content_default',
-      wrapper: 'figure',
-      wrapper_attrs: {
-        class: 'SimilarContentCard-img',
-      },
-      position: 1,
-      img_attrs: {
-          loading: 'lazy',
-      },
-      placeholder: asset('dist/images/placeholder.webp'),
-    } %}
-        {% set productImage = getImages(product_image_params) %}
-
         {{ productImage|raw }}
     </div>
     <div class="SimilarContentCard-desc">

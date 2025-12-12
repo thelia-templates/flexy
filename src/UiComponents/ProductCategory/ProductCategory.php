@@ -34,6 +34,7 @@ class ProductCategory
         ]);
 
         return array_map(fn ($item) => [
+            'id' => $item['id'] ?? '',
             'title' => $item['i18ns']['title'] ?? '',
             'button' => [
                 'label' => $this->translator->trans('Discover'),
