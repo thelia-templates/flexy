@@ -14,11 +14,13 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Form;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Translation\Translator;
 use Thelia\Model\AddressQuery;
@@ -29,6 +31,8 @@ class CheckoutForm extends AbstractType
 {
     public function __construct(
         private readonly SecurityContext $security,
+        #[Autowire(service: 'translator')]
+        public ?TranslatorInterface $translator,
     ) {
     }
 
@@ -70,14 +74,14 @@ class CheckoutForm extends AbstractType
         $address = AddressQuery::create()->findPk($value);
 
         if (null === $address) {
-            $context->addViolation(Translator::getInstance()->trans('Address ID not found'));
+            $context->addViolation($this->translator->trans('Address ID not found'));
 
             return;
         }
 
         $customer = $this->security->getCustomerUser();
         if (!$customer || $address->getCustomerId() !== $customer->getId()) {
-            $context->addViolation(Translator::getInstance()->trans('Unauthorized address access'));
+            $context->addViolation($this->translator->trans('Unauthorized address access'));
         }
     }
 
@@ -86,14 +90,14 @@ class CheckoutForm extends AbstractType
         $address = AddressQuery::create()->findPk($value);
 
         if (null === $address) {
-            $context->addViolation(Translator::getInstance()->trans('Address ID not found'));
+            $context->addViolation($this->translator->trans('Address ID not found'));
 
             return;
         }
 
         $customer = $this->security->getCustomerUser();
         if (!$customer || $address->getCustomerId() !== $customer->getId()) {
-            $context->addViolation(Translator::getInstance()->trans('Unauthorized address access'));
+            $context->addViolation($this->translator->trans('Unauthorized address access'));
         }
     }
 
@@ -104,10 +108,10 @@ class CheckoutForm extends AbstractType
             ->findOne();
 
         if (null === $module) {
-            $context->addViolation(Translator::getInstance()->trans('Delivery module ID not found'));
+            $context->addViolation($this->translator->trans('Delivery module ID not found'));
         } elseif (!$module->isDeliveryModule()) {
             $context->addViolation(
-                \sprintf(Translator::getInstance()->trans("delivery module %s is not a Thelia\Module\DeliveryModuleInterface"), $module->getCode())
+                \sprintf($this->translator->trans("delivery module %s is not a Thelia\Module\DeliveryModuleInterface"), $module->getCode())
             );
         }
     }
@@ -119,10 +123,10 @@ class CheckoutForm extends AbstractType
             ->findOne();
 
         if (null === $module) {
-            $context->addViolation(Translator::getInstance()->trans('Payment module ID not found'));
+            $context->addViolation($this->translator->trans('Payment module ID not found'));
         } elseif (!$module->isPayementModule()) {
             $context->addViolation(
-                \sprintf(Translator::getInstance()->trans("payment module %s is not a Thelia\Module\PaymentModuleInterface"), $module->getCode())
+                \sprintf($this->translator->trans("payment module %s is not a Thelia\Module\PaymentModuleInterface"), $module->getCode())
             );
         }
     }

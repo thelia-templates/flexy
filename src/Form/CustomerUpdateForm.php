@@ -4,14 +4,21 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Form;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Thelia\Core\Translation\Translator;
 use Thelia\Model\ConfigQuery;
 use Symfony\Component\Validator\Constraints;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CustomerUpdateForm extends CustomerRegisterForm
 {
     public const FORM_NAME = 'flexybundle_form_customer_update_form';
+
+    public function __construct(
+        #[Autowire(service: 'translator')]
+        public ?TranslatorInterface $translator
+    )
+    {}
 
     public function buildForm(): void
     {
@@ -30,7 +37,7 @@ class CustomerUpdateForm extends CustomerRegisterForm
                     [$this, 'verifyExistingEmail']
                 ),
             ],
-            'label' => Translator::getInstance()->trans('Email Address'),
+            'label' => $this->translator->trans('Email'),
             'disabled' => !$canUpdateEmail,
 
             'help' => !$canUpdateEmail ? $this->translator->trans('Si vous voulez changer d\'adresse mail, contactez nous.') : null,

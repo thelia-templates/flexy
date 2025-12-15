@@ -15,9 +15,11 @@ declare(strict_types=1);
 namespace FlexyBundle\UiComponents\CustomerInformationForm;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
@@ -35,6 +37,8 @@ class CustomerInformationForm extends AbstractController
         private readonly FormService $formService,
         private readonly FormFactoryInterface $formFactory,
         private readonly RequestStack $requestStack,
+        #[Autowire(service: 'translator')]
+        public ?TranslatorInterface $translator,
     ) {
     }
 

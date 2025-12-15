@@ -49,7 +49,7 @@ class PasswordController extends FlexyController
 
                 return $this->generateSuccessRedirect($passwordLost);
             } catch (FormValidationException $e) {
-                $message = $this->getTranslator()->trans(
+                $message = $this->translator->trans(
                     'Please check your input: %s',
                     [
                         '%s' => $e->getMessage(),
@@ -67,7 +67,7 @@ class PasswordController extends FlexyController
                 );
             }
         } else {
-            $message = $this->getTranslator()->trans(
+            $message = $this->translator->trans(
                 "You're currently logged in. Please log out before requesting a new password.",
                 [],
             );

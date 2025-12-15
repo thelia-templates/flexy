@@ -14,12 +14,14 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Form;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
 use Thelia\Core\Translation\Translator;
@@ -27,6 +29,11 @@ use Thelia\Form\AddressCreateForm;
 
 class CustomerInformationsForm extends AddressCreateForm
 {
+    public function __construct(
+        #[Autowire(service: 'translator')]
+        protected ?TranslatorInterface $translator,
+    ) {}
+
     protected function buildForm(): void
     {
         parent::buildForm();
@@ -55,11 +62,11 @@ class CustomerInformationsForm extends AddressCreateForm
                     ),
                 ],
                 'choices' => $stateChoices,
-                'label' => Translator::getInstance()->trans('State'),
+                'label' => $this->translator->trans('State'),
                 'label_attr' => [
                     'for' => 'state',
                 ],
-                'placeholder' => Translator::getInstance()->trans('Select your state'),
+                'placeholder' => $this->translator->trans('Select your state'),
             ]);
         });
 
@@ -67,7 +74,7 @@ class CustomerInformationsForm extends AddressCreateForm
         $this->formBuilder->add('is_default', HiddenType::class, [
             'data' => true,
         ])->add('cellphone', TelType::class, [
-            'label' => Translator::getInstance()->trans('Cellphone'),
+            'label' => $this->translator->trans('Cellphone'),
             'label_attr' => [
                 'for' => 'cellphone',
             ],
@@ -77,7 +84,7 @@ class CustomerInformationsForm extends AddressCreateForm
             CheckboxType::class,
             [
                 'required' => false,
-                'label' => Translator::getInstance()->trans('I agree to receive promotional offers by newsletter'),
+                'label' => $this->translator->trans('I agree to receive promotional offers by newsletter'),
                 'label_attr' => [
                     'for' => 'newsletter',
                 ],
@@ -86,17 +93,17 @@ class CustomerInformationsForm extends AddressCreateForm
             'accept_privacy_policy',
             CheckboxType::class,
             [
-                'label' => Translator::getInstance()->trans('I agree to our privacy policy'),
+                'label' => $this->translator->trans('I agree to our privacy policy'),
                 'label_attr' => [
                     'for' => 'accept_privacy_policy',
                 ],
                 'required' => true,
-                'help' => Translator::getInstance()->trans('I agree to our privacy policy'),
+                'help' => $this->translator->trans('I agree to our privacy policy'),
             ]
         );
 
         $this->formBuilder->add('submit', SubmitType::class, [
-            'label' => Translator::getInstance()->trans('Confirm my registration'),
+            'label' => $this->translator->trans('Confirm my registration'),
             'row_attr' => [
                 'class' => 'mt-8',
             ],

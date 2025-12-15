@@ -209,7 +209,7 @@ If your account exists, a link has just been sent to your e-mail address. Please
 Didn't you receive the reset link?: Didn't you receive the reset link?
 Remember to check your spam, then try to resend the e-mail.: Remember to check your spam, then try to resend the e-mail.
 resend e-mail: resend e-mail
-A link has just been sent to your email address.: A link has just been sent to your email address.:
+A link has just been sent to your email address.: A link has just been sent to your email address.
 Reset your password: Reset your password
 Confirm: Confirm
 Your password has been reset!: Your password has been reset!
@@ -285,3 +285,36 @@ Your order: Your order
 Payment failed: Payment failed
 Your cart contains unvailable products: Your cart contains unvailable products
 Discount: Discount
+
+'Please check your input: %s': 'Please check your input: %s'
+A new activation code has been sent to your email address. Please check your mailbox. It's valid for 24 hours.: A new activation code has been sent to your email address. Please check your mailbox. It's valid for 24 hours.
+Address ID not found: Address ID not found
+Unauthorized address access: Unauthorized address access
+Delivery module ID not found: Delivery module ID not found
+'delivery module %s is not a Thelia\Module\DeliveryModuleInterface': 'delivery module %s is not a Thelia\Module\DeliveryModuleInterface'
+Payment module ID not found: Payment module ID not found
+'payment module %s is not a Thelia\Module\PaymentModuleInterface': 'payment module %s is not a Thelia\Module\PaymentModuleInterface'
+Email is required: Email is required
+Please enter a valid email address.: Please enter a valid email address.
+Activation code is required: Activation code is required
+'Activation code must be exactly {{ limit }} digits': 'Activation code must be exactly {{ limit }} digits'
+"Activation code is too short ({{ limit }} digits required)": "Activation code is too short ({{ limit }} digits required)"
+"Activation code is too long ({{ limit }} digits maximum)": "Activation code is too long ({{ limit }} digits maximum)"
+Cellphone: Cellphone
+'Activation code must contain only %info digits': 'Activation code must contain only %info digits'
+email confirmation is not the same as email field: email confirmation is not the same as email field
+password confirmation is not the same as password field: password confirmation is not the same as password field
+Quote N°: Quote N°
+Subtotal without taxes : Subtotal without taxes
+Search results for <i><u>%query</u></i>: Search results for <i><u>%query</u></i>
+Sector: Sector
+Thanks for your quote request !: Thanks for your quote request !
+We'll reach out to you as quickly as possible!: We'll reach out to you as quickly as possible!
+Your quote: Your quote
+This email is already used: This email is already used
+No delivery method is available for this order.: No delivery method is available for this order.
+Choose a delivery address : Choose a delivery address
+The payment could not be completed.: The payment could not be completed.
+Back to cart: Back to cart
+Your message has been saved: Your message has been saved
+"Si vous voulez changer d'adresse mail, contactez nous.": "If you want to change your email address, please contact us."

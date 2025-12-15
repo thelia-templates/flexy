@@ -14,13 +14,14 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Form;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use FlexyBundle\Service\FormService;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
-use Thelia\Core\Translation\Translator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Thelia\Domain\Customer\Service\CustomerTitleService;
 use Thelia\Domain\Localization\Service\CountryService;
 use Thelia\Form\AddressCountryValidationTrait;
@@ -36,6 +37,8 @@ class AddressEditForm extends AddressCreateForm
         CountryService $countryService,
         CustomerTitleService $customerTitleService,
         private readonly FormService $formService,
+        #[Autowire(service: 'translator')]
+        protected ?TranslatorInterface $translator,
     ) {
         parent::__construct($countryService, $customerTitleService);
     }
@@ -69,11 +72,11 @@ class AddressEditForm extends AddressCreateForm
                     ),
                 ],
                 'choices' => $stateChoices,
-                'label' => Translator::getInstance()->trans('State'),
+                'label' => $this->translator->trans('State'),
                 'label_attr' => [
                     'for' => 'state',
                 ],
-                'placeholder' => Translator::getInstance()->trans('Select your state'),
+                'placeholder' => $this->translator->trans('Select your state'),
             ]);
         });
     }

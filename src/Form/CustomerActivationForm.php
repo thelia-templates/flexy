@@ -14,16 +14,23 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Form;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints;
-use Thelia\Core\Translation\Translator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Thelia\Model\Customer;
 
 class CustomerActivationForm extends AbstractType
 {
+    public function __construct(
+        #[Autowire(service: 'translator')]
+        public TranslatorInterface $translator,
+    ) {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -31,10 +38,10 @@ class CustomerActivationForm extends AbstractType
                 [
                     'constraints' => [
                         new Constraints\NotBlank([
-                            'message' => Translator::getInstance()->trans('Email is required'),
+                            'message' => $this->translator->trans('Email is required'),
                         ]),
                         new Constraints\Email([
-                            'message' => Translator::getInstance()->trans('Please enter a valid email address'),
+                            'message' => $this->translator->trans('Please enter a valid email address'),
                         ]),
                     ],
                 ]
@@ -47,22 +54,25 @@ class CustomerActivationForm extends AbstractType
                 ],
                 'constraints' => [
                     new Constraints\NotBlank([
-                        'message' => Translator::getInstance()->trans('Activation code is required'),
+                        'message' => $this->translator->trans('Activation code is required'),
                     ]),
                     new Constraints\Length([
                         'min' => Customer::CODE_LENGTH,
                         'max' => Customer::CODE_LENGTH,
-                        'exactMessage' => Translator::getInstance()->trans('Activation code must be exactly {{ limit }} digits'),
-                        'minMessage' => Translator::getInstance()->trans('Activation code is too short ({{ limit }} digits required)'),
-                        'maxMessage' => Translator::getInstance()->trans('Activation code is too long ({{ limit }} digits maximum)'),
+                        'exactMessage' => $this->translator->trans('Activation code must be exactly {{ limit }} digits'),
+                        'minMessage' => $this->translator->trans('Activation code is too short ({{ limit }} digits required)'),
+                        'maxMessage' => $this->translator->trans('Activation code is too long ({{ limit }} digits maximum)'),
                     ]),
                     new Constraints\Regex([
                         'pattern' => '/^[0-9]{'.Customer::CODE_LENGTH.'}$/',
-                        'message' => Translator::getInstance()->trans('Activation code must contain only '.Customer::CODE_LENGTH.' digits'),
+                        'message' => $this->translator->trans(
+                            'Activation code must contain only %info digits',
+                            ['%info' => Customer::CODE_LENGTH]
+                        ),
                     ]),
                 ],
             ])->add('submit', SubmitType::class, [
-                'label' => Translator::getInstance()->trans('Confirm my registration'),
+                'label' => $this->translator->trans('Confirm my registration'),
                 'row_attr' => [
                     'class' => 'flex justify-center mt-8 hidden',
                 ],

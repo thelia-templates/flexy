@@ -14,11 +14,12 @@ declare(strict_types=1);
 
 namespace FlexyBundle\UiComponents\Checkout\PromoCodeForm;
 
-use FlexyBundle\UiComponents\Checkout\CheckoutEvents;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -30,7 +31,6 @@ use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\Event\Coupon\CouponConsumeEvent;
 use Thelia\Core\Event\Coupon\CouponDeleteEvent;
 use Thelia\Core\Event\TheliaEvents;
-use Thelia\Core\Translation\Translator;
 use Thelia\Domain\Cart\CartFacade;
 use Thelia\Form\CouponCode;
 use TwigEngine\Service\FormService;
@@ -47,6 +47,8 @@ class PromoCodeForm extends BaseFrontController
         private readonly FormFactoryInterface $formFactory,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly CartFacade $cartFacade,
+        #[Autowire(service: 'translator')]
+        public TranslatorInterface $translator,
     ) {
     }
 
@@ -55,7 +57,7 @@ class PromoCodeForm extends BaseFrontController
         $form = $this->formService->getFormByName(CouponCode::getName());
 
         $form->add('submit', SubmitType::class, [
-            'label' => Translator::getInstance()->trans('Apply'),
+            'label' => $this->translator->trans('Apply'),
         ]);
 
         return $form;

@@ -90,7 +90,7 @@ class AccountController extends FlexyController
 
             return $this->generateSuccessRedirect($addressUpdate);
         } catch (FormValidationException $e) {
-            $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()], Front::MESSAGE_DOMAIN);
+            $message = $this->translator->trans('Please check your input: %s', ['%s' => $e->getMessage()], Front::MESSAGE_DOMAIN);
         }
         $this->getParserContext()->set('address_id', $addressId);
 
@@ -129,7 +129,7 @@ class AccountController extends FlexyController
 
             return $this->generateSuccessRedirect($addressCreate);
         } catch (FormValidationException $e) {
-            $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()], Front::MESSAGE_DOMAIN);
+            $message = $this->translator->trans('Please check your input: %s', ['%s' => $e->getMessage()], Front::MESSAGE_DOMAIN);
         }
 
         Tlog::getInstance()->error(\sprintf('Error during address creation process : %s', $message));
@@ -162,7 +162,7 @@ class AccountController extends FlexyController
                 return $this->jsonResponse(
                     json_encode([
                         'success' => false,
-                        'message' => $this->getTranslator()->trans(
+                        'message' => $this->translator->trans(
                             'Error during address deletion process',
                             [],
                             Front::MESSAGE_DOMAIN

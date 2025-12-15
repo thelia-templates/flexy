@@ -100,7 +100,7 @@ class CustomerController extends FlexyController
 
                 return $this->generateSuccessRedirect($customerLoginForm);
             } catch (WrongPasswordException $e) {
-                $message = $this->getTranslator()->trans(
+                $message = $this->translator->trans(
                     'Wrong email or password. Please try again',
                     [],
                 );
@@ -112,13 +112,13 @@ class CustomerController extends FlexyController
                         TheliaEvents::SEND_ACCOUNT_CONFIRMATION_EMAIL
                     );
                 }
-                $message = $this->getTranslator()->trans(
+                $message = $this->translator->trans(
                     'Your account is not yet confirmed. A confirmation email has been sent to your email address, please check your mailbox',
                     [],
                 );
             }
         } catch (FormValidationException $e) {
-            $message = $this->getTranslator()->trans(
+            $message = $this->translator->trans(
                 'Please check your input: %s',
                 ['%s' => $e->getMessage()],
             );
@@ -256,7 +256,7 @@ class CustomerController extends FlexyController
                 $this->generateUrl('customer_activation', ['email' => $customer->getEmail()])
             );
         } catch (FormValidationException $e) {
-            $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
+            $message = $this->translator->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
         }
 
         Tlog::getInstance()->error(\sprintf('Error during address creation process : %s', $message));
@@ -270,7 +270,7 @@ class CustomerController extends FlexyController
             return $this->generateErrorRedirect($form);
         }
 
-        $this->addFlash('error', $this->getTranslator()->trans($message));
+        $this->addFlash('error', $this->translator->trans($message));
 
         return $this->generateRedirect(
             $this->generateUrl('customer_informations')

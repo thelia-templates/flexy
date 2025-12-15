@@ -297,3 +297,29 @@ Back to cart: Retour au panier
 Your message has been saved: Nous avons bien pris en compte votre message. Vous pouvez passez à l'étape suivante
 Your cart contains unvailable products: Votre panier comporte des produits indisponibles
 Discount: Remise
+
+'Please check your input: %s': "Veuillez vérifier votre saisie : %s"
+A new activation code has been sent to your email address. Please check your mailbox. It's valid for 24 hours.: Un nouveau code d'activation a été envoyé à votre adresse e-mail. Veuillez vérifier votre boîte de réception. Il est valable pendant 24 heures.
+Address ID not found: Aucun id d'adresse trouvé
+Unauthorized address access: Accès non autorisé à l'adresse
+Delivery module ID not found: Aucun id de module de livraison trouvé
+'delivery module %s is not a Thelia\Module\DeliveryModuleInterface': "le module de livraison %s n'est pas une Thelia\Module\DeliveryModuleInterface"
+Payment module ID not found: Aucun id de module de paiement trouvé
+'payment module %s is not a Thelia\Module\PaymentModuleInterface': "le module de paiement %s n'est pas une Thelia\Module\PaymentModuleInterface"
+Email is required: L'e-mail est requis
+Please enter a valid email address.: Veuillez saisir une adresse e-mail valide.
+Activation code is required: Le code d'activation est requis
+'Activation code must be exactly {{ limit }} digits': "Le code d'activation doit comporter exactement {{ limit }} chiffres"
+"Activation code is too short ({{ limit }} digits required)": "Le code d'activation est trop court ({{ limit }} chiffres requis)"
+"Activation code is too long ({{ limit }} digits maximum)": "Le code d'activation est trop long ({{ limit }} chiffres maximum)"
+Cellphone: Téléphone portable
+I agree to receive promotional offers by newsletter: J'accepte de recevoir des offres promotionnelles par le biais de la newsletter
+'Activation code must contain only %info digits': "Le code d'activation doit contenir uniquement %info chiffres"
+email confirmation is not the same as email field: la confirmation de l'e-mail n'est pas la même que le champ e-mail
+password confirmation is not the same as password field: la confirmation du mot de passe n'est pas la même que le champ mot de passe
+Didn't you receive the reset link?: Vous n'avez pas reçu le lien de réinitialisation ?
+Quantity: Quantité
+Out of stock: Rupture de stock
+Remember to check your spam, then try to: N'oubliez pas de vérifier vos spams, puis essayez de
+resend the e-mail: renvoyer l'e-mail
+"Si vous voulez changer d\'adresse mail, contactez nous.": "Si vous voulez changer d\'adresse mail, contactez nous."
