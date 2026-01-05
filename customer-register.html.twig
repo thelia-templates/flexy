@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block body %}
-    {{ include('@components/Layout/CheckoutSteps/CheckoutSteps.html.twig', {
+    {{ component('Flexy:Checkout:CheckoutSteps', {
         steps: ['Your login'|trans, 'Your informations'|trans],
         current: 1,
     }) }}
