@@ -8,7 +8,10 @@
 {% endblock %}
 
 {% block body %}
-    {{ include('@components/Layout/CheckoutSteps/CheckoutSteps.html.twig', {steps: ['Your login'|trans, 'Your informations'|trans], current: 2}) }}
+    {{ component('Flexy:Checkout:CheckoutSteps', {
+        steps: ['Your login'|trans, 'Your informations'|trans],
+        current: 2,
+    }) }}
 
     <div class="w-full max-w-[400px] px-[25px] pt-[30px] pb-[54px] lg:px-0 lg:pt-[50px] lg:pb-[120px] mx-auto">
         <h1 class="mb-4 text-black h2">{{ 'Create account'|trans }}</h1>
