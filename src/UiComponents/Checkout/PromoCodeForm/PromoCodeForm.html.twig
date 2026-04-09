@@ -15,7 +15,8 @@
                     'data-live-action-param': 'save'
                 }
             }) }}
-            {{ form_rest(form) }}
+            {{ form_row(form['coupon-code']) }}
+            {{ form_row(form.submit) }}
             {{ form_errors(form) }}
             {{ form_end(form) }}
         {% endblock %}
