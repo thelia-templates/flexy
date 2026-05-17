@@ -38,7 +38,8 @@
   "extra": {
     "installer-name": "flexy",
     "branch-alias": {
-      "dev-twig": "0.2.x-dev"
+      "dev-twig": "0.2.x-dev",
+      "dev-feat/use-standard-frontoffice-template-type": "0.2.x-dev"
     }
   }
 }
