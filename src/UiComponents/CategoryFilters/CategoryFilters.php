@@ -100,6 +100,7 @@ class CategoryFilters extends AbstractController
             'itemsPerPage' => self::ITEMS_PER_PAGE,
             'page' => $initialPage,
             'visible' => true,
+            'order[productCategories.position]' => 'asc',
         ];
 
         if ($promo) {
@@ -174,7 +175,7 @@ class CategoryFilters extends AbstractController
     }
 
     #[LiveAction]
-    public function save(#[LiveArg] $reset = false): void
+    public function save(#[LiveArg] $reset = false, #[LiveArg] $order = 'asc'): void
     {
         $this->submitForm();
 
@@ -190,6 +191,7 @@ class CategoryFilters extends AbstractController
             'tfilters' => $this->tfilters,
             'itemsPerPage' => self::ITEMS_PER_PAGE,
             'page' => $this->page,
+            'untaxed_price_order' => $order,
         ], 'jsonld');
 
         $this->getPagination($request);

@@ -35,7 +35,7 @@
 									{{ "Sort by" | trans }}
 								</option>
 								{% for choice in sorts|map(sort => sort|merge({'label':sort.title})) %}
-									<option value="{{ choice.value }}" {% if false %} selected {% endif %}>{{ choice.label }}</option>
+									<option value="{{ choice.value }}" {% if false %} selected {% endif %}>{{ choice.label | trans }}</option>
 								{% endfor %}
 							</select>
 						</div>
