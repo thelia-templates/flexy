@@ -41,29 +41,30 @@ class PasswordController extends FlexyController
         if (!$this->getSecurityContext()->hasCustomerUser()) {
             try {
                 $form = $this->validateForm($passwordLost);
-
-                $event = new LostPasswordEvent($form->get('email')->getData());
-
-                $eventDispatcher->dispatch($event, TheliaEvents::LOST_PASSWORD);
-                $session->set('reset_email', $form->get('email')->getData());
+                $email = $form->get('email')->getData();
+                $eventDispatcher->dispatch(new LostPasswordEvent($email), TheliaEvents::LOST_PASSWORD);
+                $session->set('reset_email', $email);
 
                 return $this->generateSuccessRedirect($passwordLost);
             } catch (FormValidationException $e) {
+                $formData = $this->requestStack->getCurrentRequest()?->request->all('thelia_customer_lost_password');
+                $submittedEmail = trim($formData['email'] ?? '');
+
+                // Prevent user enumeration: if the email is syntactically valid, the only
+                // reason for failure is the "email not found" Callback constraint — redirect
+                // silently to the success page so an attacker cannot distinguish existing
+                // from non-existing accounts.
+                if (filter_var($submittedEmail, FILTER_VALIDATE_EMAIL)) {
+                    $session->set('reset_email', $submittedEmail);
+
+                    return $this->generateSuccessRedirect($passwordLost);
+                }
+
                 $message = $this->getTranslator()->trans(
                     'Please check your input: %s',
                     [
                         '%s' => $e->getMessage(),
                     ],
-                );
-            }
-
-            if ($message !== false) {
-                Tlog::getInstance()->error(
-                    \sprintf(
-                        'Error during customer creation process : %s. Exception was %s',
-                        $message,
-                        $e->getMessage()
-                    )
                 );
             }
         } else {
