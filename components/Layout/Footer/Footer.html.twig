@@ -35,7 +35,7 @@
             </div>
             <div class="Footer-storeAddress">
                 {% set idCountry = attr('config', 'store_country') %}
-                {% set country = country_name(idCountry) %}
+                {% set country = idCountry ? country_name(idCountry) : null %}
 
                 <div class="paragraph-5">
                     {{ attr('config', 'store_address1') }}
