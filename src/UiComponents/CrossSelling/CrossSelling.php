@@ -23,7 +23,7 @@ use Thelia\Api\Service\DataAccess\DataAccessService;
 #[AsTwigComponent(name: 'Flexy:CrossSelling', template: '@UiComponents/CrossSelling/CrossSelling.html.twig')]
 class CrossSelling
 {
-    public string $categoryId;
+    public ?string $categoryId = null;
     public array $productIdsToIgnore = [];
     public int $itemsPerPage = 4;
     public bool $promo = false;
@@ -41,7 +41,7 @@ class CrossSelling
         $this->new = $new;
 
         if (0 === \count($products)) {
-            $this->products = $this->setProducts();
+            $this->products = $this->fetchProducts();
             return;
         }
 
@@ -51,7 +51,7 @@ class CrossSelling
     /**
      * @return ProductDTO[]
      */
-    public function setProducts()
+    private function fetchProducts(): array
     {
         $params = [
             'page' => 1,
