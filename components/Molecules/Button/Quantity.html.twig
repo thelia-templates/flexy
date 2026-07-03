@@ -8,11 +8,11 @@
 {% set plusHidden = plusHidden|default(false) %}
 
 <div role="button" class="Button Button-quantity {{ classes }} {% if disabled %}disabled{% endif %}"  >
-    <button type="button" {% if btnLiveAction %} data-action="live#action" data-live-action-param="{{ btnLiveAction }}" data-live-quantity-param="{{ value - 1 }}" {% else %} data-qty="minus" {% endif %} {% if minusDisabled %} disabled {% endif %} data-loading="addClass(pointer-events-none)">
+    <button type="button" aria-label="{{ 'Decrease quantity'|trans }}" {% if btnLiveAction %} data-action="live#action" data-live-action-param="{{ btnLiveAction }}" data-live-quantity-param="{{ value - 1 }}" {% else %} data-qty="minus" {% endif %} {% if minusDisabled %} disabled {% endif %} data-loading="addClass(pointer-events-none)">
         -
     </button>
-    <input type="number" name="{{ name }}" {% if disabled %} disabled {% endif %} {% if min is not null %} min="{{ min }}" {% endif %} {% if max is not null %} max="{{ max }}" {% endif %} value='{{ value }}'>
-    <button type="button" {% if plusHidden %} style="visibility: hidden;" {% endif %} {% if btnLiveAction %} data-action="live#action" data-live-action-param="{{ btnLiveAction }}" data-live-quantity-param="{{ value + 1 }}" {% else %} data-qty="plus" {% endif %} {% if plusDisabled or plusHidden %} disabled {% endif %} data-loading="addClass(pointer-events-none)">
+    <input type="number" name="{{ name }}" aria-label="{{ 'Quantity'|trans }}" {% if disabled %} disabled {% endif %} {% if min is not null %} min="{{ min }}" {% endif %} {% if max is not null %} max="{{ max }}" {% endif %} value='{{ value }}'>
+    <button type="button" aria-label="{{ 'Increase quantity'|trans }}" {% if plusHidden %} style="visibility: hidden;" {% endif %} {% if btnLiveAction %} data-action="live#action" data-live-action-param="{{ btnLiveAction }}" data-live-quantity-param="{{ value + 1 }}" {% else %} data-qty="plus" {% endif %} {% if plusDisabled or plusHidden %} disabled {% endif %} data-loading="addClass(pointer-events-none)">
         +
     </button>
 </div>
