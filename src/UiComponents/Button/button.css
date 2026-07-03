@@ -188,6 +188,9 @@
   button {
     padding-left: 3px;
     padding-right: 3px;
+    min-width: rem-convert(44px);
+    min-height: rem-convert(44px);
+    align-self: stretch;
   }
   &.disabled,
   &.disabled:hover {
