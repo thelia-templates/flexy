@@ -19,6 +19,22 @@ liip_imagine:
 
   filter_sets:
     default:
+      quality: 82
+      format: webp
+      filters:
+        downscale: { max: [1200, 1200] }
     add_to_cart:
+      quality: 82
+      format: webp
+      filters:
+        downscale: { max: [400, 400] }
     order_card:
+      quality: 82
+      format: webp
+      filters:
+        downscale: { max: [200, 200] }
     order_card_detail:
+      quality: 82
+      format: webp
+      filters:
+        downscale: { max: [400, 400] }
