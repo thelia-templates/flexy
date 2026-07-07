@@ -19,6 +19,7 @@
 {% endblock %}
 
 {% block body %}
+  {{ theme_hook('category.top', {category: category}) }}
   {{ component('Flexy:CatHero', {
     title: SEOnePageH1(),
     chapo: category.i18ns.chapo|default(null),
@@ -66,4 +67,5 @@
           breadcrumb
         }}) }}
   {% endif %}
+  {{ theme_hook('category.bottom', {category: category}) }}
 {% endblock %}

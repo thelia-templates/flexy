@@ -41,21 +41,26 @@
         {% block microdata %}
          {{ SEOneMicroData()|raw }}
         {% endblock %}
+        {{ theme_hook('layout.head') }}
     </head>
 
     <body class="no-js {% block body_class %}{% endblock %}">
+        {{ theme_hook('layout.body.top') }}
         {% block header %}
             {{ include('@components/Layout/Header/Header.html.twig') }}
         {% endblock %}
+        {{ theme_hook('layout.header.bottom') }}
 
         <main {% block stimulus_controller %}{% endblock %}>
             {% block body %}{% endblock %}
         </main>
 
+        {{ theme_hook('layout.footer.top') }}
         {% block footer %}
             {{ include('@components/Layout/Footer/Footer.html.twig') }}
         {% endblock %}
 
         {% block modals %}{% endblock %}
+        {{ theme_hook('layout.body.bottom') }}
     </body>
 </html>

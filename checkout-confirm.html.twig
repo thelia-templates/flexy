@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block checkoutContent %}
+    {{ theme_hook('order-placed.top') }}
     <div class="flex flex-col items-center justify-center text-center text-black">
         <div class=" lg:w-[240px]  mb-6">
             {{ source('assets/images/cart.svg') }}
@@ -25,4 +26,5 @@
         }) }}
 
     </div>
+    {{ theme_hook('order-placed.bottom') }}
 {% endblock %}

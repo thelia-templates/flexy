@@ -13,6 +13,7 @@
     {% set useSidebar = block('checkoutSummary') is defined and block('checkoutSummary') != '' %}
 
 {% block body %}
+    {{ theme_hook('checkout.top') }}
 
     {% block checkoutSteps %}
         {{ component('Flexy:Checkout:CheckoutSteps',{
@@ -66,6 +67,7 @@
             {% endif %}
         </div>
 
+        {{ theme_hook('checkout.bottom') }}
     {% endblock %}
     {% block footer %}
         {{ include('@components/Layout/Footer/FooterCheckout.html.twig') }}

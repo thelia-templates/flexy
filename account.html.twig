@@ -12,6 +12,8 @@
     {% set customerId = attr('customer', 'id') %}
     {% set customer = resources('/api/front/account/customers/' ~ customerId) %}
 
+    {{ theme_hook('account.top', {customer: customer}) }}
+
     {{ component('Flexy:AccountHero', {
         title: 'My profile'|trans,
         selected: "profile",
@@ -71,6 +73,7 @@
         </div>
     </div>
 
+    {{ theme_hook('account.bottom', {customer: customer}) }}
 {% endblock %}
 
 {% block footer %}

@@ -5,7 +5,9 @@
 {% endblock %}
 
 {% block checkoutContent %}
+    {{ theme_hook('cart.top') }}
     {{ component('Flexy:Checkout:Cart') }}
+    {{ theme_hook('cart.bottom') }}
 {% endblock %}
 
 {%- block checkoutSummary -%}

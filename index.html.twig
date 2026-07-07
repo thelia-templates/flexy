@@ -3,6 +3,7 @@
 {% block breadcrumb_json %}{% endblock %}
 
 {% block body %}
+    {{ theme_hook('home.top') }}
 
 {#    {{ component('HeaderHighlights') }}#}
 
@@ -33,4 +34,5 @@
         {{ component('Flexy:SimilarContent', {title: 'Our news'|trans, button: {label: 'See all news'|trans, href: '#'}}) }}
     </div>
 
+    {{ theme_hook('home.bottom') }}
 {% endblock %}

@@ -6,7 +6,7 @@
 {% for option in options %}
     {% set optionsColors = optionsColors|merge([{
     value: option.value,
-    label: '<span class="colorRounded" data-bg-color='' ~ option.color ~ ''></span>' ~ option.label,
+    label: '<span class="colorRounded" data-bg-color="' ~ option.color ~ '"></span>' ~ option.label,
   }]) %}
 {% endfor %}
 

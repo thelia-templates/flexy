@@ -16,6 +16,7 @@
 {% endif %}
 
 {% block body %}
+    {{ theme_hook('product.top', {product: product}) }}
     <div class="ProductPage">
         <div class="p-5 lg:justify-between lg:items-center lg:flex">
             {{ component('Molecules:Breadcrumb:Breadcrumb', {breadcrumb: breadcrumb}) }}
@@ -23,6 +24,7 @@
         <div class="container">
             <div class="ProductPage-grid">
                 {{ component('Flexy:Pages:Product', {product: product}) }}
+                {{ theme_hook('product.details.bottom', {product: product}) }}
 
                 <section id="description" class="ProductPage-description">
 
@@ -91,4 +93,5 @@
     </div>
     {{ component('Flexy:AddToCartToast') }}
 
+    {{ theme_hook('product.bottom', {product: product}) }}
 {% endblock %}
