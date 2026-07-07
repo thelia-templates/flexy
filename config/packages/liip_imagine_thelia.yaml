@@ -28,6 +28,16 @@ liip_imagine:
       format: webp
       filters:
         downscale: { max: [500, 500] }
+    category_md:
+      quality: 80
+      format: webp
+      filters:
+        downscale: { max: [400, 400] }
+    category_sm:
+      quality: 80
+      format: webp
+      filters:
+        downscale: { max: [300, 300] }
     block_image:
       quality: 82
       format: webp

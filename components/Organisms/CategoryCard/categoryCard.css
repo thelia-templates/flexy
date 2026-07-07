@@ -42,6 +42,7 @@
   }
 
   &-img {
+    display: block;
     overflow: hidden;
     height: 187px;
     @screen sm {
