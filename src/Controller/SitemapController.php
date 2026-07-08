@@ -1,54 +1,50 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FlexyBundle\Controller;
 
 use FlexyBundle\Service\SitemapGenerator;
+use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Thelia\Model\LangQuery;
 
 class SitemapController extends FlexyController
 {
-    #[Route('/sitemap', name: 'front_sitemap')]
-    #[Route('/sitemap.xml', name: 'front_sitemap_xml')]
-    public function generate(
-        SitemapGenerator $sitemapGenerator
-    ): Response
+    #[Route('/sitemap.xml', name: 'front_sitemap_index')]
+    public function index(SitemapGenerator $sitemapGenerator): Response
     {
-        $request = $this->getRequest();
+        return $this->buildResponse($sitemapGenerator, 'index');
+    }
 
-        $lang = $request->query->get('lang', '');
-        $context = $request->query->get('context', '');
-        $flush = $request->query->get('flush', false);
+    #[Route('/sitemap-{section}.xml', name: 'front_sitemap_section', requirements: ['section' => 'categories|products|images'])]
+    public function section(string $section, SitemapGenerator $sitemapGenerator): Response
+    {
+        return $this->buildResponse($sitemapGenerator, $section);
+    }
 
-        if ('' !== $lang && !$this->checkLang($lang)) {
-            $this->pageNotFound();
-        }
+    /**
+     * Backward compatibility with the former single sitemap URL.
+     */
+    #[Route('/sitemap', name: 'front_sitemap')]
+    public function legacy(): RedirectResponse
+    {
+        return new RedirectResponse($this->generateUrl('front_sitemap_index'), Response::HTTP_MOVED_PERMANENTLY);
+    }
 
-        if (!\in_array($context, ['', 'catalog', 'content'], true)) {
-            $this->pageNotFound();
-        }
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function buildResponse(SitemapGenerator $sitemapGenerator, string $section): Response
+    {
+        $flush = (bool) $this->getRequest()->query->get('flush', false);
 
-        $cacheItem = $sitemapGenerator->generate(
-            $this->getParser(),
-            $lang,
-            $context,
-            (bool) $flush
-        );
+        $cacheItem = $sitemapGenerator->generate($this->getParser(), $section, $flush);
 
-        $response = new Response();
-        $response->setContent($cacheItem->get());
+        $response = new Response($cacheItem->get());
         $response->headers->set('Content-Type', 'application/xml');
 
         return $response;
-    }
-
-
-    private function checkLang($lang): bool
-    {
-        $lang = LangQuery::create()
-            ->findOneByCode($lang);
-
-        return null !== $lang;
     }
 }

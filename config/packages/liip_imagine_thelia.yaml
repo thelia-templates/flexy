@@ -22,3 +22,8 @@ liip_imagine:
     add_to_cart:
     order_card:
     order_card_detail:
+    sitemap:
+      quality: 82
+      format: webp
+      filters:
+        downscale: { max: [800, 800] }
