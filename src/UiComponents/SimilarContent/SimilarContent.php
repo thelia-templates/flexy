@@ -23,6 +23,7 @@ class SimilarContent
     public array $similarContents;
     public int $itemsPerPage = 3;
     public ?int $folderId = null;
+    public ?array $excludeId = null;
 
     public function __construct(private DataAccessService $dataAccessService)
     {
@@ -41,6 +42,7 @@ class SimilarContent
             'itemsPerPage' => $this->itemsPerPage,
             'contentFolders.folder.id' => $this->folderId,
             'visible' => true,
+            'not_in[id]' => $this->excludeId,
         ]);
 
         return array_map(fn($item) => [

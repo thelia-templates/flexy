@@ -254,6 +254,11 @@ class Product
         $this->emit('addToCart', [
             'values' => $this->formValues,
         ]);
+
+        $this->dispatchBrowserEvent('addPseToCart', [
+            'pse' => $this->formValues['product_sale_elements_id'],
+            'quantity' => $this->formValues['quantity'],
+        ]);
     }
 
     private function setInitialCurrentPse(): void

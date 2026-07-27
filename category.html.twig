@@ -1,9 +1,16 @@
 {% extends 'base.html.twig' %}
-{% import '@components/Layout/Meta/SocialMeta.html.twig' as social %}
 {% set page = app.request.get('page')|default(1) %}
 {% set categoryId = attr('category', 'id') %}
 
-{% block og_image %}{{ social.image('category', categoryId) ?: parent() }}{% endblock %}
+{% set firstImage = getImagesData({
+	source_id: categoryId,
+	source_type: 'category',
+	filters: 'default',
+	limit: 1,
+}) %}
+
+{% block og_image %}{{ ((firstImage|first)?.sources|first)?.url ?: parent()  }}{% endblock %}
+
 {% set category = resources('/api/front/categories/'~categoryId) %}
 
 {% set childCategories = resources('/api/front/categories', {
