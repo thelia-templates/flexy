@@ -1,26 +1,18 @@
 {% extends 'base.html.twig' %}
 
 {% set pageData = getPageData() %}
-{% set img = getImages({
-  source_type: 'page',
-  source_id: pageData.id,
-  filters: 'default',
-  wrapper: 'div',
-  wrapper_attrs: {
-    class: 'Subheader-image',
-  },
-  img_attrs: {
-      width: 1920,
-      height: 500,
-  },
-}) %}
 {% set pageHTML = getTheliaBLocksRenderedContent(pageData.getVirtualColumn('block_group_content')|default('')) %}
+{% set img = getImagesData({
+	source_type: 'page',
+	source_id: pageData.id,
+	filters: 'default'
+}) %}
 
+{% block og_image %}{{ ((img|first)?.sources|first)?.url ?: parent()  }}{% endblock %}
 {% block og_type %}article{% endblock %}
-{% block og_image %}{{ social.image('page', pageData.id) ?: parent() }}{% endblock %}
 
 {% block body %}
-    {{ include('@components/Layout/Subheader/ContentPage/SubheaderContentPage.html.twig', {title: pageData.title, description: pageData.chapo|raw, img: img}) }}
+    {{ include('@components/Layout/Subheader/ContentPage/SubheaderContentPage.html.twig', {title: pageData.title, description: pageData.chapo|raw}) }}
 
     <div class="px-[25px] lg:pr-[225px] lg:pl-[250px] xl:pr-[325px] xl:pl-[350px] flex gap-[173px] mt-[25px] lg:mt-[54px] mb-[80px] lg:mb-[120px]">
         <article class="wysiwyg">

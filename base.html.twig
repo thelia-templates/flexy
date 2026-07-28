@@ -1,5 +1,5 @@
 {% set breadcrumb = SEOneBreadcrumb() %}
-
+{% set logo = media_url('logo') %}
 <!DOCTYPE html>
 <html lang="{{ lang_code }}">
     <head>
@@ -11,8 +11,8 @@
 	    {{ theme_hook('layout.head.top', {breadcrumb}) }}
 	    
         {% block robots %}{% endblock %}
-
-	    <meta property="og:image" content="{% block og_image %}{{ absolute_url(asset('dist/images/logo.png')) }}{% endblock %}">
+		
+	    <meta property="og:image" content="{% block og_image %}{{ logo != '' ? logo : absolute_url(asset('dist/images/logo.png')) }}{% endblock %}">
         <meta property="og:locale" content="{{ current_locale() }}">
         <meta property="og:site_name" content="{{ attr('config', 'store_name')|default('') }}">
         <meta name="twitter:card" content="summary_large_image">
@@ -38,6 +38,7 @@
     </head>
 
     <body class="no-js {% block body_class %}{% endblock %}">
+    
         {{ theme_hook('layout.body.top') }}
         {% block header %}
             {{ include('@components/Layout/Header/Header.html.twig') }}
