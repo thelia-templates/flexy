@@ -8,7 +8,13 @@
 	    <link rel="preconnect" href="https://fonts.googleapis.com">
 	    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	    
-	    {{ theme_hook('layout.head.top', {breadcrumb}) }}
+	    {{ theme_hook('layout.head.top', {
+		    breadcrumb,
+		    title:       block('title') is defined ? block('title')|trim : null,
+		    description: block('meta_description') is defined ? block('meta_description')|trim : null,
+		    og_type:     block('og_type') is defined ? block('og_type')|trim : null,
+	    }) }}
+	    
 	    
         {% block robots %}{% endblock %}
 		
