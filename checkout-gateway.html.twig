@@ -9,7 +9,7 @@
 
     {# The gateway page auto-submits the payment form provided by the payment
        module towards the external payment provider. #}
-    <form id="payment-form" method="post" action="{{ gateway_url }}" target="_top" style="display: none;">
+    <form id="payment-form" method="post" action="{{ gateway_url }}" target="_top" style="display: none;" data-turbo="false">
         {% for name, value in payment_form_data %}
             <input type="hidden" name="{{ name }}" value="{{ value }}"/>
         {% endfor %}

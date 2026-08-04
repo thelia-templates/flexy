@@ -11,6 +11,9 @@
    testing block('...') != '' directly would render it a second time, which
    re-executes every LiveComponent it contains. #}
 {% block body %}
+    {# Turbo Drive is opt-in (disabled globally in app.js): the whole tunnel
+       zone navigates client-side between the checkout steps. #}
+    <div data-turbo="true" class="contents">
     {% set checkoutContent = block('checkoutContent') is defined ? block('checkoutContent') : '' %}
     {% set checkoutSummary = block('checkoutSummary') is defined ? block('checkoutSummary') : '' %}
     {% set checkoutNextButton = block('checkoutNextButton') is defined ? block('checkoutNextButton') : '' %}
@@ -58,6 +61,7 @@
             {{ checkoutBackButton|raw }}
         </div>
     {% endif %}
+    </div>
 {% endblock %}
 
 {% block footer %}

@@ -43,4 +43,7 @@ return [
     '@symfony/ux-live-component' => [
         'path' => '@symfony/ux-live-component/live_controller.js',
     ],
+    '@hotwired/turbo' => [
+        'version' => '8.0.23',
+    ],
 ];
