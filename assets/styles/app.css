@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
-/* Force tailwind to scan these directories to detect used styles */
+/* Force tailwind to scan these directories to detect used styles.
+   The root page templates, form theme and block templates must be listed
+   too: the theme directory is git-ignored from the project root, so the
+   default source auto-detection skips it entirely. */
 @source "../../components";
 @source "../../partials";
+@source "../../*.html.twig";
+@source "../../form";
+@source "../../blocks";
 
 /* Theme and utilities : automatic layering / per file layering */
 @import "./variables.css";
@@ -56,6 +62,7 @@
   @import "../../components/Organisms/ArticleCard/Base.css";
   @import "../../components/Layouts/Footer/Base.css";
   @import "../../components/Layouts/Footer/Checkout.css";
+  @import "../../components/Layouts/Header/Checkout.css";
   @import "../../components/Layouts/CrossSelling/Base.css";
   @import "../../components/Layouts/Review/Base.css";
   @import "../../components/Layouts/SimilarContent/Base.css";
