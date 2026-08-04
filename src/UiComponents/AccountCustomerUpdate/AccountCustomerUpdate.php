@@ -45,6 +45,18 @@ class AccountCustomerUpdate extends BaseFrontController
 
     protected function instantiateForm(): FormInterface
     {
+        // The template feeds this prop from resources(); if that call failed
+        // the logged-in customer would silently get an empty profile form,
+        // so fall back to the session customer.
+        if (null === $this->customer && null !== $customer = $this->customerFacade->getCurrentCustomer()) {
+            $this->customer = [
+                'id' => $customer->getId(),
+                'email' => $customer->getEmail(),
+                'firstname' => $customer->getFirstname(),
+                'lastname' => $customer->getLastname(),
+            ];
+        }
+
         return $this->formService->getFormByName(CustomerUpdateForm::FORM_NAME, $this->customer ?? []);
     }
 }

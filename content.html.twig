@@ -1,5 +1,16 @@
 {% extends 'base.html.twig' %}
 
+{% set images = getImagesData({
+	source_id: attr('content', 'id'),
+	source_type: 'content',
+	filters: 'default',
+	limit: 1,
+}) %}
+
+{% block og_image %}{{ ((images|first)?.sources|first)?.url ?: parent()  }}{% endblock %}
+
+{% block og_type %}article{% endblock %}
+
 {% block body %}
 
 	{% set ps = attr('content', 'postscriptum') %}
@@ -37,6 +48,7 @@
                         label: 'See all news'|trans,
                         href: '/'
                     },
+					excludeId: [attr('content', 'id')]
                 })
             }}
         </div>

@@ -44,17 +44,17 @@ liip_imagine:
       filters:
         downscale: { max: [800, 800] }
     add_to_cart:
-      quality: 82
-      format: webp
-      filters:
-        downscale: { max: [400, 400] }
+        quality: 80
+        format: webp
+        filters:
+            thumbnail: { size: [ 400, 400 ], mode: inset }
     order_card:
-      quality: 82
-      format: webp
-      filters:
-        downscale: { max: [200, 200] }
+        quality: 80
+        format: webp
+        filters:
+            thumbnail: { size: [ 200, 200 ], mode: inset }
     order_card_detail:
-      quality: 82
-      format: webp
-      filters:
-        downscale: { max: [400, 400] }
+        quality: 80
+        format: webp
+        filters:
+            thumbnail: { size: [ 300, 300 ], mode: inset }

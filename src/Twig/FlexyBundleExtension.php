@@ -16,6 +16,7 @@ namespace FlexyBundle\Twig;
 
 use FlexyBundle\Service\ProductSaleElementsService;
 use Thelia\Core\Security\SecurityContext;
+use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Model\Customer;
 use Thelia\Model\ProductSaleElements;
 use Twig\Extension\AbstractExtension;
@@ -26,6 +27,7 @@ class FlexyBundleExtension extends AbstractExtension
     public function __construct(
         private ProductSaleElementsService $pseService,
         private SecurityContext $securityContext,
+        private LangService $langService,
     ) {
     }
 
@@ -34,7 +36,17 @@ class FlexyBundleExtension extends AbstractExtension
         return [
             new TwigFunction('attributeAv', [$this, 'attributeAv']),
             new TwigFunction('getCurrentCustomer', [$this, 'getCurrentCustomer']),
+            new TwigFunction('current_locale', [$this, 'currentLocale']),
         ];
+    }
+
+    /**
+     * Current request locale in the language_TERRITORY form (e.g. fr_FR),
+     * as expected by og:locale.
+     */
+    public function currentLocale(): string
+    {
+        return $this->langService->getLocale() ?: 'en_US';
     }
 
     public function getCurrentCustomer(): ?Customer
