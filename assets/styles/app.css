@@ -60,6 +60,9 @@
   @import "../../components/Organisms/CategoryCard/Base.css";
   @import "../../components/Organisms/ReviewCard/Base.css";
   @import "../../components/Organisms/ArticleCard/Base.css";
+  @import "../../components/Organisms/CartItem/Base.css";
+  @import "../../components/Organisms/CartItemDelete/Base.css";
+  @import "../../components/Organisms/CheckoutSummary/Base.css";
   @import "../../components/Layouts/Footer/Base.css";
   @import "../../components/Layouts/Footer/Checkout.css";
   @import "../../components/Layouts/Header/Checkout.css";

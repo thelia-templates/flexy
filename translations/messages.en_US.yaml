@@ -44,6 +44,8 @@ Product unavailable: Product unavailable
 Add to cart: Add to cart
 New: New
 Your product has been added to the cart: Your product has been added to the cart
+Decrease quantity: Decrease quantity
+Increase quantity: Increase quantity
 Quantity:: Quantity:
 has been removed from your cart.: has been removed from your cart.
 Restore: Restore
@@ -68,6 +70,7 @@ No Promo Code: No Promo Code
 Gift Card: Gift Card
 No Gift Card: No Gift Card
 Total (including VAT): Total (including VAT)
+Total: Total
 Taxes of: Taxes of
 included: included
 By paying for your order, you agree to our: By paying for your order, you agree to our

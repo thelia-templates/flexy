@@ -1,9 +1,10 @@
 {# @prop label string Text of the call-to-action button #}
 {% props label = 'Order' %}
+{% set buttonProps = {text: label|trans, disabled: not this.isValid} %}
+{# A null href would crash ComponentAttributes: only pass it when clickable. #}
+{% if this.isValid %}
+    {% set buttonProps = buttonProps|merge({href}) %}
+{% endif %}
 <div class="{{ ('flex justify-end ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
-    <twig:Molecules:Button:Base
-        text="{{ label|trans }}"
-        :disabled="not this.isValid"
-        :href="this.isValid ? href : null"
-    />
+    {{ component('Molecules:Button:Base', buttonProps) }}
 </div>

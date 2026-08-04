@@ -1,0 +1,80 @@
+{# @prop showPromoCodeForm bool Renders the coupon form above the totals #}
+{# @prop cgvLink string|null Link to the terms and conditions shown under the total #}
+{% props showPromoCodeForm = true, cgvLink = null %}
+<div {{ attributes }}>
+    {% set summary = this.summary %}
+    {% set coupons = summary.coupons ?? [] %}
+
+    <div class="Summary">
+        {% if showPromoCodeForm %}
+            <div class="mb-4">
+                <twig:Forms:PromoCode:Base />
+            </div>
+        {% endif %}
+
+        <div class="Summary-list">
+            <div class="Summary-line">
+                <div>
+                    {{ 'Subtotal'|trans }}
+                    <span class="font-normal paragraph-6">
+                        ({{ summary.item_count }} {{ (summary.item_count > 1 ? 'items' : 'item')|trans }})
+                    </span>
+                </div>
+                <div>
+                    {{ summary.raw_taxed_total_price|format_currency('EUR', locale: lang_code) }}
+                </div>
+            </div>
+            <div class="Summary-line">
+                <div>{{ 'Delivery'|trans }}</div>
+                <div>
+                    {{ summary.taxed_postage ? summary.taxed_postage|format_currency('EUR', locale: lang_code) : 'Free delivery'|trans }}
+                </div>
+            </div>
+            {% if coupons|length %}
+                <div class="Summary-line flex-wrap">
+                    <div>{{ 'Promo Code'|trans }}</div>
+                    <ul class="flex gap-1 flex-wrap">
+                        {% for coupon in coupons %}
+                            <li>
+                                <button type="button" class="FilterPill" data-action="live#emit" data-live-event-param="removeCoupon" data-live-code-param="{{ coupon }}">
+                                    <span>{{ coupon }}</span>
+                                    <span class="FilterPill-iconClose">{{ ux_icon('close') }}</span>
+                                </button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            {% if this.hasDiscount %}
+                <div class="Summary-line">
+                    <div>{{ 'Discount'|trans }}</div>
+                    <div>&minus;{{ summary.taxed_discount|format_currency('EUR', locale: lang_code) }}</div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="Summary-footer">
+            <div class="Summary-total">
+                <div>
+                    {{ (this.hasTax ? 'Total (including VAT)' : 'Total')|trans }}
+                </div>
+                <div>
+                    {{ summary.total_taxed_price|format_currency('EUR', locale: lang_code) }}
+                </div>
+            </div>
+            {% if this.hasTax %}
+                <div class="italic">
+                    {{ 'Taxes of'|trans }}
+                    {{ summary.total_tax_amount|format_currency('EUR', locale: lang_code) }}
+                    {{ 'included'|trans }}
+                </div>
+            {% endif %}
+            {% if cgvLink %}
+                <div class="mt-2">
+                    {{ 'By paying for your order, you agree to our'|trans }}
+                    <a href="{{ cgvLink }}">{{ 'terms and conditions'|trans }}</a>.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

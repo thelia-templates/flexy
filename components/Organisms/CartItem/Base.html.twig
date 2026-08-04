@@ -1,0 +1,137 @@
+{# @prop index int Position of the item in the parent Cart items list (live actions target it) #}
+{# @prop disabled bool Renders the item read-only (no quantity/delete controls) #}
+{% props index = null, disabled = false %}
+<div
+    class="{{ (this.outOfStock ? 'CartItem-wrapper CartItem-wrapper--outOfStock ' : 'CartItem-wrapper ') ~ attributes.render('class')|tailwind_merge }}"
+    {{ attributes.without('class') }}
+    data-loading="addClass(opacity-50 pointer-events-none)"
+>
+    {% if this.outOfStock %}
+        <div class="flex paragraph-4 mb-2.5">
+            <span class="w-5 h-5 mr-1">
+                {{ ux_icon('error') }}
+            </span>
+            <span>
+                {{ this.title }}
+                {{ 'is no longer available and cannot be ordered.'|trans }}
+            </span>
+        </div>
+    {% endif %}
+
+    <div class="CartItem {{ this.outOfStock ? 'CartItem--outOfStock' : '' }}">
+        <div class="CartItem-mainContent">
+            <a class="CartItem-imgLink" href="{{ this.url }}">
+                {% if this.pseImageId %}
+                    {{ getImages({
+                        source_type: 'product',
+                        img_id: this.pseImageId,
+                        filters: 'add_to_cart',
+                        limit: 1,
+                        wrapper: 'figure',
+                        wrapper_attrs: {class: 'CartItem-img'},
+                        img_attrs: {class: 'mx-auto', loading: 'lazy', width: '105', height: '112'},
+                        placeholder: asset('images/placeholder2.webp'),
+                    })|raw }}
+                {% else %}
+                    <figure class="CartItem-img">
+                        <img class="mx-auto" src="{{ asset('images/placeholder2.webp') }}" alt="" width="105" height="112" loading="lazy">
+                    </figure>
+                {% endif %}
+            </a>
+            <div class="CartItem-desc">
+                <a href="{{ this.url }}" class="CartItem-title">
+                    {{ this.title }}
+                </a>
+                <div class="CartItem-orderInfos paragraph-6">
+                    {% if this.desc %}
+                        <span>{{ this.desc }}</span>
+                    {% endif %}
+                    {% if this.attributesAv|length %}
+                        <span>
+                            {%- set attrs = [] -%}
+                            {%- for attribute, value in this.attributesAv -%}
+                                {%- set attrs = attrs|merge([attribute ~ ' : ' ~ value]) -%}
+                            {%- endfor -%}
+                            {{ attrs|join(', ') }}
+                        </span>
+                    {% endif %}
+                    {% if this.cartItem.quantity %}
+                        <span>
+                            {{ 'Quantity:'|trans }}
+                            {{ this.cartItem.quantity }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="CartItem-footer">
+                    {% if this.promo %}
+                        <div class="CartItem-footerRight">
+                            <div class="CartItem-price">
+                                {{ this.prices.promoTaxedPrice|format_currency('EUR', locale: lang_code) }}
+                            </div>
+                            <div class="CartItem-originalPrice">
+                                {{ this.prices.taxedPrice|format_currency('EUR', locale: lang_code) }}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="CartItem-price">
+                            {{ this.prices.taxedPrice|format_currency('EUR', locale: lang_code) }}
+                        </div>
+                    {% endif %}
+
+                    {% if this.outOfStock %}
+                        <div class="CartItem-unavailable">
+                            {{ 'Unavailable'|trans }}
+                        </div>
+                    {% elseif not disabled %}
+                        <div class="CartItem-quantity" {{ stimulus_controller('Organisms--CartItem--quantity') }}>
+                            <button
+                                type="button"
+                                aria-label="{{ 'Decrease quantity'|trans }}"
+                                data-action="live#action"
+                                data-live-action-param="minus"
+                                data-live-index-param="{{ index }}"
+                                {% if this.cartItem.quantity <= 0 %}class="invisible"{% endif %}
+                            >&minus;</button>
+
+                            <input
+                                type="number"
+                                aria-label="{{ 'Quantity'|trans }}"
+                                data-model="on(change)|items[{{ index }}].quantity"
+                                data-action="input->Organisms--CartItem--quantity#enforce change->live#action"
+                                data-live-action-param="onQuantityChanged"
+                                data-live-index-param="{{ index }}"
+                                data-live-base-quantity-param="{{ this.cartItem.quantity }}"
+                                value="{{ this.cartItem.quantity }}"
+                                min="0"
+                                {% if this.cartItem.stockManaged %}max="{{ this.cartItem.stock }}"{% endif %}
+                            >
+
+                            <button
+                                type="button"
+                                aria-label="{{ 'Increase quantity'|trans }}"
+                                data-action="live#action"
+                                data-live-action-param="plus"
+                                data-live-index-param="{{ index }}"
+                                {% if this.cartItem.stockManaged and this.cartItem.quantity >= this.cartItem.stock %}class="invisible"{% endif %}
+                            >+</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if not disabled %}
+            <div class="CartItem-actions">
+                <a href="{{ this.url }}">
+                    <span>{{ ux_icon('show') }}</span>
+                    {{ 'View product'|trans }}
+                </a>
+                <button type="button" {{ live_action('remove', {index}) }}>
+                    <span>{{ ux_icon('delete') }}</span>
+                    {{ 'Delete'|trans }}
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div>

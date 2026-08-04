@@ -1,0 +1,42 @@
+{# @prop title string Title of the removed product #}
+{# @prop productId int #}
+{# @prop pseId int Product sale element to restore #}
+{# @prop quantity int Quantity to restore #}
+{# @prop imageId int|null Product image shown next to the message #}
+{% props title = '', productId = null, pseId = null, quantity = 1, imageId = null %}
+<div class="{{ ('CartItemDelete ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    <div class="CartItemDelete-mainContent">
+        {% if imageId %}
+            {{ getImages({
+                source_type: 'product',
+                img_id: imageId,
+                alt: title,
+                filters: 'default',
+                wrapper: 'picture',
+                wrapper_attrs: {class: 'CartItemDelete-img'},
+                img_attrs: {width: '88', height: '88'},
+                limit: 1,
+                placeholder: asset('images/placeholder2.webp'),
+            })|raw }}
+        {% else %}
+            <picture class="CartItemDelete-img">
+                <img src="{{ asset('images/placeholder2.webp') }}" alt="" width="88" height="88">
+            </picture>
+        {% endif %}
+        <div class="CartItemDelete-desc">
+            <div class="mb-2 paragraph-3">
+                {{ title }} {{ 'has been removed from your cart.'|trans }}
+            </div>
+            <twig:Molecules:Button:Base
+                size="small"
+                icon_left="restore"
+                text="{{ 'Restore'|trans }}"
+                data-action="live#action"
+                data-live-action-param="restoreCartItem"
+                data-live-pse-id-param="{{ pseId }}"
+                data-live-product-id-param="{{ productId }}"
+                data-live-quantity-param="{{ quantity }}"
+            />
+        </div>
+    </div>
+</div>

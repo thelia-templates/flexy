@@ -1,0 +1,54 @@
+<div {{ attributes }} data-loading="addClass(opacity-50 pointer-events-none)">
+    {% if this.totalItems %}
+        {% if this.itemHasNoStockMessage %}
+            <twig:Molecules:SnackBar:Base
+                variant="error"
+                withIcon
+                class="mb-6"
+                text="{{ 'Your cart contains unvailable products'|trans }}"
+            />
+        {% endif %}
+
+        <div class="text-right mb-1 paragraph-6 hidden sm:block">
+            {{ this.totalItems }}
+            {{ (this.totalItems <= 1 ? 'item' : 'items')|trans }}
+        </div>
+
+        {% if this.pendingDelete %}
+            <twig:Organisms:CartItemDelete:Base
+                title="{{ this.pendingDelete.title }}"
+                :productId="this.pendingDelete.productId"
+                :pseId="this.pendingDelete.pseId"
+                :quantity="this.pendingDelete.quantity"
+                :imageId="this.pendingDelete.imageId"
+            />
+        {% endif %}
+
+        <div class="flex flex-col gap-5">
+            {% for index, item in this.items %}
+                <twig:Organisms:CartItem:Base :cartItem="item" :index="index" :key="item.id" />
+            {% endfor %}
+        </div>
+    {% else %}
+        {% if this.pendingDelete %}
+            <twig:Organisms:CartItemDelete:Base
+                title="{{ this.pendingDelete.title }}"
+                :productId="this.pendingDelete.productId"
+                :pseId="this.pendingDelete.pseId"
+                :quantity="this.pendingDelete.quantity"
+                :imageId="this.pendingDelete.imageId"
+            />
+        {% endif %}
+        <div class="my-8 text-center">
+            {{ ux_icon('empty', {class: 'w-60 h-45 block mx-auto mb-14'}) }}
+            <h1 class="mb-6 h3">
+                {{ 'Your cart is empty'|trans }}
+            </h1>
+            <twig:Molecules:Button:Base
+                text="{{ 'Back to the store'|trans }}"
+                size="large"
+                href="{{ path('index') }}"
+            />
+        </div>
+    {% endif %}
+</div>

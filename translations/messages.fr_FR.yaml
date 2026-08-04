@@ -44,6 +44,8 @@ Product unavailable: Produit indisponible
 Add to cart: Ajouter au panier
 New: Nouveau
 Your product has been added to the cart: Votre produit a été ajouté au panier
+Decrease quantity: Diminuer la quantité
+Increase quantity: Augmenter la quantité
 Quantity:: Quantité :
 Quantity: Quantité
 Color: Couleur
@@ -70,6 +72,7 @@ No Promo Code: Pas de code promo
 Gift Card: Carte cadeau
 No Gift Card: Pas de carte cadeau
 Total (including VAT): Total (TVA incluse)
+Total: Total
 Taxes of: Taxes de
 included: incluses
 By paying for your order, you agree to our: En payant votre commande, vous acceptez nos

@@ -1,0 +1,33 @@
+.CartItemDelete {
+  border-radius: 0.25rem;
+  background-color: var(--color-grey-lightest);
+  overflow: hidden;
+  padding: 0.5rem;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.CartItemDelete-mainContent {
+  display: flex;
+  column-gap: 1.125rem;
+  align-items: center;
+  flex-direction: row;
+}
+
+.CartItemDelete-img {
+  display: flex;
+  height: 5.5rem;
+
+  img {
+    object-fit: cover;
+  }
+}
+
+.CartItemDelete-desc {
+  flex-grow: 1;
+  padding-top: 0.625rem;
+
+  @variant sm {
+    padding: 0 0.5rem 0 0;
+  }
+}

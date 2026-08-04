@@ -1,0 +1,25 @@
+{% form_theme form with flexy_form_themes only %}
+<div class="{{ ('PromoCode ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }} data-loading="addClass(opacity-50 pointer-events-none)">
+    <twig:Molecules:Accordion:Base id="promo-code">
+        <twig:Molecules:Accordion:Item value="promo-code" class="bg-white border-0">
+            <twig:Molecules:Accordion:Trigger iconClosed="plus" iconOpen="minus" iconClass="size-5">
+                {{ 'Add a promo code'|trans }}
+            </twig:Molecules:Accordion:Trigger>
+            <twig:Molecules:Accordion:Content>
+                {{ form_start(form, {
+                    attr: {
+                        class: 'flex gap-4 items-start',
+                        'data-action': 'live#action:prevent',
+                        'data-live-action-param': 'save',
+                    },
+                }) }}
+                <div class="flex-1">
+                    {{ form_row(form['coupon-code']) }}
+                </div>
+                {{ form_row(form.submit) }}
+                {{ form_errors(form) }}
+                {{ form_end(form) }}
+            </twig:Molecules:Accordion:Content>
+        </twig:Molecules:Accordion:Item>
+    </twig:Molecules:Accordion:Base>
+</div>

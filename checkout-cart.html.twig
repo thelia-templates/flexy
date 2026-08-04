@@ -3,19 +3,20 @@
 {% block title %}{{ 'Cart'|trans }}{% endblock %}
 
 {% block checkoutContent %}
-    {% if emptyCart %}
-        <div class="my-8 text-center">
-            {{ ux_icon('empty', {class: 'w-60 h-45 block mx-auto mb-14'}) }}
-            <h1 class="mb-6 h3">
-                {{ 'Your cart is empty'|trans }}
-            </h1>
-            <twig:Molecules:Button:Base
-                text="{{ 'Back to the store'|trans }}"
-                size="large"
-                href="{{ path('index') }}"
-            />
-        </div>
-    {% else %}
-        {# The cart item list (Organisms/Cart LiveComponent) lands with the next batch. #}
-    {% endif %}
+    <twig:Organisms:Cart:Base />
+{% endblock %}
+
+{% block checkoutSummary %}
+    {%- if not emptyCart -%}
+        <twig:Organisms:CheckoutSummary:Base />
+    {%- endif -%}
+{% endblock %}
+
+{% block checkoutNextButton %}
+    {%- if not emptyCart -%}
+        <twig:Organisms:NextButton:Base
+            :step="constant('FlexyBundle\\Components\\Molecules\\CheckoutSteps\\Base::CART')"
+            href="{{ path('checkout_delivery') }}"
+        />
+    {%- endif -%}
 {% endblock %}
