@@ -1,29 +1,88 @@
-# Documentation on how to configure the bundle can be found at: https://symfony.com/doc/current/bundles/LiipImagineBundle/basic-usage.html
 liip_imagine:
-  # valid drivers options include "gd" or "gmagick" or "imagick"
-  driver: 'gd'
+  driver: gd
   resolvers:
     default:
       web_path:
         web_root: '%kernel.project_dir%/public'
-        cache_prefix: 'cache/images'
-
+        cache_prefix: cache/images
   loaders:
     default:
       filesystem:
         data_root: '%kernel.project_dir%/local/media/images'
-        # Allow the loader to boot before TheliaLibrary (which creates the folder)
-        # has run its preActivation. Missing paths fall through to a regular 404
-        # when the image is requested.
         allow_unresolvable_data_roots: true
-
   filter_sets:
     default:
+      quality: 82
+      format: webp
+      filters:
+        downscale:
+          max:
+            - 1200
+            - 1200
+    category:
+      quality: 82
+      format: webp
+      filters:
+        downscale:
+          max:
+            - 500
+            - 500
+    category_md:
+      quality: 80
+      format: webp
+      filters:
+        downscale:
+          max:
+            - 400
+            - 400
+    category_sm:
+      quality: 80
+      format: webp
+      filters:
+        downscale:
+          max:
+            - 300
+            - 300
+    block_image:
+      quality: 82
+      format: webp
+      filters:
+        downscale:
+          max:
+            - 800
+            - 800
     add_to_cart:
+      quality: 80
+      format: webp
+      filters:
+        thumbnail:
+          size:
+            - 400
+            - 400
+          mode: inset
     order_card:
+      quality: 80
+      format: webp
+      filters:
+        thumbnail:
+          size:
+            - 200
+            - 200
+          mode: inset
     order_card_detail:
+      quality: 80
+      format: webp
+      filters:
+        thumbnail:
+          size:
+            - 300
+            - 300
+          mode: inset
     sitemap:
       quality: 82
       format: webp
       filters:
-        downscale: { max: [800, 800] }
+        downscale:
+          max:
+            - 800
+            - 800

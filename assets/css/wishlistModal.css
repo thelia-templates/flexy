@@ -1,0 +1,131 @@
+.WishListButton {
+  display: inline-flex;
+}
+
+.WishListModal {
+  z-index: 30;
+
+  &-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  &-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &-title {
+    @apply block mb-6 text-center text-black;
+  }
+
+  &-titleSection {
+    @apply paragraph-2;
+    font-weight: 700;
+    color: var(--black);
+  }
+
+  &-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &-formRow {
+    display: flex;
+    gap: rem-convert(8px);
+    align-items: stretch;
+
+    .FieldInput-blockInput {
+      flex: 1 1 auto;
+    }
+  }
+
+  &-grid {
+    display: grid;
+    gap: 0.5rem;
+
+    @screen md {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  &-card {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    border-radius: 12px;
+    background: var(--theme-lightest);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+
+    &:hover:not(.WishListModal--selected) {
+      background: var(--theme-lighter);
+    }
+  }
+  &-cardIcon {
+    width: rem-convert(18px);
+    height: rem-convert(18px);
+    flex: 0 0 auto;
+  }
+
+  &-list {
+    display: flex;
+    flex-direction: column;
+    gap: rem-convert(8px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: rem-convert(12px);
+    padding: rem-convert(10px) rem-convert(12px);
+    border: 1px solid var(--grey);
+    border-radius: rem-convert(12px);
+  }
+
+  &-remove {
+    display: inline-flex;
+    align-items: center;
+    gap: rem-convert(6px);
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 0.5rem 0.75rem;
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .WishListModal.MobileDrawer {
+    top: 50%;
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    width: min(560px, 92vw);
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: rem-convert(20px);
+  }
+
+  .WishListModal.MobileDrawer.is-open {
+    transform: translate(-50%, -50%);
+  }
+
+  .WishListModal.MobileDrawer::before {
+    content: none;
+  }
+}

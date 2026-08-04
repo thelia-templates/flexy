@@ -7,6 +7,11 @@
     "thelia-flexy"
   ],
   "license": "GPL-3.0-or-later",
+  "homepage": "https://thelia.net",
+  "support": {
+    "issues": "https://github.com/thelia-templates/flexy/issues",
+    "source": "https://github.com/thelia-templates/flexy"
+  },
   "require": {
     "symfony/webpack-encore-bundle": "^2.1",
     "symfony/ux-twig-component": "^2.19",

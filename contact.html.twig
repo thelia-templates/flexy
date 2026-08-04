@@ -1,5 +1,14 @@
 {% extends 'base.html.twig' %}
 
+{% block structured_data %}
+    {{ SEOneContactPage() }}
+    {{ SEOneBreadcrumbList([
+        { name: attr('config', 'store_name'), url: absolute_url(path('index')) },
+        { name: 'Contact'|trans, url: SEOnePageCanonical() },
+    ]) }}
+    {{ SEOneLocalBusiness(absolute_url(asset('dist/images/logo.png'))) }}
+{% endblock %}
+
 {% block body %}
     <div class="p-5 lg:justify-between lg:items-center lg:flex">
         {{ component('Molecules:Breadcrumb:Breadcrumb', {

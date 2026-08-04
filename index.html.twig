@@ -2,6 +2,12 @@
 
 {% block breadcrumb_json %}{% endblock %}
 
+{% block structured_data %}
+    {{ SEOneWebSite() }}
+    {{ SEOneWebPage() }}
+    {{ SEOneLocalBusiness(absolute_url(asset('dist/images/logo.png'))) }}
+{% endblock %}
+
 {% block body %}
     {{ theme_hook('home.top') }}
 
@@ -33,6 +39,7 @@
     <div class="bg-theme-lighter">
         {{ component('Flexy:SimilarContent', {title: 'Our news'|trans, button: {label: 'See all news'|trans, href: '#'}}) }}
     </div>
+	
 
     {{ theme_hook('home.bottom') }}
 {% endblock %}
