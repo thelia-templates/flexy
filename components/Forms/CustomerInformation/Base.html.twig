@@ -1,3 +1,4 @@
+{% form_theme form with flexy_form_themes only %}
 <div {{ attributes }}>
     {{ form_start(form, {attr: {class: 'flex flex-col gap-6'}}) }}
     {{ form_row(form.success_url, {value: path('account_index')}) }}

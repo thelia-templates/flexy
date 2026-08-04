@@ -9,6 +9,7 @@
 
     <div class="container-s pt-8 pb-14 lg:pt-12 lg:pb-30">
         {% set form = getForm('thelia.front.contact') %}
+        {% form_theme form with flexy_form_themes only %}
 
         {% block contactFormTitle %}
             <h2 class="mb-4 h2">{{ 'Contact Us'|trans }}</h2>

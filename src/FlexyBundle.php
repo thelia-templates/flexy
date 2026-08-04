@@ -59,8 +59,14 @@ class FlexyBundle extends AbstractBundle
                 \dirname(__DIR__) . '/form' => 'FlexyForm',
                 \dirname(__DIR__) . '/partials' => 'FlexyPartials',
             ],
-            'form_themes' => [
-                '@FlexyForm/flexy_form_theme.html.twig',
+            // The theme is intentionally NOT registered globally (a global form
+            // theme would also style the back-office forms): every template
+            // rendering a form declares it explicitly with
+            // {% form_theme form with flexy_form_themes only %}.
+            'globals' => [
+                'flexy_form_themes' => [
+                    '@FlexyForm/flexy_form_theme.html.twig',
+                ],
             ],
         ]);
     }

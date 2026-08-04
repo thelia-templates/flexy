@@ -4,6 +4,7 @@
 
 {% block body %}
     {% set form = getForm('flexybundle_form_customer_register_form') %}
+    {% form_theme form with flexy_form_themes only %}
 
     <twig:Molecules:CheckoutSteps:Base
         :steps="[{text: 'Your login', link: path('customer_register')}, {text: 'Your informations', link: path('customer_informations')}]"
