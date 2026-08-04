@@ -252,7 +252,7 @@ No available carrier for your current address.: Aucun de nos transporteurs ne po
 Choose a payment method: Choisissez un mode de paiement
 Your cart is curently empty: Votre panier est vide.
 Back to the store: Retour à la boutique
-Payment processing...: Payment en cours...
+Payment processing...: Paiement en cours...
 Thanks for your order !: Merci pour votre commande !
 for your order: pour votre commande
 Your payment has been confirmed: Votre paiement a été validé.
@@ -275,7 +275,7 @@ Address label: Nom de l'adresse
 This name will allow you to easily identify each of your addresses: Ce label vous permettra d'identifier chacune de vos adresses
 Choose a delivery method: Votre mode de livraison
 In case we need to contact you about your order: Si nous avons besoin de vous contacter au sujet de votre commande
-Payment: Paiment
+Payment: Paiement
 Your cart: Votre panier
 Confirmation: Confirmation
 Change address: Changer l'adresse
@@ -318,6 +318,7 @@ This email is already used: Cet e-mail est déjà utilisé
 No delivery method is available for this order.: Aucun mode de livraison disponible.
 Choose a delivery address : Choisir une adresse
 Your order: Votre commande
+Payment Gateway: Passerelle de paiement
 Payment failed: Paiement échoué
 The payment could not be completed.: Le paiement n'a pas pu être effectué
 Back to cart: Retour au panier

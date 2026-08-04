@@ -1,0 +1,20 @@
+{% extends 'checkout-base.html.twig' %}
+
+{% block title %}{{ 'Payment failed'|trans }}{% endblock %}
+
+{% block checkoutContent %}
+    <div class="flex flex-col items-center justify-center text-center">
+        {{ ux_icon('not-found', {class: 'w-50 h-auto block mx-auto mb-6'}) }}
+        {% if failed_order_message %}
+            <h3 class="mt-4 mb-6 h4">{{ failed_order_message }}</h3>
+        {% else %}
+            <h3 class="mt-4 mb-6 h4">{{ 'The payment could not be completed.'|trans }}</h3>
+        {% endif %}
+
+        <twig:Molecules:Button:Base
+            text="{{ 'Back to cart'|trans }}"
+            size="large"
+            href="{{ path('checkout_cart') }}"
+        />
+    </div>
+{% endblock %}

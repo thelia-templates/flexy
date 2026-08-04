@@ -1,0 +1,23 @@
+{% extends 'checkout-base.html.twig' %}
+
+{% block title %}{{ 'Payment Gateway'|trans }}{% endblock %}
+
+{% block checkoutContent %}
+    <div class="block mx-auto text-center text-black">
+        <strong>{{ 'Payment processing...'|trans }}</strong>
+    </div>
+
+    {# The gateway page auto-submits the payment form provided by the payment
+       module towards the external payment provider. #}
+    <form id="payment-form" method="post" action="{{ gateway_url }}" target="_top" style="display: none;">
+        {% for name, value in payment_form_data %}
+            <input type="hidden" name="{{ name }}" value="{{ value }}"/>
+        {% endfor %}
+    </form>
+
+    <script>
+        setTimeout(() => {
+            document.getElementById('payment-form').submit();
+        }, 1000);
+    </script>
+{% endblock %}
