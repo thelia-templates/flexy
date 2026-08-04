@@ -1,0 +1,10 @@
+{# Presentational radio indicator (NOT a form input): shows the checked state
+   of the card it belongs to and carries the click behaviour of its caller. #}
+{# @prop checked bool #}
+{% props checked = false %}
+<button
+    class="{{ ('RadioButton ' ~ (checked ? 'checked ' : '') ~ attributes.render('class'))|tailwind_merge }}"
+    {{ attributes.defaults({type: 'button'}).without('class') }}
+>
+    <span class="RadioButton-checkmark"></span>
+</button>

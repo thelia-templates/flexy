@@ -1,0 +1,58 @@
+{# @prop title string Optional card title (falls back to the address label) #}
+{# @prop disabled bool Disables the action buttons #}
+{% props title = '', disabled = false %}
+{% set address = this.address %}
+<div
+    class="{{ ('AddressCard ' ~ (this.checked ? 'selected ' : '') ~ attributes.render('class'))|tailwind_merge }}"
+    {{ attributes.without('class') }}
+>
+    <div class="AddressCard-top">
+        {% block header %}
+            {% if not this.inOrder %}
+                <twig:Molecules:Favorite:Base
+                    text="{{ 'Favourite'|trans }}"
+                    :selected="address.isDefault ? true : false"
+                />
+            {% endif %}
+        {% endblock %}
+    </div>
+
+    <label class="AddressCard-content">
+        {% block form %}{% endblock %}
+
+        {% block infos %}
+            {% if title %}
+                {% set cardTitle = title %}
+                {% set name = address.label ?: (address.firstname ~ ' ' ~ address.lastname) %}
+            {% else %}
+                {% set cardTitle = address.label %}
+                {% set name = address.firstname ~ ' ' ~ address.lastname %}
+            {% endif %}
+            <span>
+                <span class="AddressCard-title">{{ cardTitle }}</span>
+                <span class="AddressCard-name">{{ name }}</span>
+                <span class="AddressCard-address">
+                    <span class="block">
+                        {{ [address.address1, address.address2 ?? '', address.address3 ?? '']|filter(i => i)|join(', ') }}
+                    </span>
+                    <span class="block">
+                        {% set country = resources('/api/front/countries/' ~ address.countryId) %}
+                        {{ [address.zipcode, address.city ?? '', country.isoalpha3 ?? '']|filter(i => i)|join(', ') }}
+                    </span>
+                    <span class="AddressCard-phone">{{ address.phone }}</span>
+                </span>
+            </span>
+        {% endblock %}
+    </label>
+
+    {% if not this.inOrder %}
+        <div class="AddressCard-actions">
+            {% block bottom %}
+                <a {% if disabled %}disabled{% endif %} href="{{ path('account_addresses') }}">
+                    <span>{{ ux_icon('edit') }}</span>
+                    {{ 'Modify'|trans }}
+                </a>
+            {% endblock %}
+        </div>
+    {% endif %}
+</div>

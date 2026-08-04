@@ -1,0 +1,50 @@
+{% extends '@Flexy/Organisms/AddressCard/Base.html.twig' %}
+
+{% block header %}
+    {% if this.address.isDefault %}
+        <twig:Molecules:Favorite:Base
+            text="{{ 'Favourite'|trans }}"
+            selected
+        />
+    {% endif %}
+{% endblock %}
+
+{% block form %}
+    {% set eventName = this.type == 'delivery'
+        ? constant('FlexyBundle\\Event\\CheckoutEvents::SET_DELIVERY_ORDER_ADDRESS_ID')
+        : constant('FlexyBundle\\Event\\CheckoutEvents::SET_INVOICE_ORDER_ADDRESS_ID') %}
+    <twig:Molecules:RadioButton:Base
+        :checked="this.checked"
+        data-action="live#emit"
+        data-live-event-param="{{ eventName }}"
+        data-live-address-id-param="{{ this.address.id }}"
+    />
+{% endblock %}
+
+{% block bottom %}
+    {% if this.type == 'delivery' %}
+        <button
+            type="button"
+            {% if disabled %}disabled{% endif %}
+            data-action="live#emit"
+            data-live-event-param="{{ constant('FlexyBundle\\Event\\CheckoutEvents::EDIT_DELIVERY_ADDRESS') }}"
+            data-live-address-id-param="{{ this.address.id }}"
+        >
+            <span>{{ ux_icon('edit') }}</span>
+            {{ 'Modify'|trans }}
+        </button>
+
+        {% if not this.address.isDefault %}
+            <button
+                type="button"
+                {% if disabled %}disabled{% endif %}
+                data-action="live#emit"
+                data-live-event-param="{{ constant('FlexyBundle\\Event\\CheckoutEvents::DELETE_DELIVERY_ADDRESS') }}"
+                data-live-address-id-param="{{ this.address.id }}"
+            >
+                <span>{{ ux_icon('delete') }}</span>
+                {{ 'Delete'|trans }}
+            </button>
+        {% endif %}
+    {% endif %}
+{% endblock %}

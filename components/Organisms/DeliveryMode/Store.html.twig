@@ -1,0 +1,17 @@
+{% extends '@Flexy/Organisms/DeliveryMode/Base.html.twig' %}
+
+{% block content %}
+    <span class="StoreDelivery-address">
+        {% set completeAddress = [
+            this.address.address1,
+            this.address.address2,
+            this.address.address3 ?? null,
+        ] %}
+        <span class="block">{{ completeAddress|filter(i => i)|join(', ') }}</span>
+        {% set city = [
+            this.address.zipCode,
+            this.address.city,
+        ] %}
+        <span class="block">{{ city|filter(i => i)|join(', ') }}</span>
+    </span>
+{% endblock %}

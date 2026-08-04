@@ -20,6 +20,7 @@
         "symfony/ux-icons": "^2.21",
         "symfony/ux-translator": "^2.19",
         "symfony/ux-live-component": "^2.19",
+        "symfonycasts/dynamic-forms": "^0.1.2",
         "symfonycasts/tailwind-bundle": "^0.11.1",
         "tales-from-a-dev/twig-tailwind-extra": "^1.0.0",
         "twig/extra-bundle": "^3.24.0",

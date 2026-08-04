@@ -1,0 +1,44 @@
+{# @prop icon string|null Icon shown on the right of the card #}
+<div
+    class="{{ ('DeliveryMode ' ~ (this.checked ? 'selected ' : '') ~ this.type ~ ' ' ~ attributes.render('class'))|tailwind_merge }}"
+    {{ attributes.without('class') }}
+    {% block stimulus %}{% endblock %}
+>
+    <label class="DeliveryMode-content">
+        <twig:Molecules:RadioButton:Base
+            :checked="this.checked"
+            data-action="live#emit"
+            data-live-event-param="{{ constant('FlexyBundle\\Event\\CheckoutEvents::SET_DELIVERY_MODULE_OPTION') }}"
+            data-live-option-code-param="{{ this.optionCode }}"
+            data-live-module-id-param="{{ this.moduleId }}"
+        />
+
+        <span>
+            <span class="flex justify-between">
+                <span>
+                    <span class="DeliveryMode-title">{{ this.title }}</span>
+                    {% if this.description %}
+                        <span class="DeliveryMode-description">{{ this.description }}</span>
+                    {% endif %}
+                </span>
+                {% if icon ?? null %}
+                    <span class="DeliveryMode-icon">
+                        {{ ux_icon(icon) }}
+                    </span>
+                {% endif %}
+            </span>
+            <span class="flex items-center mt-6">
+                <span class="DeliveryMode-price">
+                    {{ this.price ? this.price|format_currency('EUR', locale: lang_code) : 'Free'|trans }}
+                </span>
+            </span>
+
+            {% block content %}{% endblock %}
+
+            <span class="DeliveryMode-children {% if not this.checked %}hidden{% endif %}">
+                {% block children %}{% endblock %}
+            </span>
+        </span>
+    </label>
+    {% block footer %}{% endblock %}
+</div>

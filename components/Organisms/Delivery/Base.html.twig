@@ -1,0 +1,83 @@
+<div {{ attributes }} data-loading="addClass(opacity-50 pointer-events-none)">
+    <h1 class="text-black h4">
+        {{ 'Choose a delivery address'|trans }}
+    </h1>
+    <div class="my-8">
+        {% if this.showNewAddressForm %}
+            <twig:Forms:Address:Base />
+        {% elseif this.editingAddressId %}
+            <twig:Forms:Address:Base :addressId="this.editingAddressId" />
+        {% else %}
+            <div>
+                {% if this.addressList|length <= 0 %}
+                    <div class="flex flex-col items-start gap-3">
+                        <span>
+                            {{ 'You have no registered address'|trans }}:
+                        </span>
+                        <twig:Molecules:Button:Base
+                            type="button"
+                            text="{{ 'Add an address'|trans }}"
+                            data-action="live#action"
+                            data-live-action-param="toggleNewAddressForm"
+                        />
+                    </div>
+                {% else %}
+                    <ul class="flex flex-col gap-2">
+                        {% for address in this.addressList %}
+                            <li>
+                                <twig:Organisms:AddressCard:Checkout :addressId="address.id" />
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="flex flex-col gap-2 mt-4 lg:flex-row lg:items-center">
+                        <twig:Molecules:Button:Base
+                            type="button"
+                            text="{{ 'Use another address'|trans }}"
+                            data-action="live#action"
+                            data-live-action-param="toggleNewAddressForm"
+                        />
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <h2 class="text-black h4">
+        {{ 'Choose a delivery method'|trans }}
+    </h2>
+    <div class="flex flex-col gap-3.5 my-5">
+        {% set deliveryOptions = this.deliveryModulesOptions %}
+        {% if deliveryOptions|length > 0 %}
+            {% for option in deliveryOptions %}
+                {% if option.deliveryMode == enum('Thelia\\Domain\\Checkout\\Enum\\DeliveryMode').DELIVERY.value %}
+                    <twig:Organisms:DeliveryMode:Home
+                        title="{{ option.title }}"
+                        price="{{ option.postage ?? '0' }}"
+                        optionCode="{{ option.code }}"
+                        :moduleId="option.moduleId"
+                        :deliveryAddressId="this.deliveryAddressId"
+                        :invoiceAddressId="this.invoiceAddressId"
+                        icon="reinsurance-homedelivery"
+                    />
+                {% elseif option.deliveryMode == enum('Thelia\\Domain\\Checkout\\Enum\\DeliveryMode').LOCAL_PICKUP.value %}
+                    <twig:Organisms:DeliveryMode:Store
+                        title="{{ option.title }}"
+                        price="{{ option.postage ?? '' }}"
+                        optionCode="{{ option.code }}"
+                        :moduleId="option.moduleId"
+                        icon="reinsurance-store"
+                    />
+                {% endif %}
+                {# The PICKUP mode (pickup points + map) needs a pickup-capable
+                   carrier module and its own components: not wired yet. #}
+            {% endfor %}
+        {% else %}
+            <twig:Molecules:SnackBar:Base
+                variant="warning"
+                withIcon
+                text="{{ 'No delivery method is available for this order.'|trans }}"
+            />
+        {% endif %}
+    </div>
+</div>
