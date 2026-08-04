@@ -1,0 +1,61 @@
+/* Bootstrap-like input group: the search button is a segment of the field
+   (same border, same height, single continuous outline). */
+.PickupSearch-inputGroup {
+  display: flex;
+  align-items: flex-end;
+
+  & > .Input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .Input-input {
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+    border-right: none;
+  }
+}
+
+.PickupSearch-searchButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Mirror the .Input-input box model so both segments are pixel-identical
+     in height: same block padding, icon sized on the field's line-height. */
+  padding: 1rem 1.125rem;
+  flex-shrink: 0;
+  background: var(--color-white);
+  border: 1px solid var(--color-medium);
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  border-start-end-radius: 0.5rem;
+  border-end-end-radius: 0.5rem;
+  color: var(--color-black);
+  cursor: pointer;
+  transition: 0.2s ease all;
+
+  &:hover {
+    background: var(--color-lightest);
+  }
+
+  svg {
+    width: 1.25rem;
+    height: var(--line-height-paragraph-4);
+  }
+}
+
+.PickupSearch-map {
+  height: 17.8125rem;
+  width: 100%;
+}
+
+.PickupSearch-marker {
+  border-radius: 50%;
+  background: var(--color-black);
+  border: 3px solid var(--color-white);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 40%);
+}
+
+.PickupSearch-marker--selected {
+  background: var(--color-medium);
+}

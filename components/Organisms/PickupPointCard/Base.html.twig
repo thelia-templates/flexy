@@ -1,0 +1,53 @@
+{# @prop pickup array Pickup location from /api/front/delivery_pickup_locations #}
+{# @prop selected bool #}
+{% props pickup = {}, selected = false %}
+{% set days = ['monday'|trans, 'tuesday'|trans, 'wednesday'|trans, 'thursday'|trans, 'friday'|trans, 'saturday'|trans, 'sunday'|trans] %}
+<div class="{{ ('PickupPoint ' ~ (selected ? 'selected ' : '') ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    {# The whole content area selects the point (the radio indicator is
+       hidden below md, purely visual elsewhere). Not a <label>: it would
+       forward clicks to the inner button and fire the action twice. #}
+    <div
+        class="PickupPoint-content"
+        data-action="click->live#action"
+        data-live-action-param="updateOption"
+        data-live-id-param="{{ pickup.id }}"
+    >
+        <twig:Molecules:RadioButton:Base :checked="selected" />
+        <span>
+            <span class="PickupPoint-title">{{ pickup.title }}</span>
+            <span class="PickupPoint-address">
+                <span>{{ pickup.address.address1 }},</span>
+                {% if pickup.address.address2 %}
+                    <span>{{ pickup.address.address2 }},</span>
+                {% endif %}
+                <span>{{ pickup.address.zipCode }} {{ pickup.address.city }}</span>
+            </span>
+        </span>
+    </div>
+
+    {% if pickup.openingHours is defined and pickup.openingHours|filter(h => h)|length %}
+        <twig:Molecules:Accordion:Base id="pickup-hours-{{ pickup.id }}" class="PickupPoint-hours">
+            <twig:Molecules:Accordion:Item value="hours">
+                <twig:Molecules:Accordion:Trigger iconClass="size-4 ms-1" class="px-0 py-1 justify-start gap-1 flex-none">
+                    {{ 'See opening hours'|trans }}
+                </twig:Molecules:Accordion:Trigger>
+                <twig:Molecules:Accordion:Content class="px-0">
+                    <table class="PickupPoint-hoursTable">
+                        {% for i in 0..6 %}
+                            <tr>
+                                <td>{{ days[i] }}</td>
+                                <td>
+                                    {% if pickup.openingHours[i] is defined and pickup.openingHours[i] %}
+                                        {{ pickup.openingHours[i]|replace({':00': 'h', ':': 'h'})|trim }}
+                                    {% else %}
+                                        {{ 'Closed'|trans }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </twig:Molecules:Accordion:Content>
+            </twig:Molecules:Accordion:Item>
+        </twig:Molecules:Accordion:Base>
+    {% endif %}
+</div>

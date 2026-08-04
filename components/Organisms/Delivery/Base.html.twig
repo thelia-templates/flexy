@@ -68,9 +68,15 @@
                         :moduleId="option.moduleId"
                         icon="reinsurance-store"
                     />
+                {% elseif option.deliveryMode == enum('Thelia\\Domain\\Checkout\\Enum\\DeliveryMode').PICKUP.value %}
+                    <twig:Organisms:DeliveryMode:Pickup
+                        title="{{ option.title }}"
+                        price="{{ option.postage ?? '' }}"
+                        optionCode="{{ option.code }}"
+                        :moduleId="option.moduleId"
+                        icon="reinsurance-pickup"
+                    />
                 {% endif %}
-                {# The PICKUP mode (pickup points + map) needs a pickup-capable
-                   carrier module and its own components: not wired yet. #}
             {% endfor %}
         {% else %}
             <twig:Molecules:SnackBar:Base

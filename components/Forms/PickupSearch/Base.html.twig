@@ -1,0 +1,75 @@
+{% form_theme form with flexy_form_themes only %}
+<div
+    class="{{ ('PickupSearch mt-4 ' ~ attributes.render('class'))|tailwind_merge }}"
+    {{ attributes.defaults({...stimulus_controller('Forms--PickupSearch--base')}).without('class') }}
+    data-loading="addClass(opacity-50 pointer-events-none)"
+>
+    <div>
+        {{ form_start(form, {
+            attr: {
+                'data-action': 'live#action:prevent',
+                'data-live-action-param': 'save',
+            },
+        }) }}
+        {# Label/help translated here (theme catalog): the form type resolves
+           its labels through the Thelia translator, whose core domain does
+           not know the theme keys. #}
+        <div class="PickupSearch-inputGroup">
+            {{ form_row(form.address, {
+                label: 'Find a delivery address'|trans,
+                attr: {placeholder: 'e.g. City, Postcode'|trans},
+            }) }}
+            <button type="submit" class="PickupSearch-searchButton" aria-label="{{ 'Search'|trans }}">
+                {{ ux_icon('search') }}
+            </button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+
+    <div class="mt-4 flex gap-1 md:gap-5">
+        <twig:Molecules:Button:Base
+            type="button"
+            text="{{ 'List view'|trans }}"
+            icon_left="list"
+            data-Forms--PickupSearch--base-target="listButton"
+            data-action="Forms--PickupSearch--base#showList"
+        />
+        <twig:Molecules:Button:Base
+            type="button"
+            color="secondary"
+            text="{{ 'Map view'|trans }}"
+            icon_left="pin-circle"
+            data-Forms--PickupSearch--base-target="mapButton"
+            data-action="Forms--PickupSearch--base#showMap"
+        />
+    </div>
+
+    <div class="mt-5 paragraph-6">
+        {{ this.pickups|length }}
+        {{ 'relay point(s) found'|trans }}
+    </div>
+
+    <div data-Forms--PickupSearch--base-target="listView">
+        <div class="flex flex-col gap-2 mt-6">
+            {% for pickup in this.pickups %}
+                <twig:Organisms:PickupPointCard:Base
+                    :pickup="pickup"
+                    :selected="this.selectedPickup and this.selectedPickup.id == pickup.id"
+                />
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="hidden" data-Forms--PickupSearch--base-target="mapView">
+        {# data-live-ignore: a live re-render would otherwise replace this node
+           and orphan the Leaflet instance attached to it. The id is REQUIRED:
+           without it the morph cannot match the ignored node and scrambles
+           the surrounding subtrees. #}
+        <div id="pickup-map" data-Forms--PickupSearch--base-target="map" class="PickupSearch-map" data-live-ignore></div>
+        <div class="mt-2.5">
+            {% if this.selectedPickup %}
+                <twig:Organisms:PickupPointCard:Base :pickup="this.selectedPickup" selected />
+            {% endif %}
+        </div>
+    </div>
+</div>

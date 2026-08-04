@@ -68,6 +68,8 @@
   @import "../../components/Organisms/PaymentCard/Base.css";
   @import "../../components/Organisms/InvoiceCard/Base.css";
   @import "../../components/Organisms/DeliveryMode/Base.css";
+  @import "../../components/Organisms/PickupPointCard/Base.css";
+  @import "../../components/Forms/PickupSearch/Base.css";
   @import "../../components/Layouts/Footer/Base.css";
   @import "../../components/Layouts/Footer/Checkout.css";
   @import "../../components/Layouts/Header/Checkout.css";

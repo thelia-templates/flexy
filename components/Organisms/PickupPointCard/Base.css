@@ -1,0 +1,56 @@
+.PickupPoint {
+  background: var(--color-lighter);
+  border: 1px solid var(--color-lighter);
+  border-radius: 0.5rem;
+  padding: 1rem;
+
+  &.selected {
+    background: var(--color-white);
+    border: 1px solid var(--color-medium);
+  }
+
+}
+
+.PickupPoint-content {
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+
+  span {
+    display: block;
+  }
+
+  & > span:last-child {
+    flex-grow: 1;
+  }
+
+  .RadioButton {
+    margin-top: 0.25rem;
+    margin-right: 0.5rem;
+  }
+}
+
+.PickupPoint-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-black);
+}
+
+.PickupPoint-address {
+  color: var(--color-grey-dark);
+  font-weight: var(--font-weight-normal);
+}
+
+.PickupPoint-hours {
+  margin-top: 0.5rem;
+
+  @variant md {
+    margin-left: 1.375rem;
+  }
+}
+
+.PickupPoint-hoursTable {
+  td {
+    padding-right: 1rem;
+    padding-block: 0.125rem;
+  }
+}
