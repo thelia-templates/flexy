@@ -1,0 +1,20 @@
+<div class="{{ ('PaymentCard ' ~ (this.checked ? 'selected ' : '') ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    <label class="PaymentCard-content">
+        <twig:Molecules:RadioButton:Base
+            :checked="this.checked"
+            data-action="live#emit"
+            data-live-event-param="{{ constant('FlexyBundle\\Event\\CheckoutEvents::SET_PAYMENT_MODULE_ID') }}"
+            data-live-module-id-param="{{ this.module.id }}"
+        />
+        <span>
+            <span class="PaymentCard-title">
+                {{ this.module.i18ns.title }}
+            </span>
+            {% if this.module.i18ns.chapo %}
+                <small class="PaymentCard-desc">
+                    {{ this.module.i18ns.chapo }}
+                </small>
+            {% endif %}
+        </span>
+    </label>
+</div>

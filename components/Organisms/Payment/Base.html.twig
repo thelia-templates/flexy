@@ -1,0 +1,13 @@
+<div {{ attributes }} data-loading="addClass(opacity-50 pointer-events-none)">
+    <h1 class="text-black h4">
+        {{ 'Choose a payment method'|trans }}
+    </h1>
+    <ul class="flex flex-col gap-3.5 my-5">
+        {% for module in this.modules|filter(m => m.valid) %}
+            <li>
+                <twig:Organisms:PaymentCard:Base :module="module" />
+            </li>
+        {% endfor %}
+    </ul>
+    <twig:Organisms:Invoice:Base />
+</div>

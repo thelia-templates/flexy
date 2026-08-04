@@ -1,0 +1,32 @@
+.PaymentCard {
+  position: relative;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-medium);
+  background: var(--color-lightest);
+  padding: 1.125rem;
+
+  &.selected {
+    background: var(--color-lighter);
+  }
+}
+
+.PaymentCard-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-black);
+  display: block;
+}
+
+.PaymentCard-desc {
+  color: var(--color-grey);
+}
+
+.PaymentCard-content {
+  display: flex;
+  cursor: pointer;
+  align-items: baseline;
+  gap: 0.5rem;
+
+  .RadioButton {
+    align-self: baseline;
+  }
+}

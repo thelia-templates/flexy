@@ -1,0 +1,27 @@
+{% extends 'checkout-base.html.twig' %}
+
+{% block title %}{{ 'Payment'|trans }}{% endblock %}
+
+{% block checkoutContent %}
+    <twig:Organisms:Payment:Base />
+{% endblock %}
+
+{% block checkoutBackButton %}
+    <twig:Molecules:Link:Base
+        iconLeft="chevron-left"
+        customText="{{ 'Previous Step'|trans }}"
+        href="{{ path('checkout_delivery') }}"
+        class="gap-2 mt-6 inline-flex"
+    />
+{% endblock %}
+
+{% block checkoutSummary %}
+    <twig:Organisms:CheckoutSummary:Base />
+{% endblock %}
+
+{% block checkoutNextButton %}
+    <twig:Organisms:NextButton:Base
+        :step="constant('FlexyBundle\\Components\\Molecules\\CheckoutSteps\\Base::PAYMENT')"
+        href="{{ path('checkout_pay') }}"
+    />
+{% endblock %}

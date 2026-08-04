@@ -1,0 +1,17 @@
+{% props title = '' %}
+<div class="{{ ('InvoiceCard ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    <div class="InvoiceCard-address">
+        {# Reuses the address info markup of the AddressCard component. #}
+        {{ block('infos', '@Flexy/Organisms/AddressCard/Base.html.twig') }}
+    </div>
+    <div class="InvoiceCard-bottom">
+        <twig:Molecules:Button:Base
+            type="button"
+            color="secondary"
+            text="{{ 'Edit the address'|trans }}"
+            data-action="live#emit"
+            data-live-event-param="{{ constant('FlexyBundle\\Event\\CheckoutEvents::EDIT_INVOICE_ADDRESS') }}"
+            data-live-address-id-param="{{ this.address.id }}"
+        />
+    </div>
+</div>

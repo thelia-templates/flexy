@@ -1,0 +1,42 @@
+<div class="{{ ('Invoice my-8 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    <div class="flex gap-2 justify-between mb-4">
+        <p class="paragraph-1 font-bold text-black items-center">{{ 'Billing address'|trans }}</p>
+        {% if this.invoiceAddressId and not this.showAddressList and not this.editingAddressId %}
+            <button
+                type="button"
+                class="underline cursor-pointer"
+                data-action="live#emit"
+                data-live-event-param="toggleShowAddressList"
+            >
+                {{ 'Change address'|trans }}
+            </button>
+        {% endif %}
+    </div>
+
+    {% if this.invoiceAddressId and this.editingAddressId %}
+        <div class="flex flex-col gap-2 py-6 px-10 bg-lightest">
+            <twig:Forms:Address:Base :addressId="this.editingAddressId" />
+        </div>
+    {% elseif this.invoiceAddressId and not this.showAddressList %}
+        <twig:Organisms:InvoiceCard:Base :addressId="this.invoiceAddressId" />
+    {% else %}
+        <ul class="flex flex-col gap-2 py-6 px-10 bg-lightest">
+            {% for address in this.addressList %}
+                <li>
+                    <twig:Organisms:AddressCard:Checkout :addressId="address.id" type="invoice" />
+                </li>
+            {% endfor %}
+            {% if this.showAddressList %}
+                <div class="flex justify-end">
+                    <twig:Molecules:Button:Base
+                        type="button"
+                        color="secondary"
+                        text="{{ 'Cancel'|trans }}"
+                        data-action="live#emit"
+                        data-live-event-param="cancelAddressForm"
+                    />
+                </div>
+            {% endif %}
+        </ul>
+    {% endif %}
+</div>

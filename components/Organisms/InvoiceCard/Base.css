@@ -1,0 +1,14 @@
+.InvoiceCard {
+  padding: 1.875rem;
+  background-color: var(--color-lightest);
+  border-radius: 0.5rem;
+}
+
+.InvoiceCard-address span {
+  display: block;
+}
+
+.InvoiceCard-bottom {
+  display: flex;
+  justify-content: flex-end;
+}
