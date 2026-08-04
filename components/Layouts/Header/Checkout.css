@@ -1,0 +1,50 @@
+.HeaderCheckout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  height: 3rem;
+  padding-inline: 1.5rem;
+}
+
+@variant xl {
+  .HeaderCheckout {
+    height: 5rem;
+  }
+}
+
+.HeaderCheckout-logo {
+  display: flex;
+  align-items: center;
+
+  svg {
+    height: 1.5rem;
+    width: auto;
+  }
+}
+
+@variant xl {
+  .HeaderCheckout-logo {
+    margin-inline: auto;
+  }
+}
+
+.HeaderCheckout-reassurance {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  svg {
+    width: 1.25rem;
+    flex-shrink: 0;
+  }
+}
+
+@variant sm {
+  .HeaderCheckout-reassurance {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    translate: 0 -50%;
+  }
+}

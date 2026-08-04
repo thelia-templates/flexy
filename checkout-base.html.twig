@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Checkout'|trans }}{% endblock %}
+
+{% block header %}
+    <twig:Layouts:Header:Checkout />
+{% endblock %}
+
+{# Child pages define the checkoutContent, checkoutSummary, checkoutNextButton
+   and checkoutBackButton blocks. Each block is rendered ONCE into a variable:
+   testing block('...') != '' directly would render it a second time, which
+   re-executes every LiveComponent it contains. #}
+{% block body %}
+    {% set checkoutContent = block('checkoutContent') is defined ? block('checkoutContent') : '' %}
+    {% set checkoutSummary = block('checkoutSummary') is defined ? block('checkoutSummary') : '' %}
+    {% set checkoutNextButton = block('checkoutNextButton') is defined ? block('checkoutNextButton') : '' %}
+    {% set checkoutBackButton = block('checkoutBackButton') is defined ? block('checkoutBackButton') : '' %}
+    {% set useSidebar = checkoutSummary|trim != '' %}
+
+    {% block checkoutSteps %}
+        <twig:Molecules:CheckoutSteps:Base
+            :steps="[
+                {text: 'Your cart', link: path('checkout_cart')},
+                {text: 'Delivery', link: path('checkout_delivery')},
+                {text: 'Payment', link: path('checkout_payment')},
+                {text: 'Confirmation'},
+            ]"
+            :current="current"
+        />
+    {% endblock %}
+
+    {% if useSidebar %}
+        <div class="container-double-1">
+            <div>
+                <div class="py-9 lg:py-12">
+                    {{ checkoutContent|raw }}
+                    {{ checkoutBackButton|raw }}
+                </div>
+            </div>
+            <div class="bg-lightest">
+                <div class="py-12 lg:py-20">
+                    <h2 class="text-black h3 pb-4">
+                        {{ 'Summary'|trans }}
+                    </h2>
+                    {{ checkoutSummary|raw }}
+
+                    {% if checkoutNextButton|trim != '' %}
+                        <div class="mt-8">
+                            {{ checkoutNextButton|raw }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="container-m py-9 lg:py-12">
+            {{ checkoutContent|raw }}
+            {{ checkoutBackButton|raw }}
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}

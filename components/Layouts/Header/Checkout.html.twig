@@ -1,0 +1,11 @@
+<header class="{{ ('HeaderCheckout ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    <a href="{{ path('index') }}" class="HeaderCheckout-logo">
+        {{ ux_icon('thelia') }}
+    </a>
+    <div class="HeaderCheckout-reassurance">
+        {{ ux_icon('lock') }}
+        <span class="text-grey-dark indication">
+            {{ '100% secure'|trans }}
+        </span>
+    </div>
+</header>

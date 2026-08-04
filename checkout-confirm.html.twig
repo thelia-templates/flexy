@@ -1,0 +1,19 @@
+{% extends 'checkout-base.html.twig' %}
+
+{% block title %}{{ 'Your order'|trans }}{% endblock %}
+
+{% block checkoutContent %}
+    <div class="flex flex-col items-center justify-center text-center text-black">
+        {{ ux_icon('cart-illustration', {class: 'w-40 h-auto block mx-auto mb-6'}) }}
+        <h3 class="mt-4 h3">{{ 'Thanks for your order !'|trans }}</h3>
+        <p class="paragraph-3 mt-4 mb-8">
+            <span class="block">{{ 'Your payment has been confirmed'|trans }}</span>
+            <span>{{ "We'll do everything we can to send your order as quickly as possible!"|trans }}</span>
+        </p>
+        <twig:Molecules:Button:Base
+            text="{{ 'Back to the store'|trans }}"
+            size="large"
+            href="{{ path('index') }}"
+        />
+    </div>
+{% endblock %}

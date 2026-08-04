@@ -1,0 +1,8 @@
+<div class="{{ ('CheckoutSteps-mobile text-right ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    <div class="paragraph-4 font-semibold">
+        {{ this.summary.total_taxed_price|format_currency('EUR', locale: lang_code) }}
+    </div>
+    <div class="paragraph-6">
+        {{ this.summary.item_count }} {{ (this.summary.item_count > 1 ? 'items' : 'item')|trans }}
+    </div>
+</div>

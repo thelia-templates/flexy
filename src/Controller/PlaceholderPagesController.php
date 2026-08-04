@@ -26,7 +26,6 @@ final class PlaceholderPagesController
     #[Route('/account', name: 'account_index')]
     #[Route('/account/orders', name: 'account_orders')]
     #[Route('/account/addresses', name: 'account_addresses')]
-    #[Route('/cart', name: 'checkout_cart')]
     public function __invoke(): Response
     {
         return new Response('Coming soon.');
