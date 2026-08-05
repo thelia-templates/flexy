@@ -148,9 +148,10 @@ class FlexyBundle extends AbstractBundle
 
         $containerBuilder->prependExtensionConfig('stimulus', [
             'controller_paths' => [
-                \dirname(__DIR__) . '/assets/controllers',
+                '%kernel.project_dir%/templates/frontOffice/%thelia_front_template%/assets/controllers',
                 \dirname(__DIR__) . '/components',
             ],
+            'controllers_json'  => '%kernel.project_dir%/templates/frontOffice/%thelia_front_template%/assets/controllers.json',
         ]);
     }
 
