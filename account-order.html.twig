@@ -7,6 +7,8 @@
 {% block body %}
     {% set order = resources('/api/front/account/orders/' ~ orderId) %}
     {% set isQuotation = order.orderStatus.code == "quotation" %}
+    {# The core PDF controller 404s on an unpaid order, so only offer the invoice once it is. #}
+    {% set isPaid = order.orderStatus.code in ['paid', 'processing', 'sent'] %}
     <main>
         {% include '@components/Molecules/Breadcrumb/Breadcrumb.html.twig' with {
             breadcrumb: [
@@ -106,16 +108,18 @@
                     {% set paymentModule = resources('/api/front/modules/' ~ order.paymentModule.id) %}
                 </div>
             {% endif %}
-            <div>
-                {{ component('Flexy:Button', {
-                    text: (isQuotation ? 'Download quote' : 'Download invoice')|trans,
-                    class: 'mt-8 ',
-                    href: isQuotation
-                    ? path('account_order_pdf_quotation', {'orderId': order.id})
-                    : path('account_order_pdf_invoice', {'orderId': order.id}),
-                    icon_right: 'download'
-                }) }}
-            </div>
+            {% if isQuotation or isPaid %}
+                <div>
+                    {{ component('Flexy:Button', {
+                        text: (isQuotation ? 'Download quote' : 'Download invoice')|trans,
+                        class: 'mt-8 ',
+                        href: isQuotation
+                        ? path('account_order_pdf_quotation', {'orderId': order.id})
+                        : path('account_order_pdf_invoice', {'orderId': order.id}),
+                        icon_right: 'download'
+                    }) }}
+                </div>
+            {% endif %}
         </div>
     </main>
 {% endblock %}

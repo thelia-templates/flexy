@@ -62,10 +62,19 @@ class AddressesForm extends BaseFrontController
 
     private function getData(): array
     {
-        if (!$this->addressId) {
+        $customerId = $this->getSecurityContext()->getCustomerUser()?->getId();
+
+        if (!$this->addressId || null === $customerId) {
             return [];
         }
-        $address = AddressQuery::create()->findPk($this->addressId);
+
+        $address = AddressQuery::create()
+            ->filterByCustomerId($customerId)
+            ->findPk($this->addressId);
+
+        if (null === $address) {
+            return [];
+        }
 
         return $this->addressService->mapModelToFormData($address);
     }

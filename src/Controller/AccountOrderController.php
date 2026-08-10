@@ -35,12 +35,11 @@ class AccountOrderController extends FlexyController
     {
         $this->checkOrderCustomer($orderId);
 
+        // Keep the core paid-order guard on: both flags must stay true for it to run.
         return $this->generateOrderPdf(
             $eventDispatcher,
             $orderId,
-            ConfigQuery::read('pdf_delivery_file', 'delivery'),
-            false,
-            false
+            ConfigQuery::read('pdf_delivery_file', 'delivery')
         );
     }
 
@@ -49,12 +48,11 @@ class AccountOrderController extends FlexyController
     {
         $this->checkOrderCustomer($orderId);
 
+        // Keep the core paid-order guard on: both flags must stay true for it to run.
         return $this->generateOrderPdf(
             $eventDispatcher,
             $orderId,
-            ConfigQuery::read('pdf_invoice_file', 'invoice'),
-            false,
-            false
+            ConfigQuery::read('pdf_invoice_file', 'invoice')
         );
     }
 
@@ -64,6 +62,7 @@ class AccountOrderController extends FlexyController
     {
         $this->checkOrderCustomer($orderId);
 
+        // A quotation is issued before payment, so the paid-order guard stays off here.
         return $this->generateOrderPdf(
             $eventDispatcher,
             $orderId,

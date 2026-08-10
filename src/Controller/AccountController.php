@@ -20,6 +20,8 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Event\Address\AddressCreateOrUpdateEvent;
 use Thelia\Core\Event\Customer\CustomerCreateOrUpdateEvent;
@@ -27,13 +29,17 @@ use Thelia\Core\Event\TheliaEvents;
 use Thelia\Domain\Addressing\Service\AddressService;
 use Thelia\Form\Definition\FrontForm;
 use Thelia\Form\Exception\FormValidationException;
-use Thelia\Model\Base\AddressQuery;
+use Thelia\Model\Address;
+use Thelia\Model\AddressQuery;
 use Thelia\Model\Customer;
 use Thelia\Model\Event\AddressEvent;
 
 #[Route('/account', name: 'account_')]
 class AccountController extends FlexyController
 {
+    public const DELETE_ADDRESS_TOKEN_ID = 'delete_address';
+    public const DEFAULT_ADDRESS_TOKEN_ID = 'default_address';
+
     #[Route('', name: 'index')]
     public function noRoute(): Response
     {
@@ -55,6 +61,12 @@ class AccountController extends FlexyController
     {
         $this->checkAuth();
 
+        if (null === $this->findCustomerAddress($addressId)) {
+            return new RedirectResponse($this->generateUrl('account_addresses', [
+                'error' => true,
+            ]));
+        }
+
         return $this->render('address-update', [
             'addressId' => $addressId,
         ]);
@@ -68,17 +80,11 @@ class AccountController extends FlexyController
         $addressUpdate = $this->createForm(AddressEditForm::FORM_NAME);
 
         try {
-            $customer = $this->getSecurityContext()->getCustomerUser();
-
             $form = $this->validateForm($addressUpdate);
 
-            $address = AddressQuery::create()->findPk($addressId);
+            $address = $this->findCustomerAddress($addressId);
 
             if (null === $address) {
-                return $this->generateRedirectFromRoute('default');
-            }
-
-            if ($address->getCustomer()->getId() !== $customer->getId()) {
                 return $this->generateRedirectFromRoute('default');
             }
 
@@ -146,16 +152,20 @@ class AccountController extends FlexyController
     /**
      * @throws \JsonException
      */
-    #[Route('/address/delete/{addressId}', name: 'address_delete', requirements: ['addressId' => '\d+'])]
-    public function addressDelete(EventDispatcherInterface $eventDispatcher, ?int $addressId = null): Response
-    {
+    #[Route('/address/delete/{addressId}', name: 'address_delete', requirements: ['addressId' => '\d+'], methods: ['POST'])]
+    public function addressDelete(
+        EventDispatcherInterface $eventDispatcher,
+        CsrfTokenManagerInterface $csrfTokenManager,
+        ?int $addressId = null,
+    ): Response {
         $this->checkAuth();
         $error_message = false;
 
-        $customer = $this->getSecurityContext()->getCustomerUser();
-        $address = AddressQuery::create()->findPk($addressId);
+        $address = $this->hasValidCsrfToken($csrfTokenManager, self::DELETE_ADDRESS_TOKEN_ID)
+            ? $this->findCustomerAddress($addressId)
+            : null;
 
-        if (!$address || $customer->getId() !== $address->getCustomerId()) {
+        if (!$address) {
             // If Ajax Request
             if ($this->getRequest()->isXmlHttpRequest()) {
                 return $this->jsonResponse(
@@ -170,7 +180,7 @@ class AccountController extends FlexyController
                 );
             }
             $url = $this->generateUrl('account_addresses', [
-                'delete_success' => 1,
+                'error' => true,
             ]);
 
             return new RedirectResponse($url);
@@ -204,13 +214,17 @@ class AccountController extends FlexyController
         return new RedirectResponse($url);
     }
 
-    #[Route('/address/default/{addressId}', name: 'address_default', requirements: ['addressId' => '\d+'])]
-    public function addressDefault(EventDispatcherInterface $eventDispatcher, ?int $addressId = null): RedirectResponse
-    {
+    #[Route('/address/default/{addressId}', name: 'address_default', requirements: ['addressId' => '\d+'], methods: ['POST'])]
+    public function addressDefault(
+        EventDispatcherInterface $eventDispatcher,
+        CsrfTokenManagerInterface $csrfTokenManager,
+        ?int $addressId = null,
+    ): RedirectResponse {
         $this->checkAuth();
-        $address = AddressQuery::create()
-          ->filterByCustomerId($this->getSecurityContext()->getCustomerUser()?->getId())
-          ->findPk($addressId);
+
+        $address = $this->hasValidCsrfToken($csrfTokenManager, self::DEFAULT_ADDRESS_TOKEN_ID)
+            ? $this->findCustomerAddress($addressId)
+            : null;
 
         if (null === $address) {
             return new RedirectResponse($this->generateUrl('account_addresses', [
@@ -294,6 +308,35 @@ class AccountController extends FlexyController
         }
 
         return $this->generateRedirectFromRoute('account_index');
+    }
+
+    /**
+     * Addresses are only ever reachable through their owner: never look one up by
+     * primary key alone, or any logged-in customer can read and act on someone
+     * else's address book by walking the sequential ids.
+     */
+    private function findCustomerAddress(?int $addressId): ?Address
+    {
+        $customerId = $this->getSecurityContext()->getCustomerUser()?->getId();
+
+        if (null === $addressId || null === $customerId) {
+            return null;
+        }
+
+        return AddressQuery::create()
+          ->filterByCustomerId($customerId)
+          ->findPk($addressId);
+    }
+
+    private function hasValidCsrfToken(CsrfTokenManagerInterface $csrfTokenManager, string $tokenId): bool
+    {
+        $submittedToken = $this->getRequest()->request->get('_token');
+
+        if (!\is_string($submittedToken)) {
+            return false;
+        }
+
+        return $csrfTokenManager->isTokenValid(new CsrfToken($tokenId, $submittedToken));
     }
 
     private function createEventInstance($data): CustomerCreateOrUpdateEvent

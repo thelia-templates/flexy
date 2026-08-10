@@ -99,9 +99,12 @@
             <button type="button" class="Button Button--secondary Button--fill" data-action="modal#close">
                 {{ 'Cancel'|trans }}
             </button>
-            <a href="#" class="Button Button--fill" data-modal-target="confirm">
-                {{ 'Yes'|trans }}
-            </a>
+            <form method="post" action="" data-modal-target="confirm">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete_address') }}">
+                <button type="submit" class="Button Button--fill w-full">
+                    {{ 'Yes'|trans }}
+                </button>
+            </form>
         </div>
     {% endset %}
 
@@ -118,9 +121,12 @@
             <button type="button" class="Button Button--secondary Button--fill" data-action="modal#close">
                 {{ 'Cancel'|trans }}
             </button>
-            <a href="#" class="Button Button--fill" data-modal-target="confirm">
-                {{ 'Yes'|trans }}
-            </a>
+            <form method="post" action="" data-modal-target="confirm">
+                <input type="hidden" name="_token" value="{{ csrf_token('default_address') }}">
+                <button type="submit" class="Button Button--fill w-full">
+                    {{ 'Yes'|trans }}
+                </button>
+            </form>
         </div>
     {% endset %}
 

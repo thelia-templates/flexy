@@ -70,10 +70,21 @@ class AccountAddressForm extends BaseFrontController
 
     public function getAddress(): array
     {
-        if (!$this->addressId) {
+        $customerId = $this->customerFacade->getCurrentCustomer()?->getId();
+
+        if (!$this->addressId || null === $customerId) {
             return [];
         }
-        $address = AddressQuery::create()->findPk($this->addressId);
+
+        // Scope the lookup to the logged-in customer: addressId comes from the URL,
+        // so a bare findPk() hands another customer's address to the form.
+        $address = AddressQuery::create()
+            ->filterByCustomerId($customerId)
+            ->findPk($this->addressId);
+
+        if (null === $address) {
+            return [];
+        }
 
         return $this->addressService->mapModelToFormData($address);
     }
