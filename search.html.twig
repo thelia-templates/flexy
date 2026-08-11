@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
-{% set page = app.request.get('page')|default(1) %}
-{% set searchString = app.request.get('query')|default('') %}
+{% set page = app.request.query.getInt('page', 1) %}
+{% set searchQuery = app.request.query.getString('query') %}
 
 {% block title %}{{ 'Search'|trans }}
 {% endblock %}
@@ -9,10 +9,7 @@
 {% block robots %}<meta name="robots" content="noindex, follow">{% endblock %}
 
 {% block body %}
-    {% set products = resources('/api/front/products', {itemsPerPage: 9, page: page}) %}
-    {% set totalProducts = resources('/api/front/products', {itemsPerPage: 9, page: page}) %}
-
-    {{ include('@components/Layout/Subheader/SearchResult/SubheaderSearch.html.twig', {title: 'Search results'|trans}) }}
+    {{ component('Flexy:SearchResults', {query: searchQuery, page: page}) }}
 
     {{ include('@components/Layout/Reinsurance/Reinsurance.html.twig', {data: [
       {

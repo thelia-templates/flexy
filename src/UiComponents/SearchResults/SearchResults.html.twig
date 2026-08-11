@@ -1,0 +1,36 @@
+{{ include('@components/Layout/Subheader/SearchResult/SubheaderSearch.html.twig', {
+	title: 'Search results'|trans,
+	nbProducts: totalItems,
+}) }}
+
+<div class="container mt-[50px] lg:mt-[100px]">
+	{% if products|length %}
+		{# The subheader count is hidden from lg up, where listings show it above the grid #}
+		<div class="justify-between items-end mb-[29px] hidden lg:flex">
+			<span>{{ totalItems }}
+				{{ 'product(s)'|trans }}</span>
+		</div>
+		<div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-[40px]">
+			{% for product in products %}
+				{{ component('Flexy:ProductCard', {product}) }}
+			{% endfor %}
+		</div>
+		{% if pagination.totalItems > pagination.itemsPerPage %}
+			<div class="flex justify-center">
+				{% include '@components/Molecules/Pagination/Pagination.html.twig' with pagination %}
+			</div>
+		{% endif %}
+	{% else %}
+		<div class="flex flex-col justify-center items-center h-[400px]">
+			<div class="w-[250px] h-[150px] lg:w-[300px] lg:h-[200px] mb-6">
+				{{ source('@assets/images/not-found.svg') }}
+			</div>
+			<h3 class="text-center h4">
+				{{ query is empty ? 'Enter a search term to see products'|trans : 'No products found'|trans }}
+			</h3>
+			<a href="/" class="mt-4 Button--medium Button Button--secondary">
+				{{ 'Home'|trans }}
+			</a>
+		</div>
+	{% endif %}
+</div>
