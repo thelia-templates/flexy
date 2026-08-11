@@ -10,6 +10,7 @@
     {# The core PDF controller 404s on an unpaid order, so only offer the invoice once it is. #}
     {% set isPaid = order.orderStatus.code in ['paid', 'processing', 'sent'] %}
     <main>
+        {{ theme_hook('account-order.top', {order: order}) }}
         {% include '@components/Molecules/Breadcrumb/Breadcrumb.html.twig' with {
             breadcrumb: [
                 {
@@ -47,10 +48,12 @@
                 {% set nbItems = 0 %}
                 {% for orderProduct in order.orderProducts %}
                     {% set nbItems = nbItems + orderProduct.quantity %}
+                    {{ theme_hook('account-order.item.top', {order: order, orderProduct: orderProduct}) }}
                     {{ component('Flexy:OrderProductCard', {
                         orderProduct,
                         placeholder: asset('dist/images/placeholder.webp')
                     }) }}
+                    {{ theme_hook('account-order.item.bottom', {order: order, orderProduct: orderProduct}) }}
                 {% endfor %}
                 {% set summary = {
                     'Subtotal without taxes' : order.totalAmountWithoutTaxes|format_currency('EUR', locale: lang_code),
@@ -121,6 +124,7 @@
                 </div>
             {% endif %}
         </div>
+        {{ theme_hook('account-order.bottom', {order: order}) }}
     </main>
 {% endblock %}
 
