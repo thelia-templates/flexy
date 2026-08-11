@@ -83,10 +83,14 @@ class Delivery
         $this->deliveryAddressId = $this->cartFacade->getDeliveryAddressId();
 
         if (null === $this->deliveryAddressId) {
-            $addresses = array_filter($this->getAddressList(), fn ($address) => $address['isDefault']);
+            $defaultAddresses = array_filter($this->getAddressList() ?? [], static fn ($address) => (bool) $address['isDefault']);
 
-            $defaultAddress = reset($addresses);
-            $this->selectDeliveryAddress($defaultAddress['id']);
+            $defaultAddress = reset($defaultAddresses);
+
+            // No address, or none flagged as default: let the customer create or pick one.
+            if (false !== $defaultAddress) {
+                $this->selectDeliveryAddress((int) $defaultAddress['id']);
+            }
         }
 
         $this->invoiceAddressId = $this->cartFacade->getInvoiceAddressId();
