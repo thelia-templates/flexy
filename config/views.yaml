@@ -1,0 +1,13 @@
+# Root templates a controller renders with the context it prepares, and templates that only
+# exist to be extended. They are not pages: asking for them by name returns a 404.
+internal:
+    - account-order
+    - address
+    - address-update
+    - base
+    - checkout-base
+    - checkout-delivery
+    - checkout-payment
+    - customer-activation
+    - customer-informations
+    - reset_password
