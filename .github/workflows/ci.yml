@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  php-lint:
+    name: PHP syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Lint every PHP file of the bundle
+        run: find src -name '*.php' -print0 | xargs -0 -n1 -P4 php -l
+
+  assets:
+    name: Asset build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build the theme assets
+        run: npm run build
+
+  templates:
+    name: Templates (rendered by a Thelia checkout)
+    runs-on: ubuntu-latest
+    # A leaked DB transaction once kept a core DDL test waiting on a metadata
+    # lock until the runner limit; keep the same guard here.
+    timeout-minutes: 30
+    steps:
+      - name: Checkout the theme
+        uses: actions/checkout@v4
+        with:
+          path: theme
+
+      - name: Checkout Thelia
+        uses: actions/checkout@v4
+        with:
+          repository: thelia/thelia
+          ref: main
+          path: thelia
+
+      - name: Start MySQL
+        # The runner ships MySQL pre-installed (root/root on 127.0.0.1:3306); using
+        # it avoids the flaky service-container init on this runner image.
+        run: sudo systemctl start mysql.service
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          ini-values: post_max_size=20M
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql, gd, zip
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: theme/package-lock.json
+
+      - name: Resolve thelia/flexy from this checkout instead of Packagist
+        # Same treatment as the `core/` directory in thelia/thelia: a Composer
+        # path repository with a forced version. Without it, `composer install`
+        # would pull the published tag and the pull request under test would
+        # never be exercised.
+        working-directory: thelia
+        run: |
+          composer config repositories.flexy-checkout '{"type":"path","url":"../theme","options":{"symlink":false,"versions":{"thelia/flexy":"1.0.0-beta99"}}}'
+
+      - name: Install Composer dependencies
+        working-directory: thelia
+        env:
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Check that the theme under test is the one installed
+        working-directory: thelia
+        run: |
+          composer show thelia/flexy | grep -E '^versions|^source'
+          test -f templates/frontOffice/flexy/base.html.twig
+
+      - name: Build the theme assets
+        # Rendering a page needs the Encore manifest; a theme installed by
+        # Composer ships no dist/.
+        working-directory: thelia/templates/frontOffice/flexy
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare the test database credentials
+        working-directory: thelia
+        run: printf 'DATABASE_HOST=127.0.0.1\nDATABASE_PORT=3306\nDATABASE_USER=root\nDATABASE_PASSWORD=root\nDATABASE_NAME=test\n' > .env.test.local
+
+      - name: Install the test database
+        working-directory: thelia
+        run: composer test:prepare
+
+      - name: Lint the theme templates
+        working-directory: thelia
+        run: php bin/console lint:twig --env=test templates/frontOffice/flexy
+
+      - name: Run the core http-flexy suite against this checkout
+        working-directory: thelia
+        run: composer test:http-flexy
