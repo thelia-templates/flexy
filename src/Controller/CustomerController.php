@@ -76,11 +76,19 @@ class CustomerController extends FlexyController
         try {
             $form = $this->validateForm($customerLoginForm, 'post');
 
+            // "I do not have an account": the login form validated that this address has
+            // none, so send the visitor to the registration page with it already filled
+            // in. The route this used to build, customer.create.process, is the Thelia 2
+            // POST endpoint of the Front module: naming it here made the page fail with
+            // a RouteNotFoundException as soon as that module was not installed.
             if ((int) $form->get('account')->getData() === 0 && $form->get('email')->getErrors()->count() === 0) {
-                return $this->generateRedirectFromRoute(
-                    'customer.create.process',
-                    ['email' => $form->get('email')->getData()]
+                $this->getParserContext()->addForm(
+                    $this->createForm(CustomerRegisterForm::class, data: [
+                        'email' => $form->get('email')->getData(),
+                    ])
                 );
+
+                return $this->generateRedirect($this->generateUrl('customer_register'));
             }
             try {
                 $authenticator = new CustomerUsernamePasswordFormAuthenticator($request, $customerLoginForm);
