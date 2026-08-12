@@ -199,25 +199,25 @@ class CustomerController extends FlexyController
     ): Response {
         $customer = $this->retrieveCustomerFromSession($session);
 
-        $email = null;
-        $firstname = null;
-        $lastname = null;
-        if ($customer instanceof Customer) {
-            $email = $customer->getEmail();
-            $firstname = $customer->getFirstname();
-            $lastname = $customer->getLastname();
-        } elseif ($this->getSecurityContext()->hasCustomerUser()) {
-            $customer = $this->getSecurityContext()->getCustomerUser();
-            $firstname = $customer->getFirstname();
-            $lastname = $customer->getLastname();
+        // This is the second step of the registration: it completes the account the first
+        // step created, and the activation link it builds needs that account's email. A
+        // visitor who lands here without one has to start the registration over, and a
+        // customer who is already logged in has an account to go back to. Rendering the
+        // page without an email would break the activation link it points to.
+        if (!$customer instanceof Customer) {
+            return $this->generateRedirect(
+                $this->getSecurityContext()->hasCustomerUser()
+                    ? $this->generateUrl('account_index')
+                    : $this->generateUrl('customer_register')
+            );
         }
 
         return $this->render(
             'customer-informations',
             [
-                'email' => $email,
-                'firstname' => $firstname,
-                'lastname' => $lastname,
+                'email' => $customer->getEmail(),
+                'firstname' => $customer->getFirstname(),
+                'lastname' => $customer->getLastname(),
             ]
         );
     }
