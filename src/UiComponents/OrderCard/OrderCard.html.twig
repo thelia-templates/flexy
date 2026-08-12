@@ -1,3 +1,5 @@
+{# An order the API will not serve renders nothing rather than taking the list down. #}
+{% if this.order %}
 <div class="OrderCard">
     <div class="justify-between 2xl:flex">
         <div>
@@ -62,3 +64,4 @@
         }) }}
     </div>
 </div>
+{% endif %}

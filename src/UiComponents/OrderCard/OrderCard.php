@@ -16,7 +16,12 @@ class OrderCard
     {
     }
 
-    public function getOrder(): array
+    /**
+     * The API returns nothing for an order the current customer cannot read, or for one
+     * whose related rows no longer resolve. A single such order used to take the whole
+     * order list down, so the card renders nothing instead.
+     */
+    public function getOrder(): ?array
     {
         return $this->dataAccessService->resources('/api/front/account/orders/'.$this->orderId);
     }

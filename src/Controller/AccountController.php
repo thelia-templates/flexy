@@ -244,24 +244,6 @@ class AccountController extends FlexyController
         ]));
     }
 
-    #[Route('/orders', name: 'orders')]
-    public function orders(): Response
-    {
-        $this->checkAuth();
-
-        return $this->render('account-orders');
-    }
-
-    #[Route('/order/{orderId}', name: 'order', requirements: ['orderId' => '\d+'])]
-    public function order(?int $orderId = null): Response
-    {
-        $this->checkAuth();
-
-        return $this->render('account-order', [
-            'orderId' => $orderId,
-        ]);
-    }
-
     #[Route('/password', name: 'password', methods: 'POST')]
     public function password(EventDispatcherInterface $eventDispatcher): ?Response
     {
