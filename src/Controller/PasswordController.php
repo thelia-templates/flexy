@@ -95,12 +95,24 @@ class PasswordController extends FlexyController
         return $this->render('password-forgotten-confirm');
     }
 
+    // Anyone can put any address in their own session by posting the form above, so
+    // this route asks the shop to mail whoever the caller named. The core caps how
+    // many of those emails go out, per address and per caller; the page below says
+    // the same thing either way, so repeating the request tells a caller nothing
+    // about the address it names.
     #[Route('/resend', name: 'resend', methods: ['GET'])]
     public function resendLink(SessionInterface $session, EventDispatcherInterface $eventDispatcher): RedirectResponse
     {
-        $event = new LostPasswordEvent($session->get('reset_email'));
+        $email = $session->get('reset_email');
 
-        $eventDispatcher->dispatch($event, TheliaEvents::LOST_PASSWORD);
+        // Nothing was asked for in this session: send the visitor back to the form,
+        // the way the confirmation page does, instead of asking for a password for
+        // no address at all.
+        if (null === $email) {
+            return $this->generateRedirect($this->generateUrl('password_forgotten'));
+        }
+
+        $eventDispatcher->dispatch(new LostPasswordEvent($email), TheliaEvents::LOST_PASSWORD);
 
         return $this->generateRedirect($this->generateUrl('password_reset_link', [
             'resend_success' => true,
