@@ -1,4 +1,4 @@
-{{ include('./Toggle.html.twig', {labelOff: 'Off', labelOn: 'On', disabled: disabled, error: error}) }}
+{{ include('@components/Atoms/Form/Toggle.html.twig', {labelOff: 'Off', labelOn: 'On', disabled: disabled, error: error}) }}
 <div class="mt-5">
-  {{ include('./Toggle.html.twig', {disabled: disabled, error: error, checked: true}) }}
+  {{ include('@components/Atoms/Form/Toggle.html.twig', {disabled: disabled, error: error, checked: true}) }}
 </div>

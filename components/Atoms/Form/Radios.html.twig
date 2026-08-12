@@ -1,5 +1,5 @@
 <div>
-  {{ include('./Radio.html.twig', {label: 'Radio 1', name: 'radio', disabled: disabled, error: error}) }}
-  {{ include('./Radio.html.twig', {label: 'Radio 2', name: 'radio', disabled: disabled, error: error, checked: true}) }}
-  {{ include('./Radio.html.twig', {label: 'Radio 3', name: 'radio', disabled: disabled, error: error}) }}
+  {{ include('@components/Atoms/Form/Radio.html.twig', {label: 'Radio 1', name: 'radio', disabled: disabled, error: error}) }}
+  {{ include('@components/Atoms/Form/Radio.html.twig', {label: 'Radio 2', name: 'radio', disabled: disabled, error: error, checked: true}) }}
+  {{ include('@components/Atoms/Form/Radio.html.twig', {label: 'Radio 3', name: 'radio', disabled: disabled, error: error}) }}
 </div>

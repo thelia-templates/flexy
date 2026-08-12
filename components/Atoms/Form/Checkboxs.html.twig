@@ -1,7 +1,7 @@
 <div>
-  {{ include('./Checkbox.html.twig', {label: 'Unchecked', disabled: disabled, error: error}) }}
-  {{ include('./Checkbox.html.twig', {label: 'Checked', disabled: disabled, error: error, checked: true}) }}
-  {{ include('./Checkbox.html.twig',
+  {{ include('@components/Atoms/Form/Checkbox.html.twig', {label: 'Unchecked', disabled: disabled, error: error}) }}
+  {{ include('@components/Atoms/Form/Checkbox.html.twig', {label: 'Checked', disabled: disabled, error: error, checked: true}) }}
+  {{ include('@components/Atoms/Form/Checkbox.html.twig',
     {label: 'Undefined', disabled: disabled, error: error, classes: 'indeterminate'},
   ) }}
 </div>
