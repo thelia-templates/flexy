@@ -146,12 +146,18 @@ class FlexyBundle extends AbstractBundle
             return;
         }
 
+        // Stimulus feeds a single, application-wide controller registry, so these paths must follow
+        // the active front template rather than this bundle's own location: bundles.php loads
+        // FlexyBundle unconditionally, and a hardcoded dirname(__DIR__) would keep registering
+        // Flexy's controllers even when another front theme is active. This mirrors what every
+        // other prepend in this class already does. asset_mapper.paths deliberately keeps
+        // dirname(__DIR__): there it is this bundle's own directory that must be searched first.
         $containerBuilder->prependExtensionConfig('stimulus', [
             'controller_paths' => [
                 '%kernel.project_dir%/templates/frontOffice/%thelia_front_template%/assets/controllers',
-                \dirname(__DIR__) . '/components',
+                '%kernel.project_dir%/templates/frontOffice/%thelia_front_template%/components',
             ],
-            'controllers_json'  => '%kernel.project_dir%/templates/frontOffice/%thelia_front_template%/assets/controllers.json',
+            'controllers_json' => '%kernel.project_dir%/templates/frontOffice/%thelia_front_template%/assets/controllers.json',
         ]);
     }
 
