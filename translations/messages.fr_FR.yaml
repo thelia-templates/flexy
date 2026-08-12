@@ -241,6 +241,8 @@ Your payment has been confirmed: Votre paiement a été validé.
 We'll do everything we can to send your order as quickly as possible!: Nous mettons tout en oeuvre pour envoyer votre commande au plus vite !
 Enter the code received by e-mail: Entrez le code reçu par mail
 resend_code: Pensez à vérifier vos spams, puis essayez de <a href='%h'>renvoyer le code</a>
+This activation code is not valid, or is no longer valid. Please ask for a new one.: Ce code d'activation est invalide ou a expiré. Demandez-en un nouveau.
+Your registration could not be found. Please register again.: Votre inscription n'a pas été retrouvée. Merci de vous inscrire à nouveau.
 Dont't have receive code ?: Vous n’avez pas reçu le code ?
 every_cat: Découvrir %cat
 Product's visuals: Visuels produit

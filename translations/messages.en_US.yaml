@@ -247,6 +247,8 @@ Your payment has been confirmed: Your payment has been confirmed
 We'll do everything we can to send your order as quickly as possible!: We'll do everything we can to send your order as quickly as possible!
 Enter the code received by e-mail: Enter the code received by e-mail
 resend_code: Please check your spam then try to <a href='%h'>resend code</a>
+This activation code is not valid, or is no longer valid. Please ask for a new one.: This activation code is not valid, or is no longer valid. Please ask for a new one.
+Your registration could not be found. Please register again.: Your registration could not be found. Please register again.
 Don't have receive code ?: Don't have receive code ?
 every_cat: Discover %cat
 Product's visuals: Product's visuals

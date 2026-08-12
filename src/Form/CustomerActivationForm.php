@@ -26,19 +26,11 @@ class CustomerActivationForm extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // The account being activated is the pending registration held in the session,
+        // so this form carries no email field: a submitted one would let a caller aim
+        // the code check at any address, and answer whether that address has an account.
         $builder
-            ->add('customer_email', HiddenType::class,
-                [
-                    'constraints' => [
-                        new Constraints\NotBlank([
-                            'message' => Translator::getInstance()->trans('Email is required'),
-                        ]),
-                        new Constraints\Email([
-                            'message' => Translator::getInstance()->trans('Please enter a valid email address'),
-                        ]),
-                    ],
-                ]
-            )->add('activation_code', HiddenType::class, [
+            ->add('activation_code', HiddenType::class, [
                 'attr' => [
                     'maxlength' => Customer::CODE_LENGTH,
                     'pattern' => '[0-9]{'.Customer::CODE_LENGTH.'}',
