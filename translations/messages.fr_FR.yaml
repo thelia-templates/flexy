@@ -311,7 +311,7 @@ Remember to check your spam, then try to: Pensez à vérifier vos spams, puis es
 resend the e-mail: renvoyer le mail
 "Please check your input: %s": "Veuillez vérifier votre saisie : %s"
 Wrong email or password. Please try again: Adresse e-mail ou mot de passe incorrect. Veuillez réessayer.
-Your account is not yet confirmed. A confirmation email has been sent to your email address, please check your mailbox: Votre compte n'est pas encore confirmé. Un e-mail de confirmation a été envoyé à votre adresse e-mail, veuillez vérifier votre boîte de réception
+Your account is not yet confirmed. A new activation code has been sent to your email address.: "Votre compte n'est pas encore confirmé. Un nouveau code d'activation a été envoyé à votre adresse e-mail."
 view_all: Voir tous les produits
 view_all_promo: Voir toutes les promotions
 view_all_newness: Voir toutes les nouveautés

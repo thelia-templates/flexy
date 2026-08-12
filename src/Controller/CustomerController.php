@@ -64,6 +64,7 @@ class CustomerController extends FlexyController
     public function loginAction(
         EventDispatcherInterface $eventDispatcher,
         CustomerAuthenticator $customerLoginProcessor,
+        SessionInterface $session,
     ): ?Response {
         if ($this->getSecurityContext()->hasCustomerUser()) {
             return $this->generateRedirect('/');
@@ -113,17 +114,28 @@ class CustomerController extends FlexyController
                     [],
                 );
             } catch (CustomerNotConfirmedException $e) {
-                if ($e->getUser() !== null) {
-                    // Send the confirmation email again
-                    $eventDispatcher->dispatch(
-                        new CustomerEvent($e->getUser()),
-                        TheliaEvents::SEND_ACCOUNT_CONFIRMATION_EMAIL
-                    );
-                }
-                $message = $this->getTranslator()->trans(
-                    'Your account is not yet confirmed. A confirmation email has been sent to your email address, please check your mailbox',
-                    [],
+                // The password has been checked before this point, so the visitor owns
+                // the account: put it back in the activation flow the registration uses,
+                // send a fresh code and take them to the page that asks for it. Saying
+                // "check your mailbox" on the login page left them with no way in, since
+                // registering again with the same address is refused.
+                $customer = $e->getUser();
+
+                $session->set('registration_customer_id', $customer->getId());
+
+                $eventDispatcher->dispatch(
+                    new CustomerEvent($customer),
+                    TheliaEvents::SEND_ACCOUNT_CONFIRMATION_EMAIL
                 );
+
+                $this->addFlash(
+                    'information',
+                    $this->getTranslator()->trans(
+                        'Your account is not yet confirmed. A new activation code has been sent to your email address.'
+                    )
+                );
+
+                return $this->generateRedirect($this->generateUrl('customer_activation'));
             }
         } catch (FormValidationException $e) {
             $message = $this->getTranslator()->trans(
