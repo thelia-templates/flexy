@@ -10,7 +10,7 @@
                 {% set addressId = create ? null : update %}
                 {% set key = create ? 'create' : 'update_' ~ update %}
                 <div class={{ (update or create) ? '' : 'hidden' }}>
-                    {{ component('Flexy:HomeDelivery:AddressesForm', {addressId: addressId, key: key}) }}
+                    {{ component('Flexy:AddressesForm', {addressId: addressId, key: key}) }}
                 </div>
                 <div class={{ (update or create) ? 'hidden' : '' }}>
                     {% if addresses|length <= 0 %}
@@ -30,7 +30,7 @@
                             <ul class="flex flex-col gap-2">
                                 {% for address in addresses %}
                                     <li>
-                                        {{ include('@components/Organisms/Card/Address/AddressCardCheckout.html.twig', {address: address, selected: invoiceAddressId == address.id, isDefault: address.isDefault, model: 'invoiceAddressId'}) }}
+                                        {{ component('Flexy:Checkout:AddressCardCheckout', {addressId: address.id, type: 'invoice'}) }}
                                     </li>
                                 {% endfor %}
                             </ul>
