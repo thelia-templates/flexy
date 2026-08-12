@@ -19,12 +19,14 @@ use Front\Front;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Event\Address\AddressCreateOrUpdateEvent;
 use Thelia\Core\Event\Customer\CustomerCreateOrUpdateEvent;
+use Thelia\Core\Event\Customer\CustomerPersonalDataExportEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Domain\Addressing\Service\AddressService;
 use Thelia\Form\Definition\FrontForm;
@@ -39,6 +41,7 @@ class AccountController extends FlexyController
 {
     public const DELETE_ADDRESS_TOKEN_ID = 'delete_address';
     public const DEFAULT_ADDRESS_TOKEN_ID = 'default_address';
+    public const PERSONAL_DATA_TOKEN_ID = 'personal_data';
 
     #[Route('', name: 'index')]
     public function noRoute(): Response
@@ -290,6 +293,54 @@ class AccountController extends FlexyController
         }
 
         return $this->generateRedirectFromRoute('account_index');
+    }
+
+    /**
+     * Hands the customer everything the shop knows about them, as the JSON
+     * archive built by the core exporter and by every module declaring a
+     * CustomerPersonalDataProviderInterface.
+     *
+     * The archive is never written anywhere: it is built and streamed inside
+     * the request that asked for it. A file dropped in web/ or in a cache
+     * directory would keep the personal data of one person behind a URL that
+     * outlives their session, guessable by whoever knows the naming scheme.
+     * For the same reason the route only answers POST, from an authenticated
+     * session, with a CSRF token: a GET would be linkable, prefetchable and
+     * loggable in every proxy on the way.
+     */
+    #[Route('/personal-data', name: 'personal_data', methods: ['POST'])]
+    public function personalData(
+        EventDispatcherInterface $eventDispatcher,
+        CsrfTokenManagerInterface $csrfTokenManager,
+    ): Response {
+        $this->checkAuth();
+
+        $customer = $this->getSecurityContext()->getCustomerUser();
+
+        if (!$customer instanceof Customer || !$this->hasValidCsrfToken($csrfTokenManager, self::PERSONAL_DATA_TOKEN_ID)) {
+            return new RedirectResponse($this->generateUrl('account_index', ['error' => true]));
+        }
+
+        $event = new CustomerPersonalDataExportEvent($customer);
+        $eventDispatcher->dispatch($event, TheliaEvents::CUSTOMER_PERSONAL_DATA_EXPORT);
+
+        $json = json_encode(
+            $event->getPersonalData(),
+            \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR,
+        );
+
+        $response = new Response($json, Response::HTTP_OK, ['Content-Type' => 'application/json']);
+        $response->headers->set('Content-Disposition', $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            \sprintf('my-personal-data-%s.json', date('Y-m-d')),
+        ));
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
+        $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        $response->setPrivate();
+        $response->headers->addCacheControlDirective('no-store', true);
+        $response->headers->addCacheControlDirective('must-revalidate', true);
+
+        return $response;
     }
 
     /**

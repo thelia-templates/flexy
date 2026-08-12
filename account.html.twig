@@ -70,6 +70,31 @@
                 }) }}
                 {{ form_end(form) }}
             </div>
+            <div class="flex flex-col gap-6">
+                <div class="text-black h4">
+                    {{ 'My personal data'|trans }}
+                </div>
+                {% if app.request.query.get('error') == 1 %}
+                    {{ include('@components/Organisms/SnackBar/SnackBar.html.twig', {
+                        text: 'Your data could not be prepared. Please try again.'|trans,
+                        variant: 'error',
+                        withIcon: true,
+                    }) }}
+                {% endif %}
+                <form method="post" action="{{ path('account_personal_data') }}"
+                      class="flex flex-col gap-4 px-10 pt-8 pb-6 rounded-lg bg-theme-lighter">
+                    <input type="hidden" name="_token" value="{{ csrf_token('personal_data') }}">
+                    <p>
+                        {{ 'Download a copy of everything we hold about you. The archive contains your account, your addresses, your orders, your carts and your newsletter subscription. It is sent to you as the answer to this request and is never stored on the shop.'|trans }}
+                    </p>
+                    {{ component('Flexy:Button', {
+                        text: 'Download my data'|trans,
+                        type: 'submit',
+                        size: 'medium',
+                        class: 'mt-1.5 self-start',
+                    }) }}
+                </form>
+            </div>
         </div>
     </div>
 
