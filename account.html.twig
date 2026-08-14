@@ -56,6 +56,31 @@
                 <twig:Molecules:Button:Base text="{{ 'Update my password'|trans }}" type="submit" class="w-max" />
                 {{ form_end(form) }}
             </div>
+
+            <div class="flex flex-col gap-6">
+                <h2 class="h4 text-black">{{ 'My personal data'|trans }}</h2>
+
+                {% if app.request.query.get('error') %}
+                    <twig:Molecules:SnackBar:Base
+                        variant="error"
+                        :withIcon="true"
+                        text="{{ 'Your data could not be prepared. Please try again.'|trans }}"
+                    />
+                {% endif %}
+
+                <form method="post" action="{{ path('account_personal_data') }}"
+                      class="flex flex-col gap-4 px-10 pt-8 pb-6 rounded-lg bg-lighter">
+                    <input type="hidden" name="_token" value="{{ csrf_token('personal_data') }}">
+                    <p>
+                        {{ 'Download a copy of everything we hold about you. The archive contains your account, your addresses, your orders, your carts and your newsletter subscription. It is sent to you as the answer to this request and is never stored on the shop.'|trans }}
+                    </p>
+                    <twig:Molecules:Button:Base
+                        text="{{ 'Download my data'|trans }}"
+                        type="submit"
+                        class="mt-1.5 w-max"
+                    />
+                </form>
+            </div>
         </div>
     </div>
 
