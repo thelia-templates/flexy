@@ -33,9 +33,20 @@ class ToolkitController extends AbstractController
         '2xl' => 'Large Desktop',
     ];
 
+    /**
+     * The toolkit renders every component of the theme and walks the theme directory
+     * to find them. That is a developer tool: on a live shop it exposes the internals
+     * of the template, and search engines index a page no customer should reach. It
+     * answers only where the kernel runs in debug, and says nothing about itself
+     * anywhere else - a 404, not a 403, so its existence is not advertised either.
+     */
     #[Route('', name: 'index')]
     public function index(Request $request): Response
     {
+        if (true !== $this->getParameter('kernel.debug')) {
+            throw $this->createNotFoundException();
+        }
+
         $finder = (new Finder())
             ->files()
             ->name('toolkit.html.twig')
@@ -65,11 +76,17 @@ class ToolkitController extends AbstractController
             }
         }
 
-        return $this->render('@Flexy/Toolkit/index.html.twig', [
+        $response = $this->render('@Flexy/Toolkit/index.html.twig', [
             'grouped' => $grouped,
             'breakpoints' => $this->getBreakpoints(),
             'embed' => $request->query->getBoolean('embed'),
         ]);
+
+        // Second lock, for the day the page is deliberately opened on a demo running
+        // in debug: the header travels even where the markup is not read.
+        $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+
+        return $response;
     }
 
     private function getBreakpoints(): array
