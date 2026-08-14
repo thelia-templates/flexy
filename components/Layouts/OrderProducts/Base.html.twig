@@ -9,5 +9,17 @@
 		:pse="line.pse"
 		:imageId="line.imageId"
 	/>
+	{# A virtual line carries its file only once the order is paid for, and only when a
+	   document was attached to it. The route answers 404 in every other case, so the link
+	   is shown only where it leads somewhere. #}
+	{% if line.orderProduct.virtual and line.orderProduct.virtualDocument
+		and order is not null and order.orderStatus.code in ['paid', 'processing', 'sent'] %}
+		<twig:Molecules:Button:Base
+			text="{{ 'Download my file'|trans }}"
+			href="{{ path('account_order_download', {orderProductId: line.orderProduct.id}) }}"
+			icon_right="download"
+			class="mb-6 w-max"
+		/>
+	{% endif %}
 	{{ theme_hook('account-order.item.bottom', {order: order, orderProduct: line.orderProduct}) }}
 {% endfor %}
