@@ -63,6 +63,7 @@ class CustomerController extends FlexyController
     public function loginAction(
         EventDispatcherInterface $eventDispatcher,
         CustomerAuthenticator $customerLoginProcessor,
+        SessionInterface $session,
     ): ?Response {
         if ($this->getSecurityContext()->hasCustomerUser()) {
             return $this->generateRedirect('/');
@@ -104,13 +105,30 @@ class CustomerController extends FlexyController
                 // email would tell an attacker which addresses have an account here.
                 $message = $this->getTranslator()->trans('Wrong email or password. Please try again');
             } catch (CustomerNotConfirmedException $e) {
-                if (null !== $e->getUser()) {
+                // The password has been checked before this point, so the visitor owns
+                // the account: put it back in the activation flow the registration uses,
+                // send a fresh code and take them to the page that asks for it. Saying
+                // "check your mailbox" on the login page left them with no way in, since
+                // registering again with the same address is refused.
+                $customer = $e->getUser();
+
+                if ($customer instanceof Customer) {
+                    $session->set('registration_customer_id', $customer->getId());
+
                     $eventDispatcher->dispatch(
-                        new CustomerEvent($e->getUser()),
+                        new CustomerEvent($customer),
                         TheliaEvents::SEND_ACCOUNT_CONFIRMATION_EMAIL
                     );
+
+                    $this->addFlash(
+                        'information',
+                        $this->translator->trans('Your account is not yet confirmed. A new activation code has been sent to your email address.')
+                    );
+
+                    return $this->generateRedirect($this->generateUrl('customer_activation'));
                 }
-                $message = $this->getTranslator()->trans(
+
+                $message = $this->translator->trans(
                     'Your account is not yet confirmed. A confirmation email has been sent to your email address, please check your mailbox'
                 );
             }
