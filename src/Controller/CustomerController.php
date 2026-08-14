@@ -217,7 +217,6 @@ class CustomerController extends FlexyController
 
     #[Route('/informations', name: 'informations_create', methods: ['POST'])]
     public function informationsCreate(
-        CustomerCodeManager $customerCodeProcessor,
         AddressService $addressService,
         SessionInterface $session,
         NewsletterSubscriber $newsletterProcessor,
@@ -242,8 +241,9 @@ class CustomerController extends FlexyController
                 return $this->generateSuccessRedirect($form);
             }
 
-            $customerCodeProcessor->createCodeAndSendIt($customer);
-
+            // No code is sent here: the account creation of the previous step already
+            // mailed one. Sending a second one would invalidate the code the visitor
+            // received first, on top of mailing them twice for one registration.
             return $this->generateRedirect($this->generateUrl('customer_activation'));
         } catch (FormValidationException $e) {
             $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
