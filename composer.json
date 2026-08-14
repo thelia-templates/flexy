@@ -45,7 +45,7 @@
     "extra": {
         "installer-name": "flexy",
         "branch-alias": {
-            "dev-twig": "0.2.x-dev"
+            "dev-main": "1.0.x-dev"
         }
     }
 }
