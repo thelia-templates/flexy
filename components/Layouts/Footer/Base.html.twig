@@ -31,7 +31,12 @@
                     {{ attr('config', 'store_zipcode') }} {{ attr('config', 'store_city') }}
                     {% if country %}<br>{{ country }}{% endif %}
                 </div>
-                <div class="Footer-storePhone paragraph-5">Tel. {{ attr('config', 'store_phone') }}</div>
+                <div class="Footer-storePhone paragraph-5">
+                    Tel.
+                    <a href="tel:{{ attr('config', 'store_phone')|replace({' ': '', '(': '', ')': ''}) }}">
+                        {{ attr('config', 'store_phone') }}
+                    </a>
+                </div>
             </div>
             <twig:Molecules:Button:Base href="/contact" text="{{ 'Contact Us'|trans }}" color="secondary" size="large" icon_right="email" />
         </div>
