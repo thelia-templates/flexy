@@ -71,7 +71,7 @@ class Base
         $cart = $this->cartFacade->getOrCreateFromSession();
 
         return $this->isCartValid()
-            && $this->cartFacade->getDeliveryAddressId()
+            && $cart->getAddressDeliveryId()
             && $cart->getDeliveryModuleId();
     }
 
@@ -81,6 +81,6 @@ class Base
 
         return $this->isDeliveryValid()
             && $cart->getPaymentModuleId()
-            && $this->cartFacade->getInvoiceAddressId();
+            && $cart->getAddressInvoiceId();
     }
 }
