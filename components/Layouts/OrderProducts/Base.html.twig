@@ -10,9 +10,11 @@
 		:imageId="line.imageId"
 	/>
 	{# A virtual line carries its file only once the order is paid for, and only when a
-	   document was attached to it. The route answers 404 in every other case, so the link
-	   is shown only where it leads somewhere. #}
-	{% if line.orderProduct.virtual and line.orderProduct.virtualDocument
+	   document was attached to it: `virtual` alone says the product was sold as a file,
+	   not that one is there to be served. The route answers 404 in every other case, so
+	   the link is shown only where it leads somewhere. `default(null)` keeps a core whose
+	   order payload predates the property from breaking the whole page over a link. #}
+	{% if line.orderProduct.virtualDocument|default(null)
 		and order is not null and order.orderStatus.code in ['paid', 'processing', 'sent'] %}
 		<twig:Molecules:Button:Base
 			text="{{ 'Download my file'|trans }}"

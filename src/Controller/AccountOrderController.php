@@ -114,9 +114,14 @@ class AccountOrderController extends FlexyController
                 ->endUse()
                 ->findPk($orderProductId);
 
-        // A line of someone else's order, an unknown id, and an order that is not paid for
-        // all answer the same 404: none of them tells whether the file is there to be had.
-        if (null === $orderProduct || !$orderProduct->getOrder()->isPaid(false)) {
+        // A line of someone else's order, an unknown id, an order that is not paid for and
+        // a line no document was ever attached to all answer the same 404: none of them
+        // tells whether the file is there to be had. `virtual` alone is not enough — it
+        // says the product was sold as a file, not that one was attached to the line.
+        if (null === $orderProduct
+            || null === $orderProduct->getVirtualDocument()
+            || !$orderProduct->getOrder()->isPaid(false)
+        ) {
             throw new NotFoundHttpException();
         }
 
