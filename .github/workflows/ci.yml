@@ -122,5 +122,9 @@ jobs:
         run: php bin/console lint:twig --env=test templates/frontOffice/flexy
 
       - name: Run the core http-flexy suite against this checkout
+        # --display-deprecations because PHPUnit otherwise reports deprecations
+        # as a bare count in the summary and the job still passes. On PHP 8.4
+        # that count is not zero, and without the detail nobody can tell whether
+        # a new one comes from the theme or from a dependency.
         working-directory: thelia
-        run: composer test:http-flexy
+        run: composer test:http-flexy -- --display-deprecations
