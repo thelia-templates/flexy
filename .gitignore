@@ -7,3 +7,8 @@ composer.lock
 .DS_Store
 .idea/
 .vscode/
+
+# Tool caches, written wherever the tool is run from.
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+/.phpunit.result.cache
