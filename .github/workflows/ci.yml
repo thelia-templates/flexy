@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  php-lint:
+    name: PHP syntax (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '8.3', '8.4' ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '${{ matrix.php }}'
+          coverage: none
+
+      - name: Lint every PHP file of the theme
+        # src/ holds the bundle, components/ the Twig components; both ship in
+        # the Composer package and both are parsed by the shop at runtime.
+        run: find src components -name '*.php' -print0 | xargs -0 -n1 -P4 php -l
+
+  theme:
+    name: Theme in a Thelia checkout (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    # A leaked DB transaction once kept a core DDL test waiting on a metadata
+    # lock until the runner limit; keep the same guard here.
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # 8.3 is the supported floor, 8.4 the other version the core is tested
+        # on. Keeping both is what catches a dependency that resolves to a
+        # different release depending on the interpreter (see #152).
+        php: [ '8.3', '8.4' ]
+    steps:
+      - name: Checkout the theme
+        uses: actions/checkout@v4
+        with:
+          path: theme
+
+      - name: Checkout Thelia
+        # A theme is not an application: it has no kernel and no bin/console of
+        # its own, so importmap:install, tailwind:build and lint:twig cannot run
+        # here. They need a host, and the host is the core.
+        uses: actions/checkout@v4
+        with:
+          repository: thelia/thelia
+          ref: main
+          path: thelia
+
+      - name: Start MySQL
+        # The runner ships MySQL pre-installed (root/root on 127.0.0.1:3306); using
+        # it avoids the flaky service-container init on this runner image.
+        run: sudo systemctl start mysql.service
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '${{ matrix.php }}'
+          ini-values: post_max_size=20M
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, mysql, gd, zip
+
+      - name: Resolve thelia/flexy from this checkout instead of Packagist
+        # Same treatment as the `core/` directory in thelia/thelia: a Composer
+        # path repository with a forced version. Without it, `composer install`
+        # would pull the published tag and the pull request under test would
+        # never be exercised.
+        working-directory: thelia
+        run: |
+          composer config repositories.flexy-checkout '{"type":"path","url":"../theme","options":{"symlink":false,"versions":{"thelia/flexy":"1.0.0-beta99"}}}'
+
+      - name: Install Composer dependencies
+        working-directory: thelia
+        env:
+          # Without a token, Flex silently skips the thelia/thelia-recipes
+          # endpoint; config/bundles.php then never gets the Tailwind bundles the
+          # theme prepends configuration for, and the kernel fails to compile.
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Check that the theme under test is the one installed
+        working-directory: thelia
+        run: |
+          composer show thelia/flexy | grep -E '^versions|^source'
+          test -f templates/frontOffice/flexy/base.html.twig
+
+      - name: Prepare the test database credentials
+        working-directory: thelia
+        run: printf 'DATABASE_HOST=127.0.0.1\nDATABASE_PORT=3306\nDATABASE_USER=root\nDATABASE_PASSWORD=root\nDATABASE_NAME=test\n' > .env.test.local
+
+      - name: Install the test database
+        # Everything below reads the active front template from the database, so
+        # nothing theme-related can run before this step.
+        working-directory: thelia
+        run: composer test:prepare
+
+      - name: Download the importmap vendors
+        # AssetMapper replaced Webpack Encore: importmap.php is the theme's
+        # dependency manifest and assets/vendor/ is gitignored, so the shop
+        # downloads it. A missing or unresolvable entry fails here.
+        working-directory: thelia
+        run: php bin/console importmap:install --env=test
+
+      - name: Build the Tailwind stylesheet
+        # symfonycasts/tailwind-bundle compiles assets/styles/app.css through the
+        # standalone Tailwind v4 binary; without this the CSS that
+        # `asset('styles/app.css')` serves is the uncompiled source.
+        working-directory: thelia
+        run: php bin/console tailwind:build --env=test
+
+      - name: Lint the theme templates
+        working-directory: thelia
+        run: php bin/console lint:twig --env=test templates/frontOffice/flexy
+
+      - name: Run the core http-flexy suite against this checkout
+        working-directory: thelia
+        run: composer test:http-flexy
