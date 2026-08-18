@@ -145,8 +145,10 @@ class CheckoutController extends FlexyController
                 new CheckoutDTO(
                     cart: $cart,
                     deliveryModuleId: $cart->getDeliveryModuleId(),
-                    deliveryAddressId: $cart->getAddressDeliveryId(),
-                    invoiceAddressId: $cart->getAddressInvoiceId(),
+                    // The cart columns hold `cart_address` ids, not customer `address`
+                    // ids: read them through the facade, which resolves the copy.
+                    deliveryAddressId: $cartFacade->getDeliveryAddressId(),
+                    invoiceAddressId: $cartFacade->getInvoiceAddressId(),
                     paymentModuleId: $cart->getPaymentModuleId(),
                 )
             );
