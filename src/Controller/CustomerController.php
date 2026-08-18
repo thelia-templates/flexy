@@ -35,6 +35,7 @@ use Thelia\Domain\Customer\Service\CustomerAuthenticator;
 use Thelia\Domain\Customer\Service\CustomerCodeManager;
 use Thelia\Domain\Customer\Service\CustomerRegistrationService;
 use Thelia\Domain\Customer\Service\CustomerUpdateService;
+use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Domain\Marketing\Service\NewsletterSubscriber;
 use Thelia\Form\CustomerLogin;
 use Thelia\Form\Exception\FormValidationException;
@@ -162,6 +163,7 @@ class CustomerController extends FlexyController
     public function registerCreate(
         CustomerRegistrationService $customerRegistrationProcessor,
         SessionInterface $session,
+        LangService $langService,
     ): RedirectResponse {
         if ($this->securityService->isAuthenticatedFront()) {
             return $this->generateRedirect('/account');
@@ -176,7 +178,11 @@ class CustomerController extends FlexyController
                 firstname: $formValidated->get('firstname')->getData(),
                 lastname: $formValidated->get('lastname')->getData(),
                 email: $formValidated->get('email')->getData(),
-                password: $formValidated->get('password')->getData()
+                password: $formValidated->get('password')->getData(),
+                // The language the visitor registered in is only known here. Left out, the
+                // account keeps a NULL lang_id and every later message for that customer
+                // goes out in the shop default instead.
+                langId: $langService->getLang()?->getId(),
             ));
 
             $session->set('registration_customer_id', $customer->getId());
