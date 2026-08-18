@@ -14,24 +14,17 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\LangSelect;
 
-use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 use Thelia\Core\HttpFoundation\Session\Session;
-use Thelia\Core\Routing\Rewriting\Exception\UrlRewritingException;
-use Thelia\Model\ConfigQuery;
-use Thelia\Tools\URL;
 
 #[AsTwigComponent]
 class Base
 {
     /** @var array<int, array<string, mixed>>|null */
     private ?array $langs = null;
-
-    /** @var array<string, string>|null */
-    private ?array $switchUrls = null;
 
     public function __construct(
         private readonly DataAccessService $dataAccessService,
@@ -67,117 +60,41 @@ class Base
     }
 
     /**
-     * Where each active language sends the visitor, keyed by locale.
+     * Where each active language sends the visitor, keyed by locale: the page being
+     * read, asked for in that language. The core takes it from there, and keeps the
+     * visitor in place - RewritingRouter redirects a rewritten url to its translation,
+     * LangService switches the language of any other page and handles the redirect to
+     * the domain of the language.
      *
-     * Switching language must keep the visitor on the page being read, so the link
-     * points at the translation of that page whenever one can be named here. When it
-     * cannot - rewriting disabled, page without a rewritten url, language without a
-     * translation of it, one domain per language - the link keeps the current path
-     * and carries ?lang=, which the core turns into the right page on the next
-     * request: RewritingRouter::maybeRedirectForRequestedLocale() for a rewritten
-     * page, LangService::resolveFrontLanguageFromRequest() otherwise, including the
-     * redirect to the domain of the language.
+     * The query string is read from the request and not from app.request.query, which
+     * RewritingRouter::applyRewritingAttributes() fills with the view id and with the
+     * parameters encoded in the rewritten url by the time a template renders. Those are
+     * internal to the rewriting and have no business being written back into a link.
      *
      * @return array<string, string>
      */
     public function getSwitchUrls(): array
     {
-        if (null !== $this->switchUrls) {
-            return $this->switchUrls;
-        }
-
         $request = $this->requestStack->getMainRequest();
 
         if (!$request instanceof Request) {
-            return $this->switchUrls = [];
+            return [];
         }
 
-        $currentPage = $this->resolveCurrentPage($request);
-        $currentPath = $request->getBaseUrl().$request->getPathInfo();
-        $query = $this->requestedQuery($request);
+        parse_str((string) $request->getQueryString(), $query);
+        unset($query['lang'], $query['locale']);
 
+        $path = $request->getBaseUrl().$request->getPathInfo();
         $switchUrls = [];
 
         foreach ($this->getLangs() as $lang) {
             $locale = $lang['locale'] ?? null;
 
-            if (!\is_string($locale) || '' === $locale) {
-                continue;
+            if (\is_string($locale) && '' !== $locale) {
+                $switchUrls[$locale] = $path.'?'.http_build_query($query + ['lang' => $locale]);
             }
-
-            $translatedUrl = null === $currentPage ? null : $this->translatedUrl($currentPage, $locale);
-
-            $switchUrls[$locale] = null === $translatedUrl
-                ? $this->withQuery($currentPath, $query + ['lang' => $locale])
-                : $this->withQuery($translatedUrl, $query);
         }
 
-        return $this->switchUrls = $switchUrls;
-    }
-
-    /**
-     * View and id of the page being read, when a rewritten url serves it.
-     *
-     * One domain per language is left out on purpose: the domain of a language is not
-     * exposed to the front, so the target url cannot be named here and the core
-     * redirect stays in charge of it.
-     *
-     * @return array{view: string, viewId: mixed}|null
-     */
-    private function resolveCurrentPage(Request $request): ?array
-    {
-        try {
-            if (!ConfigQuery::isRewritingEnable() || ConfigQuery::isMultiDomainActivated()) {
-                return null;
-            }
-
-            $resolver = URL::getInstance()->resolve($request->getPathInfo());
-        } catch (UrlRewritingException|PropelException|\RuntimeException) {
-            return null;
-        }
-
-        if (!\is_string($resolver->view) || '' === $resolver->view) {
-            return null;
-        }
-
-        return ['view' => $resolver->view, 'viewId' => $resolver->viewId];
-    }
-
-    /**
-     * @param array{view: string, viewId: mixed} $currentPage
-     */
-    private function translatedUrl(array $currentPage, string $locale): ?string
-    {
-        try {
-            return URL::getInstance()
-                ->retrieve($currentPage['view'], $currentPage['viewId'], $locale)
-                ->rewrittenUrl;
-        } catch (PropelException|\RuntimeException) {
-            return null;
-        }
-    }
-
-    /**
-     * The query string as the visitor asked for it. The request query bag cannot be
-     * used: RewritingRouter feeds the resolved url back into it - the view id and the
-     * rewriting arguments - and those internal parameters have no place in a link.
-     *
-     * @return array<string, mixed>
-     */
-    private function requestedQuery(Request $request): array
-    {
-        parse_str((string) $request->getQueryString(), $query);
-
-        unset($query['lang'], $query['locale']);
-
-        return $query;
-    }
-
-    /**
-     * @param array<string, mixed> $query
-     */
-    private function withQuery(string $url, array $query): string
-    {
-        return [] === $query ? $url : $url.'?'.http_build_query($query);
+        return $switchUrls;
     }
 }
