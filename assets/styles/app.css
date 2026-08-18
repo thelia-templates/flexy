@@ -5,7 +5,6 @@
    too: the theme directory is git-ignored from the project root, so the
    default source auto-detection skips it entirely. */
 @source "../../components";
-@source "../../partials";
 @source "../../*.html.twig";
 @source "../../form";
 @source "../../blocks";
