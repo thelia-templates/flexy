@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% set pageData = getPageData() %}
+{% set img = getImagesData({
+	source_type: 'page',
+	source_id: pageData.id,
+	filters: 'default'
+}) %}
+
+{% block og_image %}{{ ((img|first)?.sources|first)?.url ?: parent()  }}{% endblock %}
+{% block og_type %}article{% endblock %}
+
+{% block body %}
+    {% set ps = pageData.postscriptum %}
+
+    <twig:Layouts:Subheader:Item
+        title="{{pageData.title}}"
+        description="{{pageData.chapo}}"
+        :breadcrumb="breadcrumb"
+        itemType="page"
+        itemId="{{pageData.id}}"
+    />
+
+    <div class="container-double-3 pt-6 lg:pt-14 pb-20 lg:pb-30">
+        <article class="wysiwyg wysiwyg-theme flex flex-col gap-10 min-w-0">
+            <div>{{ pageData.description|raw }}</div>
+            <twig:Organisms:Blocks:Base itemType="page" itemId="{{ pageData.id }}" />
+            {% if ps %}
+                <small>{{ ps }}</small>
+            {% endif %}
+        </article>
+
+        <twig:Organisms:BlocksToc:Base itemType="page" itemId="{{ pageData.id }}" maxLevel="3" />
+    </div>
+{% endblock %}
