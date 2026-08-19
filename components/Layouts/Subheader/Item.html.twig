@@ -17,28 +17,25 @@
     'single-3': 'container-single-3',
 }[container] %}
 
-{% set image = null %}
+{% set image = image|default(null) %}
+
 {% if itemType and itemId %}
-    {# `visible` mirrors what getImages() filters on below: without it the probe can
-       announce an image the renderer then refuses, leaving an empty wrapper. #}
-    {% set _imageFilter = {(itemType ~ '.id'): itemId, visible: true, itemsPerPage: 1} %}
-    {% if resources('/api/front/' ~ itemType ~ '_images', _imageFilter)|length %}
-        {% set image = getImages({
-            source_type: itemType,
-            source_id: itemId,
-            filters: {
-                '1366px': 'subheader_item_xl',
-                '1024px': 'subheader_item_lg',
-                '768px': 'subheader_item_md',
-                default: 'subheader_item_sm',
-            },
-            wrapper: 'picture',
-            wrapper_attrs: {class: 'Subheader-image'},
-            position: 1,
-            alt: title,
-            img_attrs: {loading: 'lazy'},
-        }) %}
-    {% endif %}
+    {% set image = getImages({
+        source_type: itemType,
+        source_id: itemId,
+        no_placeholder: true,
+        filters: {
+            '1366px': 'subheader_item_xl',
+            '1024px': 'subheader_item_lg',
+            '768px': 'subheader_item_md',
+            default: 'subheader_item_sm',
+        },
+        wrapper: 'picture',
+        wrapper_attrs: {class: 'Subheader-image'},
+        position: 1,
+        alt: title,
+        img_attrs: {loading: 'lazy'},
+    }) %}
 {% endif %}
 
 <div class="{{ ('Subheader Subheader--contentPage ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
