@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{{ page.category ? page.category ~ ' / ' : '' }}{{ page.name }} — Design System — Toolkit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('styles/app.css') }}" blocking="render">
+    {{ importmap('app') }}
+    <style>
+        html {
+            scrollbar-gutter: stable;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen bg-lightest text-black" {{ stimulus_controller('Toolkit--preview', {}, {previewing: 'bg-black'}) }}>
+
+    {% if not embed %}
+        {% include '@Flexy/Toolkit/_sidebar.html.twig' %}
+    {% endif %}
+
+    {# Main content #}
+    <main {{ stimulus_target('Toolkit--preview', 'main') }}
+          class="flex-1 py-10 px-2.5 md:px-5 lg:px-10 overflow-y-auto transition-colors{{ embed ? '' : ' ml-64' }}">
+
+        <div {{ stimulus_target('Toolkit--preview', 'content') }}>
+            {% if currentSlug in ['breakpoints', 'layout'] %}
+                {% include page.twigPath %}
+            {% else %}
+                <section>
+                    {% if page.category %}
+                        <h2 class="text-2xl font-bold mb-8 pb-3 border-b text-base border-grey-lighter">{{ page.category }}</h2>
+                    {% endif %}
+
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-grey-darker">{{ page.name }}</h3>
+
+                        {% if source %}
+                            <div {{ stimulus_controller('Toolkit--copy') }}>
+                                <button type="button" {{ stimulus_action('Toolkit--copy', 'toggle', 'click') }}
+                                        class="text-xs font-medium text-grey-darker hover:text-black underline underline-offset-2 transition-colors">
+                                    <span {{ stimulus_target('Toolkit--copy', 'toggleLabel') }}>Voir le code</span>
+                                </button>
+
+                                <div {{ stimulus_target('Toolkit--copy', 'panel') }} hidden class="relative mt-3">
+                                    <button type="button" {{ stimulus_action('Toolkit--copy', 'copy', 'click') }}
+                                            class="absolute top-3 right-3 text-xs font-medium px-3 py-1.5 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors">
+                                        <span {{ stimulus_target('Toolkit--copy', 'copyLabel') }}>Copier</span>
+                                    </button>
+                                    <pre class="overflow-x-auto rounded-2xl bg-black text-grey-lightest text-sm font-mono p-4 lg:p-6 pr-24"><code class="text-grey-lightest" {{ stimulus_target('Toolkit--copy', 'source') }}>{{ source }}</code></pre>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="bg-white rounded-2xl border border-grey-lighter p-4 lg:p-8">
+                            {% include page.twigPath ignore missing %}
+                        </div>
+                    </div>
+                </section>
+            {% endif %}
+        </div>
+
+        <iframe
+            hidden
+            {{ stimulus_target('Toolkit--preview', 'frame') }}
+            class="mx-auto block ring-1 ring-grey-lighter rounded-2xl bg-white"
+            style="height: calc(100vh - 6rem);"
+            title="Aperçu responsive"
+        />
+
+    </main>
+
+</body>
+</html>

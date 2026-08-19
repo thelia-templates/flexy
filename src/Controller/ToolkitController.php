@@ -39,14 +39,48 @@ class ToolkitController extends AbstractController
      * of the template, and search engines index a page no customer should reach. It
      * answers only where the kernel runs in debug, and says nothing about itself
      * anywhere else - a 404, not a 403, so its existence is not advertised either.
+     *
+     * Each component gets its own page (so the preview iframe only ever has to
+     * render one component instead of the whole catalogue), sharing the same
+     * sidebar navigation. The slug is optional so `/toolkit` alone lands on a
+     * sensible default page.
      */
-    #[Route('', name: 'index')]
-    public function index(Request $request): Response
+    #[Route('/{slug}', name: 'show', defaults: ['slug' => null])]
+    public function show(Request $request, ?string $slug = null): Response
     {
         if (true !== $this->getParameter('kernel.debug')) {
             throw $this->createNotFoundException();
         }
 
+        $grouped = $this->getGroupedComponents();
+        $pages = $this->buildPages($grouped);
+
+        $slug ??= array_key_first($pages);
+
+        if (!isset($pages[$slug])) {
+            throw $this->createNotFoundException();
+        }
+
+        $page = $pages[$slug];
+
+        $response = $this->render('@Flexy/Toolkit/show.html.twig', [
+            'grouped' => $grouped,
+            'breakpoints' => $this->getBreakpoints(),
+            'embed' => $request->query->getBoolean('embed'),
+            'currentSlug' => $slug,
+            'page' => $page,
+            'source' => isset($page['path']) ? file_get_contents($page['path']) : null,
+        ]);
+
+        // Second lock, for the day the page is deliberately opened on a demo running
+        // in debug: the header travels even where the markup is not read.
+        $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+
+        return $response;
+    }
+
+    private function getGroupedComponents(): array
+    {
         $finder = (new Finder())
             ->files()
             ->name('toolkit.html.twig')
@@ -63,6 +97,7 @@ class ToolkitController extends AbstractController
 
             $grouped[$category][] = [
                 'twigPath' => '@Flexy/' . $file->getRelativePathname(),
+                'path' => $file->getRealPath(),
                 'name' => $name,
                 'slug' => $slug,
             ];
@@ -76,17 +111,28 @@ class ToolkitController extends AbstractController
             }
         }
 
-        $response = $this->render('@Flexy/Toolkit/index.html.twig', [
-            'grouped' => $grouped,
-            'breakpoints' => $this->getBreakpoints(),
-            'embed' => $request->query->getBoolean('embed'),
-        ]);
+        return $grouped;
+    }
 
-        // Second lock, for the day the page is deliberately opened on a demo running
-        // in debug: the header travels even where the markup is not read.
-        $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+    /**
+     * Flattens the grouped components into a slug-indexed map and adds the two
+     * hardcoded design-token pages, so every page (component or not) resolves
+     * the same way.
+     */
+    private function buildPages(array $grouped): array
+    {
+        $pages = [
+            'breakpoints' => ['name' => 'Breakpoints', 'category' => null, 'twigPath' => '@Flexy/Toolkit/breakpoints.html.twig'],
+            'layout' => ['name' => 'Layout', 'category' => null, 'twigPath' => '@Flexy/Toolkit/layout.html.twig'],
+        ];
 
-        return $response;
+        foreach ($grouped as $category => $components) {
+            foreach ($components as $component) {
+                $pages[$component['slug']] = $component + ['category' => $category];
+            }
+        }
+
+        return $pages;
     }
 
     private function getBreakpoints(): array

@@ -1,0 +1,53 @@
+{# Sidebar #}
+<aside class="w-64 shrink-0 top-0 h-screen bg-white border-r border-medium fixed flex flex-col">
+    <div class="shrink-0 bg-medium p-6">
+        <p class="text-xs font-semibold uppercase tracking-widest text-grey mb-1">Flexy</p>
+        <h1 class="text-xl font-bold mb-4 text-dark">Design System</h1>
+
+        <select {{ stimulus_target('Toolkit--preview', 'select') }} {{ stimulus_action('Toolkit--preview', 'setWidth', 'change') }}
+                class="w-full text-xs border border-base rounded-lg px-3 py-1 bg-white outline-dark">
+            <option value="">Responsive</option>
+            {% for bp in breakpoints %}
+                {% if bp.label %}
+                    <option value="{{ bp.px }}">{{ bp.label }} ({{ bp.px }}px)</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto space-y-6 p-6">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-base mb-2">Design tokens</p>
+            <ul class="space-y-1">
+                <li>
+                    <a href="{{ path('toolkit_show', {slug: 'breakpoints'}) }}"
+                       class="block px-3 py-1.5 rounded-lg text-sm transition-colors {{ currentSlug == 'breakpoints' ? 'bg-grey-lightest text-black font-medium' : 'text-grey-darker hover:bg-grey-lightest hover:text-black' }}">
+                        Breakpoints
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('toolkit_show', {slug: 'layout'}) }}"
+                       class="block px-3 py-1.5 rounded-lg text-sm transition-colors {{ currentSlug == 'layout' ? 'bg-grey-lightest text-black font-medium' : 'text-grey-darker hover:bg-grey-lightest hover:text-black' }}">
+                        Layout
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        {% for category, components in grouped %}
+            <div class="mb-6">
+                <p class="text-xs font-semibold uppercase tracking-widest text-base mb-2">{{ category }}</p>
+                <ul class="space-y-1">
+                    {% for component in components %}
+                        <li>
+                            <a href="{{ path('toolkit_show', {slug: component.slug}) }}"
+                               class="block px-3 py-1.5 rounded-lg text-sm transition-colors {{ currentSlug == component.slug ? 'bg-grey-lightest text-black font-medium' : 'text-grey-darker hover:bg-grey-lightest hover:text-black' }}">
+                                {{ component.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    </nav>
+</aside>
