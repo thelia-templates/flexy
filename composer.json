@@ -20,7 +20,7 @@
         "thelia/twig-engine-module": "^1.0",
         "thelia/thelia-library-module": "^2.0",
         "thelia/thelia-blocks-module": "^3.0",
-        "thelia/page-module": "^2.0.3",
+        "thelia/page-module": "^2.0",
         "thelia/header-highlights-module": "^2.0",
         "thelia/recently-viewed-module": "^2.1",
         "thelia/seone-module": "^1.1",
