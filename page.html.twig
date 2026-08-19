@@ -26,7 +26,7 @@
             <div>{{ pageData.description|raw }}</div>
             <twig:Organisms:Blocks:Base itemType="page" itemId="{{ pageData.id }}" />
             {% if ps %}
-                <small>{{ ps }}</small>
+                <small>{{ ps|raw }}</small>
             {% endif %}
         </article>
 
