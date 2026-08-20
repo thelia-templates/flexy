@@ -12,6 +12,12 @@
     </div>
 
     {{ form_row(form.company, {label: 'Company'|trans}) }}
+    {% if form.siret is defined %}
+        {{ form_row(form.siret) }}
+    {% endif %}
+    {% if form.vat_number is defined %}
+        {{ form_row(form.vat_number) }}
+    {% endif %}
     {{ form_row(form.address1, {label: 'Address'|trans}) }}
     {{ form_row(form.address2) }}
     {{ form_row(form.address3) }}

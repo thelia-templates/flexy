@@ -32,6 +32,17 @@
             <span>
                 <span class="AddressCard-title">{{ cardTitle }}</span>
                 <span class="AddressCard-name">{{ name }}</span>
+                {% if address.company %}
+                    <span class="AddressCard-company">
+                        <span class="block">{{ address.company }}</span>
+                        {% if address.siret %}
+                            <span class="block">{{ 'Company registration number'|trans }} : {{ address.siret }}</span>
+                        {% endif %}
+                        {% if address.vatNumber %}
+                            <span class="block">{{ 'VAT number'|trans }} : {{ address.vatNumber }}</span>
+                        {% endif %}
+                    </span>
+                {% endif %}
                 <span class="AddressCard-address">
                     <span class="block">
                         {{ [address.address1, address.address2 ?? '', address.address3 ?? '']|filter(i => i)|join(', ') }}

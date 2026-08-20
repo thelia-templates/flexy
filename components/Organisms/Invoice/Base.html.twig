@@ -15,7 +15,7 @@
 
     {% if this.invoiceAddressId and this.editingAddressId %}
         <div class="flex flex-col gap-2 py-6 px-10 bg-lightest">
-            <twig:Forms:Address:Base :addressId="this.editingAddressId" />
+            <twig:Forms:Address:Base :addressId="this.editingAddressId" withCompany />
         </div>
     {% elseif this.invoiceAddressId and not this.showAddressList %}
         <twig:Organisms:InvoiceCard:Base :addressId="this.invoiceAddressId" />

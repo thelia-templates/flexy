@@ -30,6 +30,8 @@ use Thelia\Form\AddressCreateForm;
 
 class CustomerInformationsForm extends AddressCreateForm
 {
+    use LegalIdentifierFieldsTrait;
+
     public function __construct(
         protected CountryService $countryService,
         protected CustomerTitleService $customerTitleService,
@@ -73,6 +75,8 @@ class CustomerInformationsForm extends AddressCreateForm
                 'placeholder' => Translator::getInstance()->trans('Select your state'),
             ]);
         });
+
+        $this->addLegalIdentifierFields();
 
         $this->formBuilder->add('is_default', HiddenType::class, [
             'data' => true,
