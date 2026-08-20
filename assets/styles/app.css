@@ -11,6 +11,7 @@
 
 /* Theme and utilities : automatic layering / per file layering */
 @import "./variables.css";
+@import "./cms.css";
 @import "./layout.css";
 @import "../../components/Atoms/Typography/Typography.css";
 

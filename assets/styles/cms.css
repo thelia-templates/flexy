@@ -1,0 +1,25 @@
+/*
+ * The palette the blocks of TheliaCMS read, when the module is installed.
+ *
+ * The module ships the socle of its own blocks and borrows the text, surface
+ * and border colours of the theme on its own. The accent is the one thing it
+ * cannot borrow: a background and the text written on it have to be chosen
+ * together, and the brand orange carries dark text, where a dark accent would
+ * carry white. So the theme states the pair, and a CMS page comes out in the
+ * colours of the site rather than in the sober neutrals the module falls back
+ * on.
+ *
+ * Four declarations, and no rule about the blocks themselves: what they look
+ * like belongs to the module, and a project that wants to restyle them writes
+ * its own rules here, outside any cascade layer, which is enough to win over
+ * the socle.
+ *
+ * Harmless on a site without the module: nothing reads these variables.
+ */
+
+:root {
+  --cms-color-accent: var(--color-base);
+  --cms-color-accent-strong: var(--color-dark);
+  --cms-color-on-accent: var(--color-black);
+  --cms-color-accent-surface: var(--color-lightest);
+}
