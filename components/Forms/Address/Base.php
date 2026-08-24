@@ -41,6 +41,13 @@ class Base
     #[LiveProp]
     public ?int $addressId = null;
 
+    /**
+     * The checkout asks for a company name on the billing address only, and the legal
+     * identifiers come with it: a delivery address never carries any of the three.
+     */
+    #[LiveProp]
+    public bool $withCompany = false;
+
     public function __construct(
         private readonly FormServiceInterface $formService,
         private readonly AddressService $addressService,
@@ -53,7 +60,17 @@ class Base
     {
         $form = $this->formService->getFormByName(AddressEditForm::FORM_NAME, $this->getData());
         $form->remove('address3');
-        $form->remove('company');
+
+        if (!$this->withCompany) {
+            $form->remove('company');
+            // The identifiers are dependent fields, so they are only there when a company
+            // name was submitted; removing them unconditionally would fail on the others.
+            foreach (['siret', 'vat_number'] as $field) {
+                if ($form->has($field)) {
+                    $form->remove($field);
+                }
+            }
+        }
 
         return $form;
     }

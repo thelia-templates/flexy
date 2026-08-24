@@ -1,18 +1,13 @@
-{# @prop action string URL the form posts to #}
-{# @prop successUrl string Where the controller redirects once the address is saved #}
-{# @prop errorUrl string Where the controller redirects when validation fails #}
-{% props action, successUrl, errorUrl %}
-
 {% form_theme form with flexy_form_themes only %}
 <div {{ attributes }}>
     {{ form_start(form, {attr: {
         class: 'flex flex-col gap-6',
-        action: action,
+        action: this.action,
         method: 'POST',
     }}) }}
     {{ form_errors(form) }}
-    {{ form_row(form.success_url, {value: successUrl}) }}
-    {{ form_row(form.error_url, {value: errorUrl}) }}
+    {{ form_row(form.success_url, {value: this.successUrl}) }}
+    {{ form_row(form.error_url, {value: this.errorUrl}) }}
 
     {{ form_row(form.label, {help: 'This name will allow you to easily identify each of your addresses'|trans}) }}
     {{ form_row(form.title) }}
@@ -23,6 +18,12 @@
     </div>
 
     {{ form_row(form.company, {label: 'Company'|trans}) }}
+    {% if form.siret is defined %}
+        {{ form_row(form.siret) }}
+    {% endif %}
+    {% if form.vat_number is defined %}
+        {{ form_row(form.vat_number) }}
+    {% endif %}
     {{ form_row(form.address1, {label: 'Address'|trans}) }}
     {{ form_row(form.address2) }}
     {{ form_row(form.address3) }}

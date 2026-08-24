@@ -18,6 +18,17 @@
             {{ form_row(form.firstname) }}
             {{ form_row(form.lastname) }}
         </div>
+        {# Billing address only, and the identifiers only once a company name is typed:
+           the form itself decides, this template just renders what is there. #}
+        {% if form.company is defined %}
+            {{ form_row(form.company) }}
+        {% endif %}
+        {% if form.siret is defined %}
+            {{ form_row(form.siret) }}
+        {% endif %}
+        {% if form.vat_number is defined %}
+            {{ form_row(form.vat_number) }}
+        {% endif %}
         {{ form_row(form.country) }}
         {% if form.state is defined %}
             {{ form_row(form.state) }}

@@ -40,6 +40,18 @@ class Account
     #[LiveProp]
     public ?int $addressId = null;
 
+    // Read by the Twig template on every render, including the internal ones a live model
+    // update triggers: unlike addressId these never come from the browser, so they stay
+    // constant across the component's lifetime rather than round-tripping user input.
+    #[LiveProp]
+    public string $action = '';
+
+    #[LiveProp]
+    public string $successUrl = '';
+
+    #[LiveProp]
+    public string $errorUrl = '';
+
     public function __construct(
         private readonly FormServiceInterface $formService,
         private readonly AddressService $addressService,

@@ -22,6 +22,9 @@ use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Thelia\Domain\Cart\CartFacade;
+use Thelia\Domain\Legal\CompanyIdentifierRules;
+use Thelia\Model\Cart;
+use Thelia\Model\CartAddressQuery;
 
 #[AsLiveComponent]
 class Base
@@ -81,6 +84,28 @@ class Base
 
         return $this->isDeliveryValid()
             && $cart->getPaymentModuleId()
-            && $cart->getAddressInvoiceId();
+            && $cart->getAddressInvoiceId()
+            && $this->hasBillableInvoiceAddress($cart);
+    }
+
+    /**
+     * Greys out the button rather than letting the buyer submit and bounce back: an invoice for
+     * a business needs its legal identifiers. CheckoutValidationService holds the same rule and
+     * is the one that decides - this only spares a round trip.
+     */
+    private function hasBillableInvoiceAddress(Cart $cart): bool
+    {
+        $address = CartAddressQuery::create()->findPk($cart->getAddressInvoiceId());
+
+        if (null === $address) {
+            return false;
+        }
+
+        return [] === CompanyIdentifierRules::violationsFor(
+            $address->getCompany(),
+            $address->getSiret(),
+            $address->getVatNumber(),
+            $address->getCountry()?->getIsoalpha2(),
+        );
     }
 }

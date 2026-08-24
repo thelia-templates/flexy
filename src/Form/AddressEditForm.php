@@ -26,6 +26,7 @@ use Thelia\Form\AddressCreateForm;
 class AddressEditForm extends AddressCreateForm
 {
     use AddressCountryValidationTrait;
+    use LegalIdentifierFieldsTrait;
 
     public const FORM_NAME = 'flexybundle_address_edit_form';
 
@@ -67,6 +68,8 @@ class AddressEditForm extends AddressCreateForm
                 'placeholder' => Translator::getInstance()->trans('Select your state'),
             ]);
         });
+
+        $this->addLegalIdentifierFields();
     }
 
     public static function getName(): string

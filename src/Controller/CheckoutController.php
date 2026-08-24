@@ -27,6 +27,7 @@ use Thelia\Domain\Cart\Service\CartGuard;
 use Thelia\Domain\Checkout\CheckoutFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
 use Thelia\Domain\Checkout\Exception\EmptyCartException;
+use Thelia\Domain\Checkout\Exception\IncompleteInvoiceAddressException;
 use Thelia\Domain\Checkout\Exception\InvalidDeliveryException;
 use Thelia\Domain\Checkout\Exception\MissingAddressException;
 use Thelia\Domain\Shipping\ShippingFacade;
@@ -94,6 +95,10 @@ class CheckoutController extends FlexyController
         $this->checkAuth();
 
         try {
+            // Deliberately not guarded on the legal identifiers here: the billing address form
+            // lives on this very page, so refusing to render it would leave the buyer with no
+            // way to supply what is missing. The rule is enforced on leaving the step instead,
+            // by CheckoutValidationService, and surfaced early by the NextButton.
             $cart = $cartFacade->getOrCreateFromSession();
             $cartGuard->checkCartNotEmpty($cart);
             $cartGuard->checkValidDelivery($cart);
@@ -162,6 +167,10 @@ class CheckoutController extends FlexyController
             ]);
         } catch (EmptyCartException $e) {
             throw new RedirectException($this->generateUrl('checkout_cart'), Response::HTTP_FOUND, $e->getMessage());
+        } catch (IncompleteInvoiceAddressException $e) {
+            // Back to the payment step, which is where this theme puts the billing address
+            // form: it opens on the selected address, ready to be completed.
+            throw new RedirectException($this->generateUrl('checkout_payment'), Response::HTTP_FOUND, $e->getMessage());
         } catch (MissingAddressException|InvalidDeliveryException $e) {
             throw new RedirectException($this->generateUrl('checkout_delivery'), Response::HTTP_FOUND, $e->getMessage());
         }
