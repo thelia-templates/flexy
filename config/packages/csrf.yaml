@@ -1,0 +1,10 @@
+# Forms rendered inside cacheable zones (product page, cart, login) must not carry a
+# session-bound CSRF token: Turbo snapshots and reverse-proxy caches would replay a
+# token that belongs to another session. Listing their ids here makes the core BaseForm
+# use Symfony's stateless (same-origin) validation for them.
+framework:
+    csrf_protection:
+        stateless_token_ids:
+            - thelia_cart_add
+            - thelia_coupon_code
+            - thelia_customer_login
