@@ -55,7 +55,10 @@
 /* How many products the value keeps: quieter than the label, never wraps away from it */
 .FilterPill-count {
   @apply paragraph-4;
-  opacity: 0.6;
+
+  margin-left: 0.375rem;
+  color: currentColor;
+  opacity: 0.7;
   white-space: nowrap;
 }
 
