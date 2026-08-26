@@ -89,6 +89,14 @@ class Base extends AbstractController
     #[ExposeInTemplate]
     public int $activeFilterCount = 0;
 
+    /**
+     * Filter definitions already read during this request, by selection: the form building and
+     * the listing refresh both ask for them.
+     *
+     * @var array<string, array>
+     */
+    private array $resolvedFilters = [];
+
     public function __construct(
         private readonly DataAccessService $dataAccessService,
         private readonly RequestStack $requestStack,
@@ -146,6 +154,9 @@ class Base extends AbstractController
             // `sort` can only be cleared through the $reset branch above: the placeholder option of
             // Fields:Select:Base is rendered disabled, so it can never be re-selected to send null.
             $this->sort = $sort ?? $this->sort;
+            // The facets follow the selection, so the form that was just submitted describes the
+            // column before this action: it is rebuilt from the new selection for the re-render.
+            $this->resetForm();
         }
 
         // A narrower result set can have fewer pages than the one currently displayed
@@ -157,6 +168,10 @@ class Base extends AbstractController
     /**
      * Filter definitions come from the product's category: Thelia exposes none without one,
      * so a category-less listing (view_all) has no filters at all.
+     *
+     * The current selection goes along, so each value is offered with the number of products
+     * it would keep and the values no product of the narrowed set holds disappear. Thelia
+     * relaxes a checked filter from its own facet, so a checked value always keeps its siblings.
      */
     public function getFilters(): array
     {
@@ -164,10 +179,17 @@ class Base extends AbstractController
             return $this->filters = [];
         }
 
-        return $this->filters = $this->dataAccessService->resources(
-            '/api/front/tfilters/products',
-            ['tfilters' => $this->categoryTFilter()],
-        ) ?? [];
+        $selection = $this->categoryTFilter() + $this->tfilters;
+        $key = json_encode($selection);
+
+        if (($this->resolvedFilters[$key] ?? null) === null) {
+            $this->resolvedFilters[$key] = $this->dataAccessService->resources(
+                '/api/front/tfilters/products',
+                ['tfilters' => $selection],
+            ) ?? [];
+        }
+
+        return $this->filters = $this->resolvedFilters[$key];
     }
 
     /**
