@@ -42,13 +42,13 @@
                             <div {{ stimulus_controller('Toolkit--copy') }}>
                                 <button type="button" {{ stimulus_action('Toolkit--copy', 'toggle', 'click') }}
                                         class="text-xs font-medium text-grey-darker hover:text-black underline underline-offset-2 transition-colors">
-                                    <span {{ stimulus_target('Toolkit--copy', 'toggleLabel') }}>Voir le code</span>
+                                    <span {{ stimulus_target('Toolkit--copy', 'toggleLabel') }}>Show the code</span>
                                 </button>
 
                                 <div {{ stimulus_target('Toolkit--copy', 'panel') }} hidden class="relative mt-3">
                                     <button type="button" {{ stimulus_action('Toolkit--copy', 'copy', 'click') }}
                                             class="absolute top-3 right-3 text-xs font-medium px-3 py-1.5 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors">
-                                        <span {{ stimulus_target('Toolkit--copy', 'copyLabel') }}>Copier</span>
+                                        <span {{ stimulus_target('Toolkit--copy', 'copyLabel') }}>Copy</span>
                                     </button>
                                     <pre class="overflow-x-auto rounded-2xl bg-black text-grey-lightest text-sm font-mono p-4 lg:p-6 pr-24"><code class="text-grey-lightest" {{ stimulus_target('Toolkit--copy', 'source') }}>{{ source }}</code></pre>
                                 </div>
@@ -68,8 +68,8 @@
             {{ stimulus_target('Toolkit--preview', 'frame') }}
             class="mx-auto block ring-1 ring-grey-lighter rounded-2xl bg-white"
             style="height: calc(100vh - 6rem);"
-            title="Aperçu responsive"
-        />
+            title="Responsive preview"
+        ></iframe>
 
     </main>
 

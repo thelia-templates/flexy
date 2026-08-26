@@ -79,6 +79,9 @@ class ToolkitController extends AbstractController
         return $response;
     }
 
+    /**
+     * @return array<string, list<array{twigPath: string, path: string, name: string, slug: string}>>
+     */
     private function getGroupedComponents(): array
     {
         $finder = (new Finder())
@@ -118,6 +121,12 @@ class ToolkitController extends AbstractController
      * Flattens the grouped components into a slug-indexed map and adds the two
      * hardcoded design-token pages, so every page (component or not) resolves
      * the same way.
+     *
+     * A token page carries neither `path` nor `slug`: it is not read from disk.
+     *
+     * @param array<string, list<array{twigPath: string, path: string, name: string, slug: string}>> $grouped
+     *
+     * @return array<string, array{name: string, category: string|null, twigPath: string, path?: string, slug?: string}>
      */
     private function buildPages(array $grouped): array
     {
