@@ -6,7 +6,8 @@
     iconColor = null,
     color = null,
     close = false,
-    selected = false
+    selected = false,
+    count = null
 %}
 
 {# A product color filter always renders as a circle tinted with `color` #}
@@ -44,6 +45,10 @@
     {% endif %}
 
     <span class="FilterPill-label">{{ label }}</span>
+
+    {% if count is not null %}
+        <span class="FilterPill-count">{{ count }}</span>
+    {% endif %}
 
     {% if close %}
         <span class="FilterPill-iconClose">

@@ -138,6 +138,7 @@
                             <li>
                                 {{ component('Molecules:FilterPill:Base', {
                                     label: choice.label|trans,
+                                    count: choice.attr['data-count']|default(null),
                                     close: true,
                                     color: attr.colors[choice.value]|default(null),
                                     'input:name': full_name,

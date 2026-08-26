@@ -30,7 +30,7 @@ use Symfony\Component\Form\FormBuilderInterface;
  * Turns a product filter coming from /api/front/tfilters/* into a form field.
  * The five field types handled here are the ones Thelia core can emit.
  *
- * @phpstan-type FilterValue array{id?: int|string, title?: int|string}
+ * @phpstan-type FilterValue array{id?: int|string, title?: int|string, count?: int|null}
  * @phpstan-type Filter array{type: string, title: string, fieldType?: string, id?: int|string, values?: list<FilterValue>}
  */
 final readonly class FormService
@@ -93,9 +93,14 @@ final readonly class FormService
     private function renderCheckbox(array $filter, FormBuilderInterface $fieldset, array $tfilters): void
     {
         $values = [];
+        $counts = [];
 
         foreach ($filter['values'] as $value) {
             $values[$value['title'] ?? ''] = $value['id'];
+
+            if (isset($value['count'])) {
+                $counts[(string) $value['id']] = (int) $value['count'];
+            }
         }
 
         $fieldName = self::fieldName($filter);
@@ -106,6 +111,8 @@ final readonly class FormService
             [
                 'label' => $filter['title'],
                 'choices' => $values,
+                // The widget reads the count back from the choice attributes.
+                'choice_attr' => static fn (mixed $choice): array => isset($counts[(string) $choice]) ? ['data-count' => $counts[(string) $choice]] : [],
                 'data' => self::currentValues($tfilters, $filter['type'])[$fieldName] ?? [],
                 'multiple' => true,
                 'required' => false,

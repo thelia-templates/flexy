@@ -52,6 +52,13 @@
   @apply paragraph-4;
 }
 
+/* How many products the value keeps: quieter than the label, never wraps away from it */
+.FilterPill-count {
+  @apply paragraph-4;
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
 .FilterPill input {
   @apply sr-only;
 }
