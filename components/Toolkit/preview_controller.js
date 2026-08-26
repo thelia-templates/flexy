@@ -11,6 +11,12 @@ export default class extends Controller {
     // is kept in sessionStorage and re-applied here, otherwise it would reset
     // to "Responsive" every time the sidebar navigates to another page.
     connect() {
+        // The select lives in the sidebar, which `embed=1` leaves out: inside the preview
+        // iframe there is no target to restore, and asking for it would throw.
+        if (!this.hasSelectTarget) {
+            return;
+        }
+
         const width = sessionStorage.getItem(STORAGE_KEY);
 
         if (width) {
