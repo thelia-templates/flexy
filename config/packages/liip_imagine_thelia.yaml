@@ -2,12 +2,20 @@
 liip_imagine:
   # valid drivers options include "gd" or "gmagick" or "imagick"
   driver: 'gd'
-  # No global `format` conversion: it would rewrite the base image too, and the base
-  # image is the fallback served to clients that do not accept WebP — they would get
-  # WebP bytes under the source extension and render nothing. `webp.generate` already
-  # serves a WebP variant through Accept negotiation, with the original left intact.
+  # WebP negotiation is off on purpose. With `webp.generate` enabled, CacheManager's
+  # getBrowserPath() short-circuits its isStored() check and emits a
+  # /media/cache/resolve/... URL for EVERY image, forever — the Accept negotiation
+  # happens in the resolve controller, per request. Each resolve is a full framework
+  # boot answered with a redirect the browser is forbidden to cache
+  # (Cache-Control: private, max-age=0), so a listing page re-pays dozens of PHP
+  # boots on every view. Off, an image resolves to its direct /media/cache/... URL
+  # once generated and the web server serves it with long-lived caching. The WebP
+  # saving was small at these sizes (thumbnails, quality 80-82); if it is ever
+  # wanted back, serve the variant through <picture><source type="image/webp">
+  # with direct URLs instead of per-request negotiation. No global `format`
+  # conversion either: it would rewrite the base image too.
   webp:
-    generate: true
+    generate: false
   loaders:
     default:
       filesystem:
