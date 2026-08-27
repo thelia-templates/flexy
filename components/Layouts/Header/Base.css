@@ -1,7 +1,12 @@
 @layer components {
   :root {
     --header-height: 3rem; /* 48px */
-    --header-nav-height: 3.875rem; /* 62px */
+    --header-nav-bar-height: 3.875rem; /* 62px */
+    /* The mobile bar is fixed to the bottom of the screen, where a notched phone reserves a
+       strip for its home indicator. Everything that clears the bar — the footer's margin, the
+       fullscreen panels' bottom — has to clear that strip too, so the inset is folded into the
+       height rather than added to the bar alone. Zero on every device without one. */
+    --header-nav-height: calc(var(--header-nav-bar-height) + env(safe-area-inset-bottom, 0px));
 
     --padding-button-sub: 1.375rem; /* 22px */
     --padding-top-menu: 5.125rem; /* 82px */

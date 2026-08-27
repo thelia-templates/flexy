@@ -8,12 +8,18 @@
   vertical-align: middle;
   width: 100%;
   height: var(--header-nav-height);
+  /* Keeps the buttons on the bar's own 62px and leaves the home-indicator strip as inert
+     background: with border-box the padding comes off the total, not on top of it. */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background-color: var(--color-white);
   border-top: 1px solid var(--color-grey);
 
   @variant md {
     position: static;
     width: auto;
     height: auto;
+    padding-bottom: 0;
+    background-color: transparent;
     border-top: 0;
   }
 }
