@@ -1,16 +1,16 @@
-<div class="grid gap-8">
-    <div class="flex flex-col gap-2">
-        <h4>base</h4>
-        <div class="flex flex-col gap-1 max-w-xs">
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">base</h4>
+        <div class="Story-col Story-col--slim">
             <twig:Molecules:FilterList:Base type="radio" label="Price: low to high" input:name="filter_list_demo" />
             <twig:Molecules:FilterList:Base type="radio" label="Price: high to low" input:name="filter_list_demo" />
             <twig:Molecules:FilterList:Base type="radio" label="New arrivals" input:name="filter_list_demo" />
         </div>
     </div>
 
-    <div class="flex flex-col gap-2">
-        <h4>native states (label + input)</h4>
-        <div class="flex flex-col gap-1 max-w-xs">
+    <div class="Story-section">
+        <h4 class="Story-title">native states (label + input)</h4>
+        <div class="Story-col Story-col--slim">
             <twig:Molecules:FilterList:Base label="checked" input:name="filter_list_state" input:checked />
             <twig:Molecules:FilterList:Base label="unchecked" input:name="filter_list_state_off" />
         </div>

@@ -1,38 +1,38 @@
-<div class="grid gap-12">
+<div class="Story">
 
     {# ── Title Only ──────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Title Only</h4>
-        <div class="grid gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">Title Only</h4>
+        <div class="Story-col">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">default (container-l)</span>
+            <div class="Story-col">
+                <span class="Story-label">default (container-l)</span>
                 <twig:Layouts:Subheader:Base title="Nom de la page" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">container-m</span>
+            <div class="Story-col">
+                <span class="Story-label">container-m</span>
                 <twig:Layouts:Subheader:Base title="Nom de la page" container="medium" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">container-s</span>
+            <div class="Story-col">
+                <span class="Story-label">container-s</span>
                 <twig:Layouts:Subheader:Base title="Nom de la page" container="small" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">container-single-3 — single-column text page (e.g. FAQ), aligns with the body below it</span>
+            <div class="Story-col">
+                <span class="Story-label">container-single-3 — single-column text page (e.g. FAQ), aligns with the body below it</span>
                 <twig:Layouts:Subheader:Base title="Nom de la page" container="single-3" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">centered</span>
+            <div class="Story-col">
+                <span class="Story-label">centered</span>
                 <twig:Layouts:Subheader:Base title="Nom de la page" :centered="true" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with breadcrumb</span>
+            <div class="Story-col">
+                <span class="Story-label">with breadcrumb</span>
                 <twig:Layouts:Subheader:Base title="Nom de la page" :breadcrumb="[{title: 'Page name'}]" />
             </div>
 
@@ -41,27 +41,27 @@
 
     {# ── Content Page ────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Content Page</h4>
-        <div class="grid gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">Content Page</h4>
+        <div class="Story-col">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with description</span>
+            <div class="Story-col">
+                <span class="Story-label">with description</span>
                 <twig:Layouts:Subheader:Item title="Nom du contenu" description="<p>Chapo du contenu, potentiellement en HTML.</p>" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">without description</span>
+            <div class="Story-col">
+                <span class="Story-label">without description</span>
                 <twig:Layouts:Subheader:Item title="Nom du contenu" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with breadcrumb</span>
+            <div class="Story-col">
+                <span class="Story-label">with breadcrumb</span>
                 <twig:Layouts:Subheader:Item title="Nom du contenu" :breadcrumb="[{title: 'Content name'}]" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with image (itemType/itemId): fetches a real illustration via getImages() — depends on real database data, no preview in the toolkit</span>
+            <div class="Story-col">
+                <span class="Story-label">with image (itemType/itemId): fetches a real illustration via getImages() — depends on real database data, no preview in the toolkit</span>
                 <twig:Layouts:Subheader:Item title="Nom du contenu" />
             </div>
 

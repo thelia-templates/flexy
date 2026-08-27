@@ -1,26 +1,20 @@
-<section id="breakpoints">
-    <h2 class="text-2xl font-bold mb-8 pb-3 border-b border-grey-lighter">Breakpoints</h2>
-
-    <div class="bg-white rounded-2xl border border-grey-lighter overflow-hidden">
-        <table class="w-full text-sm text-left">
-            <thead class="bg-grey-lightest text-grey uppercase text-xs">
-                <tr>
-                    <th class="px-6 py-3">Name</th>
-                    <th class="px-6 py-3">rem</th>
-                    <th class="px-6 py-3">px</th>
-                    <th class="px-6 py-3">Category</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-grey-lightest">
-                {% for breakpoint in breakpoints %}
-                    <tr>
-                        <td class="px-6 py-3 font-mono font-semibold">{{ breakpoint.name }}</td>
-                        <td class="px-6 py-3 font-mono">{{ breakpoint.rem }}rem</td>
-                        <td class="px-6 py-3 font-mono">{{ breakpoint.px }}px</td>
-                        <td class="px-6 py-3">{{ breakpoint.label ?? '—' }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</section>
+<table class="Breakpoints">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>rem</th>
+            <th>px</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for breakpoint in breakpoints %}
+            <tr>
+                <td class="Breakpoints-name">{{ breakpoint.name }}</td>
+                <td class="Breakpoints-num">{{ breakpoint.rem }}rem</td>
+                <td class="Breakpoints-num">{{ breakpoint.px }}px</td>
+                <td>{{ breakpoint.label ?? '—' }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -10,9 +10,9 @@
     {url: '/men/shirts', title: 'Shirts'}
 ] %}
 
-<div class="grid gap-8">
-    <div class="grid gap-4">
-        <h4>Base</h4>
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">Base</h4>
 
         {# .Breadcrumb is position:absolute (it overlays the Subheader in real use), so each example
            needs its own relative box with reserved height, otherwise they overlap. #}
@@ -22,9 +22,9 @@
         ] %}
 
         {% for example in examples %}
-            <div class="grid gap-2">
-                <span class="text-xs text-grey">{{ example.label }}</span>
-                <div class="relative min-h-20 rounded-md border border-grey-lighter">
+            <div class="Story-col">
+                <span class="Story-label">{{ example.label }}</span>
+                <div class="Story-canvas Story-anchor Story-reserve">
                     <twig:Molecules:Breadcrumb:Base :items="example.items" />
                 </div>
             </div>

@@ -1,12 +1,14 @@
-<div class="grid gap-4">
-    <h4>Base (requires an authenticated front session)</h4>
+<div class="Story">
+<div class="Story-section">
+    <h4 class="Story-title">Base (requires an authenticated front session)</h4>
     {% if getCurrentCustomer() %}
-        <div class="flex h-20 items-stretch bg-grey-lighter">
+        <div class="Story-bar Story-bar--stretch">
             <twig:Organisms:HeaderProfile:Base />
         </div>
     {% else %}
-        <span class="text-xs text-grey">
+        <span class="Story-label">
             Log in on the front office to preview this component — it reads the current customer via <code>getCurrentCustomer()</code>.
         </span>
     {% endif %}
+</div>
 </div>

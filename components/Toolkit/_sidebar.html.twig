@@ -1,66 +1,80 @@
-{# Sidebar #}
-<aside class="w-64 shrink-0 top-0 h-screen bg-white border-r border-medium fixed flex flex-col">
-    <div class="shrink-0 bg-medium p-6">
-        <p class="text-xs font-semibold uppercase tracking-widest text-grey mb-1">Toolkit</p>
-        <h1 class="Toolkit-logo mb-4">
-            <img src="{{ asset('images/logo.png') }}" alt="Flexy design system">
+{# One shape, so sections and components cannot drift apart. #}
+{% macro navLink(slug, name, status, currentSlug) %}
+    <li>
+        <a href="{{ path('toolkit_show', {slug: slug}) }}"
+           class="Toolkit-navLink"
+           {% if currentSlug == slug %}aria-current="page"{% endif %}
+        >
+            {{ name }}
+            {% if status %}
+                <span class="Toolkit-statusMark Toolkit-statusMark--{{ status }}" aria-hidden="true">
+                    {{ ux_icon(status == 'ready' ? 'checkmark' : 'clock') }}
+                </span>
+                <span class="sr-only">{{ status }}</span>
+            {% endif %}
+        </a>
+    </li>
+{% endmacro %}
+
+<aside class="Toolkit-aside">
+    <div class="Toolkit-asideHeader">
+        <p class="Toolkit-asideTitle">Toolkit</p>
+        <h1 class="Toolkit-brand">
+            <img class="Toolkit-logo" src="{{ asset('images/logo.png') }}" alt="Flexy design system">
         </h1>
 
-        <select {{ stimulus_target('Toolkit--preview', 'select') }} {{ stimulus_action('Toolkit--preview', 'setWidth', 'change') }}
-                class="w-full text-xs border border-base rounded-lg px-3 py-1 bg-white outline-dark">
-            <option value="">Responsive</option>
-            {% for bp in breakpoints %}
-                {% if bp.label %}
-                    <option value="{{ bp.px }}">{{ bp.label }} ({{ bp.px }}px)</option>
-                {% endif %}
-            {% endfor %}
-        </select>
+        <span class="Toolkit-selectWrap">
+            <select class="Toolkit-select"
+                    {{ stimulus_target('Toolkit--preview', 'select') }}
+                    {{ stimulus_action('Toolkit--preview', 'setWidth', 'change') }}>
+                <option value="">Responsive</option>
+                {% for bp in breakpoints %}
+                    {% if bp.label %}
+                        <option value="{{ bp.px }}">{{ bp.label }} ({{ bp.px }}px)</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            <span class="Toolkit-selectIcon" aria-hidden="true">{{ ux_icon('chevron-down') }}</span>
+        </span>
     </div>
 
-    <nav class="flex-1 overflow-y-auto space-y-6 p-6">
-        {# The pages that are not components, grouped as the controller declares them. #}
+    <nav class="Toolkit-nav">
         {% for group, items in sections %}
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-widest text-base mb-2">{{ group }}</p>
-                <ul class="space-y-1">
+            <div class="Toolkit-navGroup">
+                <p class="Toolkit-navGroupTitle">{{ group }}</p>
+                <ul class="Toolkit-navList">
                     {% for slug, item in items %}
-                        <li>
-                            <a href="{{ path('toolkit_show', {slug: slug}) }}"
-                               class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors {{ currentSlug == slug ? 'bg-grey-lightest text-black font-medium' : 'text-grey-darker hover:bg-grey-lightest hover:text-black' }}">
-                                {{ item.name }}
-                                {% if item.status %}
-                                    <span class="Toolkit-statusMark Toolkit-statusMark--{{ item.status }}" aria-hidden="true">
-                                        {{ ux_icon(item.status == 'ready' ? 'checkmark' : 'clock') }}
-                                    </span>
-                                    <span class="sr-only">{{ item.status }}</span>
-                                {% endif %}
-                            </a>
-                        </li>
+                        {{ _self.navLink(slug, item.name, item.status, currentSlug) }}
                     {% endfor %}
                 </ul>
             </div>
         {% endfor %}
 
         {% for category, components in grouped %}
-            <div class="mb-6">
-                <p class="text-xs font-semibold uppercase tracking-widest text-base mb-2">{{ category }}</p>
-                <ul class="space-y-1">
+            <div class="Toolkit-navGroup">
+                <p class="Toolkit-navGroupTitle">{{ category }}</p>
+                <ul class="Toolkit-navList">
                     {% for component in components %}
-                        <li>
-                            <a href="{{ path('toolkit_show', {slug: component.slug}) }}"
-                               class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors {{ currentSlug == component.slug ? 'bg-grey-lightest text-black font-medium' : 'text-grey-darker hover:bg-grey-lightest hover:text-black' }}">
-                                {{ component.name }}
-                                {% if component.status %}
-                                    <span class="Toolkit-statusMark Toolkit-statusMark--{{ component.status }}" aria-hidden="true">
-                                        {{ ux_icon(component.status == 'ready' ? 'checkmark' : 'clock') }}
-                                    </span>
-                                    <span class="sr-only">{{ component.status }}</span>
-                                {% endif %}
-                            </a>
-                        </li>
+                        {{ _self.navLink(component.slug, component.name, component.status, currentSlug) }}
                     {% endfor %}
                 </ul>
             </div>
         {% endfor %}
     </nav>
 </aside>
+
+{# Inline and before the first paint, or the list is seen jumping — a lazy controller fires too
+   late, an eager one would ship on every shop page.
+
+   scrollTop by hand: scrollIntoView({block: 'center'}) centers in *every* scrolling ancestor,
+   so the document would scroll to no effect, carrying the main column with it. #}
+<script>
+    (() => {
+        const nav = document.querySelector('.Toolkit-nav');
+        const current = nav?.querySelector('.Toolkit-navLink[aria-current="page"]');
+
+        if (current) {
+            nav.scrollTop = current.offsetTop - nav.offsetTop - (nav.clientHeight - current.offsetHeight) / 2;
+        }
+    })();
+</script>

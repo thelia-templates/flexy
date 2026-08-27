@@ -9,62 +9,72 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('styles/app.css') }}" blocking="render">
-    {# Chrome of the tool, kept out of app.css so no shop page ever loads it. #}
     <link rel="stylesheet" href="{{ asset('styles/toolkit.css') }}" blocking="render">
     {{ importmap('app') }}
-    <style>
-        html {
-            scrollbar-gutter: stable;
-        }
-    </style>
 </head>
-<body class="flex min-h-screen bg-lightest text-black" {{ stimulus_controller('Toolkit--preview', {}, {previewing: 'bg-black'}) }}>
+<body {{ stimulus_controller('Toolkit--preview', {}, {previewing: 'Toolkit-main--previewing'}) }}>
 
     {% if not embed %}
+        {# CSS alone: reaching another story reopens the panel anyway, so there is no state
+           worth carrying across a load. #}
+        <input type="checkbox" id="toolkitSidebar" class="Toolkit-sidebarState">
+        <label for="toolkitSidebar" class="Toolkit-sidebarToggle" title="Show or hide the navigation">
+            <span class="Toolkit-sidebarToggleIcon">{{ ux_icon('chevron-down') }}</span>
+        </label>
+
         {% include '@Flexy/Toolkit/_sidebar.html.twig' %}
     {% endif %}
 
-    {# Main content #}
     <main {{ stimulus_target('Toolkit--preview', 'main') }}
-          class="flex-1 py-10 px-2.5 md:px-5 lg:px-10 overflow-y-auto transition-colors{{ embed ? '' : ' ml-64' }}">
+          class="Toolkit-main{{ embed ? '' : ' Toolkit-main--offset' }}">
 
         <div {{ stimulus_target('Toolkit--preview', 'content') }}>
             {% if page.standalone|default(false) %}
                 {% include page.twigPath %}
             {% else %}
+                {% set heading = page.category ?? page.group|default(null) %}
+
                 <section>
-                    {% if page.category %}
-                        <h2 class="text-2xl font-bold mb-8 pb-3 border-b text-base border-grey-lighter">{{ page.category }}</h2>
+                    {% if heading %}
+                        <h2 class="Toolkit-sectionTitle">{{ heading }}</h2>
                     {% endif %}
 
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-3">
-                            <h3 class="text-lg font-semibold text-grey-darker">{{ page.name }}</h3>
-                            {% if page.status %}
-                                <span class="Toolkit-statusBadge Toolkit-statusBadge--{{ page.status }}">{{ page.status }}</span>
+                    <div {% if source %}{{ stimulus_controller('Toolkit--copy') }}{% endif %}>
+                        <div class="Toolkit-storyHeader">
+                            <h3 class="Toolkit-componentTitle">
+                                {{ page.name }}
+                                {% if page.status %}
+                                    <span class="Toolkit-statusBadge Toolkit-statusBadge--{{ page.status }}">{{ page.status }}</span>
+                                {% endif %}
+                            </h3>
+
+                            {% if source %}
+                                <button
+                                    type="button"
+                                    class="Toolkit-codeToggle"
+                                    aria-expanded="false"
+                                    aria-controls="story-source"
+                                    {{ stimulus_target('Toolkit--copy', 'toggleButton') }}
+                                    {{ stimulus_action('Toolkit--copy', 'toggle', 'click') }}
+                                >
+                                    <span {{ stimulus_target('Toolkit--copy', 'toggleLabel') }}>Show the code</span>
+                                    <span class="Toolkit-codeToggleIcon" aria-hidden="true">{{ ux_icon('chevron-down') }}</span>
+                                </button>
                             {% endif %}
                         </div>
 
                         {% if source %}
-                            <div {{ stimulus_controller('Toolkit--copy') }}>
-                                <button type="button" {{ stimulus_action('Toolkit--copy', 'toggle', 'click') }}
-                                        class="text-xs font-medium text-grey-darker hover:text-black underline underline-offset-2 transition-colors">
-                                    <span {{ stimulus_target('Toolkit--copy', 'toggleLabel') }}>Show the code</span>
+                            <div id="story-source" class="Toolkit-codePanel" {{ stimulus_target('Toolkit--copy', 'panel') }} hidden>
+                                <button type="button" class="Toolkit-codeCopy" {{ stimulus_action('Toolkit--copy', 'copy', 'click') }}>
+                                    <span {{ stimulus_target('Toolkit--copy', 'copyLabel') }}>Copy</span>
                                 </button>
-
-                                <div {{ stimulus_target('Toolkit--copy', 'panel') }} hidden class="relative mt-3">
-                                    <button type="button" {{ stimulus_action('Toolkit--copy', 'copy', 'click') }}
-                                            class="absolute top-3 right-3 text-xs font-medium px-3 py-1.5 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors">
-                                        <span {{ stimulus_target('Toolkit--copy', 'copyLabel') }}>Copy</span>
-                                    </button>
-                                    <pre class="overflow-x-auto rounded-2xl bg-black text-grey-lightest text-sm font-mono p-4 lg:p-6 pr-24"><code class="text-grey-lightest" {{ stimulus_target('Toolkit--copy', 'source') }}>{{ source }}</code></pre>
-                                </div>
+                                <pre class="Toolkit-code"><code {{ stimulus_target('Toolkit--copy', 'source') }}>{{ source }}</code></pre>
                             </div>
                         {% endif %}
+                    </div>
 
-                        <div class="bg-white rounded-2xl border border-grey-lighter p-4 lg:p-8">
-                            {% include page.twigPath ignore missing %}
-                        </div>
+                    <div class="Toolkit-canvas">
+                        {% include page.twigPath ignore missing %}
                     </div>
                 </section>
             {% endif %}
@@ -73,8 +83,7 @@
         <iframe
             hidden
             {{ stimulus_target('Toolkit--preview', 'frame') }}
-            class="mx-auto block ring-1 ring-grey-lighter rounded-2xl bg-white"
-            style="height: calc(100vh - 6rem);"
+            class="Toolkit-frame"
             title="Responsive preview"
         ></iframe>
 

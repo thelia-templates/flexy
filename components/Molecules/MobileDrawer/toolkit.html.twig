@@ -1,9 +1,9 @@
-<div class="grid gap-12">
+<div class="Story">
 
-    <div class="grid gap-4">
-        <h4>Base (mobile-only: becomes static inline content from md upward)</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">Base (mobile-only: becomes static inline content from md upward)</h4>
         <div
-            class="relative flex flex-col items-center gap-4 p-8"
+            class="Story-col Story-col--loose Story-col--centered Story-stage Story-stage--roomy Story-anchor"
             {{ stimulus_controller('Molecules--MobileDrawer--base') }}
         >
             <twig:Molecules:Button:Base

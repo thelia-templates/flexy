@@ -1,48 +1,48 @@
-<div class="grid gap-12">
+<div class="Story">
 
     {# ── Base ───────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Base</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-md">
+    <div class="Story-section">
+        <h4 class="Story-title">Base</h4>
+        <div class="Story-grid Story-grid--2">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">default</span>
+            <div class="Story-col">
+                <span class="Story-label">default</span>
                 <twig:Fields:Input:Base name="text-base" label="Text field" placeholder="Your text..." />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">required</span>
+            <div class="Story-col">
+                <span class="Story-label">required</span>
                 <twig:Fields:Input:Base name="text-required" label="Required field" placeholder="Your text..." :required="true" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">optional</span>
+            <div class="Story-col">
+                <span class="Story-label">optional</span>
                 <twig:Fields:Input:Base name="text-optional" label="Optional field" placeholder="Your text..." :optional="true" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">disabled</span>
+            <div class="Story-col">
+                <span class="Story-label">disabled</span>
                 <twig:Fields:Input:Base name="text-disabled" label="Disabled" placeholder="Your text..." :disabled="true" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">error</span>
+            <div class="Story-col">
+                <span class="Story-label">error</span>
                 <twig:Fields:Input:Base name="text-error" label="With error" value="invalid value" error="This field is required" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">success</span>
+            <div class="Story-col">
+                <span class="Story-label">success</span>
                 <twig:Fields:Input:Base name="text-success" label="With success" value="Valid value" :success="true" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with unit</span>
+            <div class="Story-col">
+                <span class="Story-label">with unit</span>
                 <twig:Fields:Input:Base name="text-unit" label="Amount" placeholder="0" unit="€" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with help (tooltip)</span>
+            <div class="Story-col">
+                <span class="Story-label">with help (tooltip)</span>
                 <twig:Fields:Input:Base name="text-help" label="With help" placeholder="Your text..." help="This field is used for billing purposes only." />
             </div>
 
@@ -51,17 +51,17 @@
 
     {# ── Types ───────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Types</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">Types</h4>
+        <div class="Story-grid Story-grid--2">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">email</span>
+            <div class="Story-col">
+                <span class="Story-label">email</span>
                 <twig:Fields:Input:Base type="email" name="email" label="Email" placeholder="example@domain.com" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">number + unit</span>
+            <div class="Story-col">
+                <span class="Story-label">number + unit</span>
                 <twig:Fields:Input:Base type="number" name="quantity" label="Quantity" placeholder="1" unit="pcs" />
             </div>
 
@@ -70,22 +70,22 @@
 
     {# ── Small ───────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Small</h4>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">Small</h4>
+        <div class="Story-grid Story-grid--3">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">default</span>
+            <div class="Story-col">
+                <span class="Story-label">default</span>
                 <twig:Fields:Input:Base name="small-base" label="Small" placeholder="Your text..." size="small" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with help</span>
+            <div class="Story-col">
+                <span class="Story-label">with help</span>
                 <twig:Fields:Input:Base name="small-help" label="Small with help" placeholder="Your text..." size="small" help="Reduced size for compact forms." />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">error</span>
+            <div class="Story-col">
+                <span class="Story-label">error</span>
                 <twig:Fields:Input:Base name="small-error" label="Small with error" size="small" value="invalid" error="Incorrect value" />
             </div>
 
@@ -94,22 +94,22 @@
 
     {# ── Password ────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Password</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">Password</h4>
+        <div class="Story-grid Story-grid--2">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">simple</span>
+            <div class="Story-col">
+                <span class="Story-label">simple</span>
                 <twig:Fields:Input:Password name="password-simple" label="Password" placeholder="########" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with help</span>
+            <div class="Story-col">
+                <span class="Story-label">with help</span>
                 <twig:Fields:Input:Password name="password-help" label="Password" placeholder="########" help="Use a password manager." />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with strength criteria</span>
+            <div class="Story-col">
+                <span class="Story-label">with strength criteria</span>
                 <twig:Fields:Input:Password name="password-criteria" label="New password" placeholder="########" :showCriteria="true" />
             </div>
 

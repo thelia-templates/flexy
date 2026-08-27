@@ -7,20 +7,20 @@
     {id: 4, pseIds: [], isProductImg: true},
 ] %}
 
-<div class="grid gap-12">
+<div class="Story">
 
-    <div class="grid gap-4">
-        <h4>Base</h4>
-        <span class="text-xs text-grey">
+    <div class="Story-section">
+        <h4 class="Story-title">Base</h4>
+        <span class="Story-label">
             Rendered outside a LiveComponent here, so selecting a visual does not send the PSE
             change round-trip — the rail, the active border and the slider behave as on the page.
         </span>
         <twig:Organisms:ProductGallery:Base :images="images" :currentPseId="2" />
     </div>
 
-    <div class="grid gap-4">
-        <h4>With tags</h4>
-        <span class="text-xs text-grey">
+    <div class="Story-section">
+        <h4 class="Story-title">With tags</h4>
+        <span class="Story-label">
             Overlaid on the current visual. On a page they come from the selected product sale
             element, so they change with the variant.
         </span>
@@ -31,9 +31,9 @@
         />
     </div>
 
-    <div class="grid gap-4">
-        <h4>Single visual</h4>
-        <span class="text-xs text-grey">Splide is destroyed and the arrows are not rendered.</span>
+    <div class="Story-section">
+        <h4 class="Story-title">Single visual</h4>
+        <span class="Story-label">Splide is destroyed and the arrows are not rendered.</span>
         <twig:Organisms:ProductGallery:Base :images="[images|first]" />
     </div>
 

@@ -1,76 +1,130 @@
+{# This story writes its utilities out in full, so the whole scale is compiled whether or not
+   a page uses it yet. Accepted trade: the scale is a closed set a project consumes in full,
+   and a specimen not carrying the real class would not show the real thing. Colors are the
+   opposite case, and say so. #}
+<div class="Story">
+
 {# ── Headings ─────────────────────────────────────────────────────── #}
-<section class="grid gap-4 mb-12">
-	<h4>Headings</h4>
-	<p class="h1">H1 — Portez ce vieux whisky au juge blond qui fume.</p>
-	<p class="h2">H2 — Portez ce vieux whisky au juge blond qui fume.</p>
-	<p class="h3">H3 — Portez ce vieux whisky au juge blond qui fume.</p>
-	<p class="h4">H4 — Portez ce vieux whisky au juge blond qui fume.</p>
-	<p class="h5">H5 — Portez ce vieux whisky au juge blond qui fume.</p>
-	<p class="h6">H6 — Portez ce vieux whisky au juge blond qui fume.</p>
-</section>
+<div class="Story-section">
+	<div class="Story-heading">
+		<h4 class="Story-title">Headings</h4>
+		<p class="Story-note">Written as a class, never as a bare element: the scale lives in @utility, so an &lt;h1&gt; alone carries no style.</p>
+	</div>
+	<div class="Story-typeRow">
+		<span class="Story-label">h1</span>
+		<p class="h1">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="h1"</span>
+	</div>
+	<div class="Story-typeRow">
+		<span class="Story-label">h2</span>
+		<p class="h2">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="h2"</span>
+	</div>
+	<div class="Story-typeRow">
+		<span class="Story-label">h3</span>
+		<p class="h3">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="h3"</span>
+	</div>
+	<div class="Story-typeRow">
+		<span class="Story-label">h4</span>
+		<p class="h4">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="h4"</span>
+	</div>
+	<div class="Story-typeRow">
+		<span class="Story-label">h5</span>
+		<p class="h5">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="h5"</span>
+	</div>
+	<div class="Story-typeRow">
+		<span class="Story-label">h6</span>
+		<p class="h6">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="h6"</span>
+	</div>
+</div>
 
-{# ── Paragraphes ─────────────────────────────────────────────────── #}
-<section class="grid gap-4 mb-12">
-	<h4>Paragraphes</h4>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">paragraph-1</span>
-		<p class="paragraph-1">Portez ce vieux whisky au juge blond qui fume.</p>
+{# ── Paragraphs ──────────────────────────────────────────────────── #}
+<div class="Story-section">
+	<div class="Story-heading">
+		<h4 class="Story-title">Paragraphs</h4>
+		<p class="Story-note">Seven steps, from the lead paragraph down to the fine print.</p>
 	</div>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">paragraph-2</span>
-		<p class="paragraph-2">Portez ce vieux whisky au juge blond qui fume.</p>
+	<div class="Story-typeRow">
+		<span class="Story-label">paragraph-1</span>
+		<p class="paragraph-1">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="paragraph-1"</span>
 	</div>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">paragraph-3</span>
-		<p class="paragraph-3">Portez ce vieux whisky au juge blond qui fume.</p>
+	<div class="Story-typeRow">
+		<span class="Story-label">paragraph-2</span>
+		<p class="paragraph-2">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="paragraph-2"</span>
 	</div>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">paragraph-4</span>
-		<p class="paragraph-4">Portez ce vieux whisky au juge blond qui fume.</p>
+	<div class="Story-typeRow">
+		<span class="Story-label">paragraph-3</span>
+		<p class="paragraph-3">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="paragraph-3"</span>
 	</div>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">paragraph-5</span>
-		<p class="paragraph-5">Portez ce vieux whisky au juge blond qui fume.</p>
+	<div class="Story-typeRow">
+		<span class="Story-label">paragraph-4</span>
+		<p class="paragraph-4">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="paragraph-4"</span>
 	</div>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">paragraph-6</span>
-		<p class="paragraph-6">Portez ce vieux whisky au juge blond qui fume.</p>
+	<div class="Story-typeRow">
+		<span class="Story-label">paragraph-5</span>
+		<p class="paragraph-5">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="paragraph-5"</span>
 	</div>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">paragraph-7</span>
-		<p class="paragraph-7">Portez ce vieux whisky au juge blond qui fume.</p>
+	<div class="Story-typeRow">
+		<span class="Story-label">paragraph-6</span>
+		<p class="paragraph-6">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="paragraph-6"</span>
 	</div>
-</section>
+	<div class="Story-typeRow">
+		<span class="Story-label">paragraph-7</span>
+		<p class="paragraph-7">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="paragraph-7"</span>
+	</div>
+</div>
 
-{# ── Divers ──────────────────────────────────────────────────────── #}
-<section class="grid gap-4 mb-12">
-	<h4>Divers</h4>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">indication</span>
-		<span class="indication">Portez ce vieux whisky au juge blond qui fume.</span>
+{# ── Interface ───────────────────────────────────────────────────── #}
+<div class="Story-section">
+	<div class="Story-heading">
+		<h4 class="Story-title">Interface</h4>
+		<p class="Story-note">The type of the controls themselves, usually reached through a component's own variant rather than by carrying the class.</p>
 	</div>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">indication-small</span>
-		<span class="indication indication-small">Portez ce vieux whisky au juge blond qui fume.</span>
+	<div class="Story-typeRow">
+		<span class="Story-label">button-l</span>
+		<p class="button-l">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="button-l"</span>
 	</div>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">button-l</span>
-		<span class="button-l">Portez ce vieux whisky au juge blond qui fume.</span>
+	<div class="Story-typeRow">
+		<span class="Story-label">button-m</span>
+		<p class="button-m">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="button-m"</span>
 	</div>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">button-m</span>
-		<span class="button-m">Portez ce vieux whisky au juge blond qui fume.</span>
+	<div class="Story-typeRow">
+		<span class="Story-label">button-s</span>
+		<p class="button-s">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="button-s"</span>
 	</div>
-	<div class="flex items-baseline gap-4">
-		<span class="text-xs text-grey w-28 shrink-0">button-s</span>
-		<span class="button-s">Portez ce vieux whisky au juge blond qui fume.</span>
+	<div class="Story-typeRow">
+		<span class="Story-label">indication</span>
+		<p class="indication">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="indication"</span>
 	</div>
-</section>
+	<div class="Story-typeRow">
+		<span class="Story-label">indication-small</span>
+		<p class="indication indication-small">The quick brown fox jumps over the lazy dog</p>
+		<span class="Story-use">class="indication indication-small"</span>
+	</div>
+</div>
 
 {# ── Wysiwyg ─────────────────────────────────────────────────────── #}
-<section>
+<div class="Story-section">
 
-	<h2>Wysiwyg</h2>
+	<div class="Story-heading">
+		<h4 class="Story-title">Wysiwyg</h4>
+		<p class="Story-note">What a rich-text field renders, from the wysiwyg utilities rather than the classes above.</p>
+	</div>
 
 	<div class="wysiwyg wysiwyg-theme mx-auto lg:wysiwyg-lg">
 	<h1>Lorem Ipsum</h1>
@@ -346,4 +400,6 @@
 
 	</div>
 
-</section>
+</div>
+
+</div>

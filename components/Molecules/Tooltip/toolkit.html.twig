@@ -1,13 +1,13 @@
-<div class="grid gap-12">
+<div class="Story">
 
     {# ── Base — arbitrary triggers ─────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Base</h4>
-        <div class="flex flex-wrap justify-center gap-12 p-8 rounded-md">
+    <div class="Story-section">
+        <h4 class="Story-title">Base</h4>
+        <div class="Story-row Story-stage Story-stage--roomy">
 
-            <div class="grid gap-2 justify-items-center content-start">
-                <span class="text-xs text-grey">text button — top</span>
+            <div class="Story-col Story-col--centered">
+                <span class="Story-label">text button — top</span>
                 <twig:Molecules:Tooltip:Base tooltip="Triggered by a text button.">
                     <button type="button" {{ stimulus_action('Molecules--Tooltip--base', 'toggle', 'click') }}>
                         Learn more
@@ -15,8 +15,8 @@
                 </twig:Molecules:Tooltip:Base>
             </div>
 
-            <div class="grid gap-2 justify-items-center content-start">
-                <span class="text-xs text-grey">badge — top</span>
+            <div class="Story-col Story-col--centered">
+                <span class="Story-label">badge — top</span>
                 <twig:Molecules:Tooltip:Base tooltip="This product benefits from an exceptional discount this month.">
                     <span class="Tag Tag--promo" {{ stimulus_action('Molecules--Tooltip--base', 'toggle', 'click') }}>
                         -20%
@@ -24,8 +24,8 @@
                 </twig:Molecules:Tooltip:Base>
             </div>
 
-            <div class="grid gap-2 justify-items-center content-start">
-                <span class="text-xs text-grey">text button — bottom</span>
+            <div class="Story-col Story-col--centered">
+                <span class="Story-label">text button — bottom</span>
                 <twig:Molecules:Tooltip:Base tooltip="Tooltip below the trigger." position="bottom">
                     <button type="button" {{ stimulus_action('Molecules--Tooltip--base', 'toggle', 'click') }}>
                         View details
@@ -38,17 +38,17 @@
 
     {# ── Help ───────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Help</h4>
-        <div class="flex flex-wrap justify-center gap-12 p-8 rounded-md">
+    <div class="Story-section">
+        <h4 class="Story-title">Help</h4>
+        <div class="Story-row Story-stage Story-stage--roomy">
 
-            <div class="grid gap-2 justify-items-center content-start">
-                <span class="text-xs text-grey">top position (default)</span>
+            <div class="Story-col Story-col--centered">
+                <span class="Story-label">top position (default)</span>
                 <twig:Molecules:Tooltip:Help tooltip="This field is used for billing purposes only." />
             </div>
 
-            <div class="grid gap-2 justify-items-center content-start">
-                <span class="text-xs text-grey">bottom position</span>
+            <div class="Story-col Story-col--centered">
+                <span class="Story-label">bottom position</span>
                 <twig:Molecules:Tooltip:Help tooltip="Tooltip displayed at the bottom." position="bottom" />
             </div>
 

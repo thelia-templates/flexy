@@ -1,11 +1,11 @@
-<div class="grid gap-12">
+<div class="Story">
 
     {# ── Default ─────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Default</h4>
-        <div class="grid gap-2 content-start">
-            <span class="text-xs text-grey">single icon, rotates 180° on open</span>
+    <div class="Story-section">
+        <h4 class="Story-title">Default</h4>
+        <div class="Story-col">
+            <span class="Story-label">single icon, rotates 180° on open</span>
             <twig:Molecules:Accordion:Base id="accordion-default">
                 <twig:Molecules:Accordion:Item value="item-1">
                     <twig:Molecules:Accordion:Trigger>Is it accessible?</twig:Molecules:Accordion:Trigger>
@@ -31,10 +31,10 @@
 
     {# ── Custom icons ────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Custom icons</h4>
-        <div class="grid gap-2 content-start">
-            <span class="text-xs text-grey">distinct iconClosed/iconOpen swap instead of rotating</span>
+    <div class="Story-section">
+        <h4 class="Story-title">Custom icons</h4>
+        <div class="Story-col">
+            <span class="Story-label">distinct iconClosed/iconOpen swap instead of rotating</span>
             <twig:Molecules:Accordion:Base id="accordion-custom-icons">
                 <twig:Molecules:Accordion:Item value="item-1">
                     <twig:Molecules:Accordion:Trigger iconClosed="plus" iconOpen="minus">Une question fréquente ici ?</twig:Molecules:Accordion:Trigger>
@@ -48,10 +48,10 @@
 
     {# ── Horizontal orientation ──────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Horizontal orientation</h4>
-        <div class="grid gap-2 content-start">
-            <span class="text-xs text-grey">orientation="horizontal" on Base — changes keyboard navigation to left/right arrow keys</span>
+    <div class="Story-section">
+        <h4 class="Story-title">Horizontal orientation</h4>
+        <div class="Story-col">
+            <span class="Story-label">orientation="horizontal" on Base — changes keyboard navigation to left/right arrow keys</span>
             <twig:Molecules:Accordion:Base id="accordion-horizontal" orientation="horizontal">
                 <twig:Molecules:Accordion:Item value="item-1">
                     <twig:Molecules:Accordion:Trigger>First item</twig:Molecules:Accordion:Trigger>
@@ -71,10 +71,10 @@
 
     {# ── Multiple open ───────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Multiple open</h4>
-        <div class="grid gap-2 content-start">
-            <span class="text-xs text-grey">multiple="true", items don't close each other</span>
+    <div class="Story-section">
+        <h4 class="Story-title">Multiple open</h4>
+        <div class="Story-col">
+            <span class="Story-label">multiple="true", items don't close each other</span>
             <twig:Molecules:Accordion:Base id="accordion-multiple" :multiple="true" :defaultValue="['item-1', 'item-2']">
                 <twig:Molecules:Accordion:Item value="item-1">
                     <twig:Molecules:Accordion:Trigger>First item</twig:Molecules:Accordion:Trigger>
@@ -100,10 +100,10 @@
 
     {# ── Disabled item ───────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Disabled item</h4>
-        <div class="grid gap-2 content-start">
-            <span class="text-xs text-grey">disabled="true" on Item</span>
+    <div class="Story-section">
+        <h4 class="Story-title">Disabled item</h4>
+        <div class="Story-col">
+            <span class="Story-label">disabled="true" on Item</span>
             <twig:Molecules:Accordion:Base id="accordion-disabled">
                 <twig:Molecules:Accordion:Item value="item-1">
                     <twig:Molecules:Accordion:Trigger>Enabled item</twig:Molecules:Accordion:Trigger>
@@ -123,10 +123,10 @@
 
     {# ── Custom styling ──────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Custom styling</h4>
-        <div class="grid gap-2 content-start">
-            <span class="text-xs text-grey">class overrides on Item/Trigger/Content (background, h4 title, bigger padding, bigger icon, no separator)</span>
+    <div class="Story-section">
+        <h4 class="Story-title">Custom styling</h4>
+        <div class="Story-col">
+            <span class="Story-label">class overrides on Item/Trigger/Content (background, h4 title, bigger padding, bigger icon, no separator)</span>
             <twig:Molecules:Accordion:Base id="accordion-custom-styling">
                 <twig:Molecules:Accordion:Item value="item-1" class="border-none bg-lighter">
                     <twig:Molecules:Accordion:Trigger class="h4 py-3.5 md:py-4.5" iconClosed="plus" iconOpen="minus" iconClass="size-10">A frequent question here?</twig:Molecules:Accordion:Trigger>

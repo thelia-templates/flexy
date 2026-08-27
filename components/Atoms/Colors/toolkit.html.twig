@@ -1,25 +1,120 @@
-{% set colors = [
-    ['bg-black', 'bg-white'],
-    ['bg-grey-darker', 'bg-grey-dark', 'bg-grey', 'bg-grey-light', 'bg-grey-lighter', 'bg-grey-lightest'],
-    ['bg-dark', 'bg-base', 'bg-medium', 'bg-light', 'bg-lighter', 'bg-lightest'],
-    ['bg-error-dark', 'bg-error', 'bg-error-light', 'bg-error-lightest'],
-    ['bg-success-dark', 'bg-success', 'bg-success-lightest'],
-    ['bg-warning', 'bg-warning-lightest'],
-    ['bg-validated', 'bg-validated-lightest'],
-    ['bg-informative', 'bg-informative-lightest'],
-    ['bg-processing', 'bg-processing-lightest'],
-] %}
-{% for line in colors %}
-    <div class="flex flex-wrap gap-4">
-        {% for color in line %}
-            <div>
-                <div class="rounded-4xl shadow-lg p-4">
-                    <div class="{{ color }} w-[150px] h-[120px]"></div>
-                    <div class="text-sm text-center mt-2 h-6">
-                        {{ color|replace({'bg-': ''}) }}
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
+{% import _self as ui %}
+
+{# The class name below is BUILT, never spelled, and the swatch is painted with a var() in a
+   style attribute: the scanner reads raw bytes, not markup, so a utility written out in full —
+   in an attribute, in text, even in this comment — is compiled into the stylesheet every shop
+   page downloads. Do not simplify it into a literal. Typography makes the opposite call, and
+   says so.
+
+   The grey ramp has no `light` step: that token is not declared, and its swatch rendered
+   blank. #}
+{% macro swatch(name, token) %}
+    <div class="Swatch">
+        <div class="Swatch-block" style="background-color: var({{ token }})" data-token="{{ token }}"></div>
+
+        <p class="Swatch-name">{{ name }}</p>
+        <p class="Swatch-meta">bg-{{ token|replace({'--color-': ''}) }}</p>
+        <p class="Swatch-meta">{{ token }}</p>
+        <p class="Swatch-meta" data-hex></p>
     </div>
-{% endfor %}
+{% endmacro %}
+
+{% set groups = [
+    {
+        title: 'Brand',
+        note: '`base` is the accent a component reaches for; the lighter steps are grounds.',
+        rows: [
+            [
+                { name: 'Dark', token: '--color-dark' },
+                { name: 'Base', token: '--color-base' },
+                { name: 'Medium', token: '--color-medium' },
+                { name: 'Light', token: '--color-light' },
+                { name: 'Lighter', token: '--color-lighter' },
+                { name: 'Lightest', token: '--color-lightest' },
+            ],
+        ],
+    },
+    {
+        title: 'Neutrals',
+        note: 'Text sits on the darker end, rules and grounds on the lighter one. `black` is not #000.',
+        rows: [
+            [
+                { name: 'Black', token: '--color-black' },
+                { name: 'Grey Darker', token: '--color-grey-darker' },
+                { name: 'Grey Dark', token: '--color-grey-dark' },
+                { name: 'Grey', token: '--color-grey' },
+                { name: 'Grey Lighter', token: '--color-grey-lighter' },
+                { name: 'Grey Lightest', token: '--color-grey-lightest' },
+                { name: 'White', token: '--color-white' },
+            ],
+        ],
+    },
+    {
+        title: 'States',
+        note: 'Incomplete on purpose: only Error carries all four steps. A missing one gets added when a screen asks for it.',
+        rows: [
+            [
+                { name: 'Error Dark', token: '--color-error-dark' },
+                { name: 'Error', token: '--color-error' },
+                { name: 'Error Light', token: '--color-error-light' },
+                { name: 'Error Lightest', token: '--color-error-lightest' },
+            ],
+            [
+                { name: 'Success Dark', token: '--color-success-dark' },
+                { name: 'Success', token: '--color-success' },
+                { name: 'Success Lightest', token: '--color-success-lightest' },
+            ],
+            [
+                { name: 'Warning', token: '--color-warning' },
+                { name: 'Warning Lightest', token: '--color-warning-lightest' },
+            ],
+            [
+                { name: 'Validated', token: '--color-validated' },
+                { name: 'Validated Lightest', token: '--color-validated-lightest' },
+            ],
+            [
+                { name: 'Informative', token: '--color-informative' },
+                { name: 'Informative Lightest', token: '--color-informative-lightest' },
+            ],
+            [
+                { name: 'Processing', token: '--color-processing' },
+                { name: 'Processing Lightest', token: '--color-processing-lightest' },
+            ],
+        ],
+    },
+] %}
+
+<div class="Story">
+    {% for group in groups %}
+        <div class="Story-section">
+            <div class="Story-heading">
+                <h4 class="Story-title">{{ group.title }}</h4>
+                <p class="Story-note">{{ group.note }}</p>
+            </div>
+
+            {% for row in group.rows %}
+                <div class="Story-row">
+                    {% for color in row %}
+                        {{ ui.swatch(color.name, color.token) }}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+{# The hex is read back from the swatch: written out here it would duplicate variables.css,
+   and the copy is what goes stale. #}
+<script>
+    (() => {
+        const hex = (rgb) => {
+            const n = rgb.match(/\d+/g);
+            return n ? '#' + n.slice(0, 3).map(v => (+v).toString(16).padStart(2, '0')).join('') : rgb;
+        };
+
+        document.querySelectorAll('.Swatch').forEach(swatch => {
+            const block = swatch.querySelector('[data-token]');
+            swatch.querySelector('[data-hex]').textContent = hex(getComputedStyle(block).backgroundColor);
+        });
+    })();
+</script>

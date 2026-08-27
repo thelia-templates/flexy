@@ -1,14 +1,18 @@
-<div class="grid bg-lightest rounded-md contain-layout">
-    <span class="text-xs text-grey p-8">Extra height below so you can actually scroll and preview the sticky/stuck transition (≥ md)</span>
+<div class="Story">
+
+<div class="Story-stage HeaderMock-scroller">
+    <span class="Story-label">Extra height below so you can actually scroll and preview the sticky/stuck transition (≥ md)</span>
     <twig:Layouts:Header:Base />
-    <div class="h-[50vh] flex items-start justify-center pt-20 text-grey text-sm">
+    <div class="HeaderMock-stage">
         Scroll to preview the sticky "stuck" transition
     </div>
 </div>
 
-<div class="grid gap-2 mt-8">
-    <h4>Checkout (minimal header of the purchase tunnel)</h4>
-    <div class="bg-lightest rounded-md">
+<div class="Story-section">
+    <h4 class="Story-title">Checkout (minimal header of the purchase tunnel)</h4>
+    <div class="Story-stage">
         <twig:Layouts:Header:Checkout />
     </div>
+</div>
+
 </div>

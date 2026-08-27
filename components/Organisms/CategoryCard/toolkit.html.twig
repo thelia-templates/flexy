@@ -1,10 +1,11 @@
 {% set category = resources('/api/front/categories/1') %}
 
-<div class="grid gap-4">
-    <h4>Base</h4>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-lightest p-4 rounded-md">
-        <div class="grid gap-2 content-start">
-            <span class="text-xs text-grey">real data (category #1 — image falls back to placeholder unless one was added in the BO)</span>
+<div class="Story">
+<div class="Story-section">
+    <h4 class="Story-title">Base</h4>
+    <div class="Story-grid Story-grid--2 Story-stage">
+        <div class="Story-col">
+            <span class="Story-label">real data (category #1 — image falls back to placeholder unless one was added in the BO)</span>
             <twig:Organisms:CategoryCard:Base
                 id="1"
                 title="{{ category.i18ns.title|default('Category one') }}"
@@ -12,9 +13,10 @@
             />
         </div>
 
-        <div class="grid gap-2 content-start">
-            <span class="text-xs text-grey">manual data, no matching category (placeholder image)</span>
+        <div class="Story-col">
+            <span class="Story-label">manual data, no matching category (placeholder image)</span>
             <twig:Organisms:CategoryCard:Base id="99999" title="Category two" href="/category/99999" />
         </div>
     </div>
+</div>
 </div>

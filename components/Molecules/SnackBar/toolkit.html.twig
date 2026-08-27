@@ -1,8 +1,8 @@
-<div class="grid gap-8">
+<div class="Story">
 
-    <div class="flex flex-col gap-2">
-        <h4>variant</h4>
-        <div class="grid gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">variant</h4>
+        <div class="Story-col">
             <twig:Molecules:SnackBar:Base variant="neutral-light" text="Neutral light" />
             <twig:Molecules:SnackBar:Base variant="neutral-dark" text="Neutral dark" />
             <twig:Molecules:SnackBar:Base variant="error" withIcon text="Error" />
@@ -12,16 +12,16 @@
         </div>
     </div>
 
-    <div class="flex flex-col gap-2">
-        <h4>with button</h4>
-        <div class="grid gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">with button</h4>
+        <div class="Story-col">
             <twig:Molecules:SnackBar:Base variant="error" withIcon text="Error message to help the user fix their mistake." button="Button" />
         </div>
     </div>
 
-    <div class="flex flex-col gap-2">
-        <h4>without icon</h4>
-        <div class="grid gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">without icon</h4>
+        <div class="Story-col">
             <twig:Molecules:SnackBar:Base variant="informative" text="Informative, no icon" />
         </div>
     </div>

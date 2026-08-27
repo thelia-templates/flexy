@@ -22,19 +22,19 @@
     },
 ] %}
 
-<div class="grid gap-8">
-    <div class="flex flex-col gap-2">
-        <h4>base</h4>
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">base</h4>
         <twig:Layouts:ReinsuranceModule:Base :items="items" />
     </div>
 
-    <div class="flex flex-col gap-2">
-        <h4>without links</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">without links</h4>
         <twig:Layouts:ReinsuranceModule:Base :items="items|map(item => item|merge({link: null}))" />
     </div>
 
-    <div class="flex flex-col gap-2">
-        <h4>two items</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">two items</h4>
         <twig:Layouts:ReinsuranceModule:Base :items="items|slice(0, 2)" />
     </div>
 </div>
