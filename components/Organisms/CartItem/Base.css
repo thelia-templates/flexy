@@ -153,6 +153,9 @@
     border: none;
     text-align: center;
     width: 3.125rem;
+    /* The pill is the visual, the field is the target. Left to its own height the input is one
+       text line tall, so the middle of the control swallows taps without focusing anything. */
+    align-self: stretch;
 
     &::-webkit-outer-spin-button,
     &::-webkit-inner-spin-button {
