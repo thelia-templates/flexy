@@ -21,6 +21,10 @@
         {# Empty by default: pages that must not be indexed (internal search) fill it in #}
         {% block robots %}{% endblock %}
 
+        {# Empty by default: pages whose own URL is a secret (a password reset link) use it
+           to keep that URL out of the Referer header sent to whatever they link to #}
+        {% block head_meta %}{% endblock %}
+
         {% set ogImage %}{% block og_image %}{{ logo }}{% endblock %}{% endset %}
         {% if ogImage|trim is not empty %}
             <meta property="og:image" content="{{ ogImage|trim }}">
