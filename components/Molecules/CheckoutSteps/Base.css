@@ -41,6 +41,14 @@
   display: none;
 }
 
+/* Wrapping a step in a link makes it a control: an inline box round a 24px badge lands at 23px,
+   a hair under the touch-target floor. */
+.Step a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+}
+
 .Step-label {
   display: none;
 }

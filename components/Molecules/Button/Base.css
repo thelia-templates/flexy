@@ -73,6 +73,10 @@
     justify-content: center;
     text-align: center;
     text-decoration: none;
+    /* A padding-less variant (breadcrumb, `minimal`) is only as tall as its label — 23px, just
+       under the 24px floor a touch target needs. Centered content, so this grows the box around
+       the label rather than moving it. */
+    min-height: 1.5rem;
     font-size: var(--button-font-size);
     font-family: var(--button-font-family);
     font-weight: var(--button-font-weight);

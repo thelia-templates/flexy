@@ -9,6 +9,9 @@
     color: var(--color-black);
     display: inline-flex;
     align-items: center;
+    /* --small runs at 12px, which leaves a 22px box: under the touch-target floor. Centered
+       inline-flex, so the floor grows the box around the text instead of shifting it. */
+    min-height: 1.5rem;
     padding: 0.125rem;
     transition: 0.2s ease all;
     outline: 0;

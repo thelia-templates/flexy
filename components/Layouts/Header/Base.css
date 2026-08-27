@@ -47,6 +47,14 @@
     width: auto;
     display: block;
     transition: height 250ms ease;
+
+    /* The 18px mark is the visual; on touch the link is padded out to a 44px target, since
+       "back to the shop" is what a thumb reaches for at the top of every page. Symmetrical
+       padding in a bar that centres its content, so the mark itself does not move. */
+    @variant max-md {
+      box-sizing: content-box;
+      padding-block: 0.8125rem;
+    }
   }
 
   .Header-logo svg {
