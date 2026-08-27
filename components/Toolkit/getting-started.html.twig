@@ -1,0 +1,81 @@
+<section id="getting-started">
+    <h2 class="text-2xl font-bold mb-8 pb-3 border-b border-grey-lighter">Getting started</h2>
+
+    <div class="space-y-10 max-w-3xl">
+        <div class="Story-warning">
+            <strong>Read this page, then delete it.</strong> It belongs to the starter kit, not to
+            your project — which is why it is marked <em>waiting</em>: it waits on the one thing the
+            theme cannot do for you. Delete
+            <code class="font-mono text-sm">components/Toolkit/getting-started.html.twig</code>
+            and the page goes, navigation entry included — then drop its two lines from
+            <code class="font-mono text-sm">ComponentStatus</code> and
+            <code class="font-mono text-sm">ToolkitController::SECTIONS</code>, which stay behind
+            harmlessly until you do.
+        </div>
+
+        <div class="space-y-3">
+            <p class="text-grey-darker">
+                The toolkit renders every component of the theme, one page per component, from the
+                stories it finds on disk. It only answers while the kernel runs in debug: a live shop
+                returns a 404, so nothing here reaches a customer.
+            </p>
+        </div>
+
+        <div class="space-y-3">
+            <h3 class="text-lg font-semibold text-grey-darker">Adding a story</h3>
+            <p class="text-grey-darker">
+                Drop a <code class="font-mono text-sm bg-grey-lightest px-1.5 py-0.5 rounded">toolkit.html.twig</code>
+                next to the component it shows, for instance in
+                <code class="font-mono text-sm bg-grey-lightest px-1.5 py-0.5 rounded">components/Molecules/Button/</code>.
+                It is picked up on the next request: there is nothing to register. The folder path
+                becomes the page name and its URL.
+            </p>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-grey-darker">Saying where a story stands</h3>
+            <p class="text-grey-darker">
+                Statuses live in one file,
+                <code class="font-mono text-sm bg-grey-lightest px-1.5 py-0.5 rounded">src/Toolkit/ComponentStatus.php</code>,
+                keyed by the story path under <code class="font-mono text-sm bg-grey-lightest px-1.5 py-0.5 rounded">components/</code>.
+                The list ships empty: a story that is not in it shows nothing and claims nothing.
+                <strong>It is not a backlog</strong> — only a way to say what has been settled.
+            </p>
+
+            <div class="bg-white rounded-2xl border border-grey-lighter divide-y divide-grey-lightest">
+                <div class="flex items-start gap-4 p-4">
+                    <span class="Toolkit-statusBadge Toolkit-statusBadge--ready">ready</span>
+                    <p class="text-sm text-grey-darker">
+                        Handled on our side and open to review — not reviewed yet. Shown as a check
+                        mark in the navigation, like the Welcome page.
+                    </p>
+                </div>
+                <div class="flex items-start gap-4 p-4">
+                    <span class="Toolkit-statusBadge Toolkit-statusBadge--waiting">waiting</span>
+                    <p class="text-sm text-grey-darker">
+                        Stopped on something that is not the theme's to decide. A status cannot say
+                        <em>what</em> is awaited, so the story carries a banner that does — the one
+                        at the top of this page.
+                    </p>
+                </div>
+                <div class="flex items-start gap-4 p-4">
+                    <span class="Toolkit-statusBadge">hidden</span>
+                    <p class="text-sm text-grey-darker">
+                        Will never be integrated: the story is dropped from the toolkit entirely. The
+                        files stay, and so does the component's CSS import — removing it while a call
+                        site remains would leave the component rendering unstyled.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <h3 class="text-lg font-semibold text-grey-darker">Previewing at a width</h3>
+            <p class="text-grey-darker">
+                The selector above the navigation renders the current page in an iframe at a chosen
+                breakpoint. The width is kept while you move from one component to another, so a
+                whole set can be reviewed at one size.
+            </p>
+        </div>
+    </div>
+</section>

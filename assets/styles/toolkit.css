@@ -1,0 +1,73 @@
+/*
+ * Chrome of the toolkit — the developer tool, not the shop.
+ *
+ * Deliberately NOT imported from app.css: none of this belongs in the stylesheet a
+ * customer downloads. `components/Toolkit/show.html.twig` links it on its own.
+ */
+
+/*
+ * The brand mark replaces the "Design System" wording. The <h1> stays for the document
+ * outline; the name it carried lives in the image's alt text.
+ */
+.Toolkit-logo img {
+  display: block;
+  height: 2.25rem;
+  width: auto;
+}
+
+/* Where a story stands: the mark in the nav, the badge on its heading. */
+.Toolkit-statusMark {
+  display: flex;
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 1rem;
+  height: 1rem;
+}
+
+.Toolkit-statusMark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.Toolkit-statusMark--ready {
+  color: var(--color-success-dark);
+}
+
+.Toolkit-statusMark--waiting {
+  color: var(--color-warning);
+}
+
+.Toolkit-statusBadge {
+  flex-shrink: 0;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  /* One text colour on both tints: success-dark on its own lightest sits at 3.13:1,
+     under the 4.5:1 a label this small needs. grey-darker clears 9:1 on both. */
+  color: var(--color-grey-darker);
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.Toolkit-statusBadge--ready {
+  background-color: var(--color-success-lightest);
+}
+
+.Toolkit-statusBadge--waiting {
+  background-color: var(--color-warning-lightest);
+}
+
+/*
+ * Said by a story that is deliberately not ready: a status can only name the state, never
+ * what is being waited for. Keep it to the wait itself — what was already done is the rest
+ * of the story's job.
+ */
+.Story-warning {
+  border-left: 0.25rem solid var(--color-warning);
+  background-color: var(--color-warning-lightest);
+  padding: 0.75rem 1rem;
+  color: var(--color-grey-darker);
+  font-size: 0.875rem;
+}

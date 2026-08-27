@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <title>{{ page.category ? page.category ~ ' / ' : '' }}{{ page.name }} — Design System — Toolkit</title>
+    <title>{{ page.category ? page.category ~ ' / ' : '' }}{{ page.name }} — Toolkit</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('styles/app.css') }}" blocking="render">
+    {# Chrome of the tool, kept out of app.css so no shop page ever loads it. #}
+    <link rel="stylesheet" href="{{ asset('styles/toolkit.css') }}" blocking="render">
     {{ importmap('app') }}
     <style>
         html {
@@ -27,7 +29,7 @@
           class="flex-1 py-10 px-2.5 md:px-5 lg:px-10 overflow-y-auto transition-colors{{ embed ? '' : ' ml-64' }}">
 
         <div {{ stimulus_target('Toolkit--preview', 'content') }}>
-            {% if currentSlug in ['breakpoints', 'layout'] %}
+            {% if page.standalone|default(false) %}
                 {% include page.twigPath %}
             {% else %}
                 <section>
@@ -36,7 +38,12 @@
                     {% endif %}
 
                     <div class="space-y-4">
-                        <h3 class="text-lg font-semibold text-grey-darker">{{ page.name }}</h3>
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-lg font-semibold text-grey-darker">{{ page.name }}</h3>
+                            {% if page.status %}
+                                <span class="Toolkit-statusBadge Toolkit-statusBadge--{{ page.status }}">{{ page.status }}</span>
+                            {% endif %}
+                        </div>
 
                         {% if source %}
                             <div {{ stimulus_controller('Toolkit--copy') }}>
