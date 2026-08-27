@@ -7,9 +7,22 @@
 .Tooltip-icon {
   display: inline-block;
   cursor: pointer;
+  position: relative;
   width: 1.25rem;
   height: 1.25rem;
   color: var(--color-black);
+}
+
+/* The help mark reads best at 20px next to a field label, which is under the touch-target
+   floor. This grows the hit area to 44px around it without moving the mark or the label. */
+.Tooltip-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  transform: translate(-50%, -50%);
 }
 
 .Tooltip-text {
