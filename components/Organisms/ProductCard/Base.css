@@ -141,6 +141,14 @@
   overflow: hidden;
   height: 11.6875rem;
 
+  /* Two-up cards are ~157px wide on a 375px screen: a fixed 187px frame letterboxes the
+     visual. Below sm the box follows the card's own width instead. The --search and --order
+     variants set both width and height, so this leaves them alone. */
+  @variant max-sm {
+    height: auto;
+    aspect-ratio: 1;
+  }
+
   @variant sm {
     height: 17.5rem;
   }

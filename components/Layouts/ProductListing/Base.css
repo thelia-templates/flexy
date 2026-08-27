@@ -131,10 +131,18 @@
 
 .ProductListing-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-  gap: 2rem;
+  /* Two up on phones. The `auto-fill` track below needs 2 × 15rem + the gap to fit a second
+     column, which no phone width reaches, so it would collapse a 10-product listing into ten
+     screens of scrolling. Stated explicitly here and handed back to `auto-fill` from sm. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 0.75rem;
   margin-bottom: 2.5rem;
   transition: opacity 0.2s ease;
+
+  @variant sm {
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 2rem;
+  }
 }
 
 .ProductListing-empty {
