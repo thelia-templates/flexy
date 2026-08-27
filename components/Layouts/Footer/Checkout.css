@@ -21,7 +21,9 @@
 .FooterCheckout-links {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  /* .Footer-link brings its own vertical padding for the touch target; the gap would stack on
+     top of it while the column is stacked. Restored once the list turns into a row at md. */
+  gap: 0;
 
   @variant md {
     flex-direction: row;
