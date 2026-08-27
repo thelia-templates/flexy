@@ -31,6 +31,8 @@ use Thelia\Domain\Checkout\Exception\IncompleteInvoiceAddressException;
 use Thelia\Domain\Checkout\Exception\InvalidDeliveryException;
 use Thelia\Domain\Checkout\Exception\MissingAddressException;
 use Thelia\Domain\Shipping\ShippingFacade;
+use Thelia\Model\Order;
+use Thelia\Model\OrderQuery;
 
 #[Route('/checkout', name: 'checkout_')]
 class CheckoutController extends FlexyController
@@ -191,21 +193,41 @@ class CheckoutController extends FlexyController
     #[Route('/failed', name: 'failed')]
     public function failedAction(CheckoutFacade $checkoutFacade, Request $request): Response
     {
-        $this->checkAuth();
+        $order = $this->failedOrderOf($request->query->getInt('order_id'));
 
-        $orderId = (int) $request->query->get('order_id');
-        $message = $request->query->get('message');
-
-        try {
-            $checkoutFacade->cancelOrder($orderId);
-        } catch (\InvalidArgumentException $e) {
-            throw new RedirectException($this->generateUrl('checkout_cart'), Response::HTTP_FOUND, $e->getMessage());
+        // Only an order still waiting for its payment is cancelled. A payment module that
+        // already gave up on it, a gateway returning twice, or the buyer refreshing this
+        // page then find nothing left to cancel, and an order paid in the meantime — a
+        // late confirmation crossing a failure return — is never taken back.
+        if ($order instanceof Order && $order->isNotPaid()) {
+            $checkoutFacade->cancelOrder($order->getId());
         }
 
         return $this->render('checkout-failed', [
             'current' => CheckoutSteps::FAILED,
-            'failed_order_id' => $orderId,
-            'failed_order_message' => $message,
+            'failed_order_id' => $order?->getId(),
+            'failed_order_message' => $request->query->get('message'),
         ]);
+    }
+
+    /**
+     * A buyer coming back from a payment gateway may come back without the session they
+     * left with: a gateway issuing the return itself, a browser dropping the cookie on a
+     * cross-site redirect. Telling them the payment failed must not depend on that, so
+     * this page is never guarded by a login.
+     *
+     * What does depend on it is the order: nothing is read, cancelled or shown unless the
+     * session holds the customer it belongs to. Walking the order ids from here answers
+     * the same page whether the order exists or not.
+     */
+    private function failedOrderOf(int $orderId): ?Order
+    {
+        $customerId = $this->getSecurityContext()->getCustomerUser()?->getId();
+
+        if ($orderId <= 0 || null === $customerId) {
+            return null;
+        }
+
+        return OrderQuery::create()->filterByCustomerId($customerId)->findPk($orderId);
     }
 }
