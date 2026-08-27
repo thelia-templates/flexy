@@ -19,8 +19,12 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Thelia\Core\Event\Customer\CustomerResetPasswordEvent;
 use Thelia\Core\Event\LostPasswordEvent;
 use Thelia\Core\Event\TheliaEvents;
+use Thelia\Domain\Customer\Exception\InvalidPasswordResetTokenException;
+use Thelia\Domain\Customer\Service\PasswordResetService;
+use Thelia\Form\CustomerResetPasswordForm;
 use Thelia\Form\Exception\FormValidationException;
 
 #[Route('/password', name: 'password_')]
@@ -46,19 +50,9 @@ class PasswordController extends FlexyController
 
                 return $this->generateSuccessRedirect($passwordLost);
             } catch (FormValidationException $e) {
-                $formData = $this->requestStack->getCurrentRequest()?->request->all('thelia_customer_lost_password');
-                $submittedEmail = trim($formData['email'] ?? '');
-
-                // Prevent user enumeration: if the email is syntactically valid, the only
-                // reason for failure is the "email not found" Callback constraint — redirect
-                // silently to the success page so an attacker cannot distinguish existing
-                // from non-existing accounts.
-                if (filter_var($submittedEmail, \FILTER_VALIDATE_EMAIL)) {
-                    $session->set('reset_email', $submittedEmail);
-
-                    return $this->generateSuccessRedirect($passwordLost);
-                }
-
+                // The form only checks the shape of the address, and the shop stays silent
+                // about whether it has an account, so what is left here is a genuinely
+                // unusable submission the visitor can fix.
                 $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
             }
         } else {
@@ -98,6 +92,53 @@ class PasswordController extends FlexyController
         $eventDispatcher->dispatch($event, TheliaEvents::LOST_PASSWORD);
 
         return $this->generateRedirect($this->generateUrl('password_reset_link', ['resend_success' => true]));
+    }
+
+    /**
+     * The page the link in the reset email leads to.
+     *
+     * The token is checked before the form is shown, so someone holding a link that has
+     * expired or has already been used is told so straight away instead of choosing a
+     * password the shop is going to refuse.
+     */
+    #[Route('/reset/{token}', name: 'reset', methods: ['GET'])]
+    public function reset(string $token, PasswordResetService $passwordResetService): Response
+    {
+        return $this->render('reset-password', [
+            'token' => $token,
+            'token_is_valid' => null !== $passwordResetService->findCustomerForToken($token),
+        ]);
+    }
+
+    #[Route('/reset/{token}', name: 'reset_action', methods: ['POST'])]
+    public function resetAction(string $token, EventDispatcherInterface $eventDispatcher): Response
+    {
+        $resetForm = $this->createForm(CustomerResetPasswordForm::class);
+
+        try {
+            $form = $this->validateForm($resetForm, 'post');
+
+            $eventDispatcher->dispatch(
+                new CustomerResetPasswordEvent(
+                    (string) $form->get('token')->getData(),
+                    (string) $form->get('password')->getData(),
+                ),
+                TheliaEvents::CUSTOMER_RESET_PASSWORD,
+            );
+
+            return $this->generateSuccessRedirect($resetForm);
+        } catch (InvalidPasswordResetTokenException) {
+            // Nothing the visitor can fix on this page: show it in the state that offers
+            // a new link rather than the form.
+            return $this->render('reset-password', ['token' => $token, 'token_is_valid' => false]);
+        } catch (FormValidationException $e) {
+            $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
+        }
+
+        $resetForm->setErrorMessage($message);
+        $this->getParserContext()->addForm($resetForm);
+
+        return $this->render('reset-password', ['token' => $token, 'token_is_valid' => true]);
     }
 
     #[Route('/reset', name: 'reset_confirm', methods: ['GET'])]
