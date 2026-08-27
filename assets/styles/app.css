@@ -1,13 +1,20 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
 
-/* Force tailwind to scan these directories to detect used styles.
-   The root page templates, form theme and block templates must be listed
-   too: the theme directory is git-ignored from the project root, so the
-   default source auto-detection skips it entirely. */
+/* source(none) turns auto-detection off: this list is the whole of what the scanner reads,
+   and a new directory of templates has to be added to it.
+
+   Without it the scanner reads the whole project, back office included, and what it finds
+   there lands in the stylesheet a shop page downloads. How much depends on the install: an
+   unversioned root prunes nothing, so var/ is read too — Tailwind's own cached output with
+   it, and no class ever leaves the build again. */
 @source "../../components";
 @source "../../*.html.twig";
 @source "../../form";
 @source "../../blocks";
+
+/* Injected by LiveComponent's data-loading="addClass(...)", which the scanner does not read
+   inside: without this, the loading state stops dimming. */
+@source inline("opacity-50 pointer-events-none");
 
 /* Theme and utilities : automatic layering / per file layering */
 @import "./variables.css";
