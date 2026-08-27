@@ -50,7 +50,7 @@ class CheckoutController extends FlexyController
         CartFacade $cartFacade,
     ): Response {
         $cart = $cartFacade->getOrCreateFromSession();
-        $checkoutFacade->resetCheckout($cart);
+        $checkoutFacade->resetCheckout();
         $emptyCart = false;
 
         try {
