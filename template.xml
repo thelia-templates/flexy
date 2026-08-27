@@ -22,7 +22,7 @@
         </author>
     </authors>
     <thelia>3.0.0</thelia>
-    <stability>beta</stability>
+    <stability>prod</stability>
     <!-- No <assets>: that path only drives the Webpack Encore manifest and its symlink, and
          this template is served through AssetMapper. Declaring one would point at a dist
          directory the build never produces. -->
