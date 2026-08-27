@@ -37,7 +37,11 @@ class FlexyController extends BaseController
     public const EMPTY_FORM_NAME = 'thelia.empty';
     public const CONTROLLER_TYPE = 'front';
 
-    protected string $currentRouter = 'router.front';
+    /**
+     * The front-office routes live in the default router: this theme declares them with
+     * #[Route], and so do the modules. Only the back office runs a router of its own.
+     */
+    protected string $currentRouter = 'router';
 
     public function __construct(
         public SecurityContext $securityContext,
