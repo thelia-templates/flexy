@@ -4,25 +4,25 @@
     {value: 'price-desc', label: 'Price: high to low'},
 ] %}
 
-<div class="grid gap-12">
+<div class="Story">
 
-    <div class="grid gap-4">
-        <h4>Base (desktop dropdown ≥ md, drawer below md)</h4>
-        <div class="max-w-xs">
+    <div class="Story-section">
+        <h4 class="Story-title">Base (desktop dropdown ≥ md, drawer below md)</h4>
+        <div class="Story-col Story-col--slim">
             <twig:Molecules:FilterSelect:Base id="toolkit-filter-select-base" :options="demoOptions" />
         </div>
     </div>
 
-    <div class="grid gap-4">
-        <h4>placeholder</h4>
-        <div class="max-w-xs">
+    <div class="Story-section">
+        <h4 class="Story-title">placeholder</h4>
+        <div class="Story-col Story-col--slim">
             <twig:Molecules:FilterSelect:Base id="toolkit-filter-select-placeholder" placeholder="Sort by" :options="demoOptions" />
         </div>
     </div>
 
-    <div class="grid gap-4">
-        <h4>rounded</h4>
-        <div class="max-w-xs">
+    <div class="Story-section">
+        <h4 class="Story-title">rounded</h4>
+        <div class="Story-col Story-col--slim">
             <twig:Molecules:FilterSelect:Base id="toolkit-filter-select-rounded" rounded :options="demoOptions" />
         </div>
     </div>

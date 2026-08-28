@@ -1,38 +1,38 @@
-<div class="grid gap-12">
+<div class="Story">
 
     {# ── Base ───────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Base</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-md">
+    <div class="Story-section">
+        <h4 class="Story-title">Base</h4>
+        <div class="Story-grid Story-grid--2">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">default</span>
+            <div class="Story-col">
+                <span class="Story-label">default</span>
                 <twig:Fields:TextArea:Base name="textarea-base" label="Message" placeholder="Your message..." />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">required</span>
+            <div class="Story-col">
+                <span class="Story-label">required</span>
                 <twig:Fields:TextArea:Base name="textarea-required" label="Required message" placeholder="Your message..." :required="true" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">optional</span>
+            <div class="Story-col">
+                <span class="Story-label">optional</span>
                 <twig:Fields:TextArea:Base name="textarea-optional" label="Optional message" placeholder="Your message..." :optional="true" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">disabled</span>
+            <div class="Story-col">
+                <span class="Story-label">disabled</span>
                 <twig:Fields:TextArea:Base name="textarea-disabled" label="Disabled" placeholder="Your message..." :disabled="true" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with help (tooltip)</span>
+            <div class="Story-col">
+                <span class="Story-label">with help (tooltip)</span>
                 <twig:Fields:TextArea:Base name="textarea-help" label="With help" placeholder="Your message..." help="Describe your request as precisely as possible." />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">custom rows (rows=8)</span>
+            <div class="Story-col">
+                <span class="Story-label">custom rows (rows=8)</span>
                 <twig:Fields:TextArea:Base name="textarea-rows" label="Long message" placeholder="Your message..." rows="8" />
             </div>
 
@@ -41,17 +41,17 @@
 
     {# ── States ────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>States</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">States</h4>
+        <div class="Story-grid Story-grid--2">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">error</span>
+            <div class="Story-col">
+                <span class="Story-label">error</span>
                 <twig:Fields:TextArea:Base name="textarea-error" label="With error" value="invalid value" error="This field is required" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">success</span>
+            <div class="Story-col">
+                <span class="Story-label">success</span>
                 <twig:Fields:TextArea:Base name="textarea-success" label="With success" value="Valid message" :success="true" />
             </div>
 
@@ -60,22 +60,22 @@
 
     {# ── Small ───────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Small</h4>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">Small</h4>
+        <div class="Story-grid Story-grid--3">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">default</span>
+            <div class="Story-col">
+                <span class="Story-label">default</span>
                 <twig:Fields:TextArea:Base name="textarea-small-base" label="Small" placeholder="Your message..." size="small" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with help</span>
+            <div class="Story-col">
+                <span class="Story-label">with help</span>
                 <twig:Fields:TextArea:Base name="textarea-small-help" label="Small with help" placeholder="Your message..." size="small" help="Reduced size for compact forms." />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">error</span>
+            <div class="Story-col">
+                <span class="Story-label">error</span>
                 <twig:Fields:TextArea:Base name="textarea-small-error" label="Small with error" size="small" value="invalid" error="Incorrect value" />
             </div>
 

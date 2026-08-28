@@ -1,9 +1,9 @@
 
 
-<div class="grid gap-8">
-    <div class="flex flex-col gap-2">
-        <h4>base</h4>
-        <div class="flex gap-2">
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">base</h4>
+        <div class="Story-row Story-row--tight">
             <twig:Molecules:Tag:Base customText="Promo code" icon="price-tag"  />
             <twig:Molecules:Tag:Base customText="Promo code" />
             <twig:Molecules:Tag:Base customText="noBackground" icon="price-tag" noBackground   />
@@ -18,14 +18,14 @@
         <twig:Molecules:Tag:Base customText="Warning" color="warning" />
         <twig:Molecules:Tag:Base customText="Error" color="error" />
     </div>
-    <div class="flex flex-col gap-2">
-        <h4>Stock</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">Stock</h4>
         <twig:Molecules:Tag:Stock customText="In stock" color="in" />
         <twig:Molecules:Tag:Stock customText="Low stock" color="low" />
         <twig:Molecules:Tag:Stock customText="Out of stock" color="out" />
     </div>
-    <div class="flex flex-col gap-2">
-        <h4>Order</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">Order</h4>
         <twig:Molecules:Tag:Order customText="Order not paid" status="not_paid" />
         <twig:Molecules:Tag:Order customText="Order paid" status="paid" />
         <twig:Molecules:Tag:Order customText="Order processing" status="processing" />

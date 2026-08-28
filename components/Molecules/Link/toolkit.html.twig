@@ -1,5 +1,5 @@
 {% macro row(size) %}
-    <div class="flex flex-wrap gap-6 items-center">
+    <div class="Story-row">
         <twig:Molecules:Link:Base href="#" customText="Link" size="{{ size }}" />
         <twig:Molecules:Link:Base href="#" customText="With left icon" iconLeft="chevron-left" size="{{ size }}" />
         <twig:Molecules:Link:Base href="#" customText="With right icon" iconRight="chevron-right" size="{{ size }}" />
@@ -10,17 +10,17 @@
     </div>
 {% endmacro %}
 
-<div class="grid gap-8">
-    <div class="grid gap-2">
-        <h4>Large (default)</h4>
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">Large (default)</h4>
         {{ _self.row(null) }}
     </div>
-    <div class="grid gap-2">
-        <h4>Medium</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">Medium</h4>
         {{ _self.row('medium') }}
     </div>
-    <div class="grid gap-2">
-        <h4>Small</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">Small</h4>
         {{ _self.row('small') }}
     </div>
 </div>

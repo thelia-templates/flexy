@@ -1,125 +1,137 @@
-<section id="layout">
-    <h2 class="text-2xl font-bold mb-8 pb-3 border-b border-grey-lighter">Layout</h2>
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">container-l</h4>
 
-    <div class="space-y-10">
-    <div class="space-y-4 ">
-        <h3 class="text-lg font-semibold text-grey-darker">container-l</h3>
-
-        <div class="hidden xl:flex max-w-341.5 mx-auto justify-center pb-1 border-b border-dashed border-medium">
-            <span class="-mb-2.5 bg-lightest px-2 font-mono text-xs text-grey-dark">max-width 1366px</span>
+        <div class="Layout-ruler Layout-ruler--l">
+            <span class="Layout-rulerLabel">max-width 1366px</span>
         </div>
 
-        <div class="bg-grey-lightest overflow-hidden max-w-341.5 mx-auto">
-            <div class="container-l relative">
-                <div class="h-24 bg-light outline-2 outline-dashed outline-medium"></div>
+        <div class="Layout-viewport Layout-viewport--l">
+            <div class="container-l Layout-slot">
+                <div class="Layout-block"></div>
 
-                <div class="absolute inset-y-0 left-0 flex items-center justify-center whitespace-nowrap font-mono text-xs text-grey-dark w-6 md:w-13 lg:w-20">
-                    <span class="md:hidden">24px</span>
-                    <span class="hidden md:inline lg:hidden">52px</span>
-                    <span class="hidden lg:inline">80px</span>
+                <div class="Layout-gutter Layout-gutter--start">
+                    <span class="Layout-gutterValue--sm">24px</span>
+                    <span class="Layout-gutterValue--md">52px</span>
+                    <span class="Layout-gutterValue--lg">80px</span>
                 </div>
-                <div class="absolute inset-y-0 right-0 flex items-center justify-center whitespace-nowrap font-mono text-xs text-grey-dark w-6 md:w-13 lg:w-20">
-                    <span class="md:hidden">24px</span>
-                    <span class="hidden md:inline lg:hidden">52px</span>
-                    <span class="hidden lg:inline">80px</span>
+                <div class="Layout-gutter Layout-gutter--end">
+                    <span class="Layout-gutterValue--sm">24px</span>
+                    <span class="Layout-gutterValue--md">52px</span>
+                    <span class="Layout-gutterValue--lg">80px</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-grey-darker">container-m</h3>
+    <div class="Story-section">
+        <h4 class="Story-title">container-m</h4>
 
-        <div class="hidden md:flex max-w-135 mx-auto justify-center pb-1 border-b border-dashed border-medium">
-            <span class="-mb-2.5 bg-lightest px-2 font-mono text-xs text-grey-dark">max-width 540px</span>
+        <div class="Layout-ruler Layout-ruler--m">
+            <span class="Layout-rulerLabel">max-width 540px</span>
         </div>
 
-        <div class="bg-grey-lightest overflow-hidden max-w-135 mx-auto">
-            <div class="container-m relative">
-                <div class="h-24 bg-light outline-2 outline-dashed outline-medium"></div>
+        <div class="Layout-viewport Layout-viewport--m">
+            <div class="container-m Layout-slot">
+                <div class="Layout-block"></div>
 
-                <div class="absolute inset-y-0 left-0 flex md:hidden items-center justify-center whitespace-nowrap font-mono text-xs text-grey-dark w-6">
-                    24px
-                </div>
-                <div class="absolute inset-y-0 right-0 flex md:hidden items-center justify-center whitespace-nowrap font-mono text-xs text-grey-dark w-6">
-                    24px
-                </div>
+                <div class="Layout-gutter Layout-gutter--narrow Layout-gutter--start">24px</div>
+                <div class="Layout-gutter Layout-gutter--narrow Layout-gutter--end">24px</div>
             </div>
         </div>
     </div>
 
-    <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-grey-darker">container-s</h3>
+    <div class="Story-section">
+        <h4 class="Story-title">container-s</h4>
 
-        <div class="hidden md:flex max-w-100 mx-auto justify-center pb-1 border-b border-dashed border-medium">
-            <span class="-mb-2.5 bg-lightest px-2 font-mono text-xs text-grey-dark">max-width 400px</span>
+        <div class="Layout-ruler Layout-ruler--s">
+            <span class="Layout-rulerLabel">max-width 400px</span>
         </div>
 
-        <div class="bg-grey-lightest overflow-hidden max-w-100 mx-auto">
-            <div class="container-s relative">
-                <div class="h-24 bg-light outline-2 outline-dashed outline-medium"></div>
+        <div class="Layout-viewport Layout-viewport--s">
+            <div class="container-s Layout-slot">
+                <div class="Layout-block"></div>
 
-                <div class="absolute inset-y-0 left-0 flex md:hidden items-center justify-center whitespace-nowrap font-mono text-xs text-grey-dark w-6">
-                    24px
-                </div>
-                <div class="absolute inset-y-0 right-0 flex md:hidden items-center justify-center whitespace-nowrap font-mono text-xs text-grey-dark w-6">
-                    24px
-                </div>
+                <div class="Layout-gutter Layout-gutter--narrow Layout-gutter--start">24px</div>
+                <div class="Layout-gutter Layout-gutter--narrow Layout-gutter--end">24px</div>
             </div>
         </div>
     </div>
 
-    <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-grey-darker">container-double-1 <span class="text-sm font-normal text-grey">— checkout tunnel. The 1st/2nd child is the full column (background-styleable, here only B has one) and needs one nested wrapper div for the centered fixed-width content</span></h3>
-        <div class="bg-grey-lightest overflow-hidden">
+    <div class="Story-section">
+        <div class="Story-heading">
+        <h4 class="Story-title">container-double-1</h4>
+            <p class="Story-note">
+                Checkout tunnel. The 1st/2nd child is the full column — background-styleable, here
+                only B has one — and needs one nested wrapper div for the centered fixed-width content.
+            </p>
+        </div>
+
+        <div class="Layout-viewport">
             <div class="container-double-1">
                 <div>
-                    <div class="h-24 bg-light outline-2 outline-dashed outline-medium flex items-center justify-center font-mono text-xs text-grey-dark">A — 444px / 540px</div>
+                    <div class="Layout-block">A — 444px / 540px</div>
                 </div>
-                <div class="bg-medium">
-                    <div class="h-24 bg-lighter outline-2 outline-dashed outline-medium flex items-center justify-center font-mono text-xs text-grey-dark">B — 328px / 400px</div>
+                <div class="Layout-column">
+                    <div class="Layout-block Layout-block--alt">B — 328px / 400px</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-grey-darker">container-double-2 <span class="text-sm font-normal text-grey">— category page</span></h3>
-        <div class="bg-grey-lightest overflow-hidden">
+    <div class="Story-section">
+        <div class="Story-heading">
+        <h4 class="Story-title">container-double-2</h4>
+            <p class="Story-note">Category page.</p>
+        </div>
+
+        <div class="Layout-viewport">
             <div class="container-double-2">
-                <div class="h-24 bg-light outline-2 outline-dashed outline-medium flex items-center justify-center font-mono text-xs text-grey-dark">A</div>
-                <div class="h-24 bg-lighter outline-2 outline-dashed outline-medium flex items-center justify-center font-mono text-xs text-grey-dark">B</div>
+                <div class="Layout-block">A</div>
+                <div class="Layout-block Layout-block--alt">B</div>
             </div>
         </div>
-        <div class="bg-grey-lightest overflow-hidden">
+
+        <div class="Layout-viewport">
             <div class="container-double-2">
-                <div class="h-24 bg-lighter outline-2 outline-dashed outline-medium flex items-center justify-center font-mono text-xs text-grey-dark">B alone — should stay centered</div>
+                <div class="Layout-block Layout-block--alt">B alone — should stay centered</div>
             </div>
         </div>
     </div>
 
-    <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-grey-darker">container-double-3 <span class="text-sm font-normal text-grey">— text content page</span></h3>
-        <div class="bg-grey-lightest overflow-hidden">
+    <div class="Story-section">
+        <div class="Story-heading">
+        <h4 class="Story-title">container-double-3</h4>
+            <p class="Story-note">Text content page.</p>
+        </div>
+
+        <div class="Layout-viewport">
             <div class="container-double-3">
-                <div class="h-24 bg-light outline-2 outline-dashed outline-medium flex items-center justify-center font-mono text-xs text-grey-dark">A — 406/496/676px</div>
-                <div class="h-24 bg-lighter outline-2 outline-dashed outline-medium flex items-center justify-center font-mono text-xs text-grey-dark">B — 206/280/350px</div>
+                <div class="Layout-block">A — 406/496/676px</div>
+                <div class="Layout-block Layout-block--alt">B — 206/280/350px</div>
             </div>
         </div>
-        <div class="bg-grey-lightest overflow-hidden">
+
+        <div class="Layout-viewport">
             <div class="container-double-3">
-                <div class="h-24 bg-light outline-2 outline-dashed outline-medium flex items-center justify-center font-mono text-xs text-grey-dark">A alone — should stay centered</div>
+                <div class="Layout-block">A alone — should stay centered</div>
             </div>
         </div>
     </div>
 
-    <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-grey-darker">container-single-3 <span class="text-sm font-normal text-grey">— single-column text content page (e.g. FAQ), matches container-double-3's slot A width but without its 2-column wrapper</span></h3>
-        <div class="bg-grey-lightest overflow-hidden">
+    <div class="Story-section">
+        <div class="Story-heading">
+        <h4 class="Story-title">container-single-3</h4>
+            <p class="Story-note">
+                Single-column text content page (e.g. FAQ). Matches container-double-3's slot A
+                width, without its two-column wrapper.
+            </p>
+        </div>
+
+        <div class="Layout-viewport">
             <div class="container-single-3">
-                <div class="h-24 bg-light outline-2 outline-dashed outline-medium flex items-center justify-center font-mono text-xs text-grey-dark">406/496/676px</div>
+                <div class="Layout-block">406/496/676px</div>
             </div>
         </div>
     </div>
-    </div>
-</section>
+</div>

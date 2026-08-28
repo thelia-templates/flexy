@@ -1,39 +1,39 @@
-<div class="grid gap-8">
+<div class="Story">
 
-    <div class="grid gap-2">
-        <h4>First page</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">First page</h4>
         <twig:Molecules:Pagination:Base totalItems="100" itemsPerPage="10" currentPage="1" />
     </div>
 
-    <div class="grid gap-2">
-        <h4>Middle page</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">Middle page</h4>
         <twig:Molecules:Pagination:Base totalItems="100" itemsPerPage="10" currentPage="5" />
     </div>
 
-    <div class="grid gap-2">
-        <h4>Last page</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">Last page</h4>
         <twig:Molecules:Pagination:Base totalItems="100" itemsPerPage="10" currentPage="10" />
     </div>
 
-    <div class="grid gap-2">
-        <h4>Few pages (3)</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">Few pages (3)</h4>
         <twig:Molecules:Pagination:Base totalItems="30" itemsPerPage="10" currentPage="2" />
     </div>
 
-    <div class="grid gap-2">
-        <h4>Many pages — middle (page 8 of 20)</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">Many pages — middle (page 8 of 20)</h4>
         <twig:Molecules:Pagination:Base totalItems="200" itemsPerPage="10" currentPage="8" />
     </div>
 
-    <div class="grid gap-2">
-        <h4>With baseUrl</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">With baseUrl</h4>
         <twig:Molecules:Pagination:Base totalItems="50" itemsPerPage="10" currentPage="3" baseUrl="/catalog/category/shoes" />
     </div>
 
-    <div class="grid gap-2">
-        <h4>Single page — hidden (totalPages = 1)</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">Single page — hidden (totalPages = 1)</h4>
         <twig:Molecules:Pagination:Base totalItems="8" itemsPerPage="10" currentPage="1" />
-        <span class="text-sm text-grey">(nothing rendered when only 1 page)</span>
+        <span class="Story-label">(nothing rendered when only 1 page)</span>
     </div>
 
 </div>

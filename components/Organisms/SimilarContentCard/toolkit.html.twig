@@ -1,11 +1,12 @@
 {% set content = resources('/api/front/contents/1') %}
 
-<div class="grid gap-4">
-    <h4>Base</h4>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-lightest p-4 rounded-md">
+<div class="Story">
+<div class="Story-section">
+    <h4 class="Story-title">Base</h4>
+    <div class="Story-grid Story-grid--2 Story-stage">
 
-        <div class="grid gap-2 content-start">
-            <span class="text-xs text-grey">real data (content #1 — image falls back to placeholder unless one was added in the BO)</span>
+        <div class="Story-col">
+            <span class="Story-label">real data (content #1 — image falls back to placeholder unless one was added in the BO)</span>
             <twig:Organisms:SimilarContentCard:Base
                 id="1"
                 title="{{ content.i18ns.title|default('Care instructions') }}"
@@ -14,10 +15,11 @@
             />
         </div>
 
-        <div class="grid gap-2 content-start">
-            <span class="text-xs text-grey">manual data, no matching content (placeholder image)</span>
+        <div class="Story-col">
+            <span class="Story-label">manual data, no matching content (placeholder image)</span>
             <twig:Organisms:SimilarContentCard:Base id="99999" title="How to choose your size" date="2026-02-03" url="/content/99999" />
         </div>
 
     </div>
+</div>
 </div>

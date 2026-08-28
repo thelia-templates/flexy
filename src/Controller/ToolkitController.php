@@ -14,9 +14,9 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Controller;
 
+use FlexyBundle\Toolkit\ComponentStatus;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Finder;
-use FlexyBundle\Toolkit\ComponentStatus;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -25,20 +25,25 @@ use Symfony\Component\Routing\Attribute\Route;
 class ToolkitController extends AbstractController
 {
     /**
-     * The pages that are not components, by sidebar group. Each is listed only while its
-     * file is there: deleting the file is all it takes to retire a page from a project that
-     * no longer needs it. Docs come first, so `/toolkit` lands on the welcome page.
+     * The pages that are not components, by sidebar group. Each is listed only while its file
+     * is there, so deleting the file retires the page, navigation entry included.
+     *
+     * `standalone` renders the template whole and shows no status; without it the page is
+     * framed like a component, which is what the token pages need.
      */
     private const array SECTIONS = [
         'Docs' => [
-            'welcome' => 'Welcome',
-            'getting-started' => 'Getting started',
+            'welcome' => ['name' => 'Welcome', 'standalone' => true],
+            'getting-started' => ['name' => 'Getting started', 'standalone' => true],
         ],
         'Design tokens' => [
-            'breakpoints' => 'Breakpoints',
-            'layout' => 'Layout',
+            'breakpoints' => ['name' => 'Breakpoints'],
+            'layout' => ['name' => 'Layout'],
         ],
     ];
+
+    /** What `/toolkit` opens on, named rather than inherited from the order of SECTIONS. */
+    private const string HOME = 'welcome';
 
     private const array LABELS = [
         '2xs' => 'Mobile S',
@@ -57,10 +62,8 @@ class ToolkitController extends AbstractController
      * answers only where the kernel runs in debug, and says nothing about itself
      * anywhere else - a 404, not a 403, so its existence is not advertised either.
      *
-     * Each component gets its own page (so the preview iframe only ever has to
-     * render one component instead of the whole catalogue), sharing the same
-     * sidebar navigation. The slug is optional so `/toolkit` alone lands on a
-     * sensible default page.
+     * Each component gets its own page, so the preview iframe renders one component rather
+     * than the whole catalogue. `/toolkit` alone opens on HOME, or on the first page left.
      */
     #[Route('/{slug}', name: 'show', defaults: ['slug' => null])]
     public function show(Request $request, ?string $slug = null): Response
@@ -72,9 +75,9 @@ class ToolkitController extends AbstractController
         $grouped = $this->getGroupedComponents();
         $pages = $this->buildPages($grouped);
 
-        $slug ??= array_key_first($pages);
+        $slug ??= isset($pages[self::HOME]) ? self::HOME : array_key_first($pages);
 
-        if (!isset($pages[$slug])) {
+        if (null === $slug || !isset($pages[$slug])) {
             throw $this->createNotFoundException();
         }
 
@@ -143,12 +146,8 @@ class ToolkitController extends AbstractController
     }
 
     /**
-     * Flattens the grouped components into a slug-indexed map and prepends the pages that
-     * are not components, so every page resolves the same way. The first entry of the first
-     * group comes first, which is what makes it the page `/toolkit` lands on.
-     *
-     * A page marked `standalone` renders its own template whole, rather than being framed
-     * as a component story. Those carry neither `path` nor `slug`: nothing is read from disk.
+     * Flattens everything into one slug-indexed map, so every page resolves the same way. A
+     * section page carries no `path`, so none of them offers its source.
      *
      * @param array<string, list<array{twigPath: string, path: string, name: string, slug: string, status: string|null}>> $grouped
      *
@@ -159,27 +158,25 @@ class ToolkitController extends AbstractController
         $pages = [];
 
         foreach (self::SECTIONS as $group => $slugs) {
-            foreach ($slugs as $slug => $name) {
+            foreach ($slugs as $slug => $section) {
                 if (!is_file(\dirname(__DIR__, 2) . '/components/Toolkit/' . $slug . '.html.twig')) {
                     continue;
                 }
 
                 $status = ComponentStatus::of('Toolkit/' . $slug);
 
-                // `hidden` means the same thing here as it does for a component: gone from the
-                // toolkit. Without this the page stayed routable, listed, and rendered a status
-                // no stylesheet knows about.
+                // `hidden` means the same here as for a component: gone from the toolkit.
                 if (ComponentStatus::HIDDEN === $status) {
                     continue;
                 }
 
                 $pages[$slug] = [
-                    'name' => $name,
+                    'name' => $section['name'],
                     'category' => null,
                     'group' => $group,
                     'twigPath' => '@Flexy/Toolkit/' . $slug . '.html.twig',
                     'status' => $status,
-                    'standalone' => true,
+                    'standalone' => $section['standalone'] ?? false,
                 ];
             }
         }
@@ -194,28 +191,32 @@ class ToolkitController extends AbstractController
     }
 
     /**
-     * Keeps the sidebar groups the SECTIONS constant declares, so a heading disappears with
-     * its last page rather than standing empty.
+     * Keeps the groups SECTIONS declares, so a heading disappears with its last page. `group`
+     * is what marks a section page, not `standalone`, which a token page does not have.
      *
-     * A standalone page always carries its group: buildPages() sets both together.
+     * @param array<string, array{name: string, group?: string, status: string|null}> $pages
      *
-     * @param array<string, array{name: string, group?: string, standalone?: bool}> $pages
-     *
-     * @return array<string, array<string, array{name: string, group: string, standalone: bool}>>
+     * @return array<string, array<string, array{name: string, status: string|null}>>
      */
     private function groupSections(array $pages): array
     {
         $sections = [];
 
         foreach ($pages as $slug => $page) {
-            if ($page['standalone'] ?? false) {
-                $sections[$page['group']][$slug] = $page;
+            if (isset($page['group'])) {
+                $sections[$page['group']][$slug] = [
+                    'name' => $page['name'],
+                    'status' => $page['status'],
+                ];
             }
         }
 
         return $sections;
     }
 
+    /**
+     * @return list<array{name: string, rem: float, px: float, label: string|null}>
+     */
     private function getBreakpoints(): array
     {
         $variablesPath = \dirname(__DIR__, 2) . '/assets/styles/variables.css';

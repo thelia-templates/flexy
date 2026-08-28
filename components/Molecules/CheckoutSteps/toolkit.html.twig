@@ -1,7 +1,7 @@
-<div class="grid gap-8">
+<div class="Story">
 
-    <div class="flex flex-col gap-2">
-        <h4>current = 1</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">current = 1</h4>
         <twig:Molecules:CheckoutSteps:Base
             :steps="[{text: 'Your login', link: '#'}, {text: 'Your informations', link: '#'}]"
             current="1"
@@ -9,8 +9,8 @@
         />
     </div>
 
-    <div class="flex flex-col gap-2">
-        <h4>current = 2</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">current = 2</h4>
         <twig:Molecules:CheckoutSteps:Base
             :steps="[{text: 'Your login', link: '#'}, {text: 'Your informations', link: '#'}]"
             current="2"
@@ -18,8 +18,8 @@
         />
     </div>
 
-    <div class="flex flex-col gap-2">
-        <h4>full cart mode (4 steps + mini summary of the session cart)</h4>
+    <div class="Story-section">
+        <h4 class="Story-title">full cart mode (4 steps + mini summary of the session cart)</h4>
         <twig:Molecules:CheckoutSteps:Base
             :steps="[{text: 'Your cart', link: '#'}, {text: 'Delivery', link: '#'}, {text: 'Payment', link: '#'}, {text: 'Confirmation'}]"
             current="2"

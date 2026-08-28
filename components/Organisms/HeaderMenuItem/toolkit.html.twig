@@ -1,46 +1,46 @@
-<div class="grid gap-12">
+<div class="Story">
 
-    <div class="grid gap-4">
-        <h4>Base (plain link, no API call)</h4>
-        <div class="relative flex h-19.5 px-6 bg-white shadow-md">
-            <ul class="flex gap-8 list-none h-full">
+    <div class="Story-section">
+        <h4 class="Story-title">Base (plain link, no API call)</h4>
+        <div class="HeaderMock">
+            <ul class="HeaderMock-list">
                 <twig:Organisms:HeaderMenuItem:Base title="New arrivals" href="/new-arrivals" />
                 <twig:Organisms:HeaderMenuItem:Base title="Sales" href="/sales" />
             </ul>
         </div>
     </div>
 
-    <div class="grid gap-4">
-        <h4>Category (mega-menu, subcategories only)</h4>
-        <div class="relative flex h-19.5 px-6 bg-white shadow-md">
-            <ul class="flex gap-8 list-none h-full">
+    <div class="Story-section">
+        <h4 class="Story-title">Category (mega-menu, subcategories only)</h4>
+        <div class="HeaderMock">
+            <ul class="HeaderMock-list">
                 <twig:Organisms:HeaderMenuItem:Category id="1" title="Living Room" href="/living-room" />
             </ul>
         </div>
     </div>
 
-    <div class="grid gap-4">
-        <h4>Category — no title/href (auto-resolved from id)</h4>
-        <div class="relative flex h-19.5 px-6 bg-white shadow-md">
-            <ul class="flex gap-8 list-none h-full">
+    <div class="Story-section">
+        <h4 class="Story-title">Category — no title/href (auto-resolved from id)</h4>
+        <div class="HeaderMock">
+            <ul class="HeaderMock-list">
                 <twig:Organisms:HeaderMenuItem:Category id="1" />
             </ul>
         </div>
     </div>
 
-    <div class="grid gap-4">
-        <h4>Folder (mega-menu, subfolders only)</h4>
-        <div class="relative flex h-19.5 px-6 bg-white shadow-md">
-            <ul class="flex gap-8 list-none h-full">
+    <div class="Story-section">
+        <h4 class="Story-title">Folder (mega-menu, subfolders only)</h4>
+        <div class="HeaderMock">
+            <ul class="HeaderMock-list">
                 <twig:Organisms:HeaderMenuItem:Folder id="1" title="Information" href="/information" />
             </ul>
         </div>
     </div>
 
-    <div class="grid gap-4">
-        <h4>Folder with includeContents (subfolders + contents mixed)</h4>
-        <div class="relative flex h-19.5 px-6 bg-white shadow-md">
-            <ul class="flex gap-8 list-none h-full">
+    <div class="Story-section">
+        <h4 class="Story-title">Folder with includeContents (subfolders + contents mixed)</h4>
+        <div class="HeaderMock">
+            <ul class="HeaderMock-list">
                 <twig:Organisms:HeaderMenuItem:Folder id="1" title="Information" href="/information" includeContents="{{ true }}" />
             </ul>
         </div>

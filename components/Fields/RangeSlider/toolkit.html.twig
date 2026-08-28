@@ -1,23 +1,23 @@
-<div class="grid gap-12">
+<div class="Story">
 
     {# ── Base ───────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Base</h4>
-        <div class="grid gap-8 p-4 rounded-md max-w-md">
+    <div class="Story-section">
+        <h4 class="Story-title">Base</h4>
+        <div class="Story-section Story-stage Story-stage--narrow">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">default (full range 0–100)</span>
+            <div class="Story-col">
+                <span class="Story-label">default (full range 0–100)</span>
                 <twig:Fields:RangeSlider:Base nameMin="toolkit-a-min" nameMax="toolkit-a-max" :min="0" :max="100" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">narrowed (20–70)</span>
+            <div class="Story-col">
+                <span class="Story-label">narrowed (20–70)</span>
                 <twig:Fields:RangeSlider:Base nameMin="toolkit-b-min" nameMax="toolkit-b-max" :min="0" :max="100" :valueMin="20" :valueMax="70" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">stepped (0–500, step 50)</span>
+            <div class="Story-col">
+                <span class="Story-label">stepped (0–500, step 50)</span>
                 <twig:Fields:RangeSlider:Base nameMin="toolkit-c-min" nameMax="toolkit-c-max" :min="0" :max="500" :step="50" :valueMin="100" :valueMax="350" />
             </div>
 

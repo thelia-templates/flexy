@@ -1,11 +1,13 @@
-<div class="grid gap-4">
-    <h4>Base (LiveComponent — activation code form)</h4>
-    <span class="text-xs text-grey">
+<div class="Story">
+<div class="Story-section">
+    <h4 class="Story-title">Base (LiveComponent — activation code form)</h4>
+    <span class="Story-label">
         The account comes from the pending registration in the session, never from a prop, so
         submitting here reports that no registration was found — the real flow is reached from
         <code>/customer/activation</code> after the second registration step.
     </span>
-    <div class="max-w-md bg-lightest p-4 rounded-md">
+    <div class="Story-stage Story-stage--narrow">
         <twig:Forms:RegisterValidationCode:Base />
     </div>
+</div>
 </div>

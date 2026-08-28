@@ -8,46 +8,46 @@
 {% set orderProduct = {id: 99999, i18ns: {title: 'Organic cotton t-shirt', chapo: 'Crew neck, straight cut'}, publicUrl: '/test-product'} %}
 {% set orderPse     = {attributeCombinations: [{attribute: {i18ns: {title: 'Size'}}, attributeAv: {i18ns: {title: 'M'}}}]} %}
 
-<div class="grid gap-12">
+<div class="Story">
 
     {# ── Base ───────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Base</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 bg-lightest p-4 rounded-md">
+    <div class="Story-section">
+        <h4 class="Story-title">Base</h4>
+        <div class="Story-grid Story-grid--4 Story-stage">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">real data (productId)</span>
+            <div class="Story-col">
+                <span class="Story-label">real data (productId)</span>
                 <twig:Organisms:ProductCard:Base productId="1" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">New tag</span>
+            <div class="Story-col">
+                <span class="Story-label">New tag</span>
                 <twig:Organisms:ProductCard:Base :product="base|merge({productSaleElements: [pseNew]})" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with discount</span>
+            <div class="Story-col">
+                <span class="Story-label">with discount</span>
                 <twig:Organisms:ProductCard:Base :product="base|merge({productSaleElements: [psePromo]})" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">New + discount</span>
+            <div class="Story-col">
+                <span class="Story-label">New + discount</span>
                 <twig:Organisms:ProductCard:Base :product="base|merge({productSaleElements: [pseNewPromo]})" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">color variants</span>
+            <div class="Story-col">
+                <span class="Story-label">color variants</span>
                 <twig:Organisms:ProductCard:Base :product="withColors" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">wishlist (not added)</span>
+            <div class="Story-col">
+                <span class="Story-label">wishlist (not added)</span>
                 <twig:Organisms:ProductCard:Base :product="base" wishButton />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">wishlist (added)</span>
+            <div class="Story-col">
+                <span class="Story-label">wishlist (added)</span>
                 <twig:Organisms:ProductCard:Base :product="base" wishButton inWishlist />
             </div>
 
@@ -56,12 +56,12 @@
 
     {# ── Order ──────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Order</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">Order</h4>
+        <div class="Story-grid Story-grid--4">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">real data (productId)</span>
+            <div class="Story-col">
+                <span class="Story-label">real data (productId)</span>
                 <twig:Organisms:ProductCard:Order :orderProduct="{
                     productId: 1,
                     productSaleElementsId: 1,
@@ -72,8 +72,8 @@
                 }" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">without discount</span>
+            <div class="Story-col">
+                <span class="Story-label">without discount</span>
                 <twig:Organisms:ProductCard:Order
                     :orderProduct="{productId: 99999, productSaleElementsId: 99999, productSaleElementsRef: 'REF-001', quantity: 2, wasInPromo: false, price: 25.99}"
                     :product="orderProduct"
@@ -81,8 +81,8 @@
                 />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with discount</span>
+            <div class="Story-col">
+                <span class="Story-label">with discount</span>
                 <twig:Organisms:ProductCard:Order
                     :orderProduct="{productId: 99999, productSaleElementsId: 99999, productSaleElementsRef: 'REF-001', quantity: 1, wasInPromo: true, price: 49.00, promoPrice: 29.99}"
                     :product="orderProduct"
@@ -90,8 +90,8 @@
                 />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">without quantity</span>
+            <div class="Story-col">
+                <span class="Story-label">without quantity</span>
                 <twig:Organisms:ProductCard:Order
                     :orderProduct="{productId: 99999, productSaleElementsId: 99999, productSaleElementsRef: 'REF-001', quantity: 0, wasInPromo: false, price: 12.50}"
                     :product="orderProduct"
@@ -104,27 +104,27 @@
 
     {# ── Search ─────────────────────────────────────────────────────────── #}
 
-    <div class="grid gap-4">
-        <h4>Search</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="Story-section">
+        <h4 class="Story-title">Search</h4>
+        <div class="Story-grid Story-grid--2">
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">real data (productId)</span>
+            <div class="Story-col">
+                <span class="Story-label">real data (productId)</span>
                 <twig:Organisms:ProductCard:Search productId="1" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">without discount</span>
+            <div class="Story-col">
+                <span class="Story-label">without discount</span>
                 <twig:Organisms:ProductCard:Search :product="base" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">with discount</span>
+            <div class="Story-col">
+                <span class="Story-label">with discount</span>
                 <twig:Organisms:ProductCard:Search :product="base|merge({productSaleElements: [psePromo]})" />
             </div>
 
-            <div class="grid gap-2 content-start">
-                <span class="text-xs text-grey">long name, truncated by its column</span>
+            <div class="Story-col">
+                <span class="Story-label">long name, truncated by its column</span>
                 <twig:Organisms:ProductCard:Search :product="base|merge({i18ns: {title: 'Organic cotton t-shirt with a deliberately very long product name'}})" />
             </div>
 
