@@ -12,28 +12,48 @@ import 'leaflet/dist/leaflet.css';
  */
 export default class extends Controller {
   static targets = ['map', 'mapView', 'listView', 'mapButton', 'listButton'];
-  static values = { view: { type: String, default: 'list' } };
 
-  async initialize() {
-    this.component = await getComponent(this.element);
+  // A plain property, not a Stimulus value: a value is backed by a data attribute, and the
+  // morph drops it on every re-render since the server never renders it. Nothing outside this
+  // controller sets the view.
+  view = 'list';
+
+  initialize() {
+    this.syncView = this.syncView.bind(this);
+    this.ready = getComponent(this.element).then((component) => {
+      this.component = component;
+    });
   }
 
-  connect() {
+  async connect() {
+    this.disconnected = false;
     this.onPickupsUpdate = this.onPickupsUpdate.bind(this);
     this.onPickupSelected = this.onPickupSelected.bind(this);
-    this.syncView = this.syncView.bind(this);
     window.addEventListener('pickuppoint:update', this.onPickupsUpdate);
     window.addEventListener('pickup:selected', this.onPickupSelected);
-    this.element.addEventListener('live:render:finished', this.syncView);
 
     this.markers = {};
     this.syncView();
+
+    // Subscribed here rather than in initialize(), which runs once: Stimulus keeps the same
+    // controller instance across a disconnect, so a subscription made there would be dropped
+    // by the first disconnect and never restored.
+    await this.ready;
+
+    if (this.disconnected) {
+      return;
+    }
+
+    // On the component object, not the DOM: the package dispatches live:appear alone, and the
+    // live:render events this once listened for were withdrawn in 2.5.0.
+    this.component.on('render:finished', this.syncView);
   }
 
   disconnect() {
+    this.disconnected = true;
     window.removeEventListener('pickuppoint:update', this.onPickupsUpdate);
     window.removeEventListener('pickup:selected', this.onPickupSelected);
-    this.element.removeEventListener('live:render:finished', this.syncView);
+    this.component?.off('render:finished', this.syncView);
 
     try {
       this.map?.remove();
@@ -58,17 +78,17 @@ export default class extends Controller {
   }
 
   showMap() {
-    this.viewValue = 'map';
+    this.view = 'map';
     this.syncView();
   }
 
   showList() {
-    this.viewValue = 'list';
+    this.view = 'list';
     this.syncView();
   }
 
   syncView() {
-    const mapShown = this.viewValue === 'map';
+    const mapShown = this.view === 'map';
 
     this.mapViewTarget.classList.toggle('hidden', !mapShown);
     this.listViewTarget.classList.toggle('hidden', mapShown);
