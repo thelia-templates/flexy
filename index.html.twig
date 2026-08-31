@@ -11,34 +11,16 @@
 {% block body %}
     {{ theme_hook('home.top') }}
 
-    <twig:Layouts:CrossSelling:Base categoryId="3" title="{{ 'Last seen products'|trans }}" />
+    <twig:Layouts:CrossSelling:Base :filters="{'productSaleElements.newness': true}" title="{{ 'New products'|trans }}" />
 
     <div class="bg-lighter">
-        <twig:Layouts:CrossSelling:Base categoryId="5" title="{{ 'Popular products'|trans }}" />
-    </div>
-    <div class="bg-lightest">
-        <twig:Layouts:CrossSelling:Base categoryId="6" title="{{ 'Promotions'|trans }}" />
+        <twig:Layouts:CrossSelling:Base :filters="{'productSaleElements.promo': true}" title="{{ 'Promotions'|trans }}" />
     </div>
 
     <twig:Layouts:ProductCategory:Base title="{{ 'Our product categories'|trans }}" />
 
-    {% set reviews = [4, 2, 3]|map((note) => ({
-        author: 'Prénom N.',
-        review: '“Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.”',
-        note: note,
-        date: 'JJ/MM/AAAA',
-    })) %}
-
-    <div class="bg-lightest">
-        <twig:Layouts:Review:Base
-            title="{{ 'Our customers speak about us'|trans }}"
-            :reviews="reviews"
-            :button="{label: 'See all reviews'|trans, href: '#'}"
-        />
-    </div>
-
     <div class="bg-lighter">
-        <twig:Layouts:SimilarContent:Base title="{{ 'Our news'|trans }}" :button="{label: 'See all news'|trans, href: '#'}" />
+        <twig:Layouts:SimilarContent:Base title="{{ 'Our news'|trans }}" />
     </div>
 
     {{ theme_hook('home.bottom') }}
