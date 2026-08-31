@@ -35,10 +35,6 @@
     }}) }}
 
     <div class="PseSelector-heading">
-        <div class="PseSelector-reviews">
-            <twig:Molecules:Score:Base :score="3" />
-            <span class="indication text-grey">12 {{ 'reviews'|trans }}</span>
-        </div>
         <twig:Molecules:Tag:Stock
             color="{{ outOfStock ? 'out' : 'in' }}"
             customText="{{ (outOfStock ? 'Out of stock' : 'In stock')|trans }}"
