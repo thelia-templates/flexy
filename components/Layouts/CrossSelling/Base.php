@@ -28,6 +28,9 @@ class Base
     public int|string|null $categoryId = null;
     public int $itemsPerPage = self::DEFAULT_ITEMS_PER_PAGE;
 
+    /** @var array<string, mixed> extra /api/front/products query parameters, e.g. {'productSaleElements.promo': true} */
+    public array $filters = [];
+
     /** @var ProductDTO[] */
     public array $products = [];
 
@@ -41,9 +44,11 @@ class Base
     public function mount(
         int|string|null $categoryId = null,
         int $itemsPerPage = self::DEFAULT_ITEMS_PER_PAGE,
+        array $filters = [],
     ): void {
         $this->categoryId = $categoryId;
         $this->itemsPerPage = $itemsPerPage;
+        $this->filters = $filters;
 
         $params = [
             'page' => 1,
@@ -54,6 +59,8 @@ class Base
         if ($this->categoryId !== null) {
             $params['productCategories.category.id'] = $this->categoryId;
         }
+
+        $params = array_merge($params, $this->filters);
 
         $this->products = ProductDTO::fromCollection(
             $this->dataAccessService->resources('/api/front/products', $params) ?? [],
