@@ -21,6 +21,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 use Thelia\Core\Event\Product\VirtualProductOrderDownloadResponseEvent;
 use Thelia\Core\Event\TheliaEvents;
+use Thelia\Core\Template\Exception\ResourceNotFoundException;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\Order;
 use Thelia\Model\OrderProductQuery;
@@ -84,6 +85,13 @@ class AccountOrderController extends FlexyController
     {
         $this->findCustomerOrder($orderId);
 
+        // A quote is drawn from a `quotation` document of the active PDF template, and the
+        // default template ships an invoice and a delivery slip only. A shop that has not
+        // added one has nothing to render here, which is a 404 and not a server error.
+        if (!$this->pdfDocumentExists('quotation')) {
+            throw new NotFoundHttpException();
+        }
+
         return $this->generateOrderPdf(
             $eventDispatcher,
             $orderId,
@@ -137,6 +145,25 @@ class AccountOrderController extends FlexyController
         }
 
         return $response;
+    }
+
+    /**
+     * Whether the active PDF template can render this document. The parser resolver answers
+     * for every engine the shop has, so a `quotation.html.twig` and a Smarty `quotation.html`
+     * both count, and neither extension is spelled out here.
+     */
+    private function pdfDocumentExists(string $document): bool
+    {
+        try {
+            $this->parserResolver->getParser(
+                $this->templateHelper->getActivePdfTemplate()->getAbsolutePath(),
+                $document,
+            );
+        } catch (ResourceNotFoundException) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
