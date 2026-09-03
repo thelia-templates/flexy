@@ -50,3 +50,16 @@
   @apply paragraph-4;
   color: var(--color-grey-dark);
 }
+
+/* Logo of the listing's subject (a brand), above the title. Capped rather than sized: a shop
+   uploads whatever it has, and the box keeps the ratio of any of them. */
+.Subheader-logo {
+  margin-bottom: 1.5rem;
+}
+
+.Subheader-logo img {
+  width: auto;
+  max-width: 100%;
+  max-height: 5rem;
+  object-fit: contain;
+}

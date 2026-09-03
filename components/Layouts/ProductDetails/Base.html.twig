@@ -27,6 +27,12 @@
     <section id="infos" class="ProductPage-infos">
         <h1 class="h3 mb-3">{{ title }}</h1>
 
+        {% if brandTitle and brandUrl %}
+            <p class="ProductPage-brand">
+                <twig:Molecules:Link:Base href="{{ brandUrl }}" customText="{{ brandTitle }}" size="small" />
+            </p>
+        {% endif %}
+
         {% if chapo %}
             <div class="paragraph-3 text-grey">{{ chapo }}</div>
         {% endif %}

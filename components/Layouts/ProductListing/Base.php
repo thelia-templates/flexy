@@ -55,6 +55,14 @@ class Base extends AbstractController
     #[LiveProp]
     public ?int $categoryId = null;
 
+    /**
+     * Set by the brand page. Narrows the listing to one brand, and nothing else: Thelia defines
+     * its product filters per category, so a brand listing has no facet to offer (see
+     * getFilters()) — only the sort and the pagination.
+     */
+    #[LiveProp]
+    public ?int $brandId = null;
+
     #[LiveProp]
     public int $page = 1;
 
@@ -109,11 +117,13 @@ class Base extends AbstractController
 
     public function mount(
         ?int $categoryId = null,
+        ?int $brandId = null,
         bool $promo = false,
         bool $newness = false,
         ?string $searchTerm = null,
     ): void {
         $this->categoryId = $categoryId;
+        $this->brandId = $brandId;
         $this->promo = $promo;
         $this->newness = $newness;
         $this->searchTerm = $searchTerm;
@@ -302,6 +312,10 @@ class Base extends AbstractController
 
         if ($this->categoryId !== null) {
             $parameters['productCategories.category.id'] = $this->categoryId;
+        }
+
+        if ($this->brandId !== null) {
+            $parameters['brand.id'] = $this->brandId;
         }
 
         if ($this->promo) {

@@ -17,6 +17,10 @@
     {# Cross-selling browses the category the product is filed under by default. #}
     {% set defaultCategory = product.productCategories|filter(productCategory => productCategory.defaultCategory)|first.category|default(null) %}
 
+    {# The brand of a product reaches its own resource with its position only, so the brand is
+       read here — filtered on visibility, since a brand the merchant hid has no page to link to. #}
+    {% set brand = resources('/api/front/brands', {'products.id': productId, visible: true})|first|default(null) %}
+
     {{ theme_hook('product.top', {product: product}) }}
 
     <div class="ProductPage">
@@ -28,6 +32,7 @@
             <div class="ProductPage-grid">
                 <twig:Layouts:ProductDetails:Base
                     :product="product"
+                    :brand="brand"
                     title="{{ SEOnePageH1()|default(null) ?: attr('product', 'title') }}"
                 />
                 {{ theme_hook('product.details.bottom', {product: product}) }}

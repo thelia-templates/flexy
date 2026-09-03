@@ -2,16 +2,21 @@
 {# @prop tag string HTML tag for the heading. Defaults to 'h1' #}
 {# @prop container string Which container-* utility wraps the text:
     - 'double-2' (default): container-double-2, aligned on the product grid of Layouts/ProductListing — the sidebar slot is left empty on purpose so the title starts where the products do
-    - 'large': container-l, for a category showing sub-categories instead of a product listing #}
+    - 'large': container-l, for a listing with no filter sidebar to align with — a category showing sub-categories, or a brand #}
 {# @prop description string|null Optional rich text shown below the title #}
+{# @prop logo string|null Optional pre-rendered image markup shown above the title, for a listing whose subject has a visual identity of its own (a brand logo). Pass the output of getImages() with no_placeholder so a subject without an image renders none #}
 {# @prop readMore boolean Show an anchor to the #description block further down the page. Defaults to false #}
 {# @prop productCount int|null Number of products in the listing, shown below lg only #}
-{# @prop filtersId string|null Id of the Layouts/ProductListing section, enables the "sort & filter" trigger below lg #}
+{# @prop filtersId string|null Id of the Layouts/ProductListing section, enables the trigger that opens its panel below lg #}
+{# @prop hasFilters boolean Whether the panel behind filtersId holds facets on top of the sort. Drives the trigger's wording and icon, so a panel that only sorts does not offer to filter. Defaults to true #}
 {# @prop breadcrumb array Breadcrumb items, forwarded to Molecules:Breadcrumb:Base. Defaults to empty (no breadcrumb rendered) #}
-{% props title, tag = 'h1', container = 'double-2', description = null, readMore = false, productCount = null, filtersId = null, breadcrumb = [] %}
+{% props title, tag = 'h1', container = 'double-2', description = null, logo = null, readMore = false, productCount = null, filtersId = null, hasFilters = true, breadcrumb = [] %}
 
 {% set text %}
     <div class="Subheader-content">
+        {% if logo %}
+            <div class="Subheader-logo">{{ logo|raw }}</div>
+        {% endif %}
         <{{ tag }} class="Subheader-title">{{ title }}</{{ tag }}>
         {% if description %}
             <div class="Subheader-description">{{ description|raw }}</div>
@@ -27,10 +32,13 @@
                     <span class="Subheader-count" {{ stimulus_controller('Layouts--Subheader--count') }}><span {{ stimulus_target('Layouts--Subheader--count', 'value') }}>{{ productCount }}</span> {{ 'product(s)'|trans }}</span>
                 {% endif %}
                 {% if filtersId %}
-                    {# The default button radius is already a pill, `round` would make it a circular icon button #}
+                    {# The default button radius is already a pill, `round` would make it a circular
+                       icon button. A sort-only panel gets no icon: the set carries a filter control
+                       and no sort glyph, and the filter one would announce something the panel
+                       does not hold. #}
                     <twig:Molecules:Button:Base
-                        text="{{ 'Filter & Sort'|trans }}"
-                        icon_left="filter"
+                        text="{{ (hasFilters ? 'Filter & Sort' : 'Sort')|trans }}"
+                        :icon_left="hasFilters ? 'filter' : null"
                         color="secondary"
                         class="ms-auto"
                         {{ ...stimulus_controller('Molecules--MobileDrawer--open', {id: filtersId}) }}

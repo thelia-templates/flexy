@@ -94,6 +94,14 @@ liip_imagine:
       filters:
         downscale:
           max: [300, 300]
+    # Brand logo in the brand page heading, capped at the 80px box the heading gives it,
+    # served at 2x. `downscale`, not `thumbnail`: a logo smaller than the box is left alone
+    # instead of being blown up.
+    brand_logo:
+      quality: 82
+      filters:
+        downscale:
+          max: [320, 160]
     # Images referenced by sitemap-images.xml. No `format` here on purpose: the theme serves
     # WebP through content negotiation and keeps the source format as the fallback.
     sitemap:
