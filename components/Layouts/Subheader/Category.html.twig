@@ -2,16 +2,20 @@
 {# @prop tag string HTML tag for the heading. Defaults to 'h1' #}
 {# @prop container string Which container-* utility wraps the text:
     - 'double-2' (default): container-double-2, aligned on the product grid of Layouts/ProductListing — the sidebar slot is left empty on purpose so the title starts where the products do
-    - 'large': container-l, for a category showing sub-categories instead of a product listing #}
+    - 'large': container-l, for a listing with no filter sidebar to align with — a category showing sub-categories, or a brand #}
 {# @prop description string|null Optional rich text shown below the title #}
+{# @prop logo string|null Optional pre-rendered image markup shown above the title, for a listing whose subject has a visual identity of its own (a brand logo). Pass the output of getImages() with no_placeholder so a subject without an image renders none #}
 {# @prop readMore boolean Show an anchor to the #description block further down the page. Defaults to false #}
 {# @prop productCount int|null Number of products in the listing, shown below lg only #}
 {# @prop filtersId string|null Id of the Layouts/ProductListing section, enables the "sort & filter" trigger below lg #}
 {# @prop breadcrumb array Breadcrumb items, forwarded to Molecules:Breadcrumb:Base. Defaults to empty (no breadcrumb rendered) #}
-{% props title, tag = 'h1', container = 'double-2', description = null, readMore = false, productCount = null, filtersId = null, breadcrumb = [] %}
+{% props title, tag = 'h1', container = 'double-2', description = null, logo = null, readMore = false, productCount = null, filtersId = null, breadcrumb = [] %}
 
 {% set text %}
     <div class="Subheader-content">
+        {% if logo %}
+            <div class="Subheader-logo">{{ logo|raw }}</div>
+        {% endif %}
         <{{ tag }} class="Subheader-title">{{ title }}</{{ tag }}>
         {% if description %}
             <div class="Subheader-description">{{ description|raw }}</div>
