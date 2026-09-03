@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% set brandId = attr('brand', 'id') %}
+{% set brandTitle = attr('brand', 'title') %}
+{% set chapo = attr('brand', 'chapo') %}
+
+{% set ogImages = getImagesData({
+    source_id: brandId,
+    source_type: 'brand',
+    filters: 'default',
+    limit: 1,
+}) %}
+
+{% block og_image %}{{ ((ogImages|first)?.sources|first)?.url ?: parent() }}{% endblock %}
+
+{# SEOne ships an SEO model per catalogue entity but none for a brand, so this view falls back
+   to its default one: the shop name as the title, the shop description as the meta description
+   and an empty breadcrumb. The page therefore names itself, here and in the body. These are
+   still only SEOne's own fallbacks: a module bringing a brand SEO model keeps the last word. #}
+{% block title %}{{ brandTitle }}{% endblock %}
+{% block meta_description %}{{ chapo|striptags|trim }}{% endblock %}
+
+{% block body %}
+    {% set description = attr('brand', 'description') %}
+    {% set postscriptum = attr('brand', 'postscriptum') %}
+    {% set hasEditorialContent = description or postscriptum %}
+
+    {# A brand often has no logo, and no_placeholder answers null rather than an empty <img> #}
+    {% set logo = getImages({
+        source_type: 'brand',
+        source_id: brandId,
+        no_placeholder: true,
+        filters: 'brand_logo',
+        alt: brandTitle,
+        img_attrs: {loading: 'eager'},
+    }) %}
+
+    {# Read as a resource only to feed the brand hook points with the same object shape as the
+       rest of the theme's extension contract; the page itself reads its own fields through
+       attr(), which needs no API round-trip. #}
+    {% set brand = resources('/api/front/brands/' ~ brandId) %}
+
+    {% set breadcrumb = breadcrumb|default([]) ?: [{title: brandTitle, url: brand.publicUrl|default(null)}] %}
+
+    {{ theme_hook('brand.top', {brand: brand}) }}
+
+    {# container 'large': Thelia defines its product filters per category, so a brand listing has
+       no sidebar to align with — same geometry as the all-products page. filtersId all the same:
+       below lg that trigger is the only way to reach the sort. #}
+    <twig:Layouts:Subheader:Category
+        title="{{ SEOnePageH1()|default(null) ?: brandTitle }}"
+        description="{{ chapo }}"
+        :logo="logo"
+        :readMore="hasEditorialContent"
+        :breadcrumb="breadcrumb"
+        container="large"
+        filtersId="product-listing"
+        :productCount="loopCount('product', {brand: brandId, visible: 1})"
+    />
+
+    <twig:Layouts:ProductListing:Base :brandId="brandId" />
+
+    {% if hasEditorialContent %}
+        <div id="description" class="container-single-3 pb-20 lg:pb-30">
+            <div class="wysiwyg wysiwyg-theme flex flex-col gap-10 min-w-0">
+                {% if description %}
+                    <div>{{ description|raw }}</div>
+                {% endif %}
+                <twig:Organisms:Blocks:Base itemType="brand" itemId="{{ brandId }}" />
+                {% if postscriptum %}
+                    <small>{{ postscriptum|raw }}</small>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    {{ theme_hook('brand.bottom', {brand: brand}) }}
+{% endblock %}
