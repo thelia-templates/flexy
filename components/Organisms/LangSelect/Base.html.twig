@@ -21,7 +21,7 @@
             {{ stimulus_action('Organisms--LangSelect--base', 'toggle', 'click') }}
             {{ stimulus_target('Organisms--LangSelect--base', 'toggler') }}
         >
-            {{ ux_icon('flags:' ~ currentLang.code, { class: 'LangSelect-flag' }) }}
+            {{ ux_icon('circle-flags:' ~ currentLang.code, { class: 'LangSelect-flag' }) }}
             {{ currentLang.code }}
             {{ ux_icon('chevron-small-down', { class: 'w-6 h-6' }) }}
         </button>
@@ -33,7 +33,7 @@
                             href="{{ switchUrls[lang.locale] ?? '' }}"
                             class="LangSelect-lang{% if currentLang.code == lang.code %} active{% endif %}"
                         >
-                            {{ ux_icon('flags:' ~ lang.code, { class: 'LangSelect-flag' }) }}
+                            {{ ux_icon('circle-flags:' ~ lang.code, { class: 'LangSelect-flag' }) }}
                             <span>{{ lang.title }}</span>
                             {% if currentLang.code == lang.code %}
                                 {{ ux_icon('checkmark', { class: 'LangSelect-check' }) }}
@@ -46,7 +46,7 @@
     </div>
 
     <twig:Molecules:HeaderButton:Base
-        icon="{{ 'flags:' ~ currentLang.code }}"
+        icon="{{ 'circle-flags:' ~ currentLang.code }}"
         color="light"
         small="true"
         text="{{ currentLang.title }}"
@@ -70,7 +70,7 @@
                             href="{{ switchUrls[lang.locale] ?? '' }}"
                             class="LangSelect-mobileItem{% if currentLang.code == lang.code %} active{% endif %}"
                         >
-                            {{ ux_icon('flags:' ~ lang.code, { class: 'LangSelect-flag' }) }}
+                            {{ ux_icon('circle-flags:' ~ lang.code, { class: 'LangSelect-flag' }) }}
                             <span>{{ lang.title }}</span>
                             {% if currentLang.code == lang.code %}
                                 {{ ux_icon('checkmark', { class: 'LangSelect-check' }) }}
