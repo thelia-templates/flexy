@@ -62,6 +62,19 @@ class Base
     #[LiveProp]
     public ?string $title = null;
 
+    /**
+     * The brand of the product, flattened to the two strings the heading renders. Kept as
+     * LiveProps rather than mounted once: the component re-renders on every action, and a
+     * plain mount argument would be gone from the second render on. The front product
+     * resource carries the brand's position only, so the page reads the brand itself and
+     * passes it in — already filtered on visibility.
+     */
+    #[LiveProp]
+    public ?string $brandTitle = null;
+
+    #[LiveProp]
+    public ?string $brandUrl = null;
+
     #[LiveProp]
     public array $images = [];
 
@@ -88,12 +101,14 @@ class Base
     ) {
     }
 
-    public function mount(array $product, ?string $title = null): void
+    public function mount(array $product, ?string $title = null, ?array $brand = null): void
     {
         $this->productId = (int) $product['id'];
         $this->virtual = (bool) ($product['virtual'] ?? false);
         $this->chapo = $product['i18ns']['chapo'] ?? null;
         $this->title = $title ?: ($product['i18ns']['title'] ?? null);
+        $this->brandTitle = $brand['i18ns']['title'] ?? null;
+        $this->brandUrl = $brand['publicUrl'] ?? null;
         // Keyed by attribute id upstream; re-indexed so the LiveProp round-trips as a list.
         $this->productAttrs = array_values($this->pseAccessService->attrAvByProduct($this->productId));
 

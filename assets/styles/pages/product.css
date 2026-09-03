@@ -56,6 +56,12 @@
   }
 }
 
+/* Brand of the product, between its title and its chapo. Carries the same 12px gap the title
+   utility gives, so the three lines keep one rhythm. */
+.ProductPage-brand {
+  margin-bottom: 0.75rem;
+}
+
 .ProductPage-features {
   display: grid;
   grid-template-columns: auto 1fr;
