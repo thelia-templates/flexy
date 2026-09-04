@@ -1,6 +1,10 @@
 {# @prop orderProducts array Order lines, resolved in one batch and handed to each card #}
 {# @prop order array|null The owning order, carried only to feed the per-line hook points #}
-{% props orderProducts = [], order = null %}
+{# @prop downloadRoute string The route serving a virtual line's file. The account one by
+   default; a page reached without an account passes its own, which is guarded by whatever
+   let the visitor in — the account route would answer nothing to them. #}
+{# @prop downloadRouteParams array Whatever that route needs besides the line id #}
+{% props orderProducts = [], order = null, downloadRoute = 'account_order_download', downloadRouteParams = {} %}
 {% for line in this.lines %}
 	{{ theme_hook('account-order.item.top', {order: order, orderProduct: line.orderProduct}) }}
 	<twig:Organisms:ProductCard:Order
@@ -18,7 +22,7 @@
 		and order is not null and order.orderStatus.code in ['paid', 'processing', 'sent'] %}
 		<twig:Molecules:Button:Base
 			text="{{ 'Download my file'|trans }}"
-			href="{{ path('account_order_download', {orderProductId: line.orderProduct.id}) }}"
+			href="{{ path(downloadRoute, downloadRouteParams|merge({orderProductId: line.orderProduct.id})) }}"
 			icon_right="download"
 			class="mb-6 w-max"
 		/>

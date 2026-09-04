@@ -33,12 +33,27 @@ class FlexyBundleExtension extends AbstractExtension
         return [
             new TwigFunction('getCurrentCustomer', [$this, 'getCurrentCustomer']),
             new TwigFunction('current_locale', [$this, 'currentLocale']),
+            new TwigFunction('hasCustomerAccount', [$this, 'hasCustomerAccount']),
         ];
     }
 
     public function getCurrentCustomer(): ?Customer
     {
         return $this->securityContext->getCustomerUser();
+    }
+
+    /**
+     * Whether the visitor signed into an account, as opposed to merely being in the
+     * session.
+     *
+     * A guest checking out sits under the same session key as a signed-in customer, so
+     * anything that offers the account area — the profile menu, an "my orders" link —
+     * has to ask this rather than whether a customer is there at all: those pages are
+     * closed to a guest, and offering them would only lead to the login page.
+     */
+    public function hasCustomerAccount(): bool
+    {
+        return $this->securityContext->hasAuthenticatedCustomerUser();
     }
 
     /**

@@ -11,6 +11,28 @@
             <span class="block">{{ 'Your payment has been confirmed'|trans }}</span>
             <span>{{ "We'll do everything we can to send your order as quickly as possible!"|trans }}</span>
         </p>
+        {# An order placed without an account: the only way back to it is the link, which
+           the buyer also receives by email. Offered here while it is still on screen. #}
+        {% if guest_order_token|default(null) %}
+            <div class="flex flex-col items-center gap-4 mb-8">
+                <p class="paragraph-3">
+                    {{ 'A link to follow your order has been sent to your email address.'|trans }}
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <twig:Molecules:Button:Base
+                        text="{{ 'Follow my order'|trans }}"
+                        href="{{ path('guest_order_track', {token: guest_order_token}) }}"
+                        color="secondary"
+                    />
+                    <twig:Molecules:Button:Base
+                        text="{{ 'Create my account'|trans }}"
+                        href="{{ path('guest_order_account', {token: guest_order_token}) }}"
+                        color="secondary"
+                    />
+                </div>
+            </div>
+        {% endif %}
+
         <twig:Molecules:Button:Base
             text="{{ 'Back to the store'|trans }}"
             size="large"

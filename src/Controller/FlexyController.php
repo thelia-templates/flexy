@@ -64,9 +64,19 @@ class FlexyController extends BaseController
         return self::CONTROLLER_TYPE;
     }
 
+    /**
+     * Guards everything an account gives access to.
+     *
+     * A guest checking out sits in the session under the same key as a signed-in
+     * customer, because the checkout builds the order from it. Asking only whether a
+     * customer is there would therefore hand them the account pages, someone else's
+     * orders included: they proved nothing about the address they typed, so they are
+     * sent to sign in like any other visitor. The checkout steps that are open to them
+     * ask GuestCheckoutGate instead.
+     */
     public function checkAuth(): void
     {
-        if (!$this->securityService->isAuthenticatedFront()) {
+        if (!$this->securityContext->hasAuthenticatedCustomerUser()) {
             throw new RedirectException($this->generateUrl('customer_login'));
         }
     }

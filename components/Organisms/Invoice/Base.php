@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Organisms\Invoice;
 
 use FlexyBundle\Event\CheckoutEvents;
-use Propel\Runtime\Map\TableMap;
+use FlexyBundle\Service\GuestCheckoutGate;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -23,10 +23,8 @@ use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
-use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
-use Thelia\Model\Customer;
 
 #[AsLiveComponent]
 class Base
@@ -47,7 +45,7 @@ class Base
 
     public function __construct(
         private readonly CartFacade $cartFacade,
-        private readonly Session $session,
+        private readonly GuestCheckoutGate $guestCheckoutGate,
     ) {
     }
 
@@ -89,12 +87,16 @@ class Base
         $this->showAddressList = false;
     }
 
+    /**
+     * The address book of whoever is checking out — never the whole of the row's own.
+     *
+     * A guest shares their customer row with everyone who ever ordered on that address,
+     * so the gate narrows the list down to the addresses of this identification. A
+     * signed-in customer gets theirs, whole.
+     */
     public function getAddressList(): array
     {
-        /** @var Customer|null $user */
-        $user = $this->session->getCustomerUser();
-
-        return $user?->getAddresses()->toArray(null, false, TableMap::TYPE_CAMELNAME) ?? [];
+        return $this->guestCheckoutGate->visibleAddresses();
     }
 
     #[LiveListener(CheckoutEvents::SET_INVOICE_ORDER_ADDRESS_ID)]
