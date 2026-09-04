@@ -34,7 +34,8 @@
         {% endif %}
 
         {% if chapo %}
-            <div class="paragraph-3 text-grey">{{ chapo }}</div>
+            {# Editorial html, sanitized by the core on save, like the category description #}
+            <div class="paragraph-3 text-grey">{{ chapo|raw }}</div>
         {% endif %}
 
         <twig:Organisms:PseSelector:Base
