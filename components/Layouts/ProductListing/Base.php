@@ -241,7 +241,11 @@ class Base extends AbstractController
     {
         $this->getFilters();
         $this->tfilters = $this->normalizeTfilters($this->tfilters);
-        $this->activeFilterCount = $this->countSelectedValues($this->tfilters);
+        // The sort counts as an active choice: the placeholder of the select is rendered
+        // disabled, so the reset is the only way back to the merchant's own order, and a
+        // listing sorted with no filter checked has to offer it too.
+        $this->activeFilterCount = $this->countSelectedValues($this->tfilters)
+            + ($this->productSort->knows($this->sort) ? 1 : 0);
 
         $totalItems = $this->fetchProducts();
         $lastPage = max(1, (int) ceil($totalItems / self::ITEMS_PER_PAGE));

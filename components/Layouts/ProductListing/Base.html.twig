@@ -16,9 +16,10 @@
         ...stimulus_controller('Molecules--MobileDrawer--base')|stimulus_controller('Layouts--ProductListing--base'),
     }) }}
 >
-    {# The only way to sort below lg, where the toolbar is hidden — so it is rendered even with no
-       filters, carrying the sort section alone, and dropped from lg. #}
-    <div class="{{ hasFilters ? '' : 'lg:hidden' }}">
+    {# The only way to sort below lg, where the toolbar is hidden, so it is rendered even with no
+       filters, carrying the sort section alone. Above lg it is dropped unless it still holds
+       something to act on: without facets, the reset it carries is the only way to clear a sort. #}
+    <div class="{{ hasFilters or activeFilterCount ? '' : 'lg:hidden' }}">
         <twig:Molecules:MobileDrawer:Base staticFrom="lg" class="ProductListing-panel">
             <p class="ProductListing-drawerTitle h4 lg:hidden">{{ (hasFilters ? 'Sort & filter' : 'Sort by')|trans }}</p>
 

@@ -54,6 +54,14 @@ final readonly class ProductSort
     }
 
     /**
+     * Whether a value names one of the sorts offered here. A url can carry anything.
+     */
+    public function knows(?string $sort): bool
+    {
+        return $sort !== null && \array_key_exists($sort, self::SORTS);
+    }
+
+    /**
      * The ordering parameters of an API product query.
      *
      * A sort the theme does not know — a forged or stale url — is no sort at all: the listing
@@ -68,13 +76,13 @@ final readonly class ProductSort
      */
     public function parameters(?string $sort, ?int $categoryId = null): array
     {
-        $chosen = $sort === null ? null : (self::SORTS[$sort] ?? null);
-
-        if ($chosen === null) {
+        if (!$this->knows($sort)) {
             $positionProperty = $categoryId !== null ? 'productCategories.position' : 'position';
 
             return ['order['.$positionProperty.']' => 'asc', 'order[ref]' => 'asc'];
         }
+
+        $chosen = self::SORTS[$sort];
 
         return [$chosen['parameter'] => $chosen['direction'], 'order[ref]' => 'asc'];
     }
