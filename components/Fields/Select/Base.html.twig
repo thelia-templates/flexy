@@ -1,4 +1,4 @@
-{% props label = null, error = false, success = false, size = null, choices = [], disabled = false, multiple = false, placeholder = null, help = null, value = null %}
+{% props label = null, id = null, error = false, success = false, size = null, choices = [], disabled = false, multiple = false, placeholder = null, help = null, value = null %}
 
 {% set select = html_cva(
     base: 'Select',
@@ -17,17 +17,28 @@
 
 {% set state = error ? 'error' : (success ? 'success' : null) %}
 
+{# A <select> needs an accessible name, and a <label> that names nothing leaves it unnamed.
+   Given an id, the visible label carries the name through `for`. Called without one, the field
+   repeats the label text on itself instead. Only one of the two is ever set: an aria-label
+   would win over the label it duplicates. #}
+{% set selectDefaults = { class: 'Select-input' } %}
+{% if id %}
+    {% set selectDefaults = selectDefaults|merge({ id: id }) %}
+{% elseif label or placeholder %}
+    {% set selectDefaults = selectDefaults|merge({ 'aria-label': label ?: placeholder }) %}
+{% endif %}
+
 <div class="{{ select.apply({size, state}, attributes.render('class')) }} " {{attributes.without('class')}}>
 
     <div class="Select-header">
-        <label class="Select-label">{{ label }}</label>
+        <label class="Select-label" {% if id %}for="{{ id }}"{% endif %}>{{ label }}</label>
         {% if help %}
             <twig:Molecules:Tooltip:Help tooltip="{{ help }}" />
         {% endif %}
     </div>
 
     <select
-        {{attributes.nested('select').defaults({ class: 'Select-input' }).without('disabled', 'multiple') }}
+        {{attributes.nested('select').defaults(selectDefaults).without('disabled', 'multiple') }}
         {% if disabled %}disabled{% endif %}
         {% if multiple %}multiple{% endif %}
     >

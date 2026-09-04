@@ -88,6 +88,7 @@
 
             <div class="ProductListing-sort">
                 {{ component('Fields:Select:Base', {
+                    id: id ~ '-sort-select',
                     label: 'Sort by'|trans,
                     choices: sorts|map(choice => {value: choice.value, label: choice.title|trans}),
                     value: sort,
