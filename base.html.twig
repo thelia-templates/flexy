@@ -8,13 +8,19 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+        {# block() hands back what autoescaping already escaped, and whoever answers the hook
+           escapes what it prints: passing the string on escapes it twice, an apostrophe coming
+           out as &amp;#039;. A {% set %} capture is Markup, which the escaper leaves alone. #}
+        {% set pageTitle %}{% if block('title') is defined %}{{ block('title')|trim|raw }}{% endif %}{% endset %}
+        {% set pageDescription %}{% if block('meta_description') is defined %}{{ block('meta_description')|trim|raw }}{% endif %}{% endset %}
+
         {# Title, description, canonical, hreflang and the breadcrumb JSON-LD are rendered by
-           whoever answers this hook — the SEOne module does, and falls back to its own
+           whoever answers this hook: the SEOne module does, and falls back to its own
            SEOnePage*() values for anything a page leaves unset. #}
         {{ theme_hook('layout.head.top', {
             breadcrumb,
-            title:       block('title') is defined ? block('title')|trim : null,
-            description: block('meta_description') is defined ? block('meta_description')|trim : null,
+            title:       pageTitle ?: null,
+            description: pageDescription ?: null,
             og_type:     block('og_type') is defined ? block('og_type')|trim : null,
         }) }}
 
