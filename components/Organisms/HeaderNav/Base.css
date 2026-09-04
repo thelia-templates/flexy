@@ -57,9 +57,10 @@
   }
 }
 
-/* Magnifier alone on desktop, where its neighbours keep their labels */
+/* Magnifier alone on desktop, where its neighbours keep their labels. Hidden to the eye only:
+   display:none would take the label out of the accessibility tree and leave the button unnamed. */
 .HeaderNav-search .HeaderButton-text {
   @variant md {
-    display: none;
+    @apply sr-only;
   }
 }

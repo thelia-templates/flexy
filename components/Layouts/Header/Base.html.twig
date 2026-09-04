@@ -3,7 +3,8 @@
 
 {# Captured once: rendered both in the bar and in the search panel that covers it #}
 {% set logo %}
-    <a href="/" class="Header-logo">
+    {# The logo is the only content of the link, and an inline svg names nothing. #}
+    <a href="/" class="Header-logo" aria-label="{{ attr('config', 'store_name')|default('')|trim ?: 'Home'|trans }}">
         {{ ux_icon('thelia') }}
     </a>
 {% endset %}
