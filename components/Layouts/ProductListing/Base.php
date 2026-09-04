@@ -537,6 +537,15 @@ class Base extends AbstractController
 
         unset($query['page'], $query['tfilters'], $query['sort']);
 
+        // The rewriting router publishes the id of the object the url resolved to in the query
+        // bag (category_id, brand_id...). That belongs to the resolution, not to a public link:
+        // the path of the page names the object again on its own.
+        $query = array_filter(
+            $query,
+            static fn (string $key): bool => !str_ends_with($key, '_id'),
+            \ARRAY_FILTER_USE_KEY,
+        );
+
         if ($this->tfilters !== []) {
             $query['tfilters'] = $this->tfilters;
         }
