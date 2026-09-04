@@ -14,6 +14,11 @@
     {% set productId = attr('product', 'id') %}
     {% set product = resources('/api/front/products/' ~ productId) %}
 
+    {# The accessories the merchant picked for this product. The product resource carries none,
+       so they are read through the core loop, which answers them in the picked order. Read once
+       into a variable: the strip below is rendered only when there is something to show. #}
+    {% set accessoryIds = loop('accessories', 'accessory', {product: productId, visible: 1, limit: 8})|map(accessory => accessory.ACCESSORY_ID) %}
+
     {# Cross-selling browses the category the product is filed under by default. #}
     {% set defaultCategory = product.productCategories|filter(productCategory => productCategory.defaultCategory)|first.category|default(null) %}
 
@@ -85,6 +90,15 @@
         <div class="container-l">
             <twig:Organisms:Blocks:Base itemType="product" itemId="{{ productId }}" />
         </div>
+
+        {% if accessoryIds is not empty %}
+            <div class="mt-12">
+                <twig:Layouts:CrossSelling:Base
+                    :productIds="accessoryIds"
+                    title="{{ 'Accessories'|trans }}"
+                />
+            </div>
+        {% endif %}
 
         {% if defaultCategory %}
             <div class="bg-lighter mt-12">
