@@ -22,12 +22,29 @@ export default class extends Controller {
   }
 
   afterSave(reset = false) {
+    if (reset) {
+      this.clearSortControls();
+    }
     this.resyncDrawer();
     this.broadcastTotal();
     // Nudge range sliders (Fields/RangeSlider) to redraw their progress bar: the LiveComponent
     // patches the inputs in place without reconnecting their controller, so it needs a signal —
     // and a reset must snap them back to full range.
     window.dispatchEvent(new CustomEvent(reset ? "live:form:reset" : "live:form:save"));
+  }
+
+  // A LiveComponent re-render keeps the value a visitor typed or picked in a form control, so the
+  // sort <select> and the mobile radios would still show the cleared sort after a reset while the
+  // listing below them is back to the default order. Put them back by hand.
+  clearSortControls() {
+    this.element.querySelectorAll(".ProductListing-sort select").forEach((select) => {
+      select.value = "";
+    });
+    this.element
+      .querySelectorAll('input[type="radio"][data-action*="sortChange"]')
+      .forEach((radio) => {
+        radio.checked = false;
+      });
   }
 
   // The subheader's mobile/tablet product count lives outside this LiveComponent, so a save()
