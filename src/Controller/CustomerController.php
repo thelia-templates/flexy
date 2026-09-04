@@ -17,6 +17,7 @@ namespace FlexyBundle\Controller;
 use FlexyBundle\Form\CustomerInformationsForm;
 use FlexyBundle\Form\CustomerRegisterForm;
 use FlexyBundle\Form\CustomerUpdateForm;
+use FlexyBundle\Service\GuestCheckoutGate;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -53,7 +54,7 @@ class CustomerController extends FlexyController
     #[Route('/login', name: 'login', methods: ['GET'])]
     public function login(): Response
     {
-        if ($this->securityService->isAuthenticatedFront()) {
+        if ($this->getSecurityContext()->hasAuthenticatedCustomerUser()) {
             return $this->generateRedirect('/account');
         }
 
@@ -65,8 +66,12 @@ class CustomerController extends FlexyController
         EventDispatcherInterface $eventDispatcher,
         CustomerAuthenticator $customerLoginProcessor,
         SessionInterface $session,
+        GuestCheckoutGate $guestCheckoutGate,
     ): ?Response {
-        if ($this->getSecurityContext()->hasCustomerUser()) {
+        // A guest holds a session customer but no account: signing in is exactly what
+        // they are here to do, and turning them away would leave the "log in" block of
+        // the identification page unusable.
+        if ($this->getSecurityContext()->hasAuthenticatedCustomerUser()) {
             return $this->generateRedirect('/');
         }
 
@@ -91,6 +96,12 @@ class CustomerController extends FlexyController
                 $customer = $authenticator->getAuthentifiedUser();
 
                 $customerLoginProcessor->processLogin($customer);
+
+                // The session may have been carrying someone with no account a moment
+                // ago: their tracking token, the addresses they typed in the checkout.
+                // The login replaces the customer it holds and none of that, and whoever
+                // just signed in is not necessarily the person who left it behind.
+                $guestCheckoutGate->markAsAuthenticated();
 
                 if ((int) $form->get('remember_me')->getData() > 0) {
                     $this->createRememberMeCookie(
@@ -152,7 +163,7 @@ class CustomerController extends FlexyController
     {
         // Without this, a logged-in visitor creates a second, orphaned Customer row and the
         // informations step then writes onto their original account.
-        if ($this->securityService->isAuthenticatedFront()) {
+        if ($this->getSecurityContext()->hasAuthenticatedCustomerUser()) {
             return $this->generateRedirect('/account');
         }
 
@@ -165,7 +176,7 @@ class CustomerController extends FlexyController
         SessionInterface $session,
         LangService $langService,
     ): RedirectResponse {
-        if ($this->securityService->isAuthenticatedFront()) {
+        if ($this->getSecurityContext()->hasAuthenticatedCustomerUser()) {
             return $this->generateRedirect('/account');
         }
 

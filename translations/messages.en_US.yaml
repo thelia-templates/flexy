@@ -278,7 +278,7 @@ Your payment has been confirmed: Your payment has been confirmed
 We'll do everything we can to send your order as quickly as possible!: We'll do everything we can to send your order as quickly as possible!
 Enter the code received by e-mail: Enter the code received by e-mail
 resend_code: Please check your spam then try to <a href='%h'>resend code</a>
-Don't have receive code ?: Don't have receive code ?
+Don't have receive code ?: Didn't receive the code?
 every_cat: Discover %cat
 Product's visuals: Product's visuals
 This product combination is not available: This product combination is not available
@@ -287,7 +287,7 @@ Select your state: Select your state
 State: State
 Register me: Register me
 I agree to receive promotional offers by newsletter: I agree to receive promotional offers by newsletter
-I agree to our privacy policy: I agree to the privacy policy.*
+I agree to our privacy policy: I agree to the privacy policy.
 Address label: Address label
 This name will allow you to easily identify each of your addresses: This name will allow you to easily identify each of your addresses
 Choose a delivery method: Choose a delivery method
@@ -380,3 +380,32 @@ Your account is not yet confirmed. A new activation code has been sent to your e
 Download my file: Download my file
 Company registration number: Company registration number
 VAT number: VAT number
+How would you like to order?: How would you like to order?
+I already have an account: I already have an account
+I want to create an account: I want to create an account
+I order without an account: I order without an account
+You will receive your order confirmation and a link to follow your order by email.: You will receive your order confirmation and a link to follow your order by email.
+This email address already has an account. Please sign in to place your order.: This email address already has an account. Please sign in to place your order.
+This email address already has an account. Please sign in instead.: This email address already has an account. Please sign in instead.
+Too many attempts. Please try again later.: Too many attempts. Please try again later.
+The billing address is the same as the delivery address: The billing address is the same as the delivery address
+Your details: Your details
+Your order confirmation and the link to follow your order are sent to this address: Your order confirmation and the link to follow your order are sent to this address
+Continue without an account: Continue without an account
+Identification: Identification
+A link to follow your order has been sent to your email address.: A link to follow your order has been sent to your email address.
+Follow my order: Follow my order
+Create my account: Create my account
+Choose a password and this order joins an account, where you can follow your next ones without a link.: Choose a password and this order joins an account, where you can follow your next ones without a link.
+Your order, your details and your addresses are already there. Choose a password and the account is yours.: Your order, your details and your addresses are already there. Choose a password and the account is yours.
+Your account will be created with the address: Your account will be created with the address
+Back to my order: Back to my order
+The two passwords do not match.: The two passwords do not match.
+Your account has been created.: Your account has been created.
+Check your inbox: Check your inbox
+We have sent an activation code to: We have sent an activation code to
+Enter it on the activation page to confirm your account.: Enter it on the activation page to confirm your account.
+Activate my account: Activate my account
+Your account is waiting for its activation code. Enter it below to finish, then place your order.: Your account is waiting for its activation code. Enter it below to finish, then place your order.
+Your account has been created. Enter the activation code we sent to %email to finish.: Your account has been created. Enter the activation code we sent to %email to finish.
+This order can no longer be placed without an account. Please sign in or create one.: This order can no longer be placed without an account. Please sign in or create one.

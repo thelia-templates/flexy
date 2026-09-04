@@ -1,0 +1,93 @@
+{% form_theme form with flexy_form_themes only %}
+<div {{ attributes }}>
+    {{ form_start(form, {attr: {class: 'flex flex-col gap-6'}}) }}
+
+    {% for error in form.vars.errors %}
+        <twig:Molecules:SnackBar:Base variant="error" text="{{ error.message }}" />
+    {% endfor %}
+
+    <h3 class="h5 text-black">{{ 'Your details'|trans }}</h3>
+
+    {{ form_row(form.title) }}
+
+    <div class="flex flex-col md:flex-row gap-6">
+        {{ form_row(form.firstname, {label: 'Firstname'|trans}) }}
+        {{ form_row(form.lastname, {label: 'Lastname'|trans}) }}
+    </div>
+
+    {{ form_row(form.email, {help: 'Your order confirmation and the link to follow your order are sent to this address'|trans}) }}
+
+    <h3 class="h5 text-black mt-4">{{ 'Delivery address'|trans }}</h3>
+
+    {{ form_row(form.address1, {label: 'Address'|trans}) }}
+    {{ form_row(form.address2) }}
+
+    <div class="flex flex-col md:flex-row gap-6">
+        {{ form_row(form.zipcode) }}
+        {{ form_row(form.city) }}
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-6">
+        {{ form_row(form.country) }}
+        {% if form.state is defined %}
+            {{ form_row(form.state) }}
+        {% endif %}
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-6">
+        {{ form_row(form.phone, {label: 'Phone number'|trans}) }}
+        {{ form_row(form.cellphone) }}
+    </div>
+
+    {{ form_row(form.invoice_same) }}
+
+    {# The billing fields only exist on the form once the buyer said the two addresses
+       differ, so the whole block is keyed on one of them being there. #}
+    {% if form.invoice_address1 is defined %}
+        <h3 class="h5 text-black mt-4">{{ 'Billing address'|trans }}</h3>
+
+        {{ form_row(form.invoice_title) }}
+
+        <div class="flex flex-col md:flex-row gap-6">
+            {{ form_row(form.invoice_firstname, {label: 'Firstname'|trans}) }}
+            {{ form_row(form.invoice_lastname, {label: 'Lastname'|trans}) }}
+        </div>
+
+        {{ form_row(form.invoice_company, {label: 'Company'|trans}) }}
+        {% if form.invoice_siret is defined %}
+            {{ form_row(form.invoice_siret) }}
+        {% endif %}
+        {% if form.invoice_vat_number is defined %}
+            {{ form_row(form.invoice_vat_number) }}
+        {% endif %}
+
+        {{ form_row(form.invoice_address1, {label: 'Address'|trans}) }}
+        {{ form_row(form.invoice_address2) }}
+
+        <div class="flex flex-col md:flex-row gap-6">
+            {{ form_row(form.invoice_zipcode) }}
+            {{ form_row(form.invoice_city) }}
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-6">
+            {{ form_row(form.invoice_country) }}
+            {% if form.invoice_state is defined %}
+                {{ form_row(form.invoice_state) }}
+            {% endif %}
+        </div>
+
+        {{ form_row(form.invoice_phone, {label: 'Phone number'|trans}) }}
+    {% endif %}
+
+    {{ form_row(form.accept_privacy_policy) }}
+    {{ form_rest(form) }}
+
+    <twig:Molecules:Button:Base
+        text="{{ 'Continue without an account'|trans }}"
+        type="submit"
+        size="large"
+        icon_right="chevron-right"
+        class="w-max"
+    />
+    {{ form_end(form) }}
+</div>

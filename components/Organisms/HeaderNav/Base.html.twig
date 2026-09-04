@@ -16,7 +16,9 @@
         {{...stimulus_action(headerController, 'togglePanel', 'click', {panel: 'search'})}}
     />
 
-    {% if isAuthenticatedFront() %}
+    {# Not isAuthenticatedFront(): that one is also true of a guest checking out, and the
+       account menu it opens leads nowhere for them. #}
+    {% if hasCustomerAccount() %}
         <twig:Organisms:HeaderProfile:Base />
     {% else %}
         <twig:Molecules:HeaderButton:Base

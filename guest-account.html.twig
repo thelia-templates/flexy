@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Create my account'|trans }}{% endblock %}
+
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
+{% block body %}
+    <div class="container-s pt-8 pb-14 lg:pt-12 lg:pb-30">
+        {# The successful conversion never renders here: it answers with a redirect to the
+           activation page, so that refreshing does not replay the POST onto a token the
+           new password has already invalidated. #}
+        {% set form = getForm('flexybundle_form_guest_account_creation') %}
+        {% form_theme form with flexy_form_themes only %}
+
+        {% for error in form.vars.errors %}
+            <twig:Molecules:SnackBar:Base variant="error" text="{{ error.message }}" class="mb-6" />
+        {% endfor %}
+
+        <h1 class="h2 text-black mb-4">{{ 'Create my account'|trans }}</h1>
+        <p class="paragraph-2 text-black mb-8">
+            {{ 'Your order, your details and your addresses are already there. Choose a password and the account is yours.'|trans }}
+        </p>
+
+        {% if email %}
+            <p class="paragraph-2 text-black mb-8">
+                {{ 'Your account will be created with the address'|trans }} <strong>{{ email }}</strong>
+            </p>
+        {% endif %}
+
+        {{ form_start(form, {attr: {
+            action: path('guest_order_account_create', {token: token}),
+            method: 'POST',
+            class: 'flex flex-col gap-6 mb-3',
+        }}) }}
+        {{ form_row(form.password.first) }}
+        {{ form_row(form.password.second) }}
+        {{ form_rest(form) }}
+
+        <twig:Molecules:Button:Base
+            text="{{ 'Create my account'|trans }}"
+            type="submit"
+            size="large"
+            class="w-max"
+        />
+        {{ form_end(form) }}
+
+        <twig:Molecules:Link:Base
+            href="{{ path('guest_order_track', {token: token}) }}"
+            customText="{{ 'Back to my order'|trans }}"
+            class="mt-8 inline-flex"
+        />
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}

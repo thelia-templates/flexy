@@ -16,6 +16,10 @@ namespace FlexyBundle\Controller;
 
 use FlexyBundle\Components\Molecules\CheckoutSteps\Base as CheckoutSteps;
 use FlexyBundle\Service\CartStockService;
+use FlexyBundle\Service\GuestCheckoutGate;
+use FlexyBundle\Service\GuestOrderTracking;
+use FlexyBundle\Service\PlacedOrderMemory;
+use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -27,12 +31,12 @@ use Thelia\Domain\Cart\Service\CartGuard;
 use Thelia\Domain\Checkout\CheckoutFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
 use Thelia\Domain\Checkout\Exception\EmptyCartException;
+use Thelia\Domain\Checkout\Exception\GuestCheckoutNotAllowedException;
 use Thelia\Domain\Checkout\Exception\IncompleteInvoiceAddressException;
 use Thelia\Domain\Checkout\Exception\InvalidDeliveryException;
 use Thelia\Domain\Checkout\Exception\MissingAddressException;
 use Thelia\Domain\Shipping\ShippingFacade;
 use Thelia\Model\Order;
-use Thelia\Model\OrderQuery;
 
 #[Route('/checkout', name: 'checkout_')]
 class CheckoutController extends FlexyController
@@ -70,8 +74,9 @@ class CheckoutController extends FlexyController
         CartFacade $cartFacade,
         CartGuard $cartGuard,
         ShippingFacade $shippingFacade,
+        GuestCheckoutGate $guestCheckoutGate,
     ): Response {
-        $this->checkAuth();
+        $this->checkCheckoutAccess($guestCheckoutGate);
         $cart = $cartFacade->getOrCreateFromSession();
 
         try {
@@ -93,8 +98,9 @@ class CheckoutController extends FlexyController
     public function paymentAction(
         CartGuard $cartGuard,
         CartFacade $cartFacade,
+        GuestCheckoutGate $guestCheckoutGate,
     ): Response {
-        $this->checkAuth();
+        $this->checkCheckoutAccess($guestCheckoutGate);
 
         try {
             // Deliberately not guarded on the legal identifiers here: the billing address form
@@ -116,9 +122,9 @@ class CheckoutController extends FlexyController
     }
 
     #[Route('/gateway', name: 'gateway')]
-    public function gatewayAction(): Response
+    public function gatewayAction(GuestCheckoutGate $guestCheckoutGate): Response
     {
-        $this->checkAuth();
+        $this->checkCheckoutAccess($guestCheckoutGate);
 
         return $this->render('checkout-gateway', [
             'current' => CheckoutSteps::GATEWAY,
@@ -130,9 +136,11 @@ class CheckoutController extends FlexyController
         CartFacade $cartFacade,
         CheckoutFacade $checkoutFacade,
         CartStockService $cartStockService,
+        GuestCheckoutGate $guestCheckoutGate,
+        GuestOrderTracking $guestOrderTracking,
     ): Response {
         try {
-            $this->checkAuth();
+            $this->checkCheckoutAccess($guestCheckoutGate);
 
             $cart = $cartFacade->getCartFromSession();
             if (null === $cart) {
@@ -166,7 +174,18 @@ class CheckoutController extends FlexyController
 
             return $this->render('checkout-confirm', [
                 'current' => CheckoutSteps::CONFIRM,
+                'guest_order_token' => $guestOrderTracking->tokenOfPlacedOrder(),
             ]);
+        } catch (GuestCheckoutNotAllowedException) {
+            // The shop's answer changed while the buyer was in the checkout: the setting
+            // was turned off, or the cart gained a product that requires an account. Back
+            // to the page that offers the ways in, which now offers the right ones — the
+            // guest checkout being refused for this cart, that is the login page.
+            throw new RedirectException(
+                $this->generateUrl($guestCheckoutGate->entryPointRoute()),
+                Response::HTTP_FOUND,
+                $this->translator->trans('This order can no longer be placed without an account. Please sign in or create one.'),
+            );
         } catch (EmptyCartException $e) {
             throw new RedirectException($this->generateUrl('checkout_cart'), Response::HTTP_FOUND, $e->getMessage());
         } catch (IncompleteInvoiceAddressException $e) {
@@ -179,29 +198,50 @@ class CheckoutController extends FlexyController
     }
 
     #[Route('/confirm', name: 'confirm')]
-    public function confirmAction(Session $session, EventDispatcherInterface $dispatcher): Response
-    {
-        $this->checkAuth();
+    public function confirmAction(
+        Session $session,
+        EventDispatcherInterface $dispatcher,
+        GuestCheckoutGate $guestCheckoutGate,
+        GuestOrderTracking $guestOrderTracking,
+        PlacedOrderMemory $placedOrderMemory,
+    ): Response {
+        // The core retires a guest from the session the moment their order exists, so by
+        // the time a payment module sends them back here there is no customer left to
+        // check. What stands in for it is the token of the order that was just placed:
+        // it was signed for this session, it opens that order and nothing else. It is
+        // dropped when the session changes hands, so it never names an order the person
+        // now holding this browser did not place.
+        $guestOrderToken = $guestOrderTracking->tokenOfPlacedOrder();
 
-        $session->clearSessionCart($dispatcher);
+        if (null === $guestOrderToken) {
+            $this->checkCheckoutAccess($guestCheckoutGate);
+        }
+
+        // Only for a session that actually placed an order. This page is reachable by
+        // typing its url, and emptying the cart of someone halfway through the checkout
+        // would throw away what they had put in it. The core already empties the cart on
+        // the order itself, so there is nothing to lose by asking first.
+        if ($placedOrderMemory->hasOne()) {
+            $session->clearSessionCart($dispatcher);
+        }
 
         return $this->render('checkout-confirm', [
             'current' => CheckoutSteps::CONFIRM,
+            'guest_order_token' => $guestOrderToken,
         ]);
     }
 
     #[Route('/failed', name: 'failed')]
-    public function failedAction(CheckoutFacade $checkoutFacade, Request $request): Response
-    {
-        $order = $this->failedOrderOf($request->query->getInt('order_id'));
-
-        // Only an order still waiting for its payment is cancelled. A payment module that
-        // already gave up on it, a gateway returning twice, or the buyer refreshing this
-        // page then find nothing left to cancel, and an order paid in the meantime — a
-        // late confirmation crossing a failure return — is never taken back.
-        if ($order instanceof Order && $order->isNotPaid()) {
-            $checkoutFacade->cancelOrder($order->getId());
-        }
+    public function failedAction(
+        CheckoutFacade $checkoutFacade,
+        Request $request,
+        GuestOrderTracking $guestOrderTracking,
+    ): Response {
+        $order = $this->cancelFailedOrder(
+            $checkoutFacade,
+            $request->query->getInt('order_id'),
+            $guestOrderTracking->tokenOfPlacedOrder(),
+        );
 
         return $this->render('checkout-failed', [
             'current' => CheckoutSteps::FAILED,
@@ -211,23 +251,60 @@ class CheckoutController extends FlexyController
     }
 
     /**
+     * Guards a checkout step: a signed-in customer, or a guest who identified themselves
+     * on the way in, both pass.
+     *
+     * Deliberately not checkAuth(): that one answers "does this session hold an account",
+     * which is the right question for the account pages and the wrong one here. A visitor
+     * with neither is sent to the identification page when the shop lets this cart be
+     * ordered without an account, and to the login page when it does not — which is
+     * exactly where the checkout sent everyone before the guest checkout existed.
+     */
+    private function checkCheckoutAccess(GuestCheckoutGate $guestCheckoutGate): void
+    {
+        if ($guestCheckoutGate->mayEnterCheckout()) {
+            return;
+        }
+
+        throw new RedirectException($this->generateUrl($guestCheckoutGate->entryPointRoute()));
+    }
+
+    /**
+     * Takes back the order whose payment did not go through, and answers with it.
+     *
      * A buyer coming back from a payment gateway may come back without the session they
      * left with: a gateway issuing the return itself, a browser dropping the cookie on a
      * cross-site redirect. Telling them the payment failed must not depend on that, so
      * this page is never guarded by a login.
      *
-     * What does depend on it is the order: nothing is read, cancelled or shown unless the
-     * session holds the customer it belongs to. Walking the order ids from here answers
-     * the same page whether the order exists or not.
+     * What does depend on it is the order, and the core cancellation is the one place
+     * that decides: it accepts the customer the order names, or the tracking token this
+     * session was handed when the order was placed — a guest no longer has the former by
+     * the time they get here. Resolving the order here as well would spend the tracking
+     * link's rate-limit budget twice on one page load, so the order this page reports is
+     * the one the cancellation resolved and gave back.
+     *
+     * The refusals are all business ones, and they all leave the page as it is: an order
+     * id that names nothing, one that belongs to somebody else, and one that is no longer
+     * waiting for its payment — a gateway returning twice, a page refreshed, or a late
+     * confirmation crossing a failure return. None of them is a server error, and none of
+     * them may take the failure page down with it.
      */
-    private function failedOrderOf(int $orderId): ?Order
-    {
-        $customerId = $this->getSecurityContext()->getCustomerUser()?->getId();
-
-        if ($orderId <= 0 || null === $customerId) {
+    private function cancelFailedOrder(
+        CheckoutFacade $checkoutFacade,
+        int $orderId,
+        ?string $guestOrderToken,
+    ): ?Order {
+        if ($orderId <= 0) {
             return null;
         }
 
-        return OrderQuery::create()->filterByCustomerId($customerId)->findPk($orderId);
+        try {
+            return $checkoutFacade->cancelOrder($orderId, $guestOrderToken);
+        } catch (\InvalidArgumentException|PropelException $e) {
+            $this->logger->info(\sprintf('Failed payment return: the order was not cancelled (%s).', $e->getMessage()));
+
+            return null;
+        }
     }
 }

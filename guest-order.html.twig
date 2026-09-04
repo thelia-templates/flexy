@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{# The order this page shows is the one the link named, and nothing else: the controller
+   never queries by customer, so there is no other order to reach from here. #}
+{% set statusCode = order.orderStatus.code %}
+{% set isClosed = statusCode in ['canceled', 'refunded'] %}
+{% set heading = 'Order N°'|trans ~ ' ' ~ order.ref %}
+
+{% block title %}{{ heading }}{% endblock %}
+
+{# A tracking link is meant for one person, not for a search engine. #}
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
+{% block body %}
+    <div class="container-m pt-8 pb-14 md:pb-24">
+        <h1 class="h3 text-black">{{ heading }}</h1>
+        <p class="paragraph-3 mb-6 lg:mb-11">{{ order.createdAt|format_date() }}</p>
+
+        {% if not isClosed %}
+            <twig:Organisms:DeliveryTracking:Base
+                statusCode="{{ statusCode }}"
+                trackingRef="{{ order.deliveryRef }}"
+            />
+        {% endif %}
+
+        <h2 class="h4 mt-10 mb-6">{{ 'Order details'|trans }}</h2>
+
+        <div class="flex flex-col gap-2">
+            {# The file of a virtual line hangs off this order's own link: the account
+               route resolves the order through a signed-in customer, which a guest is not. #}
+            <twig:Layouts:OrderProducts:Base
+                :orderProducts="order.orderProducts"
+                :order="order"
+                downloadRoute="guest_order_download"
+                :downloadRouteParams="{token: token}"
+            />
+
+            <twig:Organisms:Summary:Order :order="order" />
+        </div>
+
+        <hr class="my-10" />
+
+        <h2 class="h4 mb-6">{{ 'Delivery & payment'|trans }}</h2>
+        <div class="flex flex-col gap-2">
+            <twig:Organisms:AddressCard:Base
+                :addressId="order.deliveryOrderAddress.id"
+                title="{{ 'Delivery address'|trans }}"
+                :inOrder="true"
+            />
+            <twig:Organisms:AddressCard:Base
+                :addressId="order.invoiceOrderAddress.id"
+                title="{{ 'Billing address'|trans }}"
+                :inOrder="true"
+            />
+        </div>
+
+        {# The core refuses an invoice for an order that is not paid, so the link would
+           dead-end on a 404. Mirrors Thelia's own isPaid() status set. #}
+        {% if statusCode in ['paid', 'processing', 'sent'] %}
+            <twig:Molecules:Button:Base
+                text="{{ 'Download invoice'|trans }}"
+                href="{{ path('guest_order_invoice', {token: token}) }}"
+                icon_right="download"
+                class="mt-8"
+            />
+        {% endif %}
+
+        {% if may_create_account %}
+            <hr class="my-10" />
+
+            <div class="flex flex-col items-start gap-4">
+                <h2 class="h4">{{ 'Create my account'|trans }}</h2>
+                <p class="paragraph-2 text-black">
+                    {{ 'Choose a password and this order joins an account, where you can follow your next ones without a link.'|trans }}
+                </p>
+                <twig:Molecules:Button:Base
+                    text="{{ 'Create my account'|trans }}"
+                    href="{{ path('guest_order_account', {token: token}) }}"
+                />
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}

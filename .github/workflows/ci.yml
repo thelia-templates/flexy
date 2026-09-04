@@ -87,6 +87,13 @@ jobs:
           COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
+      - name: Restore the project schema the config package overwrote
+        # Same step as the core CI: the thelia/config package installs into local/
+        # and replaces the version-controlled local/config/schema.xml, which carries
+        # the guest checkout columns until the package ships them.
+        working-directory: thelia
+        run: git checkout -- local/config/schema.xml
+
       - name: Check that the theme under test is the one installed
         working-directory: thelia
         run: |

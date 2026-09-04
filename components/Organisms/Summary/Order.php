@@ -39,7 +39,15 @@ class Order
 
     public function getTaxAmount(): float
     {
-        return (float) ($this->order['totalAmount'] ?? 0) - (float) ($this->order['totalAmountWithoutTaxes'] ?? 0);
+        // totalAmount carries the shipping while totalAmountWithoutTaxes is the bare
+        // item subtotal: strip the shipping before reading the taxes out of the
+        // difference, or the postage shows up as an included tax.
+        return round(
+            (float) ($this->order['totalAmount'] ?? 0)
+            - (float) ($this->order['totalShippingWithTaxes'] ?? 0)
+            - (float) ($this->order['totalAmountWithoutTaxes'] ?? 0),
+            2,
+        );
     }
 
     public function hasTax(): bool

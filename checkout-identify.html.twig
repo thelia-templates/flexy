@@ -1,0 +1,100 @@
+{% extends 'checkout-base.html.twig' %}
+
+{% block title %}{{ 'Identification'|trans }}{% endblock %}
+
+{# The stepper names this stop "Identification": the visitor is not on the delivery
+   page yet, and the delivery link would only bounce back here. #}
+{% block checkoutSteps %}
+    <twig:Molecules:CheckoutSteps:Base
+        :steps="[
+            {text: 'Your cart', link: path('checkout_cart')},
+            {text: 'Identification'},
+            {text: 'Payment'},
+            {text: 'Confirmation'},
+        ]"
+        :current="current"
+    />
+{% endblock %}
+
+{% block checkoutContent %}
+    {% set loginForm = getForm('thelia.front.customer.login') %}
+    {% form_theme loginForm with flexy_form_themes only %}
+
+    <h1 class="h3 text-black mb-8">{{ 'How would you like to order?'|trans }}</h1>
+
+    {# The address the visitor typed already has an account: the sign-in block comes
+       first, because it is the only way this order is going through. #}
+    {% if sign_in_first|default(false) %}
+        <twig:Molecules:SnackBar:Base
+            variant="warning"
+            withIcon
+            text="{{ 'This email address already has an account. Please sign in to place your order.'|trans }}"
+            class="mb-8"
+        />
+    {% endif %}
+
+    <section class="mb-10">
+        <h2 class="h4 text-black mb-4">{{ 'I already have an account'|trans }}</h2>
+
+        {% for error in loginForm.vars.errors %}
+            <twig:Molecules:SnackBar:Base variant="error" text="{{ error.message }}" class="mb-4" />
+        {% endfor %}
+
+        {{ form_start(loginForm, {attr: {
+            action: path('customer_login_action'),
+            method: 'POST',
+            class: 'flex flex-col gap-6',
+        }}) }}
+        {{ form_row(loginForm.success_url, {value: path('checkout_delivery')}) }}
+        {{ form_row(loginForm.error_url, {value: path('checkout_identify')}) }}
+        <input type="hidden" name="{{ field_name(loginForm.account) }}" value="1">
+        {{ form_row(loginForm.email, {label: 'Email'|trans, placeholder: 'Your email'|trans}) }}
+        {{ form_row(loginForm.password, {label: 'Password'|trans, placeholder: 'Your password'|trans}) }}
+
+        <div class="flex flex-col gap-4 items-start">
+            <twig:Molecules:Link:Base href="{{ path('password_forgotten') }}" customText="{{ 'Forgot password?'|trans }}" />
+            <twig:Molecules:Button:Base text="{{ 'Log in'|trans }}" type="submit" class="w-max" />
+        </div>
+        {{ form_end(loginForm) }}
+    </section>
+
+    <hr class="my-10 text-grey" />
+
+    <section class="mb-10">
+        <h2 class="h4 text-black mb-4">{{ 'I want to create an account'|trans }}</h2>
+        <p class="paragraph-2 text-black mb-6">
+            {{ 'With your account, you can track your orders, manage your profile, receive the newsletter, manage your wish lists...'|trans }}
+        </p>
+        <twig:Molecules:Button:Base
+            href="{{ path('customer_register') }}"
+            text="{{ 'Sign up'|trans }}"
+            color="secondary"
+        />
+    </section>
+
+    {% if guest_checkout_offered|default(false) %}
+        <hr class="my-10 text-grey" />
+
+        <section>
+            <h2 class="h4 text-black mb-4">{{ 'I order without an account'|trans }}</h2>
+            <p class="paragraph-2 text-black mb-6">
+                {{ 'You will receive your order confirmation and a link to follow your order by email.'|trans }}
+            </p>
+
+            <twig:Forms:GuestCheckout:Base />
+        </section>
+    {% endif %}
+{% endblock %}
+
+{% block checkoutBackButton %}
+    <twig:Molecules:Link:Base
+        iconLeft="chevron-left"
+        customText="{{ 'Previous Step'|trans }}"
+        href="{{ path('checkout_cart') }}"
+        class="gap-2 mt-6 inline-flex"
+    />
+{% endblock %}
+
+{% block checkoutSummary %}
+    <twig:Organisms:Summary:Checkout />
+{% endblock %}

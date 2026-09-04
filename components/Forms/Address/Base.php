@@ -24,7 +24,6 @@ use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Thelia\Core\Form\FormServiceInterface;
-use Thelia\Core\Security\Front\FrontSecurityServiceInterface;
 use Thelia\Domain\Addressing\Exception\AddressNotFoundException;
 use Thelia\Domain\Addressing\Service\AddressService;
 use Thelia\Domain\Customer\Exception\CustomerException;
@@ -51,7 +50,6 @@ class Base
     public function __construct(
         private readonly FormServiceInterface $formService,
         private readonly AddressService $addressService,
-        private readonly FrontSecurityServiceInterface $securityService,
         private readonly CustomerFacade $customerFacade,
     ) {
     }
@@ -102,10 +100,16 @@ class Base
         return $this->addressService->mapModelToFormData($address);
     }
 
+    /**
+     * Any customer the session holds may write here, a guest checking out included: this
+     * is the delivery step of the tunnel, and the address book it edits is the one the
+     * core scopes to that very customer. What must stay closed to a guest is the account
+     * area, which is guarded elsewhere.
+     */
     #[LiveAction]
     public function save(): void
     {
-        if (!$this->securityService->isAuthenticatedFront()) {
+        if (null === $this->customerFacade->getCurrentCustomer()) {
             return;
         }
 

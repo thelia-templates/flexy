@@ -28,6 +28,12 @@ internal:
     - password-forgotten-confirm
     - reset-password-confirm
 
+    # Guest checkout: rendered by a controller that checks the shop setting, the cart and
+    # the tracking token. Reachable by name, they would render with no order at all.
+    - checkout-identify
+    - guest-order
+    - guest-account
+
     # Checkout steps, each guarded by the cart state its controller checks
     - checkout-cart
     - checkout-delivery
