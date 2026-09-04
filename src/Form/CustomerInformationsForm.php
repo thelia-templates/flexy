@@ -23,7 +23,6 @@ use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
-use Thelia\Core\Translation\Translator;
 use Thelia\Domain\Customer\Service\CustomerTitleService;
 use Thelia\Domain\Localization\Service\CountryService;
 use Thelia\Form\AddressCreateForm;
@@ -68,11 +67,11 @@ class CustomerInformationsForm extends AddressCreateForm
                     new Callback($this->verifyState(...)),
                 ],
                 'choices' => $stateChoices,
-                'label' => Translator::getInstance()->trans('State'),
+                'label' => $this->translation->trans('State'),
                 'label_attr' => [
                     'for' => 'state',
                 ],
-                'placeholder' => Translator::getInstance()->trans('Select your state'),
+                'placeholder' => $this->translation->trans('Select your state'),
             ]);
         });
 
@@ -81,7 +80,7 @@ class CustomerInformationsForm extends AddressCreateForm
         $this->formBuilder->add('is_default', HiddenType::class, [
             'data' => true,
         ])->add('cellphone', TelType::class, [
-            'label' => Translator::getInstance()->trans('Mobile phone'),
+            'label' => $this->translation->trans('Mobile phone'),
             'label_attr' => [
                 'for' => 'cellphone',
             ],

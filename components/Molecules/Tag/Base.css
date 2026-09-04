@@ -58,7 +58,8 @@
   }
   .Tag--warning {
     --tag-background: var(--color-warning-lightest);
-    --tag-color: var(--color-warning);
+    /* The amber of the border is 1.8:1 on its own tint: the label takes the dark shade. */
+    --tag-color: var(--color-warning-dark);
     --tag-border-color: var(--color-warning);
   }
 }

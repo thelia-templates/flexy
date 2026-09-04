@@ -19,6 +19,7 @@ use FlexyBundle\Form\Type\FieldsetType;
 use FlexyBundle\Service\FormService;
 use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\ProductSearch;
+use FlexyBundle\Service\ProductSort;
 use FlexyBundle\Service\ProductTaxationResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
@@ -42,15 +43,6 @@ class Base extends AbstractController
     use DefaultActionTrait;
 
     public const ITEMS_PER_PAGE = 30;
-
-    /**
-     * Matches the source project's own sort list exactly (`CategoryFilters::SORTS` in
-     * backport/wpc) — not the 5 options shown in the Figma mockup, which are illustrative.
-     */
-    public const SORTS = [
-        ['value' => 'asc', 'title' => 'Ascending price'],
-        ['value' => 'desc', 'title' => 'Descending price'],
-    ];
 
     #[LiveProp]
     public ?int $categoryId = null;
@@ -112,6 +104,7 @@ class Base extends AbstractController
         private readonly ProductImageResolver $productImageResolver,
         private readonly ProductTaxationResolver $productTaxationResolver,
         private readonly ProductSearch $productSearch,
+        private readonly ProductSort $productSort,
     ) {
     }
 
@@ -211,7 +204,7 @@ class Base extends AbstractController
     #[ExposeInTemplate]
     public function getSorts(): array
     {
-        return self::SORTS;
+        return $this->productSort->choices();
     }
 
     protected function instantiateForm(): FormInterface
@@ -248,7 +241,11 @@ class Base extends AbstractController
     {
         $this->getFilters();
         $this->tfilters = $this->normalizeTfilters($this->tfilters);
-        $this->activeFilterCount = $this->countSelectedValues($this->tfilters);
+        // The sort counts as an active choice: the placeholder of the select is rendered
+        // disabled, so the reset is the only way back to the merchant's own order, and a
+        // listing sorted with no filter checked has to offer it too.
+        $this->activeFilterCount = $this->countSelectedValues($this->tfilters)
+            + ($this->productSort->knows($this->sort) ? 1 : 0);
 
         $totalItems = $this->fetchProducts();
         $lastPage = max(1, (int) ceil($totalItems / self::ITEMS_PER_PAGE));
@@ -330,18 +327,7 @@ class Base extends AbstractController
             $parameters['tfilters'] = $this->tfilters;
         }
 
-        if ($this->sort !== null) {
-            $parameters['untaxed_price_order'] = $this->sort;
-        } else {
-            $positionProperty = $this->categoryId !== null ? 'productCategories.position' : 'position';
-            $parameters['order['.$positionProperty.']'] = 'asc';
-        }
-
-        // Deterministic tiebreaker: paginating without a total order lets a product repeat on one
-        // page and vanish from another. Products often share a position, and prices tie too.
-        $parameters['order[ref]'] = 'asc';
-
-        return $parameters;
+        return array_merge($parameters, $this->productSort->parameters($this->sort, $this->categoryId));
     }
 
     /**
@@ -550,6 +536,15 @@ class Base extends AbstractController
         }
 
         unset($query['page'], $query['tfilters'], $query['sort']);
+
+        // The rewriting router publishes the id of the object the url resolved to in the query
+        // bag (category_id, brand_id...). That belongs to the resolution, not to a public link:
+        // the path of the page names the object again on its own.
+        $query = array_filter(
+            $query,
+            static fn (string $key): bool => !str_ends_with($key, '_id'),
+            \ARRAY_FILTER_USE_KEY,
+        );
 
         if ($this->tfilters !== []) {
             $query['tfilters'] = $this->tfilters;

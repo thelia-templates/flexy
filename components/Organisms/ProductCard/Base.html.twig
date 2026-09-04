@@ -49,7 +49,8 @@
 			<a href="{{ this.product.publicUrl }}" class="ProductCard-title">{{ this.product.title }}</a>
 
 			{% if this.product.chapo %}
-				<div class="ProductCard-subtitle">{{ this.product.chapo }}</div>
+				{# Editorial html, sanitized by the core on save, like the category description #}
+				<div class="ProductCard-subtitle">{{ this.product.chapo|raw }}</div>
 			{% endif %}
 
 			<div class="ProductCard-footer">

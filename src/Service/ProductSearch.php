@@ -29,6 +29,7 @@ final readonly class ProductSearch
 {
     public function __construct(
         private DataAccessService $dataAccessService,
+        private ProductSort $productSort,
     ) {
     }
 
@@ -73,16 +74,6 @@ final readonly class ProductSearch
             'page' => max(1, $page),
         ];
 
-        if ($sort !== null) {
-            $parameters['untaxed_price_order'] = $sort;
-        } else {
-            $parameters['order[position]'] = 'asc';
-        }
-
-        // Deterministic tiebreaker: paginating without a total order lets a product repeat on one
-        // page and vanish from another. Products often share a position, and prices tie too.
-        $parameters['order[ref]'] = 'asc';
-
-        return $parameters;
+        return array_merge($parameters, $this->productSort->parameters($sort));
     }
 }
