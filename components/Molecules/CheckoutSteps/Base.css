@@ -37,7 +37,9 @@
   align-items: center;
   gap: 0.375rem;
   position: relative;
-  color: var(--color-grey);
+  /* Plain grey is 4.2:1 on the cream of the bar: the step a visitor has already been through
+     is still a label to read. The current step keeps its own darker colour below. */
+  color: var(--color-grey-dark);
   display: none;
 }
 
