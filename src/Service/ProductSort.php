@@ -33,6 +33,10 @@ final readonly class ProductSort
     private const SORTS = [
         'asc' => ['title' => 'Ascending price', 'parameter' => 'untaxed_price_order', 'direction' => 'asc'],
         'desc' => ['title' => 'Descending price', 'parameter' => 'untaxed_price_order', 'direction' => 'desc'],
+        'newest' => ['title' => 'Newest first', 'parameter' => 'order[createdAt]', 'direction' => 'desc'],
+        'oldest' => ['title' => 'Oldest first', 'parameter' => 'order[createdAt]', 'direction' => 'asc'],
+        'alpha' => ['title' => 'Name A to Z', 'parameter' => 'order[title]', 'direction' => 'asc'],
+        'alpha_reverse' => ['title' => 'Name Z to A', 'parameter' => 'order[title]', 'direction' => 'desc'],
     ];
 
     /**
