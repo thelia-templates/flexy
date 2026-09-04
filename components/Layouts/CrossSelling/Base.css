@@ -1,7 +1,14 @@
 .CrossSelling {
   display: flex;
   gap: 1rem;
-  overflow: hidden;
+  /* The strip is wider than the screen below lg: it has to be scrollable on its own, not only
+     draggable through the simple-slider controller, which leaves out touch flicks, the keyboard
+     and the scrollbar. Snapping stops the strip between two cards rather than mid-card. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline-start: --spacing(6);
 
   /* Below md the strip runs edge to edge while the heading keeps the container's inset: the
      negative margin cancels container-l's padding, the matching padding keeps the first card
@@ -19,12 +26,16 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
     cursor: initial;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    scroll-padding-inline-start: 0;
   }
 }
 
 .CrossSelling .ProductCard {
   flex: 0 0 auto;
   width: 11.6875rem;
+  scroll-snap-align: start;
 
   @variant md {
     flex-grow: 1;
