@@ -36,6 +36,9 @@
         "twig/intl-extra": "^3.24",
         "twig/string-extra": "^3.24"
     },
+    "suggest": {
+        "thelia/custom-front-menu-module": "Compose the header menu from the back-office; without it the header falls back to the catalogue tree."
+    },
     "autoload": {
         "psr-4": {
             "FlexyBundle\\": "src/",
