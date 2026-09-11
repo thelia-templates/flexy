@@ -11,10 +11,27 @@
     </div>
 
     <div class="Story-section">
-        <h4 class="Story-title">Category (mega-menu, subcategories only)</h4>
+        <h4 class="Story-title">CustomFrontMenu (Gestion intégrale du menu depuis le BO)</h4>
         <div class="HeaderMock">
             <ul class="HeaderMock-list">
-                <twig:Organisms:HeaderMenuItem:Category id="1" title="Living Room" href="/living-room" />
+                <twig:Organisms:HeaderMenuItem:Base
+                id="1"
+                title="Living Room"
+                children="{{[
+                    {
+                        id: 2,
+                        title: 'Couch',
+                        href: '#0',
+                        children : [
+                            {
+                                id: 3,
+                                title: 'New products',
+                                href: '#0',
+                            }
+                        ]
+                    }
+                ]}}"
+                />
             </ul>
         </div>
     </div>

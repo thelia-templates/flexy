@@ -38,26 +38,12 @@
             </button>
             <ul class="Header-navigation" data-menu-sub="0">
                 {% for item in menuItems %}
-                    {% if item.type == 'folder' %}
-                        <twig:Organisms:HeaderMenuItem:Folder
-                            id="{{ item.id }}"
-                            title="{{ item.title }}"
-                            href="{{ item.href }}"
-                            :includeContents="item.includeContents"
-                        />
-                    {% elseif item.type == 'link' %}
-                        <twig:Organisms:HeaderMenuItem:Base
-                            id="{{ item.id }}"
-                            title="{{ item.title }}"
-                            href="{{ item.href }}"
-                        />
-                    {% else %}
-                        <twig:Organisms:HeaderMenuItem:Category
-                            id="{{ item.id }}"
-                            title="{{ item.title }}"
-                            href="{{ item.href }}"
-                        />
-                    {% endif %}
+                    <twig:Organisms:HeaderMenuItem:Base
+                        id="{{ item.id }}"
+                        title="{{ item.title }}"
+                        href="{{ item.href }}"
+                        children="{{item.children}}"
+                    />
                 {% endfor %}
             </ul>
         </nav>

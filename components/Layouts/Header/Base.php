@@ -14,9 +14,12 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Layouts\Header;
 
+use CustomFrontMenu\Service\Front\MenuTreeResolver;
 use FlexyBundle\Service\NavigationTree;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Api\Service\DataAccess\DataAccessService;
+use Thelia\Core\HttpFoundation\Session\Session;
 
 #[AsTwigComponent]
 class Base
@@ -26,43 +29,28 @@ class Base
     public function __construct(
         private readonly DataAccessService $dataAccessService,
         private readonly NavigationTree $navigationTree,
+        private readonly MenuTreeResolver $treeResolver,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
     public function mount(): void
     {
-        $categories = $this->navigationTree->categoryRoots();
+        /** @var Session|null $session */
+        $session = $this->requestStack->getCurrentRequest()?->getSession();
 
-        $folder = $this->dataAccessService->resources('/api/front/folders/2');
-        $content = $this->dataAccessService->resources('/api/front/contents/1');
+        $locale = $session?->getLang()?->getLocale() ?? 'en_US';
+
+        $menu = $this->treeResolver->resolve('header', $locale);
 
         $this->menuItems = array_map(
-            static fn (array $category): array => [
-                'type' => 'category',
-                'id' => $category['id'],
-                'title' => $category['title'],
-                'href' => $category['href'],
+            static fn (array $item): array => [
+                'id' => $item['id'],
+                'title' => $item['title'],
+                'href' => $item['href'],
+                'children' => $item['children'],
             ],
-            $categories,
+            $menu,
         );
-
-        if ($folder !== null) {
-            $this->menuItems[] = [
-                'type' => 'folder',
-                'id' => $folder['id'],
-                'title' => $folder['i18ns']['title'] ?? '',
-                'href' => $folder['publicUrl'] ?? '',
-                'includeContents' => true,
-            ];
-        }
-
-        if ($content !== null) {
-            $this->menuItems[] = [
-                'type' => 'link',
-                'id' => $content['id'],
-                'title' => $content['i18ns']['title'] ?? '',
-                'href' => $content['publicUrl'] ?? '',
-            ];
-        }
     }
 }
