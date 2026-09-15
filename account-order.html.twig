@@ -30,6 +30,12 @@
             />
         {% endif %}
 
+        {# What the shop wrote for this customer, above the order itself: a message about a
+           delayed parcel or a missing size is read before the lines it talks about. The
+           component answers for itself and renders nothing when there is no message, so
+           the spacing travels with it. #}
+        <twig:Organisms:OrderNotes:Block :orderId="order.id" class="mt-10" />
+
         <h2 class="h4 mt-10 mb-6">{{ (isQuotation ? 'Quote details' : 'Order details')|trans }}</h2>
 
         <div class="flex flex-col gap-2">

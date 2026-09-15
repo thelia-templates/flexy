@@ -1,6 +1,7 @@
 # The theme ships full catalogs for en_US and fr_FR only. This file carries the
-# strings of the commercial operation page and its countdown, so the feature
-# reads correctly in every language the demo shop activates.
+# strings of the commercial operation page and its countdown, and the heading a
+# shop's message to its customer is filed under, so those features read correctly
+# in every language the demo shop activates.
 Products in this operation: I prodotti di questa operazione
 Sale: Vendita
 Time left before this offer ends: Tempo rimanente prima della fine di questa offerta
@@ -14,3 +15,4 @@ Continue: Continua
 Finish the step above to open this one.: Completa il passaggio precedente per aprire questo.
 One of the products in your cart requires an account. Please sign in or create one to place this order.: Uno dei prodotti nel tuo carrello richiede un account. Accedi o creane uno per effettuare questo ordine.
 Log in: Accedi
+Messages from the shop: Messaggi del negozio

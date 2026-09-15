@@ -1,0 +1,18 @@
+{% if this.isVisible %}
+    <div {{ attributes.defaults({class: 'flex flex-col gap-4'}) }} data-testid="order-notes-block">
+        <h2 class="h4">{{ 'Messages from the shop'|trans }}</h2>
+
+        <ul class="flex flex-col gap-2 list-none p-0 m-0">
+            {% for note in this.notes %}
+                <li class="flex flex-col gap-1 border border-grey-lighter rounded-lg p-4" data-testid="order-notes-entry">
+                    {% if note.createdAt|default('') is not empty %}
+                        <span class="paragraph-3" data-testid="order-notes-date">{{ note.createdAt|format_date() }}</span>
+                    {% endif %}
+                    {# Escaped by Twig, and the line breaks the shop typed are kept by the
+                       stylesheet rather than by turning the text back into markup. #}
+                    <p class="m-0 whitespace-pre-line" data-testid="order-notes-comment">{{ note.comment|default('') }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

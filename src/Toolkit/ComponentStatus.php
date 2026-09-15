@@ -61,6 +61,9 @@ final class ComponentStatus
             // its file without extension (`Toolkit/welcome`).
             'Toolkit/welcome' => self::READY,
 
+            // Stories handled on our side and open to review:
+            'Organisms/OrderNotes' => self::READY,
+
             default => null,
         };
     }

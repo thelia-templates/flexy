@@ -1,0 +1,22 @@
+{# The block reads the notes of the signed-in customer's own order, so it has nothing to
+   show in the toolkit. What is worth looking at here is the card the list is built around
+   and the way a note typed on several lines keeps its breaks, both from static markup. #}
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">Messages from the shop on an order</h4>
+        <div class="flex flex-col gap-4">
+            <h2 class="h4">Messages from the shop</h2>
+            <ul class="flex flex-col gap-2 list-none p-0 m-0">
+                <li class="flex flex-col gap-1 border border-grey-lighter rounded-lg p-4">
+                    <span class="paragraph-3">12 September 2026</span>
+                    <p class="m-0 whitespace-pre-line">Your parcel leaves tomorrow morning.</p>
+                </li>
+                <li class="flex flex-col gap-1 border border-grey-lighter rounded-lg p-4">
+                    <span class="paragraph-3">14 September 2026</span>
+                    <p class="m-0 whitespace-pre-line">The blue chair is out of stock until Friday.
+We are sending the rest of the order today, and the chair on its own next week.</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
