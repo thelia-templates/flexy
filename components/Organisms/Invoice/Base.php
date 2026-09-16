@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Organisms\Invoice;
 
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\BillingAddressChoice;
 use FlexyBundle\Service\GuestCheckoutGate;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
@@ -52,6 +53,33 @@ class Base
     public function mount(): void
     {
         $this->invoiceAddressId = $this->cartFacade->getInvoiceAddressId();
+
+        if (null === $this->invoiceAddressId) {
+            $this->preselectBillingAddress();
+        }
+    }
+
+    /**
+     * Bills the buyer where the order ships, and failing that on an address of their book.
+     *
+     * The delivery step already picks the default address for the buyer, and until this
+     * the payment step was the one place they had to choose an address a second time: the
+     * cart kept no billing address, the core refuses an order without one (CartGuard), and
+     * the Order button therefore stayed grey with nothing on screen saying why.
+     *
+     * Which address is chosen is {@see BillingAddressChoice}; the card above the payment
+     * methods then shows it, and the buyer changes it from that same card.
+     */
+    private function preselectBillingAddress(): void
+    {
+        $addressId = BillingAddressChoice::from(
+            $this->getAddressList(),
+            $this->cartFacade->getDeliveryAddressId(),
+        );
+
+        if (null !== $addressId) {
+            $this->billTo($addressId);
+        }
     }
 
     #[LiveListener(CheckoutEvents::ADD_NEW_DELIVERY_ADDRESS)]
@@ -104,18 +132,32 @@ class Base
     #[LiveListener(CheckoutEvents::SET_INVOICE_ORDER_ADDRESS_ID)]
     public function selectInvoiceAddress(#[LiveArg] ?int $addressId): void
     {
-        // Null is "bill me where you ship me", and names no address to check.
+        // Null is "no billing address yet", and names none to check. The order is refused
+        // without one: nothing but the buyer clearing their choice arrives here with null.
         if (null !== $addressId) {
             $this->guestCheckoutGate->assertVisible($addressId);
         }
 
+        $this->billTo($addressId);
+
+        $this->emit('hideShowAddressList');
+        $this->emit('updateNextButton');
+    }
+
+    /**
+     * Writes the billing address on the cart and reads back what the cart kept.
+     *
+     * Apart from the emits, which belong to a buyer's click and not to a first render,
+     * this is the whole of what choosing a billing address does — mount and the live
+     * listener go through it alike.
+     */
+    private function billTo(?int $addressId): void
+    {
         $this->cartFacade->setInvoiceAddress(new CheckoutDTO(
             cart: $this->cartFacade->getOrCreateFromSession(),
             invoiceAddressId: $addressId,
         ));
-        $this->invoiceAddressId = $this->cartFacade->getInvoiceAddressId();
 
-        $this->emit('hideShowAddressList');
-        $this->emit('updateNextButton');
+        $this->invoiceAddressId = $this->cartFacade->getInvoiceAddressId();
     }
 }
