@@ -76,7 +76,7 @@ jobs:
         # never be exercised.
         working-directory: thelia
         run: |
-          composer config repositories.flexy-checkout '{"type":"path","url":"../theme","options":{"symlink":false,"versions":{"thelia/flexy":"1.0.0-beta99"}}}'
+          composer config repositories.flexy-checkout '{"type":"path","url":"../theme","options":{"symlink":false,"versions":{"thelia/flexy":"1.99.0"}}}'
 
       - name: Install Composer dependencies
         working-directory: thelia
