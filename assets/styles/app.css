@@ -92,6 +92,7 @@
   @import "../../components/Organisms/DeliveryMode/Base.css";
   @import "../../components/Organisms/PickupPointCard/Base.css";
   @import "../../components/Organisms/AddToCartToast/Base.css";
+  @import "../../components/Organisms/VideoPlayer/Base.css";
   @import "../../components/Forms/PickupSearch/Base.css";
   @import "../../components/Layouts/Footer/Base.css";
   @import "../../components/Layouts/Footer/Checkout.css";

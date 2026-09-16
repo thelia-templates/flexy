@@ -1,14 +1,21 @@
-{# @prop images array List of {id, pseIds, isProductImg} — pseIds lists the PSEs an image illustrates, empty for a product-level image #}
+{# @prop media array List of {type, id, pseIds, alt} — plus {provider, embedUrl, fileUrl, thumbnailImageId} on a video. pseIds lists the PSEs a visual illustrates, empty for a product-level one #}
 {# @prop currentPseId int|null Selected PSE, used to seed the active thumbnail and slide #}
 {# @prop tags array Badges overlaid on the visual: [{text, color}], color being a Molecules/Tag one #}
-{% props images = [], currentPseId = null, tags = [] %}
+{% props media = [], currentPseId = null, tags = [] %}
 
 {% set galleryController = 'Organisms--ProductGallery--base' %}
+{% set placeholder = asset('images/placeholder2.webp') %}
 
+{# Splide rewrites the aria-label of the arrows it wires with its own English wording, so the
+   shop's own is handed to the controller rather than only written on the buttons below. #}
 <div
     class="{{ ('ProductGallery ' ~ attributes.render('class'))|tailwind_merge }}"
     {{ attributes.defaults({
-        ...stimulus_controller(galleryController, {currentPseId: currentPseId}),
+        ...stimulus_controller(galleryController, {
+            currentPseId: currentPseId,
+            previousLabel: 'Previous visual'|trans,
+            nextLabel: 'Next visual'|trans,
+        }),
     }).without('class') }}
 >
     {# Rendered even with nothing in it: morphing pairs children by position, and dropping this
@@ -21,12 +28,25 @@
 
     {# data-live-ignore on the rail and on the slider rather than on the gallery as a whole, so the
        tags above stay in sync with the current PSE. Both siblings hold client state a morph would
-       wipe: the active thumbnail, owned by the controller, and Splide's clones and inline styles.
+       wipe: the active thumbnail, owned by the controller, Splide's clones and inline styles, and
+       the player a shopper started — see Organisms/VideoPlayer.
        Live actions inside still fire — data-live-ignore only opts out of DOM morphing. #}
     <div class="ProductGallery-list" data-live-ignore {{ stimulus_target(galleryController, 'thumblist') }}>
         <ul>
-            {% for image in images %}
-                {% set pseIds = image.pseIds|default([])|join(',') %}
+            {% for item in media %}
+                {% set pseIds = item.pseIds|default([])|join(',') %}
+                {# An image with no PSE of its own stays accurate whichever variant is selected:
+                   the controller falls back to it, and recognises it by this extra target name.
+                   A video is left out of that fallback on purpose — selecting a variant must not
+                   land the shopper on a player. #}
+                {% set thumbnailTargets = pseIds or item.type == 'video' ? 'thumbnail' : 'thumbnail productImg' %}
+                {# The button is named whatever its visual carries: a decorative image has an empty
+                   alt on purpose, and without this the button would have no name at all. #}
+                {% if item.type == 'video' %}
+                    {% set thumbnailLabel = item.alt ?: 'Play video'|trans %}
+                {% else %}
+                    {% set thumbnailLabel = item.alt ?: 'Show visual %number%'|trans({'%number%': loop.index}) %}
+                {% endif %}
                 {# The active thumbnail is not marked server-side: the controller owns it, so a live
                    re-render can't reset it to the first image while another PSE is selected.
                    The click action sits on the list item because the button's own data-action is
@@ -40,23 +60,30 @@
                 >
                     <button
                         type="button"
-                        {{ stimulus_target(galleryController, image.isProductImg|default(false) ? 'thumbnail productImg' : 'thumbnail') }}
+                        {{ stimulus_target(galleryController, thumbnailTargets) }}
                         {% if pseIds %}
                             {{ live_action('updateCurrentPseFromId', {pseIds: pseIds}) }}
                             data-pse-id="{{ pseIds }}"
                         {% endif %}
                         data-index="{{ loop.index0 }}"
+                        aria-label="{{ thumbnailLabel }}"
                     >
-                        {{ getImages({
-                            img_id: image.id,
-                            source_type: 'product',
-                            filters: 'product_gallery_thumbnail',
-                            img_attrs: {
-                                class: 'ProductGallery-thumbnail',
-                                loading: 'lazy',
-                            },
-                            placeholder: asset('images/placeholder2.webp'),
-                        })|raw }}
+                        {% if item.type == 'video' %}
+                            {# The poster carries no alternative text of its own: the button it sits
+                               in is already named, and repeating it would read the video twice. #}
+                            <span class="ProductGallery-videoThumbnail">
+                                {{ media_image(
+                                    {img_id: item.thumbnailImageId, source_type: 'product', filters: 'product_gallery_thumbnail', placeholder: placeholder},
+                                    {alt: '', class: 'ProductGallery-thumbnail', loading: 'lazy'}
+                                ) }}
+                                <span class="ProductGallery-videoBadge" aria-hidden="true">{{ ux_icon('play') }}</span>
+                            </span>
+                        {% else %}
+                            {{ media_image(
+                                {img_id: item.id, source_type: 'product', filters: 'product_gallery_thumbnail', placeholder: placeholder},
+                                {alt: item.alt, class: 'ProductGallery-thumbnail', loading: 'lazy'}
+                            ) }}
+                        {% endif %}
                     </button>
                 </li>
             {% endfor %}
@@ -67,28 +94,32 @@
         <section class="splide" aria-label="{{ 'Product visuals'|trans }}" {{ stimulus_target(galleryController, 'slider') }}>
             <div class="splide__track">
                 <ul class="splide__list">
-                    {% for image in images %}
+                    {% for item in media %}
                         <li
                             class="splide__slide"
                             {{ stimulus_target(galleryController, 'slide') }}
-                            data-pse-ids="{{ image.pseIds|default([])|join(',') }}"
+                            data-pse-ids="{{ item.pseIds|default([])|join(',') }}"
                         >
-                            {{ getImages({
-                                img_id: image.id,
-                                source_type: 'product',
-                                filters: 'product_gallery',
-                                img_attrs: {
-                                    loading: 'lazy',
-                                    'data-image-id': image.id,
-                                },
-                                placeholder: asset('images/placeholder2.webp'),
-                            })|raw }}
+                            {% if item.type == 'video' %}
+                                <twig:Organisms:VideoPlayer:Base
+                                    :alt="item.alt"
+                                    :provider="item.provider|default(null)"
+                                    :embedUrl="item.embedUrl|default(null)"
+                                    :fileUrl="item.fileUrl|default(null)"
+                                    :thumbnailImageId="item.thumbnailImageId|default(null)"
+                                />
+                            {% else %}
+                                {{ media_image(
+                                    {img_id: item.id, source_type: 'product', filters: 'product_gallery', placeholder: placeholder},
+                                    {alt: item.alt, loading: 'lazy', 'data-image-id': item.id}
+                                ) }}
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>
             </div>
 
-            {% if images|length > 1 %}
+            {% if media|length > 1 %}
                 <div class="splide__arrows">
                     <button class="splide__arrow splide__arrow--prev" aria-label="{{ 'Previous visual'|trans }}">
                         {{ ux_icon('arrow-left') }}

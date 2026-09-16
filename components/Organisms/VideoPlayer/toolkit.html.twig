@@ -1,0 +1,39 @@
+{# The poster id is read from the database by getImages(): outside a real product it falls back to
+   the placeholder, which is enough to check the box, the play button and what the click builds. #}
+
+<div class="Story">
+
+    <div class="Story-section">
+        <h4 class="Story-title">Platform video</h4>
+        <span class="Story-label">
+            Nothing is requested from the platform until the button is clicked: the frame is built
+            then, from the address the core handed over. The address is never assembled here.
+        </span>
+        <div class="max-w-2xl">
+            <twig:Organisms:VideoPlayer:Base
+                alt="A demonstration of the product"
+                provider="youtube"
+                embedUrl="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"
+                :thumbnailImageId="1"
+            />
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <h4 class="Story-title">Hosted video</h4>
+        <span class="Story-label">
+            A file the shop serves itself: the click swaps the poster for a native player with its
+            own controls. This story points at a file that does not exist, so the player shows its
+            error state — what matters here is that no video tag exists before the click.
+        </span>
+        <div class="max-w-2xl">
+            <twig:Organisms:VideoPlayer:Base
+                alt="Assembling the product step by step"
+                provider="file"
+                fileUrl="/cache/videos/product/toolkit-story.mp4"
+                :thumbnailImageId="2"
+            />
+        </div>
+    </div>
+
+</div>
