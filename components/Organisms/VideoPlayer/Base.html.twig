@@ -1,0 +1,44 @@
+{# @prop alt string What the video shows, already resolved by the core's alt text rule — empty for a video declared decorative #}
+{# @prop provider string|null Platform code (youtube, vimeo, dailymotion) or 'file' for a video the shop hosts #}
+{# @prop embedUrl string|null Address of the player frame, built by the core from the platform and the identifier #}
+{# @prop fileUrl string|null Address of the hosted file, for a video the shop serves itself #}
+{# @prop thumbnailImageId int|null Product image used as the poster; the placeholder stands in when there is none #}
+{% props alt = '', provider = null, embedUrl = null, fileUrl = null, thumbnailImageId = null %}
+
+{% set playerController = 'Organisms--VideoPlayer--base' %}
+{% set label = alt ?: 'Play video'|trans %}
+
+{# Nothing playable, nothing rendered: a row whose platform was disabled after the fact would
+   otherwise show a poster that answers no click. #}
+{% if embedUrl or fileUrl %}
+    <div
+        class="{{ ('VideoPlayer ' ~ attributes.render('class'))|tailwind_merge }}"
+        {{ attributes.defaults({
+            ...stimulus_controller(playerController, {
+                provider: provider ?? '',
+                embedUrl: embedUrl ?? '',
+                fileUrl: fileUrl ?? '',
+                label: alt,
+            }),
+        }).without('class') }}
+    >
+        {# The frame is built here on the first click and nowhere else: no iframe, no video tag and
+           no request to the platform is issued while the shopper has not asked for one. #}
+        <div class="VideoPlayer-stage" {{ stimulus_target(playerController, 'stage') }}>
+            {# The poster is named by the button that covers it, so it carries no text of its own. #}
+            {{ media_image(
+                {img_id: thumbnailImageId, source_type: 'product', filters: 'product_gallery', placeholder: asset('images/placeholder2.webp')},
+                {alt: '', class: 'VideoPlayer-poster', loading: 'lazy'}
+            ) }}
+
+            <button
+                type="button"
+                class="VideoPlayer-play"
+                aria-label="{{ label }}"
+                {{ stimulus_action(playerController, 'play') }}
+            >
+                <span class="VideoPlayer-playIcon" aria-hidden="true">{{ ux_icon('play') }}</span>
+            </button>
+        </div>
+    </div>
+{% endif %}

@@ -31,6 +31,7 @@ use Thelia\Api\Service\DataAccess\ProductSaleElementsAccessService;
 use Thelia\Core\Form\FormServiceInterface;
 use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Cart\DTO\CartItemAddDTO;
+use Thelia\Domain\Media\AltTextResolver;
 use Thelia\Form\Definition\FrontForm;
 use Thelia\Model\ConfigQuery;
 
@@ -76,8 +77,16 @@ class Base
     #[LiveProp]
     public ?string $brandUrl = null;
 
+    /**
+     * The visuals of the product sheet, images and videos alike, in one list ordered by the
+     * position the merchant gave them. Each entry carries only what the gallery renders:
+     * type, id, the PSEs it illustrates, its alternative text, and for a video the platform,
+     * the frame address, the hosted file address and the id of its poster image.
+     *
+     * @var list<array{type: string, id: int, pseIds: list<string>, alt: string, provider?: string|null, embedUrl?: string|null, fileUrl?: string|null, thumbnailImageId?: int|null}>
+     */
     #[LiveProp]
-    public array $images = [];
+    public array $media = [];
 
     #[LiveProp]
     public array $productAttrs = [];
@@ -127,6 +136,7 @@ class Base
         private readonly CartFacade $cartFacade,
         private readonly RequestStack $requestStack,
         private readonly RunningSaleResolver $runningSaleResolver,
+        private readonly AltTextResolver $altTextResolver,
     ) {
     }
 
@@ -145,7 +155,7 @@ class Base
         $this->runningSaleTag = $this->runningSaleResolver->forProduct($this->productId);
 
         $this->setInitialCurrentPse();
-        $this->setImages();
+        $this->setMedia();
     }
 
     /**
@@ -410,87 +420,193 @@ class Base
     }
 
     /**
-     * The gallery shows one visual per PSE that has its own, followed by the product-level visuals
-     * shared by every variant. Both lists come from the API and are merged in position order.
+     * The gallery shows images and videos side by side, each of them either tied to the PSEs it
+     * illustrates or shared by every variant. Both kinds come from the API and are merged into a
+     * single list ordered by position: the merchant arranges the sheet with one set of positions,
+     * so a video put between two images has to come out between them.
+     *
+     * Four reads at most, and only two for a product with nothing on it: the join tables are
+     * asked for only once there is something to join.
      */
-    private function setImages(): void
+    private function setMedia(): void
     {
         $productImages = $this->dataAccessService->resources(
             '/api/front/product_images',
             [
                 'product.id' => $this->productId,
                 'visible' => true,
+                'order[position]' => 'asc',
             ]
         ) ?? [];
 
-        if ($productImages === []) {
-            $this->images = [];
+        $productVideos = $this->dataAccessService->resources(
+            '/api/front/product_videos',
+            [
+                'product.id' => $this->productId,
+                'visible' => true,
+                'order[position]' => 'asc',
+            ]
+        ) ?? [];
+
+        if ($productImages === [] && $productVideos === []) {
+            $this->media = [];
 
             return;
         }
 
-        $pseImages = $this->dataAccessService->resources(
-            '/api/front/product_sale_elements_product_image',
-            [
-                'productImageId' => array_map(static fn (array $image) => $image['id'], $productImages),
-                'productSaleElements.product.id' => $this->productId,
-                'visible' => true,
-            ]
-        ) ?? [];
-
-        $sharedImages = array_filter(
-            $productImages,
-            static function (array $image) use ($pseImages): bool {
-                foreach ($pseImages as $pseImage) {
-                    if ($pseImage['productImageId'] === $image['id']) {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
+        $entries = array_merge(
+            $this->imageEntries($productImages),
+            $this->videoEntries($productVideos, $productImages),
         );
 
-        // Only the three fields the gallery reads are kept: the API resource also carries the
-        // product IRI, both timestamps and an i18ns list, all of them dead weight in a LiveProp.
-        $this->images = array_merge(
-            $this->groupImagesByPse($pseImages, $productImages),
-            array_map(
-                static fn (array $image) => ['id' => $image['id'], 'isProductImg' => true],
-                array_values($sharedImages)
-            )
+        // Stable on ties: two visuals sharing a position keep the order the API gave them,
+        // images before videos, rather than swapping around from one render to the next.
+        usort($entries, static fn (array $a, array $b): int => $a['position'] <=> $b['position']);
+
+        $this->media = array_map(
+            static function (array $entry): array {
+                unset($entry['position']);
+
+                return $entry;
+            },
+            $entries
         );
     }
 
     /**
-     * One visual can illustrate several PSEs: collapse the join rows into a single entry carrying
-     * every PSE id, ordered by the product image's own position.
+     * @param list<array<string, mixed>> $productImages
+     *
+     * @return list<array<string, mixed>>
      */
-    private function groupImagesByPse(array $pseImages, array $productImages): array
+    private function imageEntries(array $productImages): array
     {
-        $positionByImageId = [];
-
-        foreach ($productImages as $productImage) {
-            $positionByImageId[$productImage['id']] = $productImage['position'] ?? 0;
+        if ($productImages === []) {
+            return [];
         }
 
-        $grouped = [];
+        $pseIdsByImageId = $this->pseIdsByMediaId(
+            '/api/front/product_sale_elements_product_image',
+            'productImageId',
+            $productImages,
+        );
 
-        foreach ($pseImages as $pseImage) {
-            $imageId = $pseImage['productImageId'];
+        $entries = [];
 
-            $grouped[$imageId] ??= [
-                'id' => $imageId,
-                'pseIds' => [],
-                'position' => $positionByImageId[$imageId] ?? 0,
+        foreach ($productImages as $image) {
+            $entries[] = [
+                'type' => 'image',
+                'id' => (int) $image['id'],
+                'pseIds' => $pseIdsByImageId[$image['id']] ?? [],
+                'alt' => $this->altOf($image),
+                'position' => (int) ($image['position'] ?? 0),
             ];
-
-            $grouped[$imageId]['pseIds'][] = (string) $pseImage['productSaleElementsId'];
         }
 
-        $grouped = array_values($grouped);
-        usort($grouped, static fn (array $a, array $b): int => $a['position'] <=> $b['position']);
+        return $entries;
+    }
 
-        return $grouped;
+    /**
+     * @param list<array<string, mixed>> $productVideos
+     * @param list<array<string, mixed>> $productImages
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function videoEntries(array $productVideos, array $productImages): array
+    {
+        if ($productVideos === []) {
+            return [];
+        }
+
+        $pseIdsByVideoId = $this->pseIdsByMediaId(
+            '/api/front/product_sale_elements_product_video',
+            'productVideoId',
+            $productVideos,
+        );
+
+        // A video without a poster of its own borrows the product's first image, so the gallery
+        // shows the product rather than a grey box; with no image at all the template falls back
+        // to the placeholder.
+        $defaultThumbnailId = isset($productImages[0]['id']) ? (int) $productImages[0]['id'] : null;
+
+        $entries = [];
+
+        foreach ($productVideos as $video) {
+            $thumbnailImageId = self::relationId($video['thumbnailImage'] ?? null);
+
+            $entries[] = [
+                'type' => 'video',
+                'id' => (int) $video['id'],
+                'pseIds' => $pseIdsByVideoId[$video['id']] ?? [],
+                'alt' => $this->altOf($video),
+                'provider' => $video['provider'] ?? null,
+                'embedUrl' => $video['embedUrl'] ?? null,
+                'fileUrl' => $video['fileUrl'] ?? null,
+                'thumbnailImageId' => $thumbnailImageId ?? $defaultThumbnailId,
+                'position' => (int) ($video['position'] ?? 0),
+            ];
+        }
+
+        return $entries;
+    }
+
+    /**
+     * One visual can illustrate several PSEs: collapse the join rows into the list of PSE ids
+     * each visual carries, keyed by the visual's own id.
+     *
+     * @param list<array<string, mixed>> $media
+     *
+     * @return array<int|string, list<string>>
+     */
+    private function pseIdsByMediaId(string $path, string $mediaIdField, array $media): array
+    {
+        $rows = $this->dataAccessService->resources(
+            $path,
+            [
+                $mediaIdField => array_map(static fn (array $item) => $item['id'], $media),
+                'productSaleElements.product.id' => $this->productId,
+            ]
+        ) ?? [];
+
+        $pseIds = [];
+
+        foreach ($rows as $row) {
+            $pseIds[$row[$mediaIdField]][] = (string) $row['productSaleElementsId'];
+        }
+
+        return $pseIds;
+    }
+
+    /**
+     * The alternative text the page will render, decided here and never in the template: the rule
+     * belongs to the core, and the gallery has no business re-deciding it per tag. `i18ns` reaches
+     * the component already resolved to the current language by the API data layer.
+     *
+     * @param array<string, mixed> $resource
+     */
+    private function altOf(array $resource): string
+    {
+        $i18ns = \is_array($resource['i18ns'] ?? null) ? $resource['i18ns'] : [];
+
+        return $this->altTextResolver->resolve(
+            \is_string($i18ns['alt'] ?? null) ? $i18ns['alt'] : null,
+            (bool) ($resource['decorative'] ?? false),
+            \is_string($i18ns['title'] ?? null) ? $i18ns['title'] : null,
+        );
+    }
+
+    /**
+     * A relation comes back either embedded or as an IRI, depending on the group it was read in.
+     */
+    private static function relationId(mixed $relation): ?int
+    {
+        if (\is_array($relation)) {
+            return isset($relation['id']) ? (int) $relation['id'] : null;
+        }
+
+        if (\is_string($relation) && preg_match('#/(\d+)$#', $relation, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return null;
     }
 }

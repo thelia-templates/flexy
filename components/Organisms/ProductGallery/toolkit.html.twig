@@ -1,10 +1,10 @@
 {# Image ids are read from the database by getImages(): outside a real product these fall back to
    the placeholder, which is enough to check the rail, the active state and the slider itself. #}
-{% set images = [
-    {id: 1, pseIds: ['1']},
-    {id: 2, pseIds: ['2']},
-    {id: 3, pseIds: []},
-    {id: 4, pseIds: [], isProductImg: true},
+{% set media = [
+    {type: 'image', id: 1, pseIds: ['1'], alt: 'The bag seen from the front'},
+    {type: 'image', id: 2, pseIds: ['2'], alt: 'The bag seen from the side'},
+    {type: 'video', id: 3, pseIds: [], alt: 'A demonstration of the bag', provider: 'youtube', embedUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ', fileUrl: null, thumbnailImageId: 1},
+    {type: 'image', id: 4, pseIds: [], alt: ''},
 ] %}
 
 <div class="Story">
@@ -14,8 +14,9 @@
         <span class="Story-label">
             Rendered outside a LiveComponent here, so selecting a visual does not send the PSE
             change round-trip — the rail, the active border and the slider behave as on the page.
+            The last visual is a decorative image: it carries an empty alt, on purpose.
         </span>
-        <twig:Organisms:ProductGallery:Base :images="images" :currentPseId="2" />
+        <twig:Organisms:ProductGallery:Base :media="media" :currentPseId="2" />
     </div>
 
     <div class="Story-section">
@@ -25,7 +26,7 @@
             element, so they change with the variant.
         </span>
         <twig:Organisms:ProductGallery:Base
-            :images="images"
+            :media="media"
             :currentPseId="2"
             :tags="[{text: 'New', color: 'warning'}, {text: '-20 %', color: 'error'}]"
         />
@@ -34,7 +35,7 @@
     <div class="Story-section">
         <h4 class="Story-title">Single visual</h4>
         <span class="Story-label">Splide is destroyed and the arrows are not rendered.</span>
-        <twig:Organisms:ProductGallery:Base :images="[images|first]" />
+        <twig:Organisms:ProductGallery:Base :media="[media|first]" />
     </div>
 
 </div>
