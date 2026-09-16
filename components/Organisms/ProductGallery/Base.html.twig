@@ -6,10 +6,16 @@
 {% set galleryController = 'Organisms--ProductGallery--base' %}
 {% set placeholder = asset('images/placeholder2.webp') %}
 
+{# Splide rewrites the aria-label of the arrows it wires with its own English wording, so the
+   shop's own is handed to the controller rather than only written on the buttons below. #}
 <div
     class="{{ ('ProductGallery ' ~ attributes.render('class'))|tailwind_merge }}"
     {{ attributes.defaults({
-        ...stimulus_controller(galleryController, {currentPseId: currentPseId}),
+        ...stimulus_controller(galleryController, {
+            currentPseId: currentPseId,
+            previousLabel: 'Previous visual'|trans,
+            nextLabel: 'Next visual'|trans,
+        }),
     }).without('class') }}
 >
     {# Rendered even with nothing in it: morphing pairs children by position, and dropping this
@@ -29,9 +35,11 @@
         <ul>
             {% for item in media %}
                 {% set pseIds = item.pseIds|default([])|join(',') %}
-                {# A visual with no PSE of its own stays accurate whichever variant is selected:
-                   the controller falls back to it, and recognises it by this extra target name. #}
-                {% set thumbnailTargets = pseIds ? 'thumbnail' : 'thumbnail productImg' %}
+                {# An image with no PSE of its own stays accurate whichever variant is selected:
+                   the controller falls back to it, and recognises it by this extra target name.
+                   A video is left out of that fallback on purpose — selecting a variant must not
+                   land the shopper on a player. #}
+                {% set thumbnailTargets = pseIds or item.type == 'video' ? 'thumbnail' : 'thumbnail productImg' %}
                 {# The button is named whatever its visual carries: a decorative image has an empty
                    alt on purpose, and without this the button would have no name at all. #}
                 {% if item.type == 'video' %}
