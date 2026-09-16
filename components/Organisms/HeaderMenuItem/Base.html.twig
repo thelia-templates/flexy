@@ -1,6 +1,8 @@
 {# Must match the controller identifier declared in Layouts/Header/Base.html.twig. #}
 {% set headerController = 'Layouts--Header--base' %}
 
+{% import '@Flexy/Atoms/Icon/direction.html.twig' as icon_direction %}
+
 {% set isActive = false %}
 {% set hasSubMenu = columns|length or leafLinks|length %}
 
@@ -24,7 +26,8 @@
             {{ stimulus_action(headerController, 'displaySubMenu', 'click', {item: menuKey}) }}
             aria-label="{{ 'Open the submenu'|trans }}"
         >
-            {{ ux_icon('arrow-right') }}
+            {# Points forward, into the submenu: turned round in a right-to-left page. #}
+            <span class="{{ icon_direction.mirror_class('arrow-right') }}">{{ ux_icon('arrow-right') }}</span>
         </button>
 
         <ul
@@ -55,7 +58,8 @@
                         {{ stimulus_action(headerController, 'displaySubMenu', 'click', {item: menuKey ~ '_5'}) }}
                         aria-label="{{ 'Open the submenu'|trans }}"
                     >
-                        {{ ux_icon('arrow-right') }}
+                        {# Points forward, into the submenu: turned round in a right-to-left page. #}
+                        <span class="{{ icon_direction.mirror_class('arrow-right') }}">{{ ux_icon('arrow-right') }}</span>
                     </button>
 
                     <ul class="Submenu-sub" data-menu-sub="{{ menuKey }}_5" data-menu-previous="{{ menuKey }}" {{ stimulus_target(headerController, 'sub') }}>

@@ -28,11 +28,13 @@
 
     & .button {
       border-bottom: none;
-      border-right: 1px solid var(--color-black);
+      /* Separator between two tabs butted against each other: it belongs to the side the next
+         tab comes from, which the row flow already mirrors. */
+      border-inline-end: 1px solid var(--color-black);
     }
 
     & > :last-child .button {
-      border-right: none;
+      border-inline-end: none;
     }
   }
 }

@@ -11,7 +11,7 @@
 >
     {% if this.outOfStock or this.insufficientStock %}
         <div class="flex paragraph-4 mb-2.5">
-            <span class="w-5 h-5 mr-1">
+            <span class="w-5 h-5 me-1">
                 {{ ux_icon('error') }}
             </span>
             <span>
@@ -60,8 +60,10 @@
                     />
                 {% endif %}
                 <div class="CartItem-orderInfos paragraph-6">
+                    {# Merchant wording and a count glued to a word: each fragment is isolated
+                       so its colons, commas and figures stay where its own language puts them. #}
                     {% if this.desc %}
-                        <span>{{ this.desc }}</span>
+                        <span><bdi>{{ this.desc }}</bdi></span>
                     {% endif %}
                     {% if this.attributesAv|length %}
                         <span>
@@ -69,13 +71,12 @@
                             {%- for attribute, value in this.attributesAv -%}
                                 {%- set attrs = attrs|merge([attribute ~ ' : ' ~ value]) -%}
                             {%- endfor -%}
-                            {{ attrs|join(', ') }}
+                            <bdi>{{ attrs|join(', ') }}</bdi>
                         </span>
                     {% endif %}
                     {% if this.cartItem.quantity %}
                         <span>
-                            {{ 'Quantity:'|trans }}
-                            {{ this.cartItem.quantity }}
+                            <bdi>{{ 'Quantity:'|trans }} {{ this.cartItem.quantity }}</bdi>
                         </span>
                     {% endif %}
                 </div>
@@ -90,30 +91,30 @@
                             {% if this.offeredIsDiscounted %}
                                 <div class="CartItem-price">
                                     <span class="sr-only">{{ 'This product is offered by a promotion, the discount is deducted in the order summary.'|trans }}</span>
-                                    {{ this.prices.offeredEffectiveTaxedPrice|format_currency('EUR', locale: lang_code) }}
+                                    <span dir="ltr">{{ this.prices.offeredEffectiveTaxedPrice|format_currency('EUR', locale: lang_code) }}</span>
                                 </div>
                                 <div class="CartItem-originalPrice">
-                                    {{ this.prices.offeredTaxedPrice|format_currency('EUR', locale: lang_code) }}
+                                    <span dir="ltr">{{ this.prices.offeredTaxedPrice|format_currency('EUR', locale: lang_code) }}</span>
                                 </div>
                             {% else %}
                                 <div class="CartItem-price">
                                     <span class="sr-only">{{ 'This product was added to your cart by a promotion.'|trans }}</span>
-                                    {{ this.prices.offeredTaxedPrice|format_currency('EUR', locale: lang_code) }}
+                                    <span dir="ltr">{{ this.prices.offeredTaxedPrice|format_currency('EUR', locale: lang_code) }}</span>
                                 </div>
                             {% endif %}
                         </div>
                     {% elseif this.promo %}
                         <div class="CartItem-footerRight">
                             <div class="CartItem-price">
-                                {{ this.prices.promoTaxedPrice|format_currency('EUR', locale: lang_code) }}
+                                <span dir="ltr">{{ this.prices.promoTaxedPrice|format_currency('EUR', locale: lang_code) }}</span>
                             </div>
                             <div class="CartItem-originalPrice">
-                                {{ this.prices.taxedPrice|format_currency('EUR', locale: lang_code) }}
+                                <span dir="ltr">{{ this.prices.taxedPrice|format_currency('EUR', locale: lang_code) }}</span>
                             </div>
                         </div>
                     {% else %}
                         <div class="CartItem-price">
-                            {{ this.prices.taxedPrice|format_currency('EUR', locale: lang_code) }}
+                            <span dir="ltr">{{ this.prices.taxedPrice|format_currency('EUR', locale: lang_code) }}</span>
                         </div>
                     {% endif %}
 

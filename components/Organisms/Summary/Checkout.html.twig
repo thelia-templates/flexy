@@ -17,17 +17,21 @@
                 <div>
                     {{ 'Subtotal'|trans }}
                     <span class="font-normal paragraph-6">
-                        ({{ summary.item_count }} {{ (summary.item_count > 1 ? 'items' : 'item')|trans }})
+                        <bdi>({{ summary.item_count }} {{ (summary.item_count > 1 ? 'items' : 'item')|trans }})</bdi>
                     </span>
                 </div>
                 <div>
-                    {{ summary.raw_taxed_total_price|format_currency('EUR', locale: lang_code) }}
+                    <span dir="ltr">{{ summary.raw_taxed_total_price|format_currency('EUR', locale: lang_code) }}</span>
                 </div>
             </div>
             <div class="Summary-line">
                 <div>{{ 'Delivery'|trans }}</div>
                 <div>
-                    {{ summary.taxed_postage ? summary.taxed_postage|format_currency('EUR', locale: lang_code) : 'Free delivery'|trans }}
+                    {% if summary.taxed_postage %}
+                        <span dir="ltr">{{ summary.taxed_postage|format_currency('EUR', locale: lang_code) }}</span>
+                    {% else %}
+                        {{ 'Free delivery'|trans }}
+                    {% endif %}
                 </div>
             </div>
             {% if coupons|length %}
@@ -51,13 +55,13 @@
                 {% for discount in discounts %}
                     <div class="Summary-line Summary-discountLine" data-summary-discount-label="{{ discount.label }}">
                         <div>{{ discount.label ?: 'Discount'|trans }}</div>
-                        <div>&minus;{{ discount.taxed_amount|format_currency('EUR', locale: lang_code) }}</div>
+                        <div><span dir="ltr">&minus;{{ discount.taxed_amount|format_currency('EUR', locale: lang_code) }}</span></div>
                     </div>
                 {% endfor %}
             {% elseif this.hasDiscount %}
                 <div class="Summary-line">
                     <div>{{ 'Discount'|trans }}</div>
-                    <div>&minus;{{ summary.taxed_discount|format_currency('EUR', locale: lang_code) }}</div>
+                    <div><span dir="ltr">&minus;{{ summary.taxed_discount|format_currency('EUR', locale: lang_code) }}</span></div>
                 </div>
             {% endif %}
         </div>
@@ -68,13 +72,13 @@
                     {{ (this.hasTax ? 'Total (including VAT)' : 'Total')|trans }}
                 </div>
                 <div>
-                    {{ summary.total_taxed_price|format_currency('EUR', locale: lang_code) }}
+                    <span dir="ltr">{{ summary.total_taxed_price|format_currency('EUR', locale: lang_code) }}</span>
                 </div>
             </div>
             {% if this.hasTax %}
                 <div class="italic">
                     {{ 'Taxes of'|trans }}
-                    {{ summary.total_tax_amount|format_currency('EUR', locale: lang_code) }}
+                    <span dir="ltr">{{ summary.total_tax_amount|format_currency('EUR', locale: lang_code) }}</span>
                     {{ 'included'|trans }}
                 </div>
             {% endif %}

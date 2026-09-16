@@ -43,13 +43,17 @@
     },
 ) %}
 
+{% import '@Flexy/Atoms/Icon/direction.html.twig' as icon_direction %}
+{% set mirror_left = icon_direction.mirror_class(icon_left) %}
+{% set mirror_right = icon_direction.mirror_class(icon_right) %}
+
 {# A bare <button> defaults to type="submit" in HTML, which submits any surrounding form.
    Set through defaults() so an explicit type="submit" from the caller still wins. #}
 {% set buttonAttributes = tag == 'button' ? attributes.defaults({type: 'button'}) : attributes %}
 
 <{{ tag }} class="{{ button.apply({color, size, fill, rectangle, sharp, round}, attributes.render('class')) }} " {{ buttonAttributes.without('class') }}>
     {% if icon_left %}
-        <span class="icon icon-left">
+        <span class="icon icon-left {{ mirror_left }}">
             {{ ux_icon(icon_left) }}
         </span>
     {% endif %}
@@ -59,7 +63,7 @@
     {% endblock %}
 
     {% if icon_right %}
-        <span class="icon icon-right">
+        <span class="icon icon-right {{ mirror_right }}">
             {{ ux_icon(icon_right) }}
         </span>
     {% endif %}

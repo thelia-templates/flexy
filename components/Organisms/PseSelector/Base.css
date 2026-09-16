@@ -116,7 +116,7 @@
     padding: 1rem 0.875rem;
     border: none;
     border-radius: 0;
-    text-align: left;
+    text-align: start;
     background-color: transparent;
 
     @variant hover {
@@ -140,8 +140,13 @@
   .PseSelector .FilterPill--selected {
     background-image: var(--background-image-icon-checkmark);
     background-repeat: no-repeat;
+    /* background-position has no logical form: the side is spelled out per reading direction. */
     background-position: right 0 top 50%;
     background-size: 1.5rem auto;
+
+    @variant rtl {
+      background-position: left 0 top 50%;
+    }
 
     @variant md {
       background-image: none;
@@ -192,18 +197,18 @@
 /* From md the two halves merge into one pill: inner corners squared off, hairline between them. */
 .PseSelector-addToCart > .ButtonQuantity button:last-of-type {
   @variant md {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: 0;
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+    border-inline-end: 0;
   }
 }
 
 .PseSelector-addToCart > .button {
   @variant md {
     flex: 1;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    border-left: 1px solid var(--color-white);
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+    border-inline-start: 1px solid var(--color-white);
   }
 }
 

@@ -19,10 +19,10 @@
 
     {{ form_row(form.company, {label: 'Company'|trans}) }}
     {% if form.siret is defined %}
-        {{ form_row(form.siret) }}
+        {{ form_row(form.siret, {attr: {dir: 'ltr'}}) }}
     {% endif %}
     {% if form.vat_number is defined %}
-        {{ form_row(form.vat_number) }}
+        {{ form_row(form.vat_number, {attr: {dir: 'ltr'}}) }}
     {% endif %}
     {{ form_row(form.address1, {label: 'Address'|trans}) }}
     {{ form_row(form.address2) }}

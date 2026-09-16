@@ -31,26 +31,29 @@
             {% endif %}
             <span>
                 <span class="AddressCard-title">{{ cardTitle }}</span>
-                <span class="AddressCard-name">{{ name }}</span>
+                {# Customer-entered, so the direction of each value follows its own content:
+                   a Latin street line keeps "10 rue du Tunnel" in order inside a right-to-left
+                   card, an Arabic one still reads right to left. #}
+                <span class="AddressCard-name"><bdi>{{ name }}</bdi></span>
                 {% if address.company %}
                     <span class="AddressCard-company">
-                        <span class="block">{{ address.company }}</span>
+                        <span class="block"><bdi>{{ address.company }}</bdi></span>
                         {% if address.siret %}
-                            <span class="block">{{ 'Company registration number'|trans }} : {{ address.siret }}</span>
+                            <span class="block">{{ 'Company registration number'|trans }} : <span dir="ltr">{{ address.siret }}</span></span>
                         {% endif %}
                         {% if address.vatNumber %}
-                            <span class="block">{{ 'VAT number'|trans }} : {{ address.vatNumber }}</span>
+                            <span class="block">{{ 'VAT number'|trans }} : <span dir="ltr">{{ address.vatNumber }}</span></span>
                         {% endif %}
                     </span>
                 {% endif %}
                 <span class="AddressCard-address">
                     <span class="block">
-                        {{ [address.address1, address.address2 ?? '', address.address3 ?? '']|filter(i => i)|join(', ') }}
+                        <bdi>{{ [address.address1, address.address2 ?? '', address.address3 ?? '']|filter(i => i)|join(', ') }}</bdi>
                     </span>
                     <span class="block">
-                        {{ [address.zipcode, address.city ?? '', this.countryIsoAlpha3 ?? '']|filter(i => i)|join(', ') }}
+                        <bdi>{{ [address.zipcode, address.city ?? '', this.countryIsoAlpha3 ?? '']|filter(i => i)|join(', ') }}</bdi>
                     </span>
-                    <span class="AddressCard-phone">{{ address.phone }}</span>
+                    <span class="AddressCard-phone" dir="ltr">{{ address.phone }}</span>
                 </span>
             </span>
         {% endblock %}

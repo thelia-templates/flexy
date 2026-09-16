@@ -75,7 +75,12 @@
   border: 1px solid var(--color-success);
   background-image: var(--background-image-icon-check);
   background-repeat: no-repeat;
+  /* background-position has no logical form: the side is spelled out per reading direction. */
   background-position: right 0.625rem top 1rem;
+
+  @variant rtl {
+    background-position: left 0.625rem top 1rem;
+  }
 }
 
 .TextArea ::placeholder {

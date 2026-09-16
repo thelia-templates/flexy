@@ -13,8 +13,7 @@
   @variant xl {
     flex-direction: row;
     justify-content: space-between;
-    padding-left: 7.5rem;
-    padding-right: 7.5rem;
+    padding-inline: 7.5rem;
   }
 }
 

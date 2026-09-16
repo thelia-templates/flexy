@@ -4,6 +4,10 @@
 {% set statusCode = order.orderStatus.code %}
 {% set isQuotation = statusCode == 'quotation' %}
 {% set isClosed = statusCode in ['canceled', 'refunded'] %}
+{# `heading` is the plain-text spelling, for the <title> and the breadcrumb: both are text slots
+   where an isolation would either not render or pollute the structured data. Wherever the
+   reference is rendered as markup it is isolated instead - see the <h1> below. A reference that
+   begins or ends with a neutral character (#, /, -) is reordered without it. #}
 {% set heading = (isQuotation ? 'Quote N°' : 'Order N°')|trans ~ ' ' ~ order.ref %}
 
 {% block title %}{{ heading }}{% endblock %}
@@ -11,7 +15,7 @@
 {% block body %}
     {{ theme_hook('account-order.top', {order: order}) }}
 
-    <div class="pt-2 pb-3 md:pt-5 md:pl-5">
+    <div class="pt-2 pb-3 md:pt-5 md:ps-5">
         <twig:Molecules:Breadcrumb:Base :items="[
             {title: 'My account'|trans, url: path('account_index')},
             {title: 'My orders'|trans, url: path('account_orders')},
@@ -20,8 +24,8 @@
     </div>
 
     <div class="container-m pb-14 md:pb-24">
-        <h1 class="h3 text-black">{{ heading }}</h1>
-        <p class="paragraph-3 mb-6 lg:mb-11">{{ order.createdAt|format_date() }}</p>
+        <h1 class="h3 text-black">{{ (isQuotation ? 'Quote N°' : 'Order N°')|trans }} <span dir="ltr">{{ order.ref }}</span></h1>
+        <p class="paragraph-3 mb-6 lg:mb-11"><bdi>{{ order.createdAt|format_date() }}</bdi></p>
 
         {% if not isQuotation and not isClosed %}
             <twig:Organisms:DeliveryTracking:Base

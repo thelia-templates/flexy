@@ -56,10 +56,10 @@
 
         {{ form_row(form.invoice_company, {label: 'Company'|trans}) }}
         {% if form.invoice_siret is defined %}
-            {{ form_row(form.invoice_siret) }}
+            {{ form_row(form.invoice_siret, {attr: {dir: 'ltr'}}) }}
         {% endif %}
         {% if form.invoice_vat_number is defined %}
-            {{ form_row(form.invoice_vat_number) }}
+            {{ form_row(form.invoice_vat_number, {attr: {dir: 'ltr'}}) }}
         {% endif %}
 
         {{ form_row(form.invoice_address1, {label: 'Address'|trans}) }}

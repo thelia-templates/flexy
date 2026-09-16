@@ -10,15 +10,19 @@
     {% set classes = classes ~ 'Tab--' ~ size %}
 {% endif %}
 
+{% import '@Flexy/Atoms/Icon/direction.html.twig' as icon_direction %}
+{% set mirrorLeft = icon_direction.mirror_class(iconLeft) %}
+{% set mirrorRight = icon_direction.mirror_class(iconRight) %}
+
 <button class="Tab {{ classes }}" {% if disabled %} disabled {% endif %}>
     {% if iconLeft %}
-        <span class="Tab-icon">
+        <span class="Tab-icon {{ mirrorLeft }}">
             {{ ux_icon(iconLeft) }}
         </span>
     {% endif %}
     {{ customText }}
     {% if iconRight %}
-        <span class="Tab-icon">
+        <span class="Tab-icon {{ mirrorRight }}">
             {{ ux_icon(iconRight) }}
         </span>
     {% endif %}

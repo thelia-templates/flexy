@@ -30,9 +30,8 @@
             />
         {% endfor %}
 
-        <div class="text-right mb-1 paragraph-6 hidden sm:block">
-            {{ this.totalItems }}
-            {{ (this.totalItems <= 1 ? 'item' : 'items')|trans }}
+        <div class="text-end mb-1 paragraph-6 hidden sm:block">
+            <bdi>{{ this.totalItems }} {{ (this.totalItems <= 1 ? 'item' : 'items')|trans }}</bdi>
         </div>
 
         {% if this.pendingDelete %}

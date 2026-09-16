@@ -43,7 +43,12 @@
     {# Decorative and ever-changing: kept out of the accessibility tree entirely rather than
        announced every second. The one announcement that matters — the offer has ended — is
        the status region below, updated once. #}
-    <div class="Countdown-digits" aria-hidden="true">
+    {# A duration does not turn round any more than a price does: days, hours, minutes, seconds
+       read in that order in every language. Without this the flex row is laid out from the right
+       and the clock is read backwards - seconds first, days last. Safe on the box itself here:
+       it is a flex container whose units are centred, so nothing re-resolves an alignment. The
+       component as a whole still follows the page, so the icon keeps its leading edge. #}
+    <div class="Countdown-digits" dir="ltr" aria-hidden="true">
         <div class="Countdown-unit">
             <span class="Countdown-value" {{ stimulus_target('Molecules--Countdown--base', 'days') }}>{{ '%02d'|format(days) }}</span>
             <span class="Countdown-label">{{ 'd'|trans }}</span>

@@ -22,7 +22,7 @@
   .ProductGallery-tags {
     position: absolute;
     top: 1rem;
-    left: 1rem;
+    inset-inline-start: 1rem;
     z-index: 1;
     display: flex;
     flex-wrap: wrap;

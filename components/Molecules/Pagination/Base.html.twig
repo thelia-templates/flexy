@@ -3,7 +3,7 @@
     <nav class="Pagination" aria-label="{{ 'Pagination'|trans }}">
         <ul class="Pagination-list">
             {% if currentPage != 1 %}
-                <li class="mr-3">
+                <li class="me-3">
                     <twig:Molecules:Button:Base
                         text="{{ 'Previous'|trans }}"
                         icon_left="chevron-left"
@@ -22,7 +22,7 @@
             {% endfor %}
 
             {% if currentPage != totalPages %}
-                <li class="ml-3">
+                <li class="ms-3">
                     <twig:Molecules:Button:Base
                         text="{{ 'Next'|trans }}"
                         icon_right="chevron-right"

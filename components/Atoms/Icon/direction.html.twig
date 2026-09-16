@@ -1,0 +1,24 @@
+{# The one place that says which icons turn round under a right-to-left page.
+
+   An icon that points along the line of reading - an arrow, a chevron - has to point the other
+   way once the line runs right to left. It is mirrored in place with the `rtl:-scale-x-100`
+   utility rather than duplicated as a second set of SVG files. Every icon that carries no
+   direction (cart, check, close, heart...) is left alone.
+
+   The list is the theme's own icon set, named one by one rather than guessed from a `-left` or
+   `-right` suffix: a suffix rule misses a directional icon named otherwise (`next`,
+   `arrow-narrow-right`) and mirrors one that is not (`align-left`, `text-right`). Adding a
+   directional icon to `assets/icons/` means adding its name here, and nowhere else.
+
+   Called by the three molecules that take an icon name as a prop (Button, Link, Tabulation) and
+   by every template that renders an icon itself:
+
+       {% import '@Flexy/Atoms/Icon/direction.html.twig' as icon_direction %}
+       <span class="MenuItem-icon {{ icon_direction.mirror_class('chevron-right') }}">
+
+   A theme that inherits from Flexy inherits this file with it. #}
+
+{% macro mirror_class(name) %}
+{%- set directional = ['arrow-left', 'arrow-right', 'chevron-left', 'chevron-right'] -%}
+{{- name in directional ? 'rtl:-scale-x-100' : '' -}}
+{% endmacro %}

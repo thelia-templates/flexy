@@ -10,7 +10,7 @@
       width: 0.5625rem;
       height: 0.5625rem;
       border-radius: 100%;
-      margin-right: 0.25rem;
+      margin-inline-end: 0.25rem;
       background-color: var(--color-grey-dark);
     }
   }

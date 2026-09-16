@@ -10,6 +10,9 @@
 
 {# WIDGETS #}
 
+{# `dir` is forwarded from the form's own `attr`: a text field that holds a value rather than a
+   sentence - a registration number, a VAT number - keeps its own order inside a right-to-left
+   page. The field component reads e-mail, phone, URL and figures off the type on its own. #}
 {%- block form_widget_simple -%}
     {%- set type = type|default('text') -%}
     {% if type in ['range', 'file', 'hidden'] %}
@@ -26,6 +29,7 @@
             disabled: disabled,
             required: required,
             help: help ?? null,
+            dir: attr.dir|default(null),
         }) }}
     {% endif %}
 {%- endblock form_widget_simple -%}

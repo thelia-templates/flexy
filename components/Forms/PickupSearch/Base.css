@@ -12,7 +12,7 @@
   .Input-input {
     border-start-end-radius: 0;
     border-end-end-radius: 0;
-    border-right: none;
+    border-inline-end: none;
   }
 }
 

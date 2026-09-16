@@ -19,7 +19,7 @@
         "symfony/stimulus-bundle": "^2.19",
         "symfony/twig-bundle": "^6.4 || ^7.4",
         "symfony/http-client": "^6.4 || ^7.4",
-        "thelia/twig-engine-module": "^1.0.9",
+        "thelia/twig-engine-module": "^1.1",
         "thelia/thelia-library-module": "^2.0",
         "thelia/thelia-blocks-module": "^3.0",
         "thelia/page-module": "^2.0",

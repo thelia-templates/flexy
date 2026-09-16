@@ -12,7 +12,7 @@
 
   &.Select--small .Select-input {
     padding: 0.625rem;
-    padding-right: 2rem;
+    padding-inline-end: 2rem;
   }
 
   &.Select--error {
@@ -26,11 +26,16 @@
     border-color: var(--color-success);
 
     &:not([multiple]) {
-      padding-right: 3.75rem;
+      padding-inline-end: 3.75rem;
       background-image: var(--background-image-icon-check), var(--background-image-icon-chevron-small-down);
       background-repeat: no-repeat, no-repeat;
+      /* background-position has no logical form: the side is spelled out per reading direction. */
       background-position: right 2rem top 50%, right 0 top 50%;
       background-size: auto, 2.5rem auto;
+
+      @variant rtl {
+        background-position: left 2rem top 50%, left 0 top 50%;
+      }
     }
   }
 }
@@ -56,14 +61,19 @@
   font-style: normal;
   width: 100%;
   padding: 1rem 0.625rem;
-  padding-right: 2.25rem;
+  padding-inline-end: 2.25rem;
   appearance: none;
   background-image: var(--background-image-icon-chevron-small-down);
   background-repeat: no-repeat;
+  /* background-position has no logical form: the side is spelled out per reading direction. */
   background-position: right 0 top 50%;
   background-size: 2.5rem auto;
   cursor: pointer;
   transition: 0.2s ease all;
+
+  @variant rtl {
+    background-position: left 0 top 50%;
+  }
 
   @variant hover {
     background-color: var(--select-hover-bg-color);
@@ -89,9 +99,11 @@
 
 .Select .Select-input[multiple] {
   background-image: none;
-  padding-right: 1.5rem;
-  /* The native scrollbar renders flush against the right edge and clips the rounded corner otherwise. */
-  border-radius: 0.5rem 0 0 0.5rem;
+  padding-inline-end: 1.5rem;
+  /* The native scrollbar renders flush against the trailing edge and clips the rounded corner otherwise. */
+  border-radius: 0.5rem;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
 }
 
 .Select-input option {

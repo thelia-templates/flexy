@@ -5,6 +5,8 @@
 
 {% set galleryController = 'Organisms--ProductGallery--base' %}
 
+{% import '@Flexy/Atoms/Icon/direction.html.twig' as icon_direction %}
+
 <div
     class="{{ ('ProductGallery ' ~ attributes.render('class'))|tailwind_merge }}"
     {{ attributes.defaults({
@@ -90,10 +92,11 @@
 
             {% if images|length > 1 %}
                 <div class="splide__arrows">
-                    <button class="splide__arrow splide__arrow--prev" aria-label="{{ 'Previous visual'|trans }}">
+                    {# Previous/next along the line of reading: turned round in a right-to-left page. #}
+                    <button class="splide__arrow splide__arrow--prev {{ icon_direction.mirror_class('arrow-left') }}" aria-label="{{ 'Previous visual'|trans }}">
                         {{ ux_icon('arrow-left') }}
                     </button>
-                    <button class="splide__arrow splide__arrow--next" aria-label="{{ 'Next visual'|trans }}">
+                    <button class="splide__arrow splide__arrow--next {{ icon_direction.mirror_class('arrow-right') }}" aria-label="{{ 'Next visual'|trans }}">
                         {{ ux_icon('arrow-right') }}
                     </button>
                 </div>

@@ -1,6 +1,16 @@
-{% props label = null, name = '', id = null, type = 'text', value = null, placeholder = null, error = false, success = false, disabled = false, required = false, optional = false, unit = null, help = null, size = null %}
+{# @prop dir 'ltr'|null Forces the reading direction of the field. Left to null the direction is
+    read off the type, which covers the values the browser already knows about; pass it for a
+    text field that holds a value rather than a sentence - a company registration number, a VAT
+    number, a reference. #}
+{% props label = null, name = '', id = null, type = 'text', value = null, placeholder = null, error = false, success = false, disabled = false, required = false, optional = false, unit = null, help = null, size = null, dir = null %}
 
 {% set fieldId = id ?? name %}
+
+{# An e-mail address, a phone number, an URL or a figure is a value, not a sentence: the field
+   keeps its own order inside a right-to-left page. The unit badge is pinned to the trailing
+   edge of that value, so it has to read the same direction as the field it belongs to - an
+   inset-inline-* offset resolves against the element's own direction, not the page's. #}
+{% set fieldDir = dir ?? (type in ['email', 'tel', 'url', 'number'] ? 'ltr' : null) %}
 
 {% set fieldInput = html_cva(
     base: 'Input',
@@ -34,10 +44,11 @@
             {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
             {% if disabled %}disabled{% endif %}
             {% if required %}required{% endif %}
+            {% if fieldDir %}dir="{{ fieldDir }}"{% endif %}
             {{ attributes.nested('input') }}
         />
         {% if unit %}
-            <div class="Input-unit">{{ unit }}</div>
+            <div class="Input-unit"{% if fieldDir %} dir="{{ fieldDir }}"{% endif %}>{{ unit }}</div>
         {% endif %}
     </div>
 

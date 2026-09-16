@@ -32,7 +32,7 @@
   @variant md {
     margin-bottom: 0;
     padding-top: 3.125rem;
-    padding-left: 3.125rem;
+    padding-inline-start: 3.125rem;
   }
 
   @variant lg {
@@ -63,8 +63,10 @@
   @variant md {
     margin-bottom: 0;
     padding-top: 3.125rem;
-    padding-left: 2.5rem;
-    border-right: 1px solid var(--color-grey-lighter);
+    padding-inline-start: 2.5rem;
+    /* Separator between this column and the next one: it follows the column order, which the
+       grid itself already mirrors with the direction. */
+    border-inline-end: 1px solid var(--color-grey-lighter);
   }
 
   @variant lg {
@@ -75,12 +77,12 @@
 
 .Footer--withNewsletter .Footer-storeInfos {
   @variant md {
-    border-right: 0;
-    border-left: 1px solid var(--color-grey-lighter);
+    border-inline-end: 0;
+    border-inline-start: 1px solid var(--color-grey-lighter);
   }
 
   @variant lg {
-    border-right: 1px solid var(--color-grey-lighter);
+    border-inline-end: 1px solid var(--color-grey-lighter);
   }
 }
 
@@ -113,7 +115,8 @@
   @variant md {
     gap: 0.5rem;
     margin-bottom: 0;
-    padding: 3.125rem 0 4.375rem 2.5rem;
+    padding-block: 3.125rem 4.375rem;
+    padding-inline: 2.5rem 0;
   }
 
   @variant lg {

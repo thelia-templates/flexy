@@ -39,6 +39,10 @@ class BaseController extends Controller {
 
   initSlider() {
     this.slider = new Splide(this.sliderTarget, {
+      // Splide reads its direction from its own options only, never from the document: without
+      // this the track would still run left to right under a right-to-left page, and the arrows
+      // mirrored by the template would point away from the slide they reach.
+      direction: document.documentElement.dir === "rtl" ? "rtl" : "ltr",
       pagination: false,
       destroy: this.slideTargets.length <= 1,
       drag: false,

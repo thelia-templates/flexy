@@ -10,9 +10,13 @@
     },
 ) %}
 
+{% import '@Flexy/Atoms/Icon/direction.html.twig' as icon_direction %}
+{% set mirrorLeft = icon_direction.mirror_class(iconLeft) %}
+{% set mirrorRight = icon_direction.mirror_class(iconRight) %}
+
 <a href="{{ href }}" class="{{ link.apply({size}, attributes.render('class')) }} " {{ attributes.without('class') }}>
     {% if iconLeft %}
-        <span class="Link-icon">
+        <span class="Link-icon {{ mirrorLeft }}">
             {{ ux_icon(iconLeft) }}
         </span>
     {% endif %}
@@ -20,7 +24,7 @@
     {{ customText }}
 
     {% if iconRight %}
-        <span class="Link-icon">
+        <span class="Link-icon {{ mirrorRight }}">
             {{ ux_icon(iconRight) }}
         </span>
     {% endif %}

@@ -1,8 +1,8 @@
-<div class="{{ ('CheckoutSteps-mobile text-right ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class').defaults(stimulus_controller('live-refresh-on-focus')) }}>
+<div class="{{ ('CheckoutSteps-mobile text-end ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class').defaults(stimulus_controller('live-refresh-on-focus')) }}>
     <div class="paragraph-4 font-semibold">
-        {{ this.summary.total_taxed_price|format_currency('EUR', locale: lang_code) }}
+        <span dir="ltr">{{ this.summary.total_taxed_price|format_currency('EUR', locale: lang_code) }}</span>
     </div>
     <div class="paragraph-6">
-        {{ this.summary.item_count }} {{ (this.summary.item_count > 1 ? 'items' : 'item')|trans }}
+        <bdi>{{ this.summary.item_count }} {{ (this.summary.item_count > 1 ? 'items' : 'item')|trans }}</bdi>
     </div>
 </div>

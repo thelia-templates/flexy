@@ -66,12 +66,13 @@
   }
 }
 
-/* Pinned to the sidebar's top-right corner once the sidebar is static */
+/* Pinned to the far corner of the sidebar's first line once the sidebar is static: top-right
+   reading left to right, top-left reading right to left. */
 .ProductListing-clear {
   @variant lg {
     position: absolute;
     top: 0;
-    right: 0;
+    inset-inline-end: 0;
   }
 }
 
@@ -124,9 +125,10 @@
   }
 }
 
+/* Pushed to the end of the toolbar by an auto margin on the start side. */
 .ProductListing-sort {
   width: 15.625rem;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .ProductListing-grid {

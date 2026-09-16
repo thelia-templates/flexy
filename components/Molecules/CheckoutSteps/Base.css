@@ -103,7 +103,7 @@
 .Step.current .Step-label {
   display: inline-block;
   font-weight: 600;
-  padding-left: 0.375rem;
+  padding-inline-start: 0.375rem;
 }
 
 .Step.previous .Step-number {
@@ -131,7 +131,7 @@
 
   .Step.current .Step-label {
     font-weight: 400;
-    padding-left: 0.125rem;
+    padding-inline-start: 0.125rem;
   }
 
   .Step:not(:first-child):before {
@@ -139,7 +139,7 @@
     width: 3.125rem;
     height: 1px;
     position: absolute;
-    left: -3.125rem;
+    inset-inline-start: -3.125rem;
     background-color: var(--color-medium);
   }
 }

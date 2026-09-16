@@ -4,20 +4,20 @@
     <div class="Summary-list">
         <div class="Summary-line">
             <div>{{ 'Subtotal without taxes'|trans }}</div>
-            <div>{{ order.totalAmountWithoutTaxes|format_currency('EUR', locale: lang_code) }}</div>
+            <div><span dir="ltr">{{ order.totalAmountWithoutTaxes|format_currency('EUR', locale: lang_code) }}</span></div>
         </div>
 
         {% if this.hasShipping %}
             <div class="Summary-line">
                 <div>{{ 'Delivery'|trans }}</div>
-                <div>{{ order.totalShippingWithTaxes|format_currency('EUR', locale: lang_code) }}</div>
+                <div><span dir="ltr">{{ order.totalShippingWithTaxes|format_currency('EUR', locale: lang_code) }}</span></div>
             </div>
         {% endif %}
 
         {% if this.hasDiscount %}
             <div class="Summary-line">
                 <div>{{ 'Discount'|trans }}</div>
-                <div>&minus;{{ order.amountDiscountWithTaxes|format_currency('EUR', locale: lang_code) }}</div>
+                <div><span dir="ltr">&minus;{{ order.amountDiscountWithTaxes|format_currency('EUR', locale: lang_code) }}</span></div>
             </div>
         {% endif %}
 
@@ -30,12 +30,12 @@
     <div class="Summary-footer">
         <div class="Summary-total">
             <div>{{ (this.hasTax ? 'Total (including VAT)' : 'Total')|trans }}</div>
-            <div>{{ order.totalAmount|format_currency('EUR', locale: lang_code) }}</div>
+            <div><span dir="ltr">{{ order.totalAmount|format_currency('EUR', locale: lang_code) }}</span></div>
         </div>
         {% if this.hasTax %}
             <div class="italic">
                 {{ 'Taxes of'|trans }}
-                {{ this.taxAmount|format_currency('EUR', locale: lang_code) }}
+                <span dir="ltr">{{ this.taxAmount|format_currency('EUR', locale: lang_code) }}</span>
                 {{ 'included'|trans }}
             </div>
         {% endif %}

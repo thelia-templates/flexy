@@ -122,13 +122,15 @@
     {% elseif outOfStock %}
         {{ form_widget(form.quantity, {type: 'hidden'}) }}
     {% else %}
+        {# Flex items are blockified: dir="ltr" goes on an inner inline span, so the box keeps
+           resolving its own alignment against the page. #}
         <div class="PseSelector-price">
             <strong class="h4">
-                {{ (currentPse.isPromo ? currentPse.promoPrice : currentPse.price)|format_currency('EUR', locale: lang_code) }}
+                <span dir="ltr">{{ (currentPse.isPromo ? currentPse.promoPrice : currentPse.price)|format_currency('EUR', locale: lang_code) }}</span>
             </strong>
             {% if currentPse.isPromo %}
                 <span class="PseSelector-originalPrice paragraph-4">
-                    {{ currentPse.price|format_currency('EUR', locale: lang_code) }}
+                    <span dir="ltr">{{ currentPse.price|format_currency('EUR', locale: lang_code) }}</span>
                 </span>
             {% endif %}
         </div>

@@ -20,7 +20,8 @@
 }
 
 .FilterPill--withIcon {
-  padding: 0.5rem 0.625rem 0.5rem 0.25rem;
+  padding-block: 0.5rem;
+  padding-inline: 0.25rem 0.625rem;
 }
 
 .FilterPill-icon {
@@ -28,7 +29,7 @@
   height: 1.3125rem;
   display: inline-block;
   flex-shrink: 0;
-  margin-right: 0.25rem;
+  margin-inline-end: 0.25rem;
   color: var(--filterpill-icon-color, currentColor);
 }
 
@@ -37,7 +38,7 @@
   height: 1.25rem;
   display: none;
   flex-shrink: 0;
-  margin-left: 0.25rem;
+  margin-inline-start: 0.25rem;
 }
 
 /* Icon SVGs (e.g. circle.svg) may lack a square viewBox: force them to fill their wrapper instead of relying on intrinsic sizing */
@@ -56,7 +57,7 @@
 .FilterPill-count {
   @apply paragraph-4;
 
-  margin-left: 0.375rem;
+  margin-inline-start: 0.375rem;
   color: currentColor;
   opacity: 0.7;
   white-space: nowrap;

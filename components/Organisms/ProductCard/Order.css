@@ -28,9 +28,9 @@
   }
 
   .ProductCard-desc {
-    margin-right: auto;
+    margin-inline-end: auto;
     padding: 0;
-    margin-left: 1.1875rem;
+    margin-inline-start: 1.1875rem;
   }
 
   .ProductCard-title {

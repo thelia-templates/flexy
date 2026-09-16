@@ -46,7 +46,7 @@
 }
 
 .Input-input--unit {
-  padding-right: 3rem;
+  padding-inline-end: 3rem;
 }
 
 .Input-input--verificationCode {
@@ -69,9 +69,12 @@
   }
 }
 
+/* Pinned to the trailing edge of the field it annotates. The offset resolves against this
+   element's own direction, which the template copies from the input: a numeric field forced to
+   ltr reserves its padding on the right, so the badge has to land on the right too. */
 .Input-unit {
   position: absolute;
-  right: 0.625rem;
+  inset-inline-end: 0.625rem;
   bottom: 0;
   top: 0;
   display: flex;
@@ -87,7 +90,7 @@
 }
 
 .Input--small .Input-input--unit {
-  padding-right: 3.125rem;
+  padding-inline-end: 3.125rem;
 }
 
 .Input-error {
@@ -100,17 +103,29 @@
   border: 1px solid var(--color-success);
   background-image: var(--background-image-icon-check);
   background-repeat: no-repeat;
+  /* No logical form of background-position exists: the check sits at the trailing edge of the
+     field, so the side it is pinned to is spelled out for each reading direction. */
   background-position: right 0 top 50%;
+
+  /* :dir() and not the rtl: variant. Tailwind compiles rtl: to
+     `:where(:dir(rtl), [dir="rtl"], [dir="rtl"] *)`, whose last branch matches every descendant
+     of a right-to-left page - this field included when it carries its own dir="ltr" for an
+     e-mail, a phone number, an URL or a figure. The check would then be painted on the left
+     while the text still starts there. The trailing edge of a field is the trailing edge of
+     the field's own direction, so that is what the selector asks for. */
+  &:dir(rtl) {
+    background-position: left 0 top 50%;
+  }
 }
 
 .Input--withButton .Input-input {
-  padding-right: 25%;
+  padding-inline-end: 25%;
 }
 
 .Input-button {
   position: absolute;
   top: 1px;
-  right: 1px;
+  inset-inline-end: 1px;
   bottom: 1px;
   display: flex;
   align-items: stretch;
@@ -119,7 +134,7 @@
 .Input-buttonIcon {
   position: absolute;
   top: 50%;
-  right: 0.625rem;
+  inset-inline-end: 0.625rem;
   transform: translateY(-50%);
   width: 1.25rem;
   height: 1.25rem;
@@ -130,13 +145,14 @@
   font-style: italic;
 }
 
+/* "IconLeft" is the leading edge of the field, whichever side that is. */
 .Input-blockInputIconLeft .Input-buttonIcon {
-  right: 0;
-  left: 0.625rem;
+  inset-inline-end: auto;
+  inset-inline-start: 0.625rem;
 }
 
 .Input-blockInputIconLeft .Input-input {
-  padding-left: 2.5rem;
+  padding-inline-start: 2.5rem;
 }
 
 .Input + .Input {

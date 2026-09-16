@@ -4,12 +4,15 @@
 {# @prop variant 'white'|'' Visual variant for use on dark backgrounds. Defaults to empty #}
 {% props href = '', text = '', icon = false, variant = '' %}
 
+{% import '@Flexy/Atoms/Icon/direction.html.twig' as icon_direction %}
+
 <a
     class="{{ ('MenuItem' ~ (variant ? ' MenuItem--' ~ variant : '') ~ (icon ? ' MenuItem--withIcon' : '') ~ ' ' ~ attributes.render('class'))|tailwind_merge }}"
     {{ attributes.defaults({ href: href }).without('class') }}
 >
     {{ text }}
     {% if icon %}
-        <span class="MenuItem-icon">{{ ux_icon('chevron-right') }}</span>
+        {# Points forward, into the submenu: turned round in a right-to-left page. #}
+        <span class="MenuItem-icon {{ icon_direction.mirror_class('chevron-right') }}">{{ ux_icon('chevron-right') }}</span>
     {% endif %}
 </a>

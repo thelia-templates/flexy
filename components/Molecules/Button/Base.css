@@ -89,11 +89,13 @@
   .button > span.icon {
     width: 1.5em;
     height: 1.5em;
+    /* "left"/"right" name the slot in the markup, not a screen side: the gap always sits
+       between the icon and the label, whichever way the line runs. */
     &.icon-left {
-      margin-right: 0.375rem;
+      margin-inline-end: 0.375rem;
     }
     &.icon-right {
-      margin-left: 0.375rem;
+      margin-inline-start: 0.375rem;
     }
   }
 }
@@ -178,15 +180,15 @@
   border: none;
 
   & button:first-of-type {
-    border-bottom-right-radius: 0;
-    border-top-right-radius: 0;
-    border-right: 0;
+    border-end-end-radius: 0;
+    border-start-end-radius: 0;
+    border-inline-end: 0;
   }
 
   & button:last-of-type {
-    border-bottom-left-radius: 0;
-    border-top-left-radius: 0;
-    border-left: 0;
+    border-end-start-radius: 0;
+    border-start-start-radius: 0;
+    border-inline-start: 0;
   }
 }
 
@@ -203,124 +205,10 @@
   flex: 1;
   text-align: center;
 
-  border-right: 0;
-  border-left: 0;
+  border-inline: 0;
 }
 
 .ButtonQuantity input:focus {
   --tw-ring-color: transparent;
   outline: 0;
 }
-
-/*
-
-
-.Button-quantity {
-  input {
-    -moz-appearance: textfield;
-    &::-webkit-outer-spin-button,
-    &::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    &:focus,
-    &:focus-visible {
-      --tw-ring-color: transparent;
-      outline: 0;
-    }
-    background: var(--black);
-    padding: 0;
-    border: none;
-    text-align: center;
-    width: rem-convert(60px);
-  }
-  &:hover:not(:focus):not(.disabled) {
-    background: var(--grey-dark);
-  }
-  &:hover input {
-    background: var(--grey-dark);
-  }
-  button {
-    padding-left: 3px;
-    padding-right: 3px;
-  }
-  &.disabled,
-  &.disabled:hover {
-    cursor: default;
-    background: var(--grey-lighter);
-    input {
-      background: var(--grey-lighter);
-    }
-  }
-
-  &.Button--large {
-    input {
-      width: rem-convert(80px);
-    }
-  }
-  &.Button--small {
-    input {
-      width: rem-convert(50px);
-    }
-    &.Button--xsmall {
-      input {
-        width: rem-convert(40px);
-      }
-    }
-  }
-
-  &.Button--secondary {
-    input {
-      background: var(--white);
-      color: var(--black);
-    }
-    &:hover:not(:focus):not(.disabled) {
-      background: var(--black);
-      color: var(--white);
-      input {
-        background: var(--black);
-        color: var(--white);
-      }
-    }
-
-    &.disabled,
-    &.disabled:hover {
-      background: var(--white);
-      color: var(--grey-lighter);
-      border: var(--grey-lighter) solid 1px;
-      input {
-        background: var(--white);
-        color: var(--grey-lighter);
-      }
-    }
-  }
-}
-
-.Button-quantityButton {
-  display: flex;
-
-  button.Button {
-    border-bottom-left-radius: 0;
-    border-top-left-radius: 0;
-    position: relative;
-    border-left: 1px solid var(--white);
-    &:after {
-      content: "";
-      position: absolute;
-    }
-  }
-  .Button-quantity {
-    border-bottom-right-radius: 0;
-    border-top-right-radius: 0;
-  }
-
-  &:hover {
-    .Button {
-      background: var(--grey-dark);
-      input {
-        background: var(--grey-dark);
-      }
-    }
-  }
-}
-*/

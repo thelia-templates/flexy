@@ -20,21 +20,30 @@
             </div>
         {% endif %}
         <div class="Footer-storeInfos">
-            <div class="Footer-storeName paragraph-1">{{ attr('config', 'store_name') }}</div>
+            {# The shop's own identity and address are typed by the merchant, in whatever language
+               the shop is run in. <bdi> isolates each line and reads its direction off its own
+               first strong character, so a latin address stays latin ("5 rue Rochon", not "rue
+               Rochon 5") on a right-to-left page and an arabic one is left alone. #}
+            <div class="Footer-storeName paragraph-1"><bdi>{{ attr('config', 'store_name') }}</bdi></div>
             <div class="Footer-storeAddress">
                 {% set address2 = attr('config', 'store_address2') %}
                 {% set idCountry = attr('config', 'store_country') %}
                 {% set country = idCountry ? country_name(idCountry) : null %}
                 <div class="paragraph-5">
-                    {{ attr('config', 'store_address1') }}<br>
-                    {% if address2 %}{{ address2 }}<br>{% endif %}
-                    {{ attr('config', 'store_zipcode') }} {{ attr('config', 'store_city') }}
-                    {% if country %}<br>{{ country }}{% endif %}
+                    <bdi>{{ attr('config', 'store_address1') }}</bdi><br>
+                    {% if address2 %}<bdi>{{ address2 }}</bdi><br>{% endif %}
+                    <bdi>{{ attr('config', 'store_zipcode') }} {{ attr('config', 'store_city') }}</bdi>
+                    {% if country %}<br><bdi>{{ country }}</bdi>{% endif %}
                 </div>
+                {# A phone number never flips: its "+", its brackets and its digits read left to
+                   right in every language. dir on the inline span, never on the block, which
+                   would re-resolve the line's own text-align: start. #}
                 <div class="Footer-storePhone paragraph-5">
+                    {# Untranslated, so it stays a Latin string whatever the page's language;
+                       <bdi> around it would isolate nothing. #}
                     Tel.
                     <a href="tel:{{ attr('config', 'store_phone')|replace({' ': '', '(': '', ')': ''}) }}">
-                        {{ attr('config', 'store_phone') }}
+                        <span dir="ltr">{{ attr('config', 'store_phone') }}</span>
                     </a>
                 </div>
             </div>
@@ -62,8 +71,10 @@
             <div class="Footer-icon">{{ ux_icon('linkedin') }}</div>
             <div class="Footer-icon">{{ ux_icon('tiktok') }}</div>
         </div>
+        {# A latin line that never gets translated: kept left to right whole, otherwise the sign,
+           the dash and the year end up on the wrong side of the name. #}
         <div class="Footer-copyright text-grey-dark indication indication-small">
-            © <a href="https://www.openstudio.fr/">OpenStudio</a> - {{ 'now'|date('Y') }}
+            <span dir="ltr">© <a href="https://www.openstudio.fr/">OpenStudio</a> - {{ 'now'|date('Y') }}</span>
         </div>
     </div>
 </footer>

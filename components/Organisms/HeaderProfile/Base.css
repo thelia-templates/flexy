@@ -7,7 +7,7 @@
     visibility: hidden;
     position: absolute;
     top: 100%;
-    right: 0;
+    inset-inline-end: 0;
     width: max-content;
     background-color: var(--color-white);
     border-radius: 0 0 0.5rem 0.5rem;

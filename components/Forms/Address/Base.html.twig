@@ -23,11 +23,14 @@
         {% if form.company is defined %}
             {{ form_row(form.company) }}
         {% endif %}
+        {# A registration or VAT number is a value, not a sentence: it is typed in the order it is
+           read back on the address card, which isolates it too. `phone` and `cellphone` are
+           TelType and get the same treatment from the field component on their own. #}
         {% if form.siret is defined %}
-            {{ form_row(form.siret) }}
+            {{ form_row(form.siret, {attr: {dir: 'ltr'}}) }}
         {% endif %}
         {% if form.vat_number is defined %}
-            {{ form_row(form.vat_number) }}
+            {{ form_row(form.vat_number, {attr: {dir: 'ltr'}}) }}
         {% endif %}
         {{ form_row(form.country) }}
         {% if form.state is defined %}
