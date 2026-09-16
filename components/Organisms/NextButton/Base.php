@@ -121,6 +121,83 @@ class Base
     }
 
     /**
+     * Why the button is grey, as a code the template turns into a sentence.
+     *
+     * A disabled button that says nothing leaves the buyer clicking at it: every refusal
+     * below is one the order would be refused on anyway, so naming it here costs nothing
+     * and is the difference between a tunnel that stops and one that explains itself.
+     *
+     * Null when the button is live, and null as well when the step that is not settled is
+     * one a module declared — nothing here knows what such a step waits for, and a wrong
+     * reason is worse than none.
+     */
+    public function getDisabledReason(): ?string
+    {
+        try {
+            $cart = $this->cartFacade->getOrCreateFromSession();
+
+            $codes = array_map(
+                static fn (CheckoutStepView $step): string => $step->code,
+                $this->progression->activeSteps($cart),
+            );
+
+            $here = array_search($this->step, $codes, true);
+
+            if (false === $here) {
+                return null;
+            }
+
+            foreach (\array_slice($codes, 0, $here + 1) as $code) {
+                if (!$this->isSettled($cart, $code)) {
+                    return $this->reasonFor($cart, $code);
+                }
+            }
+
+            return null;
+        } catch (PropelException) {
+            return null;
+        }
+    }
+
+    /**
+     * @throws PropelException
+     */
+    private function reasonFor(Cart $cart, string $code): ?string
+    {
+        return match ($code) {
+            CheckoutStep::CODE_CART => 'cart_empty',
+            CheckoutStep::CODE_DELIVERY => null === $cart->getAddressDeliveryId()
+                ? 'delivery_address'
+                : 'delivery_module',
+            CheckoutStep::CODE_PAYMENT => $this->paymentReason($cart),
+            default => null,
+        };
+    }
+
+    /**
+     * A billing address that is missing and one that names a company without its legal
+     * identifiers are two different things to fix, and the buyer is told which.
+     *
+     * @throws PropelException
+     */
+    private function paymentReason(Cart $cart): string
+    {
+        if (null === $cart->getPaymentModuleId()) {
+            return 'payment_method';
+        }
+
+        try {
+            $this->cartGuard->checkInvoiceAddressLegalIdentifiers($cart);
+        } catch (MissingAddressException) {
+            return 'billing_address';
+        } catch (IncompleteInvoiceAddressException) {
+            return 'billing_address_identifiers';
+        }
+
+        return 'consents';
+    }
+
+    /**
      * @throws PropelException
      */
     private function isSettled(Cart $cart, string $code): bool

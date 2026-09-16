@@ -5,6 +5,29 @@
 {% if this.isValid %}
     {% set buttonProps = buttonProps|merge({href}) %}
 {% endif %}
-<div class="{{ ('flex justify-end ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class').defaults(stimulus_controller('live-refresh-on-focus')) }}>
+{# What is left to do before the button comes alive. A disabled button that says nothing
+   leaves the buyer clicking at it; the component names the refusal, the sentences live
+   here so they stay translatable. #}
+{% set disabledReason = this.isValid ? null : this.disabledReason %}
+<div class="{{ ('flex flex-col items-end gap-2 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class').defaults(stimulus_controller('live-refresh-on-focus')) }}>
     {{ component('Molecules:Button:Base', buttonProps) }}
+    {% if disabledReason %}
+        <p class="paragraph-4 text-grey-dark text-right" role="status">
+            {% if disabledReason == 'cart_empty' %}
+                {{ 'Your cart is empty.'|trans }}
+            {% elseif disabledReason == 'delivery_address' %}
+                {{ 'Choose a delivery address to continue.'|trans }}
+            {% elseif disabledReason == 'delivery_module' %}
+                {{ 'Choose a delivery method to continue.'|trans }}
+            {% elseif disabledReason == 'payment_method' %}
+                {{ 'Choose a payment method to continue.'|trans }}
+            {% elseif disabledReason == 'billing_address' %}
+                {{ 'Choose a billing address to continue.'|trans }}
+            {% elseif disabledReason == 'billing_address_identifiers' %}
+                {{ 'Complete your billing address with your company identifiers to continue.'|trans }}
+            {% elseif disabledReason == 'consents' %}
+                {{ 'Accept the required terms to continue.'|trans }}
+            {% endif %}
+        </p>
+    {% endif %}
 </div>
