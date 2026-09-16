@@ -13,11 +13,13 @@
         "source": "https://github.com/thelia-templates/flexy"
     },
     "require": {
+        "php": ">=8.3 <9.0",
+        "thelia/core": "^3.1",
         "symfony/ux-twig-component": "^2.36",
         "symfony/stimulus-bundle": "^2.19",
         "symfony/twig-bundle": "^6.4 || ^7.4",
         "symfony/http-client": "^6.4 || ^7.4",
-        "thelia/twig-engine-module": "^1.0",
+        "thelia/twig-engine-module": "^1.0.9",
         "thelia/thelia-library-module": "^2.0",
         "thelia/thelia-blocks-module": "^3.0",
         "thelia/page-module": "^2.0",
@@ -45,7 +47,7 @@
     "extra": {
         "installer-name": "flexy",
         "branch-alias": {
-            "dev-main": "1.0.x-dev"
+            "dev-main": "1.1.x-dev"
         }
     }
 }
