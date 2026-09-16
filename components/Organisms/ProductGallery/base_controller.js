@@ -9,6 +9,8 @@ class BaseController extends Controller {
 
   static values = {
     currentPseId: Number,
+    previousLabel: String,
+    nextLabel: String,
   };
 
   async initialize() {
@@ -42,6 +44,12 @@ class BaseController extends Controller {
       pagination: false,
       destroy: this.slideTargets.length <= 1,
       drag: false,
+      // Splide overwrites the aria-label of the arrows it takes over, and its own wording ships
+      // in English only: the shop's translated one is given back to it here.
+      i18n: {
+        prev: this.previousLabelValue,
+        next: this.nextLabelValue,
+      },
       // Matches the sm breakpoint (640px): below it the slider is swipeable with dots, from it
       // the arrows rendered by the template are shown and must be wired.
       breakpoints: {

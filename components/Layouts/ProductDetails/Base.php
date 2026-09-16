@@ -497,7 +497,7 @@ class Base
                 'type' => 'image',
                 'id' => (int) $image['id'],
                 'pseIds' => $pseIdsByImageId[$image['id']] ?? [],
-                'alt' => $this->altOf($image),
+                'alt' => $this->imageAltOf($image),
                 'position' => (int) ($image['position'] ?? 0),
             ];
         }
@@ -531,6 +531,17 @@ class Base
         $entries = [];
 
         foreach ($productVideos as $video) {
+            $embedUrl = $video['embedUrl'] ?? null;
+            $fileUrl = $video['fileUrl'] ?? null;
+
+            // Neither a frame to open nor a file to serve: the platform of this video was turned
+            // off in the shop's settings after it was added, and the core hands back no address
+            // for it. Dropped here rather than in the template, so it leaves no thumbnail in the
+            // rail and no empty slide in the slider either.
+            if (($embedUrl === null || $embedUrl === '') && ($fileUrl === null || $fileUrl === '')) {
+                continue;
+            }
+
             $thumbnailImageId = self::relationId($video['thumbnailImage'] ?? null);
 
             $entries[] = [
@@ -539,8 +550,8 @@ class Base
                 'pseIds' => $pseIdsByVideoId[$video['id']] ?? [],
                 'alt' => $this->altOf($video),
                 'provider' => $video['provider'] ?? null,
-                'embedUrl' => $video['embedUrl'] ?? null,
-                'fileUrl' => $video['fileUrl'] ?? null,
+                'embedUrl' => $embedUrl,
+                'fileUrl' => $fileUrl,
                 'thumbnailImageId' => $thumbnailImageId ?? $defaultThumbnailId,
                 'position' => (int) ($video['position'] ?? 0),
             ];
@@ -592,6 +603,26 @@ class Base
             (bool) ($resource['decorative'] ?? false),
             \is_string($i18ns['title'] ?? null) ? $i18ns['title'] : null,
         );
+    }
+
+    /**
+     * An empty alt says "this image carries no information, skip it", which is true of an image
+     * the merchant marked decorative and of nothing else. An image nobody got round to naming
+     * is still a picture of the product, so it is announced with the product's own name — the
+     * same fallback the product cards use. The core resolver stays as it is: it decides on the
+     * image alone, and has no idea what product it hangs on.
+     *
+     * @param array<string, mixed> $image
+     */
+    private function imageAltOf(array $image): string
+    {
+        $alt = $this->altOf($image);
+
+        if ('' !== $alt || (bool) ($image['decorative'] ?? false)) {
+            return $alt;
+        }
+
+        return (string) $this->title;
     }
 
     /**

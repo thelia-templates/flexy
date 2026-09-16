@@ -1,4 +1,4 @@
-{# @prop alt string What the video shows, already resolved by the core's alt text rule — empty for a video declared decorative #}
+{# @prop alt string What the video shows, already resolved by the core's alt text rule — empty when the merchant wrote neither an alternative text nor a title #}
 {# @prop provider string|null Platform code (youtube, vimeo, dailymotion) or 'file' for a video the shop hosts #}
 {# @prop embedUrl string|null Address of the player frame, built by the core from the platform and the identifier #}
 {# @prop fileUrl string|null Address of the hosted file, for a video the shop serves itself #}
@@ -6,6 +6,9 @@
 {% props alt = '', provider = null, embedUrl = null, fileUrl = null, thumbnailImageId = null %}
 
 {% set playerController = 'Organisms--VideoPlayer--base' %}
+{# The one name of this player, used by the button now and by the frame the controller builds
+   later. A player is never nameless: an untitled video would otherwise leave the frame with an
+   empty title, which is exactly what a screen reader needs to announce it. #}
 {% set label = alt ?: 'Play video'|trans %}
 
 {# Nothing playable, nothing rendered: a row whose platform was disabled after the fact would
@@ -18,7 +21,7 @@
                 provider: provider ?? '',
                 embedUrl: embedUrl ?? '',
                 fileUrl: fileUrl ?? '',
-                label: alt,
+                label: label,
             }),
         }).without('class') }}
     >

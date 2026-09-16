@@ -29,13 +29,16 @@ class BaseController extends Controller {
     // markup is ever parsed out of a value.
     this.stageTarget.replaceChildren(player);
 
+    // The button that had the focus has just been removed from the document, so the focus is
+    // on its way back to <body>: it is moved onto the player, which is where the shopper who
+    // clicked expects to be, whichever kind of player was built.
+    player.focus();
+
     // A <video> can start straight away — a user gesture is what the browser asks for and
     // this method only runs from one. A rejected promise (a policy this shop cannot see)
     // leaves the shopper with the native controls, which is a fine place to land.
     if (player.tagName === "VIDEO") {
       player.play().catch(() => {});
-    } else {
-      player.focus();
     }
   }
 
