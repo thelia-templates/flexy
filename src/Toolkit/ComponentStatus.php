@@ -61,6 +61,8 @@ final class ComponentStatus
             // its file without extension (`Toolkit/welcome`).
             'Toolkit/welcome' => self::READY,
 
+            'Organisms/VideoPlayer' => self::READY,
+
             default => null,
         };
     }

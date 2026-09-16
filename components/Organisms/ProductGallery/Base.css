@@ -108,6 +108,33 @@
     cursor: pointer;
   }
 
+  /* A video in the rail is its poster plus a play mark, so it reads as playable at 54px. */
+  .ProductGallery-videoThumbnail {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .ProductGallery-videoBadge {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--color-black);
+    background-color: var(--color-white);
+    border-radius: 50%;
+
+    svg {
+      width: 0.75rem;
+      height: 0.75rem;
+      margin-left: 0.09375rem;
+    }
+  }
+
   .ProductGallery-thumbnail:focus {
     outline: none;
   }

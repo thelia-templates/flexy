@@ -1,0 +1,68 @@
+.VideoPlayer {
+  width: 100%;
+  height: 100%;
+}
+
+/*
+ * The stage keeps the same box before and after the click, and no background of its own: the
+ * poster is a product photo shot on white like every other visual of the gallery, and a dark
+ * box behind it reads as a broken image rather than as a player. The frame that replaces it
+ * paints its own.
+ */
+.VideoPlayer-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.VideoPlayer-poster {
+  max-height: var(--product-gallery-height, 28.75rem);
+  object-fit: contain;
+}
+
+.VideoPlayer-frame,
+.VideoPlayer-file {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: var(--product-gallery-height, 28.75rem);
+  background-color: var(--color-black);
+  border: 0;
+}
+
+/* Covers the poster: the whole visual is the play target, on a touch screen as much as elsewhere. */
+.VideoPlayer-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  cursor: pointer;
+}
+
+.VideoPlayer-playIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  color: var(--color-black);
+  background-color: var(--color-white);
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    /* Optical centring: a triangle's bounding box sits left of where the eye puts it. */
+    margin-left: 0.1875rem;
+  }
+}
+
+.VideoPlayer-play:hover .VideoPlayer-playIcon,
+.VideoPlayer-play:focus-visible .VideoPlayer-playIcon {
+  transform: scale(1.1);
+}
