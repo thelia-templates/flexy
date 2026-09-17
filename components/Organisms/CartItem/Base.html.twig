@@ -80,6 +80,11 @@
                     {% endif %}
                 </div>
 
+                {# What a module attached to this line: paid options, engraving, anything
+                   that describes the line without owning its price. Mirrors the point the
+                   account order lines already declare in Layouts/OrderProducts. #}
+                {{ theme_hook('cart.item.bottom', {cartItem: this.cartItem}) }}
+
                 <div class="CartItem-footer">
                     {# A gift is priced by the line and not by the unit: what the promotion
                        takes off covers the whole line. Given outright the line falls to zero,
