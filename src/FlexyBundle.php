@@ -126,7 +126,10 @@ class FlexyBundle extends AbstractBundle
     private function prependConfigUxIcons(ContainerBuilder $containerBuilder): void
     {
         $containerBuilder->prependExtensionConfig('ux_icons', [
-            'icon_dir' => '%kernel.project_dir%/templates/frontOffice/%thelia_front_template%/assets/icons'
+            'icon_dir' => '%kernel.project_dir%/templates/frontOffice/%thelia_front_template%/assets/icons',
+            // The bundle defaults this to ['fill' => 'currentColor'], which its precedence
+            // applies over the fill a file declares rather than in place of a missing one.
+            'default_icon_attributes' => [],
         ]);
     }
 
