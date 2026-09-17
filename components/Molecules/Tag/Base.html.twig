@@ -42,7 +42,12 @@
         {% endif %}
         {{ customText }}
         {% if attributes.has('data-action') %}
-            <button class="Tag__iconClose" data-action="{{ attributes.render('data-action') }}">
+            <button
+                type="button"
+                class="Tag__iconClose"
+                aria-label="{{ customText ? 'Remove %label%'|trans({'%label%': customText}) : 'Remove'|trans }}"
+                data-action="{{ attributes.render('data-action') }}"
+            >
                 {{ ux_icon('close-big') }}
             </button>
         {% endif %}
