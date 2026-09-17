@@ -10,6 +10,7 @@ import 'leaflet/dist/leaflet.css';
  * current view lives in a Stimulus value and is re-applied after every live
  * re-render (the morph restores the server-side classes).
  */
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
   static targets = ['map', 'mapView', 'listView', 'mapButton', 'listButton'];
 
