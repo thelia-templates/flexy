@@ -160,8 +160,9 @@ export default class extends Controller {
    * @param {HTMLElement} item
    * @returns {boolean}
    */
+  // The item is a div: the plain disabled attribute only ever lands on the trigger inside it.
   #isDisabled(item) {
-    return item.hasAttribute("disabled");
+    return item.getAttribute("aria-disabled") === "true";
   }
 
   /**
