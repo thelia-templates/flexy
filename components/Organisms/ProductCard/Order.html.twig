@@ -16,7 +16,7 @@
 		<div class="ProductCard-desc">
 			<a href="{{ this.productUrl|default('#') }}" class="ProductCard-title">{{ this.product.title }}</a>
 			<div class="ProductCard-orderInfos">
-				<span class="ProductCard-secondaryTitle basis-full">{{ this.product.chapo }}</span>
+				<span class="ProductCard-secondaryTitle basis-full">{{ this.product.chapo|raw }}</span>
 				{% if this.pse %}
 					{% for combination in this.pse.attributeCombinations %}
 						<span class="ProductCard-secondarySize">{{ combination.attribute.i18ns.title }}: {{ combination.attributeAv.i18ns.title }}</span>
