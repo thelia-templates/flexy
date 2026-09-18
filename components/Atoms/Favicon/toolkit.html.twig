@@ -1,0 +1,43 @@
+{# No Tailwind utility here on purpose: the toolkit must not pull classes into the production build. #}
+{% set files = [
+    { path: 'favicons/favicon.svg',                  role: 'browser tab, any size' },
+    { path: 'favicons/favicon-96x96.png',            role: 'browser tab, raster fallback' },
+    { path: 'favicons/apple-touch-icon.png',         role: 'iOS home screen, 180' },
+    { path: 'favicons/web-app-manifest-192x192.png', role: 'manifest, 192' },
+    { path: 'favicons/web-app-manifest-512x512.png', role: 'manifest, 512' },
+] %}
+
+<div class="Story">
+
+    <div class="Story-section">
+        <div class="Story-heading">
+            <h4 class="Story-title">The set</h4>
+            <span class="Story-note">
+                favicon.ico is left out — no browser renders it in a page. It ships twice, under
+                assets/favicons and at the site root.
+            </span>
+        </div>
+        <div class="Story-canvas AssetGrid">
+            {% for file in files %}
+                <div class="AssetGrid-cell">
+                    <span class="AssetGrid-preview AssetGrid-preview--tight">
+                        <img src="{{ asset(file.path) }}" alt="" loading="lazy">
+                    </span>
+                    <span class="AssetGrid-name">{{ file.path|split('/')|last }}</span>
+                    <span class="AssetGrid-meta">{{ file.role }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <div class="Story-heading">
+            <h4 class="Story-title">Web manifest</h4>
+            <span class="Story-note">
+                Served through the asset pipeline: <a href="{{ asset('favicons/site.webmanifest') }}">{{ asset('favicons/site.webmanifest') }}</a>.
+                Every src inside it carries a digest.
+            </span>
+        </div>
+    </div>
+
+</div>

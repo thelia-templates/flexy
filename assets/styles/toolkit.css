@@ -905,3 +905,111 @@ body:has(.Toolkit-sidebarState:checked) {
   color: var(--color-grey);
   font-size: 0.875rem;
 }
+
+/* ── Icons story ────────────────────────────────────────────────────────── */
+
+.IconGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 1rem 0.75rem;
+  padding: 1rem;
+}
+
+.IconGrid-cell {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.5rem;
+}
+
+/* The dotted edge is the viewBox, so the air an icon carries inside its own box is visible. */
+.IconGrid-glyph {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  border: 1px dotted var(--color-grey-lighter);
+  color: var(--color-black);
+}
+
+/* The hover is a probe: an icon that keeps its color has a fill of its own instead of currentColor. */
+.IconGrid-glyph:hover {
+  color: var(--color-dark);
+}
+
+/* ux_icon() inlines a viewBox-only SVG, which Safari then resolves to zero. */
+.IconGrid-glyph svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.IconGrid-name {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  color: var(--color-grey);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* ── Images and favicon stories ─────────────────────────────────────────── */
+
+.AssetGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 1.5rem 1rem;
+  padding: 1rem;
+}
+
+.AssetGrid-cell {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.5rem;
+}
+
+/* A checkered ground: half of these assets are transparent. */
+.AssetGrid-preview {
+  /* Flex, not grid: an auto grid track sizes on the image's min-content, so a 512px icon
+     resolves its own max-height against 512px and spills out of the frame. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+  height: 8rem;
+  padding: 0.5rem;
+  border: 1px solid var(--color-grey-lighter);
+  background-color: var(--color-white);
+  background-image:
+    linear-gradient(45deg, var(--color-grey-lightest) 25%, transparent 25% 75%, var(--color-grey-lightest) 75%),
+    linear-gradient(45deg, var(--color-grey-lightest) 25%, transparent 25% 75%, var(--color-grey-lightest) 75%);
+  background-position: 0 0, 8px 8px;
+  background-size: 16px 16px;
+}
+
+.AssetGrid-preview--tight {
+  height: 5rem;
+}
+
+.AssetGrid-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.AssetGrid-name {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  color: var(--color-grey-dark);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.AssetGrid-meta {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  color: var(--color-grey);
+  text-align: center;
+}

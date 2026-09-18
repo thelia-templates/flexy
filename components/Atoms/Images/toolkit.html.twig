@@ -1,0 +1,22 @@
+{# No Tailwind utility here on purpose: the toolkit must not pull classes into the production build. #}
+<div class="Story">
+
+    {% for namespace, paths in theme_images() %}
+        <div class="Story-section">
+            <div class="Story-heading">
+                <h4 class="Story-title">images/{{ namespace ? namespace ~ '/' }}</h4>
+            </div>
+            <div class="Story-canvas AssetGrid">
+                {% for path in paths %}
+                    <div class="AssetGrid-cell">
+                        <span class="AssetGrid-preview">
+                            <img src="{{ asset('images/' ~ path) }}" alt="" loading="lazy">
+                        </span>
+                        <span class="AssetGrid-name">{{ path }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+
+</div>

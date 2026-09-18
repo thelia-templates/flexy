@@ -1,0 +1,20 @@
+{# No Tailwind utility here on purpose: the toolkit must not pull classes into the production build. #}
+<div class="Story">
+
+    {% for namespace, names in theme_icons() %}
+        <div class="Story-section">
+            <div class="Story-heading">
+                <h4 class="Story-title">icons/{{ namespace ? namespace ~ '/' }}</h4>
+            </div>
+            <div class="Story-canvas IconGrid">
+                {% for name in names %}
+                    <div class="IconGrid-cell">
+                        <span class="IconGrid-glyph">{{ ux_icon(name) }}</span>
+                        <span class="IconGrid-name">{{ name }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+
+</div>
