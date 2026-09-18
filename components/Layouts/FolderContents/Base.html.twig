@@ -15,9 +15,9 @@
     </ul>
     <div class="flex justify-center">
         <twig:Molecules:Pagination:Base
-            totalItems="{{ this.pagination.totalItems }}"
-            itemsPerPage="{{ this.pagination.itemsPerPage }}"
-            currentPage="{{ this.pagination.currentPage }}"
+            :totalItems="this.pagination.totalItems"
+            :itemsPerPage="this.pagination.itemsPerPage"
+            :currentPage="this.pagination.currentPage"
         />
     </div>
 {% else %}

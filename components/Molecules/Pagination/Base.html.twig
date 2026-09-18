@@ -1,33 +1,45 @@
-{% set totalPages = (totalItems / itemsPerPage)|round(0, 'ceil')  %}
-{% if totalPages > 1 %}
+{# @prop totalItems int Total number of items to page through #}
+{# @prop itemsPerPage int Items shown on one page. Below 1, nothing is rendered #}
+{# @prop currentPage int Page to mark as current. Bounded to the available pages #}
+{# @prop baseUrl string|null Query string the page parameter is appended to, opening with `?` #}
+{% if this.totalPages > 1 %}
     <nav class="Pagination" aria-label="{{ 'Pagination'|trans }}">
         <ul class="Pagination-list">
-            {% if currentPage != 1 %}
+            {% if this.current > 1 %}
                 <li class="mr-3">
                     <twig:Molecules:Button:Base
                         text="{{ 'Previous'|trans }}"
                         icon_left="chevron-left"
                         color="minimal"
-                        href="{{ (baseUrl ? baseUrl ~ '&' : '?') ~ 'page=' ~ (currentPage - 1) }}"
+                        href="{{ this.url(this.current - 1) }}"
+                        rel="prev"
+                        aria-label="{{ 'Previous page'|trans }}"
                     />
                 </li>
             {% endif %}
 
-            {% for page in 1..totalPages %}
+            {% for entry in this.trail %}
+                {% if entry.gap %}
+                    <li class="Pagination-gap" aria-hidden="true">&hellip;</li>
+                {% endif %}
                 <li>
-                    <a href="{{ baseUrl ? baseUrl ~ '&' : '?'}}page={{ page }}" class="Pagination-item {{ page == currentPage ? 'Pagination-item--active' }}">
-                        {{ page }}
-                    </a>
+                    {% if entry.page == this.current %}
+                        <span class="Pagination-item Pagination-item--active" aria-current="page">{{ entry.page }}</span>
+                    {% else %}
+                        <a href="{{ this.url(entry.page) }}" class="Pagination-item">{{ entry.page }}</a>
+                    {% endif %}
                 </li>
             {% endfor %}
 
-            {% if currentPage != totalPages %}
+            {% if this.current < this.totalPages %}
                 <li class="ml-3">
                     <twig:Molecules:Button:Base
                         text="{{ 'Next'|trans }}"
                         icon_right="chevron-right"
                         color="minimal"
-                        href="{{ (baseUrl ? baseUrl ~ '&' : '?') ~ 'page=' ~ (currentPage + 1) }}"
+                        href="{{ this.url(this.current + 1) }}"
+                        rel="next"
+                        aria-label="{{ 'Next page'|trans }}"
                     />
                 </li>
             {% endif %}

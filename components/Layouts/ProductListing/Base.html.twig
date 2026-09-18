@@ -125,7 +125,12 @@
         </div>
 
         {% if products|length %}
-            {{ include('@Flexy/Molecules/Pagination/Base.html.twig', pagination) }}
+            <twig:Molecules:Pagination:Base
+                :totalItems="pagination.totalItems"
+                :itemsPerPage="pagination.itemsPerPage"
+                :currentPage="pagination.currentPage"
+                :baseUrl="pagination.baseUrl"
+            />
         {% endif %}
     </div>
 </section>

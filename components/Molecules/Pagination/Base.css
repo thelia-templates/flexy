@@ -14,7 +14,8 @@
   align-items: center;
   border-radius: 0.5rem;
 
-  &:hover {
+  /* The current page is a span, not a link: it must not answer a hover it cannot honour. */
+  &:not(.Pagination-item--active):hover {
     background-color: var(--color-grey-lightest);
     color: var(--color-grey);
   }
@@ -26,4 +27,14 @@
 
 .Pagination-item--active {
   color: var(--color-dark);
+}
+
+.Pagination-gap {
+  min-width: 1.5rem;
+  height: 2.8125rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-grey);
+  cursor: default;
 }
