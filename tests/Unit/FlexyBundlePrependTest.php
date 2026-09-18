@@ -17,6 +17,7 @@ namespace FlexyBundle\Tests\Unit;
 use FlexyBundle\FlexyBundle;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -27,6 +28,7 @@ use Symfony\Component\DependencyInjection\Loader\GlobFileLoader;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\UX\Icons\DependencyInjection\UXIconsExtension;
 
 /**
  * A shop may run a template that declares this one as its parent and ships almost nothing of
@@ -106,6 +108,32 @@ final class FlexyBundlePrependTest extends TestCase
         );
     }
 
+    /**
+     * ux-icons applies its own configured attributes over the ones an SVG file carries
+     * (precedence: file < configuration < invocation) and defaults that configuration to
+     * `fill: currentColor`. Left at its default it repaints every icon the theme ships, so the
+     * bundle has to blank it. Reading back the prepended array would not catch the key being
+     * dropped: what decides the rendering is the configuration ux-icons ends up with once its
+     * own definition tree has filled in every default, which is what is asserted here.
+     */
+    public function testNoAttributeIsAppliedOverTheOnesAnIconFileDeclares(): void
+    {
+        self::assertSame(
+            [],
+            $this->uxIconsConfigFor(self::PARENT_TEMPLATE)['default_icon_attributes'],
+            'ux-icons would repaint the fill of every icon of the template.',
+        );
+    }
+
+    /** The same, for a template that inherits its icons instead of shipping them. */
+    public function testAChildInheritsBothTheIconsOfItsParentAndTheirAttributes(): void
+    {
+        $uxIcons = $this->uxIconsConfigFor($this->childTemplate);
+
+        self::assertSame($this->parentTemplateDirectory.'/assets/icons', $uxIcons['icon_dir']);
+        self::assertSame([], $uxIcons['default_icon_attributes']);
+    }
+
     public function testTheStimulusControllersOfTheParentAreRegisteredForTheChild(): void
     {
         $stimulus = $this->configOf($this->prependFor($this->childTemplate), 'stimulus');
@@ -155,6 +183,20 @@ final class FlexyBundlePrependTest extends TestCase
         self::assertNotSame([], $configs, 'Nothing was prepended for "'.$extension.'".');
 
         return $configs[0];
+    }
+
+    /**
+     * The configuration ux-icons really runs on: everything the bundle prepended for it, merged
+     * and completed by the extension's own definition tree.
+     *
+     * @return array<string, mixed>
+     */
+    private function uxIconsConfigFor(string $frontTemplate): array
+    {
+        return (new Processor())->processConfiguration(
+            new UXIconsExtension(),
+            $this->prependFor($frontTemplate)->getExtensionConfig('ux_icons'),
+        );
     }
 
     private function prependFor(string $frontTemplate): ContainerBuilder
