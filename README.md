@@ -41,6 +41,24 @@ The template declares `theme_hook()` extension points across its pages — `layo
 
 The SEOne module already answers `layout.head.top` and `layout.head.bottom`, which is where the title, description, canonical, hreflang and structured data come from.
 
+## Deploying
+
+Check that your web server serves `.webmanifest` as `application/manifest+json`. Once the
+assets are compiled the manifest is a static file, so its media type comes from the server
+and nothing in the theme can set it. Whether a given server maps that extension depends on
+its own table, so verify rather than assume:
+
+```bash
+curl -sI https://example.com/assets/.../site.webmanifest | grep -i content-type
+```
+
+If it answers anything else, map the extension in the server configuration. With nginx, for
+instance:
+
+```nginx
+types { application/manifest+json  webmanifest; }
+```
+
 ## Development
 
 ```bash
