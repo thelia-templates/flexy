@@ -115,17 +115,37 @@
 @import "./pages/product.css";
 
 /* Generic styles */
+
+/* The scrollbar is always rendered, so locking the page cannot remove it and hand the
+   viewport its width back — a media query follows the viewport, not the body box. */
+html {
+  overflow-y: scroll;
+}
+
 body {
   color: var(--color-black);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  overflow-x: hidden;
+  /* clip, not hidden: now that html is no longer visible, hidden would make the body a
+     scroll container and the sticky Header would anchor to it instead of the viewport. */
+  overflow-x: clip;
   /* Scroll anchoring would otherwise compensate the sticky Header's height change on is-stuck, bouncing scrollY back and un-triggering it. */
   overflow-anchor: none;
 
+  /* Capped to the viewport, the root has nothing left to scroll. position: relative is not
+     decorative: without it a descendant positioned against the root escapes the cap. */
   &.locked {
     overflow: hidden;
+    /* Without the cap the root still has somewhere to scroll and the lock does nothing. */
+    height: 100vh;
+    height: 100dvh;
+    position: relative;
+
+    /* The body is a flex column: capping its height would otherwise squash its children. */
+    > * {
+      flex-shrink: 0;
+    }
   }
 }
 

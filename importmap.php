@@ -16,6 +16,9 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+    'page_lock' => [
+        'path' => './assets/scripts/page_lock.js',
+    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],

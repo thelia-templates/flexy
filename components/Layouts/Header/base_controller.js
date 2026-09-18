@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
+import { syncBodyLock } from "page_lock";
 
 export default class extends Controller {
   static targets = ["panel", "back", "sub"];
@@ -33,7 +34,7 @@ export default class extends Controller {
   // panel still open has to revisit them — the menu becomes a dropdown bar past md and must stop
   // locking the page. The removed CSS overrides used to get this for free from media queries.
   onResize() {
-    this.syncBodyLock();
+    syncBodyLock();
     this.syncInertness();
   }
 
@@ -56,7 +57,7 @@ export default class extends Controller {
 
     if (!isOpen) {
       target.classList.add("is-open");
-      this.syncBodyLock();
+      syncBodyLock();
       this.syncInertness();
       event.currentTarget.classList.add("is-selected");
       event.currentTarget.setAttribute("aria-expanded", "true");
@@ -136,7 +137,7 @@ export default class extends Controller {
 
   closeAll() {
     this.panelTargets.forEach((p) => p.classList.remove("is-open"));
-    this.syncBodyLock();
+    syncBodyLock();
     this.syncInertness();
 
     if (this.selectedButton) {
@@ -144,21 +145,5 @@ export default class extends Controller {
       this.selectedButton.setAttribute("aria-expanded", "false");
       this.selectedButton = null;
     }
-  }
-
-  // "locked" is a single shared class on <body>: derive it from whether any panel or
-  // drawer is open rather than toggling it per instance, so this controller and
-  // MobileDrawer don't desync each other's lock state.
-  // Only a panel that is actually fixed locks the page: the same markup is a fullscreen
-  // overlay below its breakpoint and in-flow (or a header-level overlay) above it, where the
-  // page must stay scrollable. Kept identical in Molecules/MobileDrawer/base_controller.js,
-  // the other writer of this class.
-  syncBodyLock() {
-    const open = document.querySelectorAll(".Header-menu.is-open, .MobilePanel.is-open, .MobileDrawer.is-open");
-
-    document.body.classList.toggle(
-      "locked",
-      [...open].some((panel) => getComputedStyle(panel).position === "fixed"),
-    );
   }
 }

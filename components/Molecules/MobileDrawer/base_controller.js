@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
+import { syncBodyLock } from "page_lock";
 
 export default class extends Controller {
   static targets = ["drawer"];
@@ -20,7 +21,7 @@ export default class extends Controller {
   // otherwise keep the page locked from a decision taken at a narrower width.
   onResize() {
     this.syncInertness();
-    this.syncBodyLock();
+    syncBodyLock();
   }
 
   toggle(event) {
@@ -45,7 +46,7 @@ export default class extends Controller {
     // its content must be explicitly excluded from focus/tab order rather than relying on it
     // being visually hidden.
     this.drawerTarget.inert = !isOpen;
-    this.syncBodyLock();
+    syncBodyLock();
   }
 
   close() {
@@ -55,7 +56,7 @@ export default class extends Controller {
 
     this.drawerTarget.classList.remove("is-open");
     this.drawerTarget.inert = true;
-    this.syncBodyLock();
+    syncBodyLock();
 
     // Closing shouldn't leave focus stuck on now-hidden content. This also closes any purely
     // CSS ":focus"-driven popup sharing this same trigger (e.g. FilterSelect's desktop
@@ -76,21 +77,5 @@ export default class extends Controller {
 
   syncInertness() {
     this.drawerTarget.inert = !this.isStatic() && !this.drawerTarget.classList.contains("is-open");
-  }
-
-  // "locked" is a single shared class on <body>: derive it from whether any drawer or
-  // Header panel is open rather than toggling it per instance, so multiple lock sources
-  // on the same page don't desync each other's lock state.
-  // Only a panel that is actually fixed locks the page: the same markup is a fullscreen
-  // overlay below its breakpoint and in-flow (or a header-level overlay) above it, where the
-  // page must stay scrollable. Same test as isStatic() above. Kept identical in
-  // Layouts/Header/base_controller.js, the other writer of this class.
-  syncBodyLock() {
-    const open = document.querySelectorAll(".MobileDrawer.is-open, .Header-menu.is-open, .MobilePanel.is-open");
-
-    document.body.classList.toggle(
-      "locked",
-      [...open].some((panel) => getComputedStyle(panel).position === "fixed"),
-    );
   }
 }
