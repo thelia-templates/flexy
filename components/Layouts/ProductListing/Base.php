@@ -48,9 +48,9 @@ class Base extends AbstractController
     public ?int $categoryId = null;
 
     /**
-     * Set by the brand page. Narrows the listing to one brand, and nothing else: Thelia defines
-     * its product filters per category, so a brand listing has no facet to offer (see
-     * getFilters()) — only the sort and the pagination.
+     * Set by the brand page. The brand is then the browsing scope of the listing, the way a
+     * category is on a category page: its facets are those of the categories where its products
+     * are filed, and the brand itself is not offered as one (see getFilters()).
      */
     #[LiveProp]
     public ?int $brandId = null;
@@ -169,8 +169,9 @@ class Base extends AbstractController
     }
 
     /**
-     * Filter definitions come from the product's category: Thelia exposes none without one,
-     * so a category-less listing (view_all) has no filters at all.
+     * Filter definitions come from the browsing scope of the listing — its category, or its brand,
+     * which borrows the filters of the categories its products are filed in. A listing that has
+     * neither (view_all, search) has no filters at all.
      *
      * The current selection goes along, so each value is offered with the number of products
      * it would keep and the values no product of the narrowed set holds disappear. Thelia
@@ -178,17 +179,21 @@ class Base extends AbstractController
      */
     public function getFilters(): array
     {
-        if ($this->categoryId === null) {
+        $scope = $this->scopeTFilter();
+
+        if ($scope === []) {
             return $this->filters = [];
         }
 
-        $selection = $this->categoryTFilter() + $this->tfilters;
+        $selection = $scope + $this->tfilters;
         $key = json_encode($selection);
 
         if (($this->resolvedFilters[$key] ?? null) === null) {
             $this->resolvedFilters[$key] = $this->dataAccessService->resources(
                 '/api/front/tfilters/products',
-                ['tfilters' => $selection],
+                // The listing only shows visible products, so the facets are read from them
+                // alone: a value held by a hidden product would offer a filter leading nowhere.
+                ['tfilters' => $selection, 'visible' => true] + $this->scopeDeclaration(),
             ) ?? [];
         }
 
@@ -348,7 +353,14 @@ class Base extends AbstractController
             foreach ($group as $fieldName => $values) {
                 $filter = $this->findFilter((string) $type, (string) $fieldName);
 
-                if ($filter === null || !\in_array($filter['fieldType'] ?? null, ['range', 'delta'], true)) {
+                // A filter the column does not offer cannot have been checked: a query string
+                // carrying one narrows the listing with something the page has no way to undo.
+                if ($filter === null) {
+                    unset($tfilters[$type][$fieldName]);
+                    continue;
+                }
+
+                if (!\in_array($filter['fieldType'] ?? null, ['range', 'delta'], true)) {
                     continue;
                 }
 
@@ -508,12 +520,27 @@ class Base extends AbstractController
     }
 
     /**
-     * CategoryFilter walks two levels below `tfilters[category]`, and single-element levels
-     * are unwrapped again when the id is read back — see FilterService.
+     * The browsing scope of the listing, declared to the filter endpoint the same way whatever
+     * it is: the filter of the scope walks two levels below its own key, and single-element
+     * levels are unwrapped again when the id is read back — see FilterService.
      */
-    private function categoryTFilter(): array
+    private function scopeTFilter(): array
     {
-        return ['category' => [[$this->categoryId]]];
+        return match (true) {
+            $this->categoryId !== null => ['category' => [[$this->categoryId]]],
+            $this->brandId !== null => ['brand' => [[$this->brandId]]],
+            default => [],
+        };
+    }
+
+    /**
+     * What the listing is the page of, told apart from what the visitor checked. The brand of a
+     * brand page is not a filter he can uncheck, so Thelia has to know it from the page rather
+     * than read it back from the selection, where a ticked category would hide it.
+     */
+    private function scopeDeclaration(): array
+    {
+        return $this->brandId === null ? [] : ['scope' => ['brand' => $this->brandId]];
     }
 
     /**
