@@ -35,7 +35,8 @@
   }
 
   @variant indeterminate {
-    & ~ .Checkbox__checkmark {
+    /* Checkboxes only: :indeterminate also matches every radio of a group with no checked member. */
+    &:not([type="radio"]) ~ .Checkbox__checkmark {
       background-color: var(--color-grey-lightest);
     }
   }
