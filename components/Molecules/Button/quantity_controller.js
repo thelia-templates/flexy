@@ -34,23 +34,42 @@ class QuantityController extends Controller {
     this.handlers.delete(element);
   }
 
+  getStep() {
+    const step = parseInt(this.inputTarget.getAttribute("step"), 10);
+
+    return step > 0 ? step : 1;
+  }
+
+  /** An absent attribute reads as "", the only thing that means no bound: 0 is a real one. */
+  getBound(name) {
+    const raw = this.inputTarget[name];
+
+    return raw === "" ? null : parseInt(raw, 10);
+  }
+
   decrement() {
-    const min = parseInt(this.inputTarget.getAttribute("min"));
+    const min = this.getBound("min");
     const value = parseInt(this.inputTarget.value) || 0;
 
-    if (min && value <= min) {
+    if (min !== null && value <= min) {
       return;
     }
-    this.setValue(value - 1);
+
+    const next = value - this.getStep();
+
+    this.setValue(min !== null && next < min ? min : next);
   }
   increment() {
-    const max = parseInt(this.inputTarget.getAttribute("max"));
+    const max = this.getBound("max");
     const value = parseInt(this.inputTarget.value) || 0;
 
-    if (max && value >= max) {
+    if (max !== null && value >= max) {
       return;
     }
-    this.setValue(value + 1);
+
+    const next = value + this.getStep();
+
+    this.setValue(max !== null && next > max ? max : next);
   }
 
   /**
