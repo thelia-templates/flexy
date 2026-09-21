@@ -30,7 +30,7 @@
       background-image: var(--background-image-icon-check), var(--background-image-icon-chevron-small-down);
       background-repeat: no-repeat, no-repeat;
       background-position: right 2rem top 50%, right 0 top 50%;
-      background-size: auto, 2.5rem auto;
+      background-size: 2.5rem, 2.5rem auto;
     }
   }
 }

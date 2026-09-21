@@ -101,6 +101,7 @@
   background-image: var(--background-image-icon-check);
   background-repeat: no-repeat;
   background-position: right 0 top 50%;
+  background-size: 2.5rem;
 }
 
 .Input--withButton .Input-input {
