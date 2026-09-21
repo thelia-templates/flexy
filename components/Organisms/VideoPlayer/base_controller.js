@@ -11,6 +11,53 @@ class BaseController extends Controller {
     label: String,
   };
 
+  connect() {
+    // The poster and the button the stage holds before a player takes their place:
+    // kept as they are, so that leaving the visual puts them back untouched.
+    this.poster = Array.from(this.stageTarget.children);
+
+    this.onSlideShown = (event) => {
+      const { gallery, slide } = event.detail ?? {};
+
+      if (!gallery?.contains(this.element) || slide?.contains(this.element)) {
+        return;
+      }
+
+      this.pause();
+    };
+
+    window.addEventListener("product-gallery:slide-shown", this.onSlideShown);
+  }
+
+  disconnect() {
+    window.removeEventListener("product-gallery:slide-shown", this.onSlideShown);
+  }
+
+  /**
+   * Stops what is playing when the shopper moves to another visual.
+   *
+   * A file the shop serves is paused where it is: coming back, the shopper picks it
+   * up where he left it. A platform frame cannot be paused without loading the
+   * platform's own script, so it is taken down and the poster comes back - which also
+   * stops the platform from following a shopper who has moved on. One click starts it
+   * again.
+   */
+  pause() {
+    const playing = this.stageTarget.firstElementChild;
+
+    if (!playing || this.poster.includes(playing)) {
+      return;
+    }
+
+    if (playing.tagName === "VIDEO") {
+      playing.pause();
+
+      return;
+    }
+
+    this.stageTarget.replaceChildren(...this.poster);
+  }
+
   /**
    * Builds the player and puts it in place of the poster. Both addresses come from the
    * values above, which the core filled: nothing here concatenates or rewrites a URL, so

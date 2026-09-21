@@ -138,6 +138,24 @@ class BaseController extends Controller {
     this.itemTargets.forEach((item, itemIndex) => {
       item.classList.toggle("is-active", itemIndex === Number(index));
     });
+
+    this.announceActiveSlide(index);
+  }
+
+  /**
+   * Says which visual the gallery is showing now. A video the shopper started on the
+   * visual he is leaving stops itself on this: the players listen, and each one knows
+   * whether it is the one still on screen — the gallery holds no reference to them.
+   *
+   * The event carries the gallery so that a player answers its own gallery only; it
+   * travels through window because a bubbling event never reaches a descendant.
+   */
+  announceActiveSlide(index) {
+    window.dispatchEvent(
+      new CustomEvent("product-gallery:slide-shown", {
+        detail: { gallery: this.element, slide: this.slideTargets[Number(index)] ?? null },
+      }),
+    );
   }
 
   scrollThumbnailIntoView(index) {
