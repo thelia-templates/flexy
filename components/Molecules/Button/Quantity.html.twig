@@ -17,7 +17,7 @@
     },
 ) %}
 
-<div role="button" class="{{ buttonQuantity.apply({color}, attributes.render('class')) }} "  {{ attributes.defaults(stimulus_controller('Molecules--Button--quantity')).without('class', 'button:color') }} >
+<div class="{{ buttonQuantity.apply({color}, attributes.render('class')) }} "  {{ attributes.defaults(stimulus_controller('Molecules--Button--quantity')).without('class', 'button:color') }} >
     <twig:Molecules:Button:Base {{...attributes.nested('button')}} aria-label="{{ 'Decrease quantity'|trans }}" disabled="{{ disabled }}" {{...stimulus_action('Molecules--Button--quantity', 'decrement')}}>-</twig:Molecules:Button:Base>
     <input
         type="number"
