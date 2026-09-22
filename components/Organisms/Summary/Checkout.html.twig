@@ -30,6 +30,16 @@
                     {{ summary.taxed_postage ? summary.taxed_postage|format_currency('EUR', locale: lang_code) : 'Free delivery'|trans }}
                 </div>
             </div>
+            {# After the delivery, before the promotions: the order of a bill — what is
+               bought, what it costs to send, what is added to it, then what comes off. #}
+            {% if this.hasGiftWrapping %}
+                <div class="Summary-line" data-summary-gift-wrapping>
+                    <div>{{ summary.gift_wrapping_title }}</div>
+                    <div>
+                        {{ summary.taxed_gift_wrapping ? summary.taxed_gift_wrapping|format_currency('EUR', locale: lang_code) : 'Free'|trans }}
+                    </div>
+                </div>
+            {% endif %}
             {% if coupons|length %}
                 <div class="Summary-line flex-wrap">
                     <div>{{ 'Promo Code'|trans }}</div>

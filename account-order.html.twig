@@ -38,6 +38,16 @@
             <twig:Organisms:Summary:Order :order="order" />
         </div>
 
+        {# What the buyer wrote for whoever receives the parcel, read back off the order.
+           `default(null)` keeps a core whose payload predates the feature from breaking
+           the page over a property it does not publish. #}
+        {% if order.giftMessage|default(null) %}
+            <div class="mt-6">
+                <h3 class="paragraph-2 text-black">{{ 'Message for the recipient'|trans }}</h3>
+                <p class="paragraph-3 whitespace-pre-line">{{ order.giftMessage }}</p>
+            </div>
+        {% endif %}
+
         {% if not isQuotation %}
             <hr class="my-10" />
 

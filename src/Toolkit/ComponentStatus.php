@@ -50,6 +50,9 @@ final class ComponentStatus
             // Components that will never be integrated, and whose story is dropped:
             // 'Organisms/Example' => self::HIDDEN,
 
+            // The gift block of the checkout, shipped with the core feature it renders.
+            'Organisms/GiftWrapping' => self::READY,
+
             // The guide waits on the one thing the theme cannot do for a project: being read,
             // then removed. Deleting `components/Toolkit/getting-started.html.twig` retires the
             // page; remove this arm and its SECTIONS entry by hand — nothing here does it for you.

@@ -478,3 +478,8 @@ Choose a payment method to continue.: Choisissez un mode de paiement pour contin
 Choose a billing address to continue.: Choisissez une adresse de facturation pour continuer.
 Complete your billing address with your company identifiers to continue.: Complétez votre adresse de facturation avec les identifiants de votre société pour continuer.
 Accept the required terms to continue.: Acceptez les conditions obligatoires pour continuer.
+Wrap it as a gift: Emballer en cadeau
+No gift wrapping: Pas d'emballage cadeau
+Message for the recipient: Message pour le destinataire
+gift_message_characters_left: '%count% caractères restants'
+The message must be %max characters at most.: Le message doit faire %max caractères au maximum.

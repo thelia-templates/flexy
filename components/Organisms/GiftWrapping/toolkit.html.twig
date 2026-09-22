@@ -1,0 +1,13 @@
+<div class="Story">
+<div class="Story-section">
+    <h4 class="Story-title">Base (LiveComponent — the gift block of the checkout: wrapping choice and note to the recipient)</h4>
+    <p class="Story-label">
+        Reads the cart of the session and the wrappings the shop offers. It renders nothing at
+        all while no wrapping is active, which is why this stage stands empty on a shop that
+        does not sell the service — create one in Configuration &gt; Gift wrappings to see it.
+    </p>
+    <div class="Story-stage Story-stage--roomy">
+        <twig:Organisms:GiftWrapping:Base />
+    </div>
+</div>
+</div>
