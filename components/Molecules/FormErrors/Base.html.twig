@@ -1,0 +1,50 @@
+{# @prop form FormView|null The submitted form to read the errors off #}
+{# @prop sampleEntries array Entries given directly, for the story #}
+{# @prop sampleRootErrors array Root errors given directly, for the story #}
+
+{% if this.hasErrors %}
+    {% set controller = 'Molecules--FormErrors--base' %}
+    {% set entries = this.entries %}
+    {% set rootErrors = this.rootErrors %}
+
+    {# Rendered as soon as there is an error, even with nothing to show: it carries the
+       controller that moves the focus to the first field to correct. #}
+    <div {{ attributes.defaults({class: 'FormErrors', ...stimulus_controller(controller)}) }}>
+        {% if this.showSummary %}
+            {% set summary %}
+                {% if entries|length %}
+                    <p class="FormErrors-heading">
+                        {% if entries|length > 1 %}
+                            {{ 'This form contains %count% errors.'|trans({'%count%': entries|length}) }}
+                        {% else %}
+                            {{ 'This form contains one error.'|trans }}
+                        {% endif %}
+                    </p>
+                    <ul class="FormErrors-list">
+                        {% for entry in entries %}
+                            <li>
+                                {%- if entry.label and entry.target -%}
+                                    <a href="#{{ entry.target }}">{{ entry.label }}</a>{{ ' : ' }}{{ entry.message }}
+                                {%- else -%}
+                                    {{ entry.message }}
+                                {%- endif -%}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <ul class="FormErrors-list">
+                        {% for message in rootErrors %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endset %}
+
+            {# No role="alert": the focus landing here is what has it read, and an alert is not
+               meant to hold links. `tabindex` is what lets it take that focus. #}
+            <div class="FormErrors-summary" tabindex="-1" {{ stimulus_target(controller, 'summary') }}>
+                <twig:Molecules:SnackBar:Base variant="error" withIcon :text="summary" />
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
