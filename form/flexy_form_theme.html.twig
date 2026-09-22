@@ -8,6 +8,14 @@
 
 {% block form_errors %}{% endblock form_errors %}
 
+{# The browser stops at the first empty field; the server already knows them all. `required`
+   stays on the fields, where it still names them as required to a screen reader. #}
+{%- block form_start -%}
+    {% set attr = attr|merge({novalidate: 'novalidate'}) %}
+    {{- parent() -}}
+    <twig:Molecules:FormErrors:Base :form="form" />
+{%- endblock form_start -%}
+
 {# WIDGETS #}
 
 {%- block form_widget_simple -%}
