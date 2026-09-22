@@ -1,9 +1,11 @@
 {% use '@FlexyForm/flexy_form_theme.html.twig' %}
 {% props error = false, label, required = false, type = 'checkbox', id = null %}
 
-{# `error` is either true, for the state alone, or the message to show under the box. #}
-{% set message = error is not same as(true) and error is not empty ? error : null %}
-{% set errorId = message and id ? id ~ '-error' : null %}
+{# `error` is a message, a list of them, or true for the state alone. #}
+{% set errorMessages = error is iterable
+    ? error|filter(m => m is not empty)
+    : (error is not same as(true) and error is not empty ? [error] : []) %}
+{% set errorId = errorMessages|length and id ? id ~ '-error' : null %}
 
 {% set inputDefaults = id ? {type: type, id: id} : {type: type} %}
 
@@ -36,7 +38,7 @@
         </span>
         <span class="Checkbox__label">{{ label }}{{required ? ' *' :''}}</span>
     </label>
-    {% if message %}
-        <p {% if errorId %}id="{{ errorId }}" {% endif %}class="Checkbox-error">{{ message }}</p>
+    {% if errorMessages|length %}
+        <p {% if errorId %}id="{{ errorId }}" {% endif %}class="Checkbox-error">{{ errorMessages|join(' ') }}</p>
     {% endif %}
 </div>

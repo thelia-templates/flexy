@@ -2,6 +2,11 @@
 
 {% set fieldId = id ?? name %}
 
+{# `error` is a message, a list of them, or true for the state alone. #}
+{% set errorMessages = error is iterable
+    ? error|filter(m => m is not empty)
+    : (error is not same as(true) and error is not empty ? [error] : []) %}
+
 {% set fieldInput = html_cva(
     base: 'Input',
     variants: {
@@ -35,7 +40,8 @@
             {% if disabled %}disabled{% endif %}
             {% if required %}required{% endif %}
             {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
-            {% if error %}aria-invalid="true" aria-describedby="{{ fieldId }}-error"{% endif %}
+            {% if error is not empty %}aria-invalid="true"{% endif %}
+            {% if errorMessages|length %}aria-describedby="{{ fieldId }}-error"{% endif %}
             {{ attributes.nested('input') }}
         />
         {% if unit %}
@@ -43,7 +49,7 @@
         {% endif %}
     </div>
 
-    {% if error %}
-        <p id="{{ fieldId }}-error" class="Input-error">{{ error }}</p>
+    {% if errorMessages|length %}
+        <p id="{{ fieldId }}-error" class="Input-error">{{ errorMessages|join(' ') }}</p>
     {% endif %}
 </div>

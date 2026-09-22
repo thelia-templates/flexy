@@ -24,9 +24,9 @@
                         {% for entry in entries %}
                             <li>
                                 {%- if entry.label and entry.target -%}
-                                    <a href="#{{ entry.target }}">{{ entry.label }}</a>{{ ' : ' }}{{ entry.message }}
+                                    <a href="#{{ entry.target }}">{{ entry.label }}</a>{{ ' : ' }}{{ entry.messages|join(' ') }}
                                 {%- else -%}
-                                    {{ entry.message }}
+                                    {{ entry.messages|join(' ') }}
                                 {%- endif -%}
                             </li>
                         {% endfor %}

@@ -2,13 +2,12 @@
     <div class="Story-section">
         <h4 class="Story-title">One error, on a visible field</h4>
         <p class="Story-label">
-            Nothing is drawn: the message already reads under the field itself, and saying it
-            twice would be worse than saying it once. The component still renders its host, which
-            is what moves the focus — hence an empty frame below.
+            Nothing is drawn: the message already reads under the field. The host still renders,
+            since it is what moves the focus — hence an empty frame below.
         </p>
         <div class="Story-stage Story-stage--narrow">
             <twig:Molecules:FormErrors:Base :sampleEntries="[
-                {label: 'Email address', message: 'This value is not a valid email address.', target: 'story-email', hidden: false}
+                {label: 'Email address', messages: ['This value is not a valid email address.'], target: 'story-email', hidden: false}
             ]" />
         </div>
     </div>
@@ -16,15 +15,29 @@
     <div class="Story-section">
         <h4 class="Story-title">Three errors, one of them on a field with no place to show it</h4>
         <p class="Story-label">
-            Each label links to its field. The third has no label and no link: a hidden field
-            cannot be reached, so the summary is the only place its message is ever read. The
-            links lead nowhere here, the fields they name belonging to a form this page has not.
+            Each label links to its field. The third has neither: a hidden field cannot be
+            reached, so the summary is the only place its message is read. The links lead nowhere
+            here, naming fields of a form this page has not.
         </p>
         <div class="Story-stage Story-stage--narrow">
             <twig:Molecules:FormErrors:Base :sampleEntries="[
-                {label: 'Email address', message: 'This value should not be blank.', target: 'story-email', hidden: false},
-                {label: 'Password', message: 'This value should not be blank.', target: 'story-password', hidden: false},
-                {label: null, message: 'The captcha is invalid.', target: null, hidden: true}
+                {label: 'Email address', messages: ['This value should not be blank.'], target: 'story-email', hidden: false},
+                {label: 'Password', messages: ['This value should not be blank.'], target: 'story-password', hidden: false},
+                {label: null, messages: ['The captcha is invalid.'], target: null, hidden: true}
+            ]" />
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <h4 class="Story-title">Two fields, one of them holding two messages</h4>
+        <p class="Story-label">
+            One entry per field, not per message: a field that broke two rules keeps one line and
+            one link, and reads both. The count counts fields to go back to.
+        </p>
+        <div class="Story-stage Story-stage--narrow">
+            <twig:Molecules:FormErrors:Base :sampleEntries="[
+                {label: 'City', messages: ['This value should not be blank.', 'Your city can only contains letters.'], target: 'story-city', hidden: false},
+                {label: 'Zip code', messages: ['This value should not be blank.'], target: 'story-zipcode', hidden: false}
             ]" />
         </div>
     </div>
@@ -36,7 +49,7 @@
         </p>
         <div class="Story-stage Story-stage--narrow">
             <twig:Molecules:FormErrors:Base :sampleEntries="[
-                {label: null, message: 'The captcha is invalid.', target: null, hidden: true}
+                {label: null, messages: ['The captcha is invalid.'], target: null, hidden: true}
             ]" />
         </div>
     </div>

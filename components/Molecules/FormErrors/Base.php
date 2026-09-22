@@ -29,10 +29,9 @@ class Base
     public ?FormView $form = null;
 
     /**
-     * Entries handed over directly. The toolkit has no submitted form to read, and the three
-     * renderings below are what its story has to show.
+     * Entries handed over directly, for the story: the toolkit has no submitted form to read.
      *
-     * @var list<array{label: ?string, message: string, target: ?string, hidden: bool}>
+     * @var list<array{label: ?string, messages: list<string>, target: ?string, hidden: bool}>
      */
     public array $sampleEntries = [];
 
@@ -40,10 +39,11 @@ class Base
     public array $sampleRootErrors = [];
 
     /**
-     * One entry per field error, in the order the form declares its fields. A hidden field
-     * carries neither label nor anchor: the summary is the only place it is ever read.
+     * One entry per field in error, in the order the form declares its fields, carrying every
+     * message it collected. A hidden field gets neither label nor anchor: the summary is the
+     * only place it is ever read.
      *
-     * @return list<array{label: ?string, message: string, target: ?string, hidden: bool}>
+     * @return list<array{label: ?string, messages: list<string>, target: ?string, hidden: bool}>
      */
     public function entries(): array
     {
@@ -76,12 +76,10 @@ class Base
     }
 
     /**
-     * A single error on a visible field reads under that field: repeating it above would say
-     * the same thing twice. Anything else needs the summary to be seen at all.
+     * A single visible field reads under itself; anything else needs the summary to be seen.
      *
-     * Root errors only count when they are the ones on show. Thelia controllers set one on
-     * every rejected submission, so counting them regardless would give a summary to every
-     * form, including the single visible error that is meant to do without one.
+     * Root errors only count when they are the ones on show: Thelia controllers set one on every
+     * rejected submission, so counting them regardless would give every form a summary.
      */
     public function showSummary(): bool
     {
@@ -105,19 +103,25 @@ class Base
     }
 
     /**
-     * @return list<array{label: ?string, message: string, target: ?string, hidden: bool}>
+     * @return list<array{label: ?string, messages: list<string>, target: ?string, hidden: bool}>
      */
     private function collect(FormView $form): array
     {
         $entries = [];
 
         foreach ($form->children as $child) {
-            $hidden = \in_array('hidden', $child->vars['block_prefixes'] ?? [], true);
+            $messages = [];
 
             foreach ($child->vars['errors'] ?? [] as $error) {
+                $messages[] = $error->getMessage();
+            }
+
+            if ([] !== $messages) {
+                $hidden = \in_array('hidden', $child->vars['block_prefixes'] ?? [], true);
+
                 $entries[] = [
                     'label' => $hidden ? null : self::labelOf($child),
-                    'message' => $error->getMessage(),
+                    'messages' => $messages,
                     'target' => $hidden ? null : ($child->vars['id'] ?? null),
                     'hidden' => $hidden,
                 ];
