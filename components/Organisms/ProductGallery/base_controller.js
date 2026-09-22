@@ -9,6 +9,8 @@ class BaseController extends Controller {
 
   static values = {
     currentPseId: Number,
+    previousLabel: String,
+    nextLabel: String,
   };
 
   async initialize() {
@@ -42,6 +44,12 @@ class BaseController extends Controller {
       pagination: false,
       destroy: this.slideTargets.length <= 1,
       drag: false,
+      // Splide overwrites the aria-label of the arrows it takes over, and its own wording ships
+      // in English only: the shop's translated one is given back to it here.
+      i18n: {
+        prev: this.previousLabelValue,
+        next: this.nextLabelValue,
+      },
       // Matches the sm breakpoint (640px): below it the slider is swipeable with dots, from it
       // the arrows rendered by the template are shown and must be wired.
       breakpoints: {
@@ -130,6 +138,24 @@ class BaseController extends Controller {
     this.itemTargets.forEach((item, itemIndex) => {
       item.classList.toggle("is-active", itemIndex === Number(index));
     });
+
+    this.announceActiveSlide(index);
+  }
+
+  /**
+   * Says which visual the gallery is showing now. A video the shopper started on the
+   * visual he is leaving stops itself on this: the players listen, and each one knows
+   * whether it is the one still on screen — the gallery holds no reference to them.
+   *
+   * The event carries the gallery so that a player answers its own gallery only; it
+   * travels through window because a bubbling event never reaches a descendant.
+   */
+  announceActiveSlide(index) {
+    window.dispatchEvent(
+      new CustomEvent("product-gallery:slide-shown", {
+        detail: { gallery: this.element, slide: this.slideTargets[Number(index)] ?? null },
+      }),
+    );
   }
 
   scrollThumbnailIntoView(index) {

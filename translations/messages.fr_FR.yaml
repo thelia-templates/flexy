@@ -368,6 +368,8 @@ Closed: Fermé
 Product visuals: Visuels du produit
 Previous visual: Visuel précédent
 Next visual: Visuel suivant
+Play video: Lire la vidéo
+Show visual %number%: Afficher le visuel %number%
 only_n_left_in_stock: '%title% : il ne reste que %count% exemplaires en stock.'
 only_one_left_in_stock: "%title% : il n'en reste qu'un en stock."
 Some products in your cart are no longer available in the requested quantity. Please adjust the quantities before ordering.: Certains produits de votre panier ne sont plus disponibles dans la quantité demandée. Merci d'ajuster les quantités avant de commander.
