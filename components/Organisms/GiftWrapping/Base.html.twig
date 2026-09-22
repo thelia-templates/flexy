@@ -1,0 +1,70 @@
+{# Nothing at all while the shop offers no wrapping: no heading, no empty card. A shop
+   that does not sell the service must have the checkout it had before it existed. #}
+{% if this.isOffered %}
+    {% set wrappings = this.wrappings %}
+    {% set maxLength = this.maximumMessageLength %}
+    {% set remaining = maxLength - this.giftMessage|length %}
+    <div {{ attributes.defaults(stimulus_controller('live-refresh-on-focus')) }} data-loading="addClass(opacity-50 pointer-events-none)">
+        <{{ this.headingLevel }} class="text-black h4">
+            {{ 'Wrap it as a gift'|trans }}
+        </{{ this.headingLevel }}>
+
+        {# One exclusive choice, "no wrapping" included: an unpicked radio group has no way
+           back to nothing, and the buyer must be able to change their mind. #}
+        <ul class="flex flex-col gap-2 my-5">
+            <li>
+                {{ component('Fields:Checkbox:Base', {
+                    type: 'radio',
+                    label: 'No gift wrapping'|trans,
+                    'input:id': 'gift-wrapping-none',
+                    'input:name': 'gift-wrapping',
+                    'input:checked': this.giftWrappingId is null,
+                    'input:data-action': 'change->live#action',
+                    'input:data-live-action-param': 'chooseWrapping',
+                    'input:data-live-gift-wrapping-id-param': 0,
+                }) }}
+            </li>
+            {% for wrapping in wrappings %}
+                <li>
+                    {{ component('Fields:Checkbox:Base', {
+                        type: 'radio',
+                        label: wrapping.title ~ ' — ' ~ (wrapping.free ? 'Free'|trans : wrapping.taxed_price|format_currency('EUR', locale: lang_code)),
+                        'input:id': 'gift-wrapping-' ~ wrapping.id,
+                        'input:name': 'gift-wrapping',
+                        'input:checked': wrapping.chosen,
+                        'input:data-action': 'change->live#action',
+                        'input:data-live-action-param': 'chooseWrapping',
+                        'input:data-live-gift-wrapping-id-param': wrapping.id,
+                    }|merge(wrapping.description ? {'input:aria-describedby': 'gift-wrapping-description-' ~ wrapping.id} : {})) }}
+                    {% if wrapping.description %}
+                        <p id="gift-wrapping-description-{{ wrapping.id }}" class="paragraph-4 text-grey-dark mt-1">
+                            {{ wrapping.description }}
+                        </p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        {# The note only makes sense once something is being wrapped, and it is written
+           straight onto the cart as it is typed: there is nothing for the buyer to submit. #}
+        {% if this.giftWrappingId is not null %}
+            <div class="mt-4">
+                {{ component('Fields:TextArea:Base', {
+                    label: 'Message for the recipient'|trans,
+                    name: 'gift-message',
+                    id: 'gift-message',
+                    value: this.giftMessage,
+                    optional: true,
+                    rows: 3,
+                    error: this.messageError,
+                    'textarea:data-model': 'debounce(500)|giftMessage',
+                    'textarea:maxlength': maxLength,
+                    'textarea:aria-describedby': 'gift-message-remaining',
+                }) }}
+                <p id="gift-message-remaining" class="paragraph-4 text-grey-dark mt-1" aria-live="polite">
+                    {{ 'gift_message_characters_left'|trans({'%count%': remaining < 0 ? 0 : remaining}) }}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

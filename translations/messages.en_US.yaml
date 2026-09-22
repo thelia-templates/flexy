@@ -488,3 +488,8 @@ This form contains one error.: This form contains one error.
 # Tag close button (components/Molecules/Tag/Base.html.twig)
 Remove: Remove
 "Remove %label%": Remove %label%
+Wrap it as a gift: Wrap it as a gift
+No gift wrapping: No gift wrapping
+Message for the recipient: Message for the recipient
+gift_message_characters_left: '%count% characters left'
+The message must be %max characters at most.: The message must be %max characters at most.

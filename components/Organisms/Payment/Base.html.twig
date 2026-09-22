@@ -11,6 +11,12 @@
     </ul>
     <twig:Organisms:Invoice:Base />
 
+    {# On this step and not on the delivery one: the wrapping is charged, so the buyer picks
+       it where they can see what it adds to the total they are about to pay. Rendered from
+       inside this organism rather than from the payment page, so the one-screen layout —
+       which stacks step components and has no page of its own to hang it on — gets it too. #}
+    <twig:Organisms:GiftWrapping:Base :headingLevel="this.headingLevel" />
+
     {% set consents = this.consents %}
     {% if consents|length %}
         <h2 class="text-black h4">

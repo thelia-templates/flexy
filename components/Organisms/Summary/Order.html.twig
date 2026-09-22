@@ -4,7 +4,7 @@
     <div class="Summary-list">
         <div class="Summary-line">
             <div>{{ 'Subtotal without taxes'|trans }}</div>
-            <div>{{ order.totalAmountWithoutTaxes|format_currency('EUR', locale: lang_code) }}</div>
+            <div>{{ this.goodsUntaxedTotal|format_currency('EUR', locale: lang_code) }}</div>
         </div>
 
         {% if this.hasShipping %}
@@ -13,6 +13,13 @@
                 <div>{{ order.totalShippingWithTaxes|format_currency('EUR', locale: lang_code) }}</div>
             </div>
         {% endif %}
+
+        {% for service in this.services %}
+            <div class="Summary-line" data-summary-service>
+                <div>{{ service.title }}</div>
+                <div>{{ service.taxed_total ? service.taxed_total|format_currency('EUR', locale: lang_code) : 'Free'|trans }}</div>
+            </div>
+        {% endfor %}
 
         {% if this.hasDiscount %}
             <div class="Summary-line">

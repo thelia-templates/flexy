@@ -37,6 +37,16 @@ class Base
      */
     public function mount(array $orderProducts = []): void
     {
-        $this->lines = $this->orderProductResolver->resolveLines($orderProducts);
+        // The service lines of the order — a gift wrapping — are not things to pick off a
+        // shelf: they carry no product to walk back to, no image and no page to link to,
+        // and a card built for a good would render an empty one. They are stated with the
+        // other charges, in the summary. A core whose payload predates the property says
+        // nothing, and every line then reads as a good, which it is.
+        $goods = array_filter(
+            $orderProducts,
+            static fn (array $orderProduct): bool => 'service' !== ($orderProduct['lineType'] ?? 'product'),
+        );
+
+        $this->lines = $this->orderProductResolver->resolveLines(array_values($goods));
     }
 }

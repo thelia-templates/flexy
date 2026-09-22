@@ -25,3 +25,8 @@ Accept the privacy policy to continue.: Acepta la política de privacidad para c
 This form contains %count% errors.: Este formulario contiene %count% errores.
 This form contains one error.: Este formulario contiene un error.
 This product could not be added to your cart.: No se ha podido añadir este producto a su carrito.
+Wrap it as a gift: Envolver para regalo
+No gift wrapping: Sin envoltorio de regalo
+Message for the recipient: Mensaje para el destinatario
+gift_message_characters_left: '%count% caracteres restantes'
+The message must be %max characters at most.: El mensaje debe tener %max caracteres como máximo.

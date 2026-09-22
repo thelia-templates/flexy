@@ -25,3 +25,8 @@ Accept the privacy policy to continue.: Accetta l'informativa sulla privacy per 
 This form contains %count% errors.: Questo modulo contiene %count% errori.
 This form contains one error.: Questo modulo contiene un errore.
 This product could not be added to your cart.: Non è stato possibile aggiungere questo prodotto al carrello.
+Wrap it as a gift: Confeziona come regalo
+No gift wrapping: Nessuna confezione regalo
+Message for the recipient: Messaggio per il destinatario
+gift_message_characters_left: '%count% caratteri rimanenti'
+The message must be %max characters at most.: Il messaggio deve contenere al massimo %max caratteri.

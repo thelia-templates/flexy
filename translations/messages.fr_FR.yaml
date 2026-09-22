@@ -497,3 +497,8 @@ Your new password again: Répétez votre nouveau mot de passe
 # Tag close button (components/Molecules/Tag/Base.html.twig)
 Remove: Retirer
 "Remove %label%": Retirer %label%
+Wrap it as a gift: Emballer en cadeau
+No gift wrapping: Pas d'emballage cadeau
+Message for the recipient: Message pour le destinataire
+gift_message_characters_left: '%count% caractères restants'
+The message must be %max characters at most.: Le message doit faire %max caractères au maximum.
