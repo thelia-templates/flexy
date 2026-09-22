@@ -20,6 +20,9 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\IsTrue;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
@@ -77,9 +80,12 @@ class CustomerInformationsForm extends AddressCreateForm
 
         $this->addLegalIdentifierFields();
 
+        $privacyPolicyMessage = $this->translation->trans('Accept the privacy policy to continue.');
+
         $this->formBuilder->add('is_default', HiddenType::class, [
             'data' => true,
         ])->add('cellphone', TelType::class, [
+            'constraints' => [new NotBlank()],
             'label' => $this->translation->trans('Mobile phone'),
             'label_attr' => [
                 'for' => 'cellphone',
@@ -99,6 +105,11 @@ class CustomerInformationsForm extends AddressCreateForm
             'accept_privacy_policy',
             CheckboxType::class,
             [
+                // An unchecked box reaches the server as null, which IsTrue lets through.
+                'constraints' => [
+                    new NotNull(message: $privacyPolicyMessage),
+                    new IsTrue(message: $privacyPolicyMessage),
+                ],
                 'label' => $this->translation->trans('I agree to our privacy policy'),
                 'label_attr' => [
                     'for' => 'accept_privacy_policy',

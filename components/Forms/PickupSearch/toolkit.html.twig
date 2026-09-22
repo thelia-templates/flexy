@@ -1,0 +1,14 @@
+<div class="Story">
+<div class="Story-section">
+    <h4 class="Story-title">Base (LiveComponent — the relay point search of the delivery step)</h4>
+    <p class="Story-label">
+        Rendered on its own, outside the delivery step that carries it. Searching geocodes the
+        address through a public API, then asks which relay points cover the city it resolved:
+        with no pickup module enabled the count stays at zero. An empty search is refused by the
+        form and never reaches the API.
+    </p>
+    <div class="Story-stage Story-stage--roomy">
+        <twig:Forms:PickupSearch:Base />
+    </div>
+</div>
+</div>

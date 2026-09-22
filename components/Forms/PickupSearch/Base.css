@@ -3,10 +3,21 @@
 .PickupSearch-inputGroup {
   display: flex;
   align-items: flex-end;
+  position: relative;
 
   & > .Input {
     flex: 1;
     min-width: 0;
+  }
+
+  /* The button follows the field, not the block around it: an error message grows that block
+     downward and `flex-end` would take the new bottom as the baseline. Out of flow it aligns
+     nothing, and the group reserves a line for it below. */
+  .Input-error {
+    position: absolute;
+    top: 100%;
+    inset-inline: 0;
+    margin-top: 0.25rem;
   }
 
   .Input-input {
@@ -14,6 +25,10 @@
     border-end-end-radius: 0;
     border-right: none;
   }
+}
+
+.PickupSearch-inputGroup:has(.Input-error) {
+  margin-bottom: 1.5rem;
 }
 
 .PickupSearch-searchButton {

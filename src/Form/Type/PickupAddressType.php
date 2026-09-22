@@ -17,6 +17,7 @@ namespace FlexyBundle\Form\Type;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SearchType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Thelia\Core\Translation\Translator;
 
 class PickupAddressType extends AbstractType
@@ -25,6 +26,9 @@ class PickupAddressType extends AbstractType
     {
         $builder
             ->add('address', SearchType::class, [
+                'constraints' => [
+                    new NotBlank(),
+                ],
                 'label' => Translator::getInstance()->trans('Find a delivery address'),
                 'label_attr' => [
                     'for' => 'address',
