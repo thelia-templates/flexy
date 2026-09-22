@@ -19,7 +19,6 @@
                     {{ form_row(form['coupon-code']) }}
                 </div>
                 {{ form_row(form.submit) }}
-                {{ form_errors(form) }}
                 {{ form_end(form) }}
                 {% if couponError %}
                     <p class="Input-error">{{ couponError }}</p>

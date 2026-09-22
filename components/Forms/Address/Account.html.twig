@@ -5,7 +5,6 @@
         action: this.action,
         method: 'POST',
     }}) }}
-    {{ form_errors(form) }}
     {{ form_row(form.success_url, {value: this.successUrl}) }}
     {{ form_row(form.error_url, {value: this.errorUrl}) }}
 

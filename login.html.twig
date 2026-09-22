@@ -14,10 +14,6 @@
             <twig:Molecules:SnackBar:Base variant="informative" withIcon text="{{ message }}" class="mb-6" />
         {% endfor %}
 
-        {% for error in form.vars.errors %}
-            <twig:Molecules:SnackBar:Base variant="error" text="{{ error.message }}" />
-        {% endfor %}
-
         <h2 class="h2 text-black mb-4">{{ 'Log in'|trans }}</h2>
 
         {{ form_start(form, {attr: {

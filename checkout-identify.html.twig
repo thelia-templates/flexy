@@ -22,10 +22,6 @@
     <section class="mb-10">
         <h2 class="h4 text-black mb-4">{{ 'I already have an account'|trans }}</h2>
 
-        {% for error in loginForm.vars.errors %}
-            <twig:Molecules:SnackBar:Base variant="error" text="{{ error.message }}" class="mb-4" />
-        {% endfor %}
-
         {{ form_start(loginForm, {attr: {
             action: path('customer_login_action'),
             method: 'POST',

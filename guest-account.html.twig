@@ -12,10 +12,6 @@
         {% set form = getForm('flexybundle_form_guest_account_creation') %}
         {% form_theme form with flexy_form_themes only %}
 
-        {% for error in form.vars.errors %}
-            <twig:Molecules:SnackBar:Base variant="error" text="{{ error.message }}" class="mb-6" />
-        {% endfor %}
-
         <h1 class="h2 text-black mb-4">{{ 'Create my account'|trans }}</h1>
         <p class="paragraph-2 text-black mb-8">
             {{ 'Your order, your details and your addresses are already there. Choose a password and the account is yours.'|trans }}

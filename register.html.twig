@@ -13,10 +13,6 @@
     />
 
     <div class="container-s pt-8 pb-14 lg:pt-12 lg:pb-30">
-        {% for error in form.vars.errors %}
-            <twig:Molecules:SnackBar:Base variant="error" text="{{ error.message }}" />
-        {% endfor %}
-
         <h2 class="h2 text-black mb-4">{{ 'Create account'|trans }}</h2>
         <p class="paragraph-2 text-black mb-8">
             {{ 'With your account, you can track your orders, manage your profile, receive the newsletter, manage your wish lists...'|trans }}

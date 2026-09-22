@@ -2,10 +2,6 @@
 <div {{ attributes }}>
     {{ form_start(form, {attr: {class: 'flex flex-col gap-6'}}) }}
 
-    {% for error in form.vars.errors %}
-        <twig:Molecules:SnackBar:Base variant="error" text="{{ error.message }}" />
-    {% endfor %}
-
     <h3 class="h5 text-black">{{ 'Your details'|trans }}</h3>
 
     {{ form_row(form.title) }}
