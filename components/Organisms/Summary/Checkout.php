@@ -49,6 +49,8 @@ class Checkout
             'taxed_postage' => $this->attributeAccessService->attributeCart('taxed_postage'),
             'taxed_discount' => $this->attributeAccessService->attributeCart('taxed_discount'),
             'discount' => $this->attributeAccessService->attributeCart('discount'),
+            'gift_wrapping_title' => $this->attributeAccessService->attributeCart('gift_wrapping_title'),
+            'taxed_gift_wrapping' => $this->attributeAccessService->attributeCart('taxed_gift_wrapping'),
             'discounts' => $this->readDiscounts(),
             'coupons' => $this->attributeAccessService->attributeCoupon('coupon_list'),
         ];
@@ -112,6 +114,23 @@ class Checkout
         }
 
         return $lines;
+    }
+
+    /**
+     * Whether the cart carries a gift wrapping to state on its own line.
+     *
+     * Read on the wording rather than on the amount: a wrapping the shop offers is
+     * charged nothing and still belongs on the summary, because the buyer asked for it
+     * and has to see that it was taken into account.
+     *
+     * A core that predates the feature answers an attribute it does not know with an
+     * empty string, which reads as no wrapping — the theme and the core ship apart.
+     */
+    public function hasGiftWrapping(): bool
+    {
+        $title = $this->attributeAccessService->attributeCart('gift_wrapping_title');
+
+        return \is_string($title) && '' !== $title;
     }
 
     public function hasTax(): bool
