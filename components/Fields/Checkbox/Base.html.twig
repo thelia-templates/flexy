@@ -1,5 +1,11 @@
 {% use '@FlexyForm/flexy_form_theme.html.twig' %}
-{% props error = false, label, required = false, type = 'checkbox' %}
+{% props error = false, label, required = false, type = 'checkbox', id = null %}
+
+{# `error` is either true, for the state alone, or the message to show under the box. #}
+{% set message = error is not same as(true) and error is not empty ? error : null %}
+{% set errorId = message and id ? id ~ '-error' : null %}
+
+{% set inputDefaults = id ? {type: type, id: id} : {type: type} %}
 
 {% set checkbox = html_cva(
     base: 'Checkbox',
@@ -15,15 +21,22 @@
     },
 ) %}
 
-
-<label  class="{{ checkbox.apply({type, error}, attributes.render('class')) }} " {{attributes.without('class')}}>
-    <input
-        type="{{ type }}"
-        {{attributes.nested('input').defaults( {type: type}).without('required', 'type')}}
-        {{required ? ' required' : ''}}
-    />
-    <span class="Checkbox__checkmark">
-        {{ ux_icon('checkbox') }}
-    </span>
-    <span class="Checkbox__label">{{ label }}{{required ? ' *' :''}}</span>
-</label>
+{# The message is a sibling of the label: inside it, it would be read as part of the name. #}
+<div class="{{ ('Checkbox-field ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    <label class="{{ checkbox.apply({type, error: error is not empty}) }}">
+        <input
+            type="{{ type }}"
+            {% if error is not empty %}aria-invalid="true"{% endif %}
+            {% if errorId %}aria-describedby="{{ errorId }}"{% endif %}
+            {{attributes.nested('input').defaults(inputDefaults).without('required', 'type')}}
+            {{required ? ' required' : ''}}
+        />
+        <span class="Checkbox__checkmark">
+            {{ ux_icon('checkbox') }}
+        </span>
+        <span class="Checkbox__label">{{ label }}{{required ? ' *' :''}}</span>
+    </label>
+    {% if message %}
+        <p {% if errorId %}id="{{ errorId }}" {% endif %}class="Checkbox-error">{{ message }}</p>
+    {% endif %}
+</div>

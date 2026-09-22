@@ -37,7 +37,7 @@
         {{ form_row(loginForm.error_url, {value: path('checkout_identify')}) }}
         <input type="hidden" name="{{ field_name(loginForm.account) }}" value="1">
         {{ form_row(loginForm.email, {label: 'Email'|trans, placeholder: 'Your email'|trans}) }}
-        {{ form_row(loginForm.password, {label: 'Password'|trans, placeholder: 'Your password'|trans}) }}
+        {{ form_row(loginForm.password, {label: 'Password'|trans, placeholder: 'Your password'|trans, attr: {autocomplete: 'current-password'}}) }}
         {{ form_row(loginForm.remember_me, {required: false}) }}
 
         <div class="flex flex-col gap-4 items-start">

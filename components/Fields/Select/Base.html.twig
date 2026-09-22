@@ -1,4 +1,4 @@
-{% props label = null, id = null, error = false, success = false, size = null, choices = [], disabled = false, multiple = false, placeholder = null, help = null, value = null %}
+{% props label = null, id = null, error = false, success = false, size = null, choices = [], disabled = false, multiple = false, placeholder = null, help = null, value = null, required = false %}
 
 {% set select = html_cva(
     base: 'Select',
@@ -16,12 +16,20 @@
 ) %}
 
 {% set state = error ? 'error' : (success ? 'success' : null) %}
+{% set message = error is not same as(true) and error is not empty ? error : null %}
+{% set errorId = message and id ? id ~ '-error' : null %}
 
 {# A <select> needs an accessible name, and a <label> that names nothing leaves it unnamed.
    Given an id, the visible label carries the name through `for`. Called without one, the field
    repeats the label text on itself instead. Only one of the two is ever set: an aria-label
    would win over the label it duplicates. #}
 {% set selectDefaults = { class: 'Select-input' } %}
+{% if error is not empty %}
+    {% set selectDefaults = selectDefaults|merge({ 'aria-invalid': 'true' }) %}
+{% endif %}
+{% if errorId %}
+    {% set selectDefaults = selectDefaults|merge({ 'aria-describedby': errorId }) %}
+{% endif %}
 {% if id %}
     {% set selectDefaults = selectDefaults|merge({ id: id }) %}
 {% elseif label or placeholder %}
@@ -31,7 +39,7 @@
 <div class="{{ select.apply({size, state}, attributes.render('class')) }} " {{attributes.without('class')}}>
 
     <div class="Select-header">
-        <label class="Select-label" {% if id %}for="{{ id }}"{% endif %}>{{ label }}</label>
+        <label class="Select-label" {% if id %}for="{{ id }}"{% endif %}>{{ label }}{% if required %} *{% endif %}</label>
         {% if help %}
             <twig:Molecules:Tooltip:Help tooltip="{{ help }}" />
         {% endif %}
@@ -41,6 +49,7 @@
         {{attributes.nested('select').defaults(selectDefaults).without('disabled', 'multiple') }}
         {% if disabled %}disabled{% endif %}
         {% if multiple %}multiple{% endif %}
+        {% if required %}required{% endif %}
     >
         {% if placeholder %}
             <option value="" {% if value is null %}selected{% endif %} disabled>{{ placeholder }}</option>
@@ -51,7 +60,7 @@
     </select>
 
 
-    {% if error is not empty and  error is not same as(true) %}
-        <p class="Select-error">{{ error }}</p>
+    {% if message %}
+        <p {% if errorId %}id="{{ errorId }}" {% endif %}class="Select-error">{{ message }}</p>
     {% endif %}
 </div>

@@ -1,4 +1,4 @@
-{% props label = null, name = '', id = null, value = null, placeholder = null, error = false, success = false, disabled = false, required = false, optional = false, help = null, size = null, rows = 2 %}
+{% props label = null, name = '', id = null, value = null, placeholder = null, error = false, success = false, disabled = false, required = false, optional = false, help = null, size = null, rows = 2, autocomplete = null %}
 
 {% set fieldId = id ?? name %}
 
@@ -33,11 +33,13 @@
             {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
             {% if disabled %}disabled{% endif %}
             {% if required %}required{% endif %}
+            {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+            {% if error %}aria-invalid="true" aria-describedby="{{ fieldId }}-error"{% endif %}
             {{ attributes.nested('textarea') }}
         >{% if value is not empty %}{{ value }}{% endif %}</textarea>
     </div>
 
     {% if error %}
-        <p class="TextArea-error">{{ error }}</p>
+        <p id="{{ fieldId }}-error" class="TextArea-error">{{ error }}</p>
     {% endif %}
 </div>

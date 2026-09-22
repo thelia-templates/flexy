@@ -1,4 +1,4 @@
-{% props label = null, name = '', id = null, type = 'text', value = null, placeholder = null, error = false, success = false, disabled = false, required = false, optional = false, unit = null, help = null, size = null %}
+{% props label = null, name = '', id = null, type = 'text', value = null, placeholder = null, error = false, success = false, disabled = false, required = false, optional = false, unit = null, help = null, size = null, autocomplete = null %}
 
 {% set fieldId = id ?? name %}
 
@@ -34,6 +34,8 @@
             {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
             {% if disabled %}disabled{% endif %}
             {% if required %}required{% endif %}
+            {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+            {% if error %}aria-invalid="true" aria-describedby="{{ fieldId }}-error"{% endif %}
             {{ attributes.nested('input') }}
         />
         {% if unit %}
@@ -42,6 +44,6 @@
     </div>
 
     {% if error %}
-        <p class="Input-error">{{ error }}</p>
+        <p id="{{ fieldId }}-error" class="Input-error">{{ error }}</p>
     {% endif %}
 </div>
