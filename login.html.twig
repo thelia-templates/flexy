@@ -16,6 +16,10 @@
 
         <h2 class="h2 text-black mb-4">{{ 'Log in'|trans }}</h2>
 
+        {% do override_labels(form, {
+            email: 'Email'|trans,
+            password: 'Password'|trans,
+        }) %}
         {{ form_start(form, {attr: {
             action: path('customer_login_action'),
             method: 'POST',
@@ -26,8 +30,8 @@
         {{ form_row(form.success_url, {value: returnUrl|default('')}) }}
         {{ form_row(form.error_url, {value: returnUrl|default(false) ? path('customer_login', {redirect: returnUrl}) : path('customer_login')}) }}
         <input type="hidden" name="{{ field_name(form.account) }}" value="1">
-        {{ form_row(form.email, {label: 'Email'|trans, placeholder: 'Your email'|trans}) }}
-        {{ form_row(form.password, {label: 'Password'|trans, placeholder: 'Your password'|trans, attr: {autocomplete: 'current-password'}}) }}
+        {{ form_row(form.email, {placeholder: 'Your email'|trans}) }}
+        {{ form_row(form.password, {placeholder: 'Your password'|trans, attr: {autocomplete: 'current-password'}}) }}
         {{ form_row(form.remember_me, {required: false}) }}
 
         <div class="flex flex-col gap-6">

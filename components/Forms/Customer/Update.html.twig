@@ -1,5 +1,9 @@
 {% form_theme form with flexy_form_themes only %}
 <div {{ attributes }}>
+    {% do override_labels(form, {
+        firstname: 'Firstname'|trans,
+        lastname: 'Lastname'|trans,
+    }) %}
     {{ form_start(form, {
         action: path('customer_update'),
         method: 'POST',
@@ -9,8 +13,8 @@
     {{ form_row(form.error_url, {value: path('account_index')}) }}
 
     <div class="flex flex-col md:flex-row gap-6">
-        {{ form_row(form.firstname, {label: 'Firstname'|trans}) }}
-        {{ form_row(form.lastname, {label: 'Lastname'|trans}) }}
+        {{ form_row(form.firstname) }}
+        {{ form_row(form.lastname) }}
     </div>
 
     {{ form_rest(form) }}
