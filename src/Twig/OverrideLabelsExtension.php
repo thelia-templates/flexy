@@ -44,9 +44,15 @@ class OverrideLabelsExtension extends AbstractExtension
      */
     public function overrideLabels(FormView $form, array $labels): void
     {
-        // Called after form_start, the write lands too late for what that block rendered, and
-        // the page says two different things in silence — the very defect this exists to remove.
-        if ($form->isMethodRendered()) {
+        // After form_start the write lands too late, and silently. The flag only ever lands on
+        // the root, so a sub-view has to be asked about its own root.
+        $root = $form;
+
+        while ($root->parent instanceof FormView) {
+            $root = $root->parent;
+        }
+
+        if ($root->isMethodRendered()) {
             throw new \LogicException(
                 'override_labels() must be called before form_start(), otherwise the labels it '
                 . 'writes are ignored by everything form_start() has already rendered.',
