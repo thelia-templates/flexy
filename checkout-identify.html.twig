@@ -73,6 +73,8 @@
             <twig:Forms:GuestCheckout:Base />
         </section>
     {% endif %}
+
+    {{ theme_hook('checkout-identify.form.bottom', {next_step_url: next_step_url}) }}
 {% endblock %}
 
 {% block checkoutBackButton %}

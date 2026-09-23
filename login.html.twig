@@ -20,6 +20,8 @@
 
         <h2 class="h2 text-black mb-4">{{ 'Log in'|trans }}</h2>
 
+        {{ theme_hook('login.form.top') }}
+
         {{ form_start(form, {attr: {
             action: path('customer_login_action'),
             method: 'POST',
@@ -39,6 +41,8 @@
             <twig:Molecules:Button:Base text="{{ 'Log in'|trans }}" type="submit" class="w-max" />
         </div>
         {{ form_end(form) }}
+
+        {{ theme_hook('login.form.bottom') }}
 
         <hr class="my-10 text-grey" />
 

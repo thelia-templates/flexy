@@ -1,0 +1,36 @@
+<p class="Story-label">Sign-in buttons carrying a provider's brand mark, so the network reads at a glance. Used by the SocialLogin module on the login, registration and checkout identification pages; one button per configured provider. The marks shown here are the built-in fallback: a shop supplies the provider's official artwork in the back office (Modules &gt; SocialLogin, "logo (SVG)" per provider), and it reaches the component sanitized, through the <code>trustedLogoSvg</code> prop, typed <code>Twig\Markup</code> so an unsanitized string cannot be passed.</p>
+
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">Providers</h4>
+        <div class="Story-row">
+            <div style="display:flex;flex-direction:column;gap:0.75rem;width:100%;max-width:360px;">
+                <twig:Molecules:SocialButton:Base provider="google" href="#" label="Continue with Google" />
+                <twig:Molecules:SocialButton:Base provider="facebook" href="#" label="Continue with Facebook" />
+                <twig:Molecules:SocialButton:Base provider="apple" href="#" label="Continue with Apple" />
+            </div>
+        </div>
+    </div>
+
+    {# A `set` block captures its content as a Twig\Markup, which is exactly what the prop
+       accepts: the story can therefore show a supplied logo without any PHP. #}
+    {% set officialLogo %}<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2" y="2" width="20" height="20" rx="5" fill="#0F62FE"/><path d="M8 12.5l2.5 2.5L16 9.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{% endset %}
+
+    <div class="Story-section">
+        <h4 class="Story-title">Logo supplied in the back office</h4>
+        <div class="Story-row">
+            <div style="display:flex;width:100%;max-width:360px;">
+                <twig:Molecules:SocialButton:Base provider="google" href="#" label="Continue with Google" :trustedLogoSvg="officialLogo" />
+            </div>
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <h4 class="Story-title">Unknown provider, renders without a mark</h4>
+        <div class="Story-row">
+            <div style="display:flex;width:100%;max-width:360px;">
+                <twig:Molecules:SocialButton:Base provider="microsoft" href="#" label="Continue with Microsoft" />
+            </div>
+        </div>
+    </div>
+</div>

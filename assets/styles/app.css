@@ -25,6 +25,7 @@
 /* Components managing their own layering internally (@theme / @utility / @layer) : imported unwrapped, the file is the sole source of truth for its own layer */
 /* If a component needs to override styles from external lib (carousel, etc), it should be put here, and have fine-tuned layering inside it's own file */
 @import "../../components/Molecules/Button/Base.css";
+@import "../../components/Molecules/SocialButton/Base.css";
 @import "../../components/Molecules/Link/Base.css";
 @import "../../components/Molecules/Tag/Base.css";
 @import "../../components/Molecules/Tag/OrderTag.css";
