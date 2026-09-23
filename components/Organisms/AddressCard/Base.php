@@ -16,7 +16,9 @@ namespace FlexyBundle\Components\Organisms\AddressCard;
 
 use Propel\Runtime\Map\TableMap;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
+use Thelia\Model\Address;
 use Thelia\Model\AddressQuery;
+use Thelia\Model\OrderAddress;
 use Thelia\Model\OrderAddressQuery;
 
 #[AsTwigComponent]
@@ -46,5 +48,11 @@ class Base
 
         $this->address = $address?->toArray(TableMap::TYPE_CAMELNAME);
         $this->countryIsoAlpha3 = $address?->getCountry()?->getIsoalpha3();
+
+        if (null !== $this->address && ($address instanceof Address || $address instanceof OrderAddress)) {
+            $this->address['vatVerificationValid'] = $address instanceof Address
+                ? $address->getVatVerificationValid()
+                : null !== $address->getVatVerifiedAt();
+        }
     }
 }

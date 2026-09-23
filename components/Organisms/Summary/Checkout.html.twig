@@ -71,7 +71,11 @@
                     {{ summary.total_taxed_price|format_currency('EUR', locale: lang_code) }}
                 </div>
             </div>
-            {% if this.hasTax %}
+            {% if this.isVatExempted %}
+                <div class="italic">
+                    {{ 'VAT exempted (reverse charge), buyer VAT number %number%'|trans({'%number%': summary.invoice_vat_number}) }}
+                </div>
+            {% elseif this.hasTax %}
                 <div class="italic">
                     {{ 'Taxes of'|trans }}
                     {{ summary.total_tax_amount|format_currency('EUR', locale: lang_code) }}
