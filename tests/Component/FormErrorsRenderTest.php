@@ -84,6 +84,38 @@ final class FormErrorsRenderTest extends KernelTestCase
         self::assertStringContainsString('Wrong email or password.', $html);
     }
 
+    /** A failure of the form is not a field: it leads the list, with nothing to go back to. */
+    public function testAFailureOfTheFormLeadsTheListWithoutAnAnchor(): void
+    {
+        $html = $this->render([
+            'sampleFormFailures' => ['The security token is no longer valid.'],
+            'sampleEntries' => [self::entry('Email', ['Blank.'], 'email', false)],
+        ]);
+
+        self::assertStringContainsString('FormErrors-summary', $html, 'one field alone would not open it');
+        self::assertSame(2, substr_count($html, '<li>'));
+        self::assertLessThan(
+            strpos($html, 'href="#email"'),
+            strpos($html, 'The security token is no longer valid.'),
+        );
+        self::assertSame(1, substr_count($html, 'href="#'), 'the failure carries no anchor');
+        self::assertStringContainsString('This form contains one error.', $html, 'the count counts fields');
+    }
+
+    /** Both are shown when no field speaks. No production path fills the two at once today. */
+    public function testAFailureAndTheWrappedMessageAreBothShownWhenNoFieldSpeaks(): void
+    {
+        $html = $this->render([
+            'sampleFormFailures' => ['The security token is no longer valid.'],
+            'sampleRootErrors' => ['Missing or invalid data.'],
+        ]);
+
+        self::assertSame(2, substr_count($html, '<li>'));
+        self::assertStringContainsString('The security token is no longer valid.', $html);
+        self::assertStringContainsString('Missing or invalid data.', $html);
+        self::assertStringNotContainsString('This form contains', $html, 'no field, so nothing to count');
+    }
+
     /** The count counts fields, not messages. */
     public function testAFieldKeepsOneEntryForAllItsMessages(): void
     {
