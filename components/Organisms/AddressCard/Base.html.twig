@@ -41,6 +41,13 @@
                         {% if address.vatNumber %}
                             <span class="block">{{ 'VAT number'|trans }} : {{ address.vatNumber }}</span>
                         {% endif %}
+                        {% if address.vatVerificationValid %}
+                            <twig:Molecules:Tag:Base
+                                color="validated"
+                                icon="checkmark"
+                                customText="{{ 'VAT verified on %date%'|trans({'%date%': address.vatVerifiedAt|date('d/m/Y')}) }}"
+                            />
+                        {% endif %}
                     </span>
                 {% endif %}
                 <span class="AddressCard-address">

@@ -32,7 +32,11 @@
             <div>{{ (this.hasTax ? 'Total (including VAT)' : 'Total')|trans }}</div>
             <div>{{ order.totalAmount|format_currency('EUR', locale: lang_code) }}</div>
         </div>
-        {% if this.hasTax %}
+        {% if this.isVatExempted %}
+            <div class="italic">
+                {{ 'VAT exempted (reverse charge), buyer VAT number %number%'|trans({'%number%': this.invoiceVatNumber}) }}
+            </div>
+        {% elseif this.hasTax %}
             <div class="italic">
                 {{ 'Taxes of'|trans }}
                 {{ this.taxAmount|format_currency('EUR', locale: lang_code) }}

@@ -64,4 +64,14 @@ class Order
     {
         return (float) ($this->order['totalShippingWithTaxes'] ?? 0) > 0;
     }
+
+    public function isVatExempted(): bool
+    {
+        return (bool) ($this->order['vatExempted'] ?? false);
+    }
+
+    public function getInvoiceVatNumber(): string
+    {
+        return (string) ($this->order['invoiceOrderAddress']['vatNumber'] ?? '');
+    }
 }
