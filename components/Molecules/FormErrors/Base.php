@@ -127,24 +127,19 @@ class Base
                 ];
             }
 
-            $entries = [...$entries, ...$this->collect($child)];
+            foreach ($this->collect($child) as $descendant) {
+                $entries[] = $descendant;
+            }
         }
 
         return $entries;
     }
 
+    /** Only a declared label: humanising the name would put untranslated English beside a translated field. */
     private static function labelOf(FormView $field): ?string
     {
         $label = $field->vars['label'] ?? null;
 
-        if (\is_string($label) && '' !== trim($label)) {
-            return $label;
-        }
-
-        $name = $field->vars['name'] ?? null;
-
-        return \is_string($name) && '' !== $name
-            ? ucfirst(str_replace(['_', '-'], ' ', $name))
-            : null;
+        return \is_string($label) && '' !== trim($label) ? $label : null;
     }
 }
