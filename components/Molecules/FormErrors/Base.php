@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Molecules\FormErrors;
 
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormView;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
@@ -38,6 +39,9 @@ class Base
     /** @var list<string> */
     public array $sampleRootErrors = [];
 
+    /** @var list<string> */
+    public array $sampleFormFailures = [];
+
     /**
      * One entry per field in error, in the order the form declares its fields, carrying every
      * message it collected. A hidden field gets neither label nor anchor: the summary is the
@@ -54,17 +58,50 @@ class Base
         return $this->collect($this->form);
     }
 
-    /** @return list<string> */
+    /**
+     * What the form itself refused, a rejected CSRF token for one. The cause is what tells these
+     * apart from the wrapped message, and none repeats a field, so they show whatever else is wrong.
+     *
+     * @return list<string>
+     */
+    public function formFailures(): array
+    {
+        if (!$this->form instanceof FormView) {
+            return $this->sampleFormFailures;
+        }
+
+        return self::messagesOf($this->form, static fn (FormError $error): bool => null !== $error->getCause());
+    }
+
+    /**
+     * The message Thelia wraps around a rejected submission: `BaseForm::setErrorMessage()` stores
+     * it, `FormService` turns it into a root error with no cause. It repeats what the fields
+     * already show, so it only appears when no field shows anything.
+     *
+     * @return list<string>
+     */
     public function rootErrors(): array
     {
         if (!$this->form instanceof FormView) {
             return $this->sampleRootErrors;
         }
 
+        return self::messagesOf($this->form, static fn (FormError $error): bool => null === $error->getCause());
+    }
+
+    /**
+     * @param callable(FormError): bool $keep
+     *
+     * @return list<string>
+     */
+    private static function messagesOf(FormView $form, callable $keep): array
+    {
         $messages = [];
 
-        foreach ($this->form->vars['errors'] ?? [] as $error) {
-            $messages[] = $error->getMessage();
+        foreach ($form->vars['errors'] ?? [] as $error) {
+            if ($error instanceof FormError && $keep($error)) {
+                $messages[] = $error->getMessage();
+            }
         }
 
         return $messages;
@@ -72,17 +109,20 @@ class Base
 
     public function hasErrors(): bool
     {
-        return [] !== $this->entries() || [] !== $this->rootErrors();
+        return [] !== $this->entries() || [] !== $this->formFailures() || [] !== $this->rootErrors();
     }
 
     /**
-     * A single visible field reads under itself; anything else needs the summary to be seen.
-     *
-     * Root errors only count when they are the ones on show: Thelia controllers set one on every
-     * rejected submission, so counting them regardless would give every form a summary.
+     * A single visible field reads under itself; anything else needs the summary. The wrapped
+     * message only counts when nothing else is on show: Thelia sets it on every rejected
+     * submission, so counting it regardless would give every form a summary.
      */
     public function showSummary(): bool
     {
+        if ([] !== $this->formFailures()) {
+            return true;
+        }
+
         $entries = $this->entries();
 
         if (\count($entries) > 1) {

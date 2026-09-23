@@ -43,6 +43,23 @@
     </div>
 
     <div class="Story-section">
+        <h4 class="Story-title">A failure of the form, beside a faulty field</h4>
+        <p class="Story-label">
+            A refused token is not a field and leads the list without a link. One faulty field
+            would not open the summary on its own; the failure does, because it has nowhere else
+            to be read. The count still counts fields, so the list is longer than it announces.
+        </p>
+        <div class="Story-stage Story-stage--narrow">
+            <twig:Molecules:FormErrors:Base
+                :sampleFormFailures="['The security token is no longer valid, please submit the form again.']"
+                :sampleEntries="[
+                    {label: 'Email address', messages: ['This value should not be blank.'], target: 'story-email', hidden: false}
+                ]"
+            />
+        </div>
+    </div>
+
+    <div class="Story-section">
         <h4 class="Story-title">One error, on a field with no place to show it</h4>
         <p class="Story-label">
             A single error still gets a summary here, for want of anywhere else to appear.
