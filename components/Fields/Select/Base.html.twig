@@ -15,23 +15,26 @@
     },
 ) %}
 
-{% set state = error ? 'error' : (success ? 'success' : null) %}
 {# `error` is a message, a list of them, or true for the state alone. #}
 {% set errorMessages = error is iterable
     ? error|filter(m => m is not empty)
     : (error is not same as(true) and error is not empty ? [error] : []) %}
+{% set hasError = errorMessages|length > 0 or error is same as(true) %}
+{% set state = hasError ? 'error' : (success ? 'success' : null) %}
 {% set errorId = errorMessages|length and id ? id ~ '-error' : null %}
+{% set helpId = help and id ? id ~ '-help' : null %}
+{% set describedBy = [errorId, helpId]|filter(v => v)|join(' ') %}
 
 {# A <select> needs an accessible name, and a <label> that names nothing leaves it unnamed.
    Given an id, the visible label carries the name through `for`. Called without one, the field
    repeats the label text on itself instead. Only one of the two is ever set: an aria-label
    would win over the label it duplicates. #}
 {% set selectDefaults = { class: 'Select-input' } %}
-{% if error is not empty %}
+{% if hasError %}
     {% set selectDefaults = selectDefaults|merge({ 'aria-invalid': 'true' }) %}
 {% endif %}
-{% if errorId %}
-    {% set selectDefaults = selectDefaults|merge({ 'aria-describedby': errorId }) %}
+{% if describedBy %}
+    {% set selectDefaults = selectDefaults|merge({ 'aria-describedby': describedBy }) %}
 {% endif %}
 {% if id %}
     {% set selectDefaults = selectDefaults|merge({ id: id }) %}
@@ -45,6 +48,8 @@
         <label class="Select-label" {% if id %}for="{{ id }}"{% endif %}>{{ label }}{% if required %} *{% endif %}</label>
         {% if help %}
             <twig:Molecules:Tooltip:Help tooltip="{{ help }}" />
+            {# The tooltip hides its text until opened, and a hidden target is not announced. #}
+            {% if helpId %}<span id="{{ helpId }}" class="sr-only">{{ help }}</span>{% endif %}
         {% endif %}
     </div>
 

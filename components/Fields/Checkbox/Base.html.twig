@@ -5,6 +5,7 @@
 {% set errorMessages = error is iterable
     ? error|filter(m => m is not empty)
     : (error is not same as(true) and error is not empty ? [error] : []) %}
+{% set hasError = errorMessages|length > 0 or error is same as(true) %}
 {% set errorId = errorMessages|length and id ? id ~ '-error' : null %}
 
 {% set inputDefaults = id ? {type: type, id: id} : {type: type} %}
@@ -25,10 +26,10 @@
 
 {# The message is a sibling of the label: inside it, it would be read as part of the name. #}
 <div class="{{ ('Checkbox-field ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
-    <label class="{{ checkbox.apply({type, error: error is not empty}) }}">
+    <label class="{{ checkbox.apply({type, error: hasError}) }}">
         <input
             type="{{ type }}"
-            {% if error is not empty %}aria-invalid="true"{% endif %}
+            {% if hasError %}aria-invalid="true"{% endif %}
             {% if errorId %}aria-describedby="{{ errorId }}"{% endif %}
             {{attributes.nested('input').defaults(inputDefaults).without('required', 'type')}}
             {{required ? ' required' : ''}}
