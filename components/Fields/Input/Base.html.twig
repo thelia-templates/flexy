@@ -1,6 +1,16 @@
-{% props label = null, name = '', id = null, type = 'text', value = null, placeholder = null, error = false, success = false, disabled = false, required = false, optional = false, unit = null, help = null, size = null %}
+{% props label = null, name = '', id = null, type = 'text', value = null, placeholder = null, error = false, success = false, disabled = false, required = false, optional = false, unit = null, help = null, size = null, autocomplete = null %}
 
 {% set fieldId = id ?? name %}
+
+{# `error` is a message, a list of them, or true for the state alone. #}
+{% set errorMessages = error is iterable
+    ? error|filter(m => m is not empty)
+    : (error is not same as(true) and error is not empty ? [error] : []) %}
+{% set hasError = errorMessages|length > 0 or error is same as(true) %}
+{% set describedBy = [
+    errorMessages|length ? fieldId ~ '-error' : null,
+    help ? fieldId ~ '-help' : null,
+]|filter(id => id)|join(' ') %}
 
 {% set fieldInput = html_cva(
     base: 'Input',
@@ -20,6 +30,8 @@
             {% endif %}
             {% if help %}
                 <twig:Molecules:Tooltip:Help tooltip="{{ help }}" />
+                {# The tooltip hides its text until opened, and a hidden target is not announced. #}
+                <span id="{{ fieldId }}-help" class="sr-only">{{ help }}</span>
             {% endif %}
         </div>
     {% endif %}
@@ -29,11 +41,14 @@
             type="{{ type }}"
             name="{{ name }}"
             id="{{ fieldId }}"
-            class="{{ ('Input-input' ~ (unit ? ' Input-input--unit' : '') ~ (error ? ' is-error' : ''))|tailwind_merge }}"
+            class="{{ ('Input-input' ~ (unit ? ' Input-input--unit' : '') ~ (hasError ? ' is-error' : ''))|tailwind_merge }}"
             {% if value is not null %}value="{{ value }}"{% endif %}
             {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
             {% if disabled %}disabled{% endif %}
             {% if required %}required{% endif %}
+            {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+            {% if hasError %}aria-invalid="true"{% endif %}
+            {% if describedBy %}aria-describedby="{{ describedBy }}"{% endif %}
             {{ attributes.nested('input') }}
         />
         {% if unit %}
@@ -41,7 +56,7 @@
         {% endif %}
     </div>
 
-    {% if error %}
-        <p class="Input-error">{{ error }}</p>
+    {% if errorMessages|length %}
+        <p id="{{ fieldId }}-error" class="Input-error">{{ errorMessages|join(' ') }}</p>
     {% endif %}
 </div>

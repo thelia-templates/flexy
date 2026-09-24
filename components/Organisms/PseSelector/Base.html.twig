@@ -41,12 +41,6 @@
         />
     </div>
 
-    {# The theme's form_errors block is empty by design, so form-level violations (an invalid
-       quantity rejected by the core CartAdd constraints) are surfaced here instead. #}
-    {% for error in form.vars.errors %}
-        <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ error.message }}" />
-    {% endfor %}
-
     {% if outOfStock %}
         <twig:Molecules:SnackBar:Base
             variant="warning"

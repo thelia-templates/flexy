@@ -1,0 +1,49 @@
+/* An anchor lands its field at the top of the window, under the sticky header. A fraction of
+   the window rather than the header's height: the header gains a bar at some widths and grows
+   once stuck, so a figure copied from it would be wrong exactly when an anchor is used. The
+   floor covers the very short window. Dynamic units, or the value jumps when a mobile address
+   bar retracts. */
+:root {
+  --form-errors-anchor-offset: max(8rem, 33dvh);
+}
+
+[aria-invalid="true"],
+.FormErrors-summary {
+  scroll-margin-top: var(--form-errors-anchor-offset);
+}
+
+/* The radius shows nothing on its own: it mirrors the SnackBar so the ring below follows the
+   banner rather than boxing it. */
+.FormErrors-summary {
+  margin-bottom: 1.5rem;
+  border-radius: 0.5rem;
+}
+
+/* The summary takes the focus when no field can; left alone it would get the browser's default
+   ring, which reads as a control. Keyboard only, like every ring in this theme. */
+.FormErrors-summary:focus-visible {
+  outline: 1px solid var(--color-error-dark);
+  outline-offset: 2px;
+}
+
+.FormErrors-heading {
+  @apply paragraph-3;
+  font-weight: 600;
+}
+
+/* A lone message is not an enumeration. Carried by the items, so telling the two cases apart
+   needs no parent-level selector. */
+.FormErrors-list {
+  @apply paragraph-4;
+  list-style: none;
+  padding-left: 0;
+}
+
+.FormErrors-list li:not(:only-child) {
+  list-style: disc;
+  margin-left: 1.25rem;
+}
+
+.FormErrors-list a {
+  text-decoration: underline;
+}

@@ -1,11 +1,17 @@
 {% form_theme form with flexy_form_themes only %}
 <div {{ attributes }}>
+    {% do override_labels(form, {
+        firstname: 'Firstname'|trans,
+        lastname: 'Lastname'|trans,
+        company: 'Company'|trans,
+        address1: 'Address'|trans,
+        phone: 'Phone number'|trans,
+    }) %}
     {{ form_start(form, {attr: {
         class: 'flex flex-col gap-6',
         action: this.action,
         method: 'POST',
     }}) }}
-    {{ form_errors(form) }}
     {{ form_row(form.success_url, {value: this.successUrl}) }}
     {{ form_row(form.error_url, {value: this.errorUrl}) }}
 
@@ -13,18 +19,18 @@
     {{ form_row(form.title) }}
 
     <div class="flex flex-col md:flex-row gap-6">
-        {{ form_row(form.firstname, {label: 'Firstname'|trans}) }}
-        {{ form_row(form.lastname, {label: 'Lastname'|trans}) }}
+        {{ form_row(form.firstname) }}
+        {{ form_row(form.lastname) }}
     </div>
 
-    {{ form_row(form.company, {label: 'Company'|trans}) }}
+    {{ form_row(form.company) }}
     {% if form.siret is defined %}
         {{ form_row(form.siret) }}
     {% endif %}
     {% if form.vat_number is defined %}
         {{ form_row(form.vat_number) }}
     {% endif %}
-    {{ form_row(form.address1, {label: 'Address'|trans}) }}
+    {{ form_row(form.address1) }}
     {{ form_row(form.address2) }}
     {{ form_row(form.address3) }}
 
@@ -41,7 +47,7 @@
     </div>
 
     <div class="flex flex-col md:flex-row gap-6">
-        {{ form_row(form.phone, {label: 'Phone number'|trans}) }}
+        {{ form_row(form.phone) }}
         {{ form_row(form.cellphone) }}
     </div>
 

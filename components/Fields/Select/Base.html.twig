@@ -1,4 +1,4 @@
-{% props label = null, id = null, error = false, success = false, size = null, choices = [], disabled = false, multiple = false, placeholder = null, help = null, value = null %}
+{% props label = null, id = null, error = false, success = false, size = null, choices = [], disabled = false, multiple = false, placeholder = null, help = null, value = null, required = false %}
 
 {% set select = html_cva(
     base: 'Select',
@@ -15,13 +15,27 @@
     },
 ) %}
 
-{% set state = error ? 'error' : (success ? 'success' : null) %}
+{# `error` is a message, a list of them, or true for the state alone. #}
+{% set errorMessages = error is iterable
+    ? error|filter(m => m is not empty)
+    : (error is not same as(true) and error is not empty ? [error] : []) %}
+{% set hasError = errorMessages|length > 0 or error is same as(true) %}
+{% set state = hasError ? 'error' : (success ? 'success' : null) %}
+{% set errorId = errorMessages|length and id ? id ~ '-error' : null %}
+{% set helpId = help and id ? id ~ '-help' : null %}
+{% set describedBy = [errorId, helpId]|filter(v => v)|join(' ') %}
 
 {# A <select> needs an accessible name, and a <label> that names nothing leaves it unnamed.
    Given an id, the visible label carries the name through `for`. Called without one, the field
    repeats the label text on itself instead. Only one of the two is ever set: an aria-label
    would win over the label it duplicates. #}
 {% set selectDefaults = { class: 'Select-input' } %}
+{% if hasError %}
+    {% set selectDefaults = selectDefaults|merge({ 'aria-invalid': 'true' }) %}
+{% endif %}
+{% if describedBy %}
+    {% set selectDefaults = selectDefaults|merge({ 'aria-describedby': describedBy }) %}
+{% endif %}
 {% if id %}
     {% set selectDefaults = selectDefaults|merge({ id: id }) %}
 {% elseif label or placeholder %}
@@ -31,9 +45,11 @@
 <div class="{{ select.apply({size, state}, attributes.render('class')) }} " {{attributes.without('class')}}>
 
     <div class="Select-header">
-        <label class="Select-label" {% if id %}for="{{ id }}"{% endif %}>{{ label }}</label>
+        <label class="Select-label" {% if id %}for="{{ id }}"{% endif %}>{{ label }}{% if required %} *{% endif %}</label>
         {% if help %}
             <twig:Molecules:Tooltip:Help tooltip="{{ help }}" />
+            {# The tooltip hides its text until opened, and a hidden target is not announced. #}
+            {% if helpId %}<span id="{{ helpId }}" class="sr-only">{{ help }}</span>{% endif %}
         {% endif %}
     </div>
 
@@ -41,6 +57,7 @@
         {{attributes.nested('select').defaults(selectDefaults).without('disabled', 'multiple') }}
         {% if disabled %}disabled{% endif %}
         {% if multiple %}multiple{% endif %}
+        {% if required %}required{% endif %}
     >
         {% if placeholder %}
             <option value="" {% if value is null %}selected{% endif %} disabled>{{ placeholder }}</option>
@@ -51,7 +68,7 @@
     </select>
 
 
-    {% if error is not empty and  error is not same as(true) %}
-        <p class="Select-error">{{ error }}</p>
+    {% if errorMessages|length %}
+        <p {% if errorId %}id="{{ errorId }}" {% endif %}class="Select-error">{{ errorMessages|join(' ') }}</p>
     {% endif %}
 </div>

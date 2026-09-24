@@ -65,6 +65,7 @@
   @import "../../components/Molecules/FilterList/Base.css";
   @import "../../components/Molecules/FilterSelect/Base.css";
   @import "../../components/Molecules/SnackBar/Base.css";
+  @import "../../components/Molecules/FormErrors/Base.css";
   @import "../../components/Molecules/CheckoutSteps/Base.css";
   @import "../../components/Molecules/RadioButton/Base.css";
   @import "../../components/Molecules/Reinsurance/Base.css";

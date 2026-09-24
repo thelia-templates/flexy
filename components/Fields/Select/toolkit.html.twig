@@ -39,6 +39,11 @@
             </div>
 
             <div class="Story-col">
+                <span class="Story-label">required</span>
+                <twig:Fields:Select:Base label="Label" required placeholder="Choose an option" choices="{{ choices }}" />
+            </div>
+
+            <div class="Story-col">
                 <span class="Story-label">success</span>
                 <twig:Fields:Select:Base label="Label" success value="option2" choices="{{ choices }}" help="This is a help text" />
             </div>

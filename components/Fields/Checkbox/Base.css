@@ -1,3 +1,10 @@
+.Checkbox-field {
+  display: inline-flex;
+  flex-direction: column;
+  align-self: flex-start;
+  gap: 0.25rem;
+}
+
 .Checkbox {
   --checkbox-color: var(--color-black);
   --checkbox-hover: var(--color-grey-dark);
@@ -22,6 +29,12 @@
   @variant hover {
     --checkbox-color: var(--color-error-light);
   }
+}
+
+.Checkbox-error {
+  @apply paragraph-5;
+  color: var(--color-error-dark);
+  font-style: italic;
 }
 
 .Checkbox input {

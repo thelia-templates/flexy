@@ -32,6 +32,14 @@
             </div>
 
             <div class="Story-col">
+                <span class="Story-label">error, several messages on one field</span>
+                <twig:Fields:Input:Base name="text-errors" label="With two errors" value="" :error="[
+                    'This value should not be blank.',
+                    'Your city can only contains letters.'
+                ]" />
+            </div>
+
+            <div class="Story-col">
                 <span class="Story-label">success</span>
                 <twig:Fields:Input:Base name="text-success" label="With success" value="Valid value" :success="true" />
             </div>

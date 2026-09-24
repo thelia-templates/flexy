@@ -5,20 +5,19 @@
     data-loading="addClass(opacity-50 pointer-events-none)"
 >
     <div>
+        {% do override_labels(form, {
+            address: 'Find a delivery address'|trans,
+        }) %}
         {{ form_start(form, {
             attr: {
                 'data-action': 'live#action:prevent',
                 'data-live-action-param': 'save',
             },
         }) }}
-        {# Label/help translated here (theme catalog): the form type resolves
-           its labels through the Thelia translator, whose core domain does
-           not know the theme keys. #}
+        {# Label and help translated here (theme catalog): the form type resolves its labels
+           through the Thelia translator, whose core domain does not know the theme keys. #}
         <div class="PickupSearch-inputGroup">
-            {{ form_row(form.address, {
-                label: 'Find a delivery address'|trans,
-                attr: {placeholder: 'e.g. City, Postcode'|trans},
-            }) }}
+            {{ form_row(form.address, {attr: {placeholder: 'e.g. City, Postcode'|trans}}) }}
             <button type="submit" class="PickupSearch-searchButton" aria-label="{{ 'Search'|trans }}">
                 {{ ux_icon('search') }}
             </button>

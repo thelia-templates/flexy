@@ -1,6 +1,16 @@
-{% props label = null, name = '', id = null, value = null, placeholder = null, error = false, success = false, disabled = false, required = false, optional = false, help = null, size = null, rows = 2 %}
+{% props label = null, name = '', id = null, value = null, placeholder = null, error = false, success = false, disabled = false, required = false, optional = false, help = null, size = null, rows = 2, autocomplete = null %}
 
 {% set fieldId = id ?? name %}
+
+{# `error` is a message, a list of them, or true for the state alone. #}
+{% set errorMessages = error is iterable
+    ? error|filter(m => m is not empty)
+    : (error is not same as(true) and error is not empty ? [error] : []) %}
+{% set hasError = errorMessages|length > 0 or error is same as(true) %}
+{% set describedBy = [
+    errorMessages|length ? fieldId ~ '-error' : null,
+    help ? fieldId ~ '-help' : null,
+]|filter(id => id)|join(' ') %}
 
 {% set textArea = html_cva(
     base: 'TextArea',
@@ -20,6 +30,8 @@
             {% endif %}
             {% if help %}
                 <twig:Molecules:Tooltip:Help tooltip="{{ help }}" />
+                {# The tooltip hides its text until opened, and a hidden target is not announced. #}
+                <span id="{{ fieldId }}-help" class="sr-only">{{ help }}</span>
             {% endif %}
         </div>
     {% endif %}
@@ -29,15 +41,18 @@
             name="{{ name }}"
             id="{{ fieldId }}"
             rows="{{ rows }}"
-            class="{{ ('TextArea-input' ~ (error ? ' is-error' : ''))|tailwind_merge }}"
+            class="{{ ('TextArea-input' ~ (hasError ? ' is-error' : ''))|tailwind_merge }}"
             {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
             {% if disabled %}disabled{% endif %}
             {% if required %}required{% endif %}
+            {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+            {% if hasError %}aria-invalid="true"{% endif %}
+            {% if describedBy %}aria-describedby="{{ describedBy }}"{% endif %}
             {{ attributes.nested('textarea') }}
         >{% if value is not empty %}{{ value }}{% endif %}</textarea>
     </div>
 
-    {% if error %}
-        <p class="TextArea-error">{{ error }}</p>
+    {% if errorMessages|length %}
+        <p id="{{ fieldId }}-error" class="TextArea-error">{{ errorMessages|join(' ') }}</p>
     {% endif %}
 </div>

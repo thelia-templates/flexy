@@ -1,0 +1,56 @@
+{# @prop form FormView|null The submitted form to read the errors off #}
+{# @prop sampleEntries array Entries given directly, for the story #}
+{# @prop sampleRootErrors array The wrapped message given directly, for the story #}
+{# @prop sampleFormFailures array Failures of the form given directly, for the story #}
+
+{% if this.hasErrors %}
+    {% set controller = 'Molecules--FormErrors--base' %}
+    {% set entries = this.entries %}
+    {% set failures = this.formFailures %}
+    {% set rootErrors = this.rootErrors %}
+
+    {# Rendered as soon as there is an error, even with nothing to show: it carries the
+       controller that moves the focus to the first field to correct. #}
+    <div {{ attributes.defaults({class: 'FormErrors', ...stimulus_controller(controller, {submission: this.submission})}) }}>
+        {% if this.showSummary %}
+            {# The count counts fields to go back to. A failure of the form has no field, so it
+               leads the list without being counted: the two are not the same kind of thing. #}
+            {% set summary %}
+                {% if entries|length %}
+                    <p class="FormErrors-heading">
+                        {% if entries|length > 1 %}
+                            {{ 'This form contains %count% errors.'|trans({'%count%': entries|length}) }}
+                        {% else %}
+                            {{ 'This form contains one error.'|trans }}
+                        {% endif %}
+                    </p>
+                {% endif %}
+                <ul class="FormErrors-list">
+                    {% for message in failures %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                    {% for entry in entries %}
+                        <li>
+                            {%- if entry.label and entry.target -%}
+                                <a href="#{{ entry.target }}">{{ entry.label }}</a>{{ ' : ' }}{{ entry.messages|join(' ') }}
+                            {%- else -%}
+                                {{ entry.messages|join(' ') }}
+                            {%- endif -%}
+                        </li>
+                    {% endfor %}
+                    {% if entries|length == 0 %}
+                        {% for message in rootErrors %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            {% endset %}
+
+            {# No role="alert": the focus landing here is what has it read, and an alert is not
+               meant to hold links. `tabindex` is what lets it take that focus. #}
+            <div class="FormErrors-summary" tabindex="-1" {{ stimulus_target(controller, 'summary') }}>
+                <twig:Molecules:SnackBar:Base variant="error" withIcon :text="summary" />
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

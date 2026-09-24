@@ -22,10 +22,10 @@
     <section class="mb-10">
         <h2 class="h4 text-black mb-4">{{ 'I already have an account'|trans }}</h2>
 
-        {% for error in loginForm.vars.errors %}
-            <twig:Molecules:SnackBar:Base variant="error" text="{{ error.message }}" class="mb-4" />
-        {% endfor %}
-
+        {% do override_labels(loginForm, {
+            email: 'Email'|trans,
+            password: 'Password'|trans,
+        }) %}
         {{ form_start(loginForm, {attr: {
             action: path('customer_login_action'),
             method: 'POST',
@@ -36,8 +36,8 @@
         {{ form_row(loginForm.success_url, {value: next_step_url}) }}
         {{ form_row(loginForm.error_url, {value: path('checkout_identify')}) }}
         <input type="hidden" name="{{ field_name(loginForm.account) }}" value="1">
-        {{ form_row(loginForm.email, {label: 'Email'|trans, placeholder: 'Your email'|trans}) }}
-        {{ form_row(loginForm.password, {label: 'Password'|trans, placeholder: 'Your password'|trans}) }}
+        {{ form_row(loginForm.email, {placeholder: 'Your email'|trans}) }}
+        {{ form_row(loginForm.password, {placeholder: 'Your password'|trans, attr: {autocomplete: 'current-password'}}) }}
         {{ form_row(loginForm.remember_me, {required: false}) }}
 
         <div class="flex flex-col gap-4 items-start">

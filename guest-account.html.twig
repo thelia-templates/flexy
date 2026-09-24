@@ -12,10 +12,6 @@
         {% set form = getForm('flexybundle_form_guest_account_creation') %}
         {% form_theme form with flexy_form_themes only %}
 
-        {% for error in form.vars.errors %}
-            <twig:Molecules:SnackBar:Base variant="error" text="{{ error.message }}" class="mb-6" />
-        {% endfor %}
-
         <h1 class="h2 text-black mb-4">{{ 'Create my account'|trans }}</h1>
         <p class="paragraph-2 text-black mb-8">
             {{ 'Your order, your details and your addresses are already there. Choose a password and the account is yours.'|trans }}
@@ -27,6 +23,10 @@
             </p>
         {% endif %}
 
+        {% do override_labels(form, {
+            'password.first': 'Password'|trans,
+            'password.second': 'Confirm password'|trans,
+        }) %}
         {{ form_start(form, {attr: {
             action: path('guest_order_account_create', {token: token}),
             method: 'POST',
@@ -34,8 +34,8 @@
         }}) }}
         {# Labelled here rather than in the form class: a label built in PHP goes through the
            core catalogue, which knows nothing of this theme's own strings. #}
-        {{ form_row(form.password.first, {label: 'Password'|trans}) }}
-        {{ form_row(form.password.second, {label: 'Confirm password'|trans}) }}
+        {{ form_row(form.password.first) }}
+        {{ form_row(form.password.second) }}
         {{ form_rest(form) }}
 
         <twig:Molecules:Button:Base

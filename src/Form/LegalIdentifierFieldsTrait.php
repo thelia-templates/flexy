@@ -16,6 +16,7 @@ namespace FlexyBundle\Form;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfonycasts\DynamicForms\DependentField;
 use Thelia\Core\Translation\Translator;
 use Thelia\Domain\Legal\CompanyIdentifier;
@@ -30,6 +31,9 @@ use Thelia\Model\CountryQuery;
  * rather than hiding the fields in the browser: the form that reaches the server then holds
  * exactly the fields the buyer was asked for. The server-side rule in
  * AddressLegalIdentifiersValidationTrait still decides, so a forged post gains nothing.
+ *
+ * Both are then mandatory: those shared rules only check the format of a value that was
+ * typed, so the obligation belongs here, with the condition that raises the fields.
  *
  * They also depend on `country`, because what the identifiers are called changes with it.
  */
@@ -50,7 +54,7 @@ trait LegalIdentifierFieldsTrait
 
                 $field->add(TextType::class, [
                     'required' => true,
-                    'constraints' => [new Callback($this->verifySiret(...))],
+                    'constraints' => [new NotBlank(), new Callback($this->verifySiret(...))],
                     'label' => Translator::getInstance()->trans(
                         CompanyIdentifierLabels::siret(self::legalIdentifierCountryCode($countryId)),
                     ),
@@ -69,7 +73,7 @@ trait LegalIdentifierFieldsTrait
 
                 $field->add(TextType::class, [
                     'required' => true,
-                    'constraints' => [new Callback($this->verifyVatNumber(...))],
+                    'constraints' => [new NotBlank(), new Callback($this->verifyVatNumber(...))],
                     'label' => Translator::getInstance()->trans(
                         CompanyIdentifierLabels::vatNumber(self::legalIdentifierCountryCode($countryId)),
                     ),

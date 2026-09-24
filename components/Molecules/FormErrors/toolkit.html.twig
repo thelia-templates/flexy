@@ -1,0 +1,73 @@
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">One error, on a visible field</h4>
+        <p class="Story-label">
+            Nothing is drawn: the message already reads under the field. The host still renders,
+            since it is what moves the focus — hence an empty frame below.
+        </p>
+        <div class="Story-stage Story-stage--narrow">
+            <twig:Molecules:FormErrors:Base :sampleEntries="[
+                {label: 'Email address', messages: ['This value is not a valid email address.'], target: 'story-email', hidden: false}
+            ]" />
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <h4 class="Story-title">Three errors, one of them on a field with no place to show it</h4>
+        <p class="Story-label">
+            Each label links to its field. The third has neither: a hidden field cannot be
+            reached, so the summary is the only place its message is read. The links lead nowhere
+            here, naming fields of a form this page has not.
+        </p>
+        <div class="Story-stage Story-stage--narrow">
+            <twig:Molecules:FormErrors:Base :sampleEntries="[
+                {label: 'Email address', messages: ['This value should not be blank.'], target: 'story-email', hidden: false},
+                {label: 'Password', messages: ['This value should not be blank.'], target: 'story-password', hidden: false},
+                {label: null, messages: ['The captcha is invalid.'], target: null, hidden: true}
+            ]" />
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <h4 class="Story-title">Two fields, one of them holding two messages</h4>
+        <p class="Story-label">
+            One entry per field, not per message: a field that broke two rules keeps one line and
+            one link, and reads both. The count counts fields to go back to.
+        </p>
+        <div class="Story-stage Story-stage--narrow">
+            <twig:Molecules:FormErrors:Base :sampleEntries="[
+                {label: 'City', messages: ['This value should not be blank.', 'Your city can only contains letters.'], target: 'story-city', hidden: false},
+                {label: 'Zip code', messages: ['This value should not be blank.'], target: 'story-zipcode', hidden: false}
+            ]" />
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <h4 class="Story-title">A failure of the form, beside a faulty field</h4>
+        <p class="Story-label">
+            A refused token is not a field and leads the list without a link. One faulty field
+            would not open the summary on its own; the failure does, because it has nowhere else
+            to be read. The count still counts fields, so the list is longer than it announces.
+        </p>
+        <div class="Story-stage Story-stage--narrow">
+            <twig:Molecules:FormErrors:Base
+                :sampleFormFailures="['The security token is no longer valid, please submit the form again.']"
+                :sampleEntries="[
+                    {label: 'Email address', messages: ['This value should not be blank.'], target: 'story-email', hidden: false}
+                ]"
+            />
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <h4 class="Story-title">One error, on a field with no place to show it</h4>
+        <p class="Story-label">
+            A single error still gets a summary here, for want of anywhere else to appear.
+        </p>
+        <div class="Story-stage Story-stage--narrow">
+            <twig:Molecules:FormErrors:Base :sampleEntries="[
+                {label: null, messages: ['The captcha is invalid.'], target: null, hidden: true}
+            ]" />
+        </div>
+    </div>
+</div>

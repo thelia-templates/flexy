@@ -8,6 +8,14 @@
 
 {% block form_errors %}{% endblock form_errors %}
 
+{# The browser stops at the first empty field; the server already knows them all. `required`
+   stays on the fields, where it still names them as required to a screen reader. #}
+{%- block form_start -%}
+    {% set attr = attr|merge({novalidate: 'novalidate'}) %}
+    {{- parent() -}}
+    <twig:Molecules:FormErrors:Base :form="form" :submitAction="attr['data-live-action-param'] ?? null" />
+{%- endblock form_start -%}
+
 {# WIDGETS #}
 
 {%- block form_widget_simple -%}
@@ -15,6 +23,18 @@
     {% if type in ['range', 'file', 'hidden'] %}
         <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}"{% endif %}/>
     {% else %}
+        {# Keyed off the field names this theme uses; `attr.autocomplete` overrides. #}
+        {% set autocompleteTokens = {
+            email: 'email',
+            firstname: 'given-name',
+            lastname: 'family-name',
+            phone: 'tel',
+            cellphone: 'tel',
+            zipcode: 'postal-code',
+            address1: 'address-line1',
+            address2: 'address-line2',
+            company: 'organization',
+        } %}
         {{ component('Fields:Input:Base', {
             label: label,
             name: full_name,
@@ -22,14 +42,17 @@
             type: type,
             value: value,
             placeholder: placeholder ?? attr.placeholder ?? null,
-            error: errors|first.message|default(false),
+            error: errors|length ? errors|map(e => e.message) : false,
             disabled: disabled,
             required: required,
             help: help ?? null,
+            autocomplete: attr.autocomplete|default(autocompleteTokens[name]|default(null)),
         }) }}
     {% endif %}
 {%- endblock form_widget_simple -%}
 
+{# `password_old` names the current password; a bare `password` is the new one on every form of
+   this theme but the two sign-in ones, which say so through `attr`. #}
 {%- block password_widget -%}
     {{ component('Fields:Input:Password', {
         label: label,
@@ -37,11 +60,12 @@
         id: id,
         value: value,
         placeholder: placeholder ?? attr.placeholder ?? null,
-        error: errors|first.message|default(false),
+        error: errors|length ? errors|map(e => e.message) : false,
         disabled: disabled,
         required: required,
         help: help ?? null,
         showCriteria: attr.password_control|default(false),
+        autocomplete: attr.autocomplete|default(name == 'password_old' ? 'current-password' : 'new-password'),
     }) }}
 {%- endblock password_widget -%}
 
@@ -52,7 +76,7 @@
         id: id,
         value: value,
         placeholder: placeholder ?? attr.placeholder ?? null,
-        error: errors|first.message|default(false),
+        error: errors|length ? errors|map(e => e.message) : false,
         disabled: disabled,
         required: required,
         help: help ?? null,
@@ -66,11 +90,13 @@
     {% endfor %}
     {{ component('Fields:Select:Base', {
         label: label,
+        id: id,
         choices: choicesList,
         value: value,
         placeholder: placeholder ?? null,
-        error: errors|first.message|default(false),
+        error: errors|length ? errors|map(e => e.message) : false,
         disabled: disabled,
+        required: required,
         help: help ?? null,
         'select:name': full_name,
     }) }}
@@ -87,7 +113,8 @@
 {%- block checkbox_widget -%}
     {{ component('Fields:Checkbox:Base', {
         label: label,
-        error: errors|first.message|default(false),
+        id: id,
+        error: errors|length ? errors|map(e => e.message) : false,
         required: required,
         'input:name': full_name,
         'input:value': value,
@@ -99,7 +126,8 @@
     {{ component('Fields:Checkbox:Base', {
         type: 'radio',
         label: label,
-        error: errors|first.message|default(false),
+        id: id,
+        error: errors|length ? errors|map(e => e.message) : false,
         required: required,
         'input:name': full_name,
         'input:value': value,
