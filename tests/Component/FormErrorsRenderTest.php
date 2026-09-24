@@ -48,6 +48,16 @@ final class FormErrorsRenderTest extends KernelTestCase
         self::assertStringNotContainsString('FormErrors-summary', $html);
     }
 
+    /** The controller reads this value to decide whether the render answers a submission. */
+    public function testTheHostHandsTheSubmissionToItsController(): void
+    {
+        $html = $this->render([
+            'sampleEntries' => [self::entry('Email', ['This value should not be blank.'], 'email', false)],
+        ]);
+
+        self::assertMatchesRegularExpression('/data-molecules--formerrors--base-submission-value="[0-9a-f]{16}"/i', $html);
+    }
+
     public function testTwoFieldsGetASummaryWithOneAnchorEach(): void
     {
         $html = $this->render([

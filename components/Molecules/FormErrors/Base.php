@@ -16,6 +16,8 @@ namespace FlexyBundle\Components\Molecules\FormErrors;
 
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 /**
@@ -41,6 +43,47 @@ class Base
 
     /** @var list<string> */
     public array $sampleFormFailures = [];
+
+    /** The live action that submits the form, as `form_start` declares it; without one, any action counts. */
+    public ?string $submitAction = null;
+
+    public function __construct(
+        private readonly RequestStack $requestStack,
+    ) {
+    }
+
+    /**
+     * A new token on each render that answers a submission, a page render or the submit action, so
+     * that the focus moves there and nowhere else.
+     */
+    public function submission(): string
+    {
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (null !== $request && $request->attributes->has('_live_component') && !$this->submitsTheForm($request)) {
+            return '';
+        }
+
+        return bin2hex(random_bytes(8));
+    }
+
+    private function submitsTheForm(Request $request): bool
+    {
+        $action = $request->attributes->get('_live_action', 'get');
+
+        // A batch carries the actions it groups under their own names.
+        $actions = '_batch' === $action
+            ? array_column($request->attributes->all('actions'), 'name')
+            : [$action];
+
+        $actions = array_diff($actions, ['get']);
+
+        if (null === $this->submitAction) {
+            return [] !== $actions;
+        }
+
+        return \in_array($this->submitAction, $actions, true);
+    }
 
     /**
      * One entry per field in error, in the order the form declares its fields, carrying every

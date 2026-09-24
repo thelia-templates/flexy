@@ -22,9 +22,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 
 /** What the component reads off a real submitted form. */
 final class FormErrorsCollectTest extends KernelTestCase
@@ -54,7 +56,7 @@ final class FormErrorsCollectTest extends KernelTestCase
 
     private function component(FormView $view): Base
     {
-        $component = new Base();
+        $component = new Base(new RequestStack());
         $component->form = $view;
 
         return $component;
@@ -180,5 +182,57 @@ final class FormErrorsCollectTest extends KernelTestCase
 
         self::assertSame([], $component->entries());
         self::assertFalse($component->hasErrors());
+    }
+
+    private function submissionFor(array $attributes, ?string $submitAction = null): string
+    {
+        $requestStack = new RequestStack();
+        $requestStack->push(new Request(attributes: $attributes));
+
+        $component = new Base($requestStack);
+        $component->submitAction = $submitAction;
+
+        return $component->submission();
+    }
+
+    public function testARenderThatOnlySyncsAFieldChangeLeavesTheFocusAlone(): void
+    {
+        self::assertSame('', $this->submissionFor(['_live_component' => 'Forms:Address:Base']));
+        self::assertSame('', $this->submissionFor(['_live_component' => 'Forms:Address:Base', '_live_action' => 'get']));
+    }
+
+    public function testALiveActionOrAPageRenderAnswersASubmission(): void
+    {
+        self::assertNotSame('', $this->submissionFor(['_live_component' => 'Forms:Address:Base', '_live_action' => 'save']));
+        self::assertNotSame('', $this->submissionFor([]));
+    }
+
+    /** Picking a combination on a product page whose quantity is in error must not pull the focus back. */
+    public function testAnotherActionOfTheFormLeavesTheFocusAlone(): void
+    {
+        $live = ['_live_component' => 'Layouts:ProductDetails:Base'];
+
+        self::assertSame('', $this->submissionFor($live + ['_live_action' => 'updateCurrentCombination'], 'save'));
+        self::assertNotSame('', $this->submissionFor($live + ['_live_action' => 'save'], 'save'));
+    }
+
+    public function testABatchAnswersASubmissionOnlyWhenItCarriesTheSubmitAction(): void
+    {
+        $batch = static fn (string ...$names): array => [
+            '_live_component' => 'Layouts:ProductDetails:Base',
+            '_live_action' => '_batch',
+            'actions' => array_map(static fn (string $name): array => ['name' => $name, 'args' => []], $names),
+        ];
+
+        self::assertNotSame('', $this->submissionFor($batch('updateCurrentCombination', 'save'), 'save'));
+        self::assertSame('', $this->submissionFor($batch('updateCurrentCombination'), 'save'));
+    }
+
+    /** The value has to change for a second submission of the same live form to move the focus again. */
+    public function testEachSubmissionGetsItsOwnValue(): void
+    {
+        $action = ['_live_component' => 'Forms:Address:Base', '_live_action' => 'save'];
+
+        self::assertNotSame($this->submissionFor($action), $this->submissionFor($action));
     }
 }
