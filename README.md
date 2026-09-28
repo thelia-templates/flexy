@@ -73,6 +73,8 @@ The template declares `theme_hook()` extension points across its pages — `layo
 
 The SEOne module already answers `layout.head.top` and `layout.head.bottom`, which is where the title, description, canonical, hreflang and structured data come from.
 
+The head also calls a hook named after the view, `layout.head.<view>`, for what a single page needs: a module that links a stylesheet on the product page alone answers `layout.head.product`, one that adds a script to the cart answers `layout.head.checkout-cart`. The view is the request's `_view` attribute: the core sets it for the pages it routes (`index`, `product`, `category`, `content`, `folder`, `brand`...), and `FlexyController` sets it for the pages it renders, from the template name (`checkout-cart`, `account`, `login`...).
+
 ### Listing a module's component in the toolkit
 
 The toolkit (`/toolkit`, served only while the kernel runs in debug) walks the `components/` directories of the template chain and nothing else. A module lists its own components by implementing `FlexyBundle\Toolkit\StoryProviderInterface`; autoconfiguration tags it, and the tag priority sets the order in the sidebar. Each story names the template the toolkit renders and the file "Show the code" reads:
