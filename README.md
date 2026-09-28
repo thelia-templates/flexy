@@ -41,6 +41,38 @@ The template declares `theme_hook()` extension points across its pages — `layo
 
 The SEOne module already answers `layout.head.top` and `layout.head.bottom`, which is where the title, description, canonical, hreflang and structured data come from.
 
+### Listing a module's component in the toolkit
+
+The toolkit (`/toolkit`, served only while the kernel runs in debug) walks the theme's `components/` directory and nothing else. A module lists its own components by implementing `FlexyBundle\Toolkit\StoryProviderInterface`; autoconfiguration tags it, and the tag priority sets the order in the sidebar. Each story names the template the toolkit renders and the file "Show the code" reads:
+
+```php
+namespace Demo\Toolkit;
+
+use FlexyBundle\Toolkit\ComponentStatus;
+use FlexyBundle\Toolkit\Story;
+use FlexyBundle\Toolkit\StoryProviderInterface;
+
+final readonly class DemoStoryProvider implements StoryProviderInterface
+{
+    public function stories(): array
+    {
+        return [
+            new Story(
+                category: 'Modules',
+                name: 'Demo / Callout',
+                twigPath: '@DemoModule/toolkit/Callout.html.twig',
+                sourcePath: __DIR__.'/../templates/toolkit/Callout.html.twig',
+                status: ComponentStatus::READY,
+            ),
+        ];
+    }
+}
+```
+
+A module's `templates/` directory is registered by the core as the `@{Code}Module` Twig namespace, so the story template needs nothing more. Its status follows the theme's rules (`READY`, `WAITING`, `HIDDEN` drops it), and a story whose slug collides with a theme story stops the page rather than shadowing it.
+
+Mind the stylesheet: `assets/styles/app.css` limits the Tailwind scan to the theme's own files, so a utility class used only in a module template is never compiled. Build a module component out of the theme's components and classes.
+
 ## Deploying
 
 Check that your web server serves `.webmanifest` as `application/manifest+json`. Once the
