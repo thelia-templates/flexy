@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Controller;
 
 use FlexyBundle\Toolkit\ComponentStatus;
+use FlexyBundle\Toolkit\ModuleStories;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,6 +45,11 @@ class ToolkitController extends AbstractController
 
     /** What `/toolkit` opens on, named rather than inherited from the order of SECTIONS. */
     private const string HOME = 'welcome';
+
+    public function __construct(
+        private readonly ModuleStories $moduleStories,
+    ) {
+    }
 
     private const array LABELS = [
         '2xs' => 'Mobile S',
@@ -112,6 +118,7 @@ class ToolkitController extends AbstractController
             ->sortByName();
 
         $grouped = [];
+        $themeSlugs = [];
 
         foreach ($finder as $file) {
             $status = ComponentStatus::of($file->getRelativePath());
@@ -124,6 +131,7 @@ class ToolkitController extends AbstractController
             $category = $parts[0];
             $name = \count($parts) > 1 ? implode(' / ', \array_slice($parts, 1)) : $category;
             $slug = strtolower(implode('-', $parts));
+            $themeSlugs[$slug] = true;
 
             $grouped[$category][] = [
                 'twigPath' => '@Flexy/' . $file->getRelativePathname(),
@@ -132,6 +140,19 @@ class ToolkitController extends AbstractController
                 'slug' => $slug,
                 'status' => $status,
             ];
+        }
+
+        // The modules' stories, listed after the theme's under a category of their own or
+        // appended to one of the theme's. A module slug that a theme story already owns
+        // would shadow it, so it stops the page rather than one of the two going missing.
+        foreach ($this->moduleStories->grouped() as $category => $stories) {
+            foreach ($stories as $story) {
+                if (isset($themeSlugs[$story['slug']])) {
+                    throw new \LogicException(\sprintf('The module story "%s" reuses the toolkit slug "%s" of a theme story.', $story['name'], $story['slug']));
+                }
+
+                $grouped[$category][] = $story;
+            }
         }
 
         foreach (['Forms', 'Layouts'] as $category) {
