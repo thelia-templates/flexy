@@ -30,7 +30,7 @@ final class ModuleStoriesTest extends TestCase
     {
         $grouped = (new ModuleStories([
             $this->provider(
-                $this->story('Modules', 'Demo / Callout', ComponentStatus::READY),
+                $this->story('Modules', 'Flexy extension demo / Callout', ComponentStatus::READY),
                 $this->story('Molecules', 'Rating'),
             ),
         ]))->grouped();
@@ -38,10 +38,10 @@ final class ModuleStoriesTest extends TestCase
         self::assertSame(['Modules', 'Molecules'], array_keys($grouped));
         self::assertSame([
             [
-                'twigPath' => '@DemoModule/toolkit/Callout.html.twig',
+                'twigPath' => '@FlexyExtensionDemoModule/toolkit/Callout.html.twig',
                 'path' => __FILE__,
-                'name' => 'Demo / Callout',
-                'slug' => 'modules-demo-callout',
+                'name' => 'Flexy extension demo / Callout',
+                'slug' => 'modules-flexy-extension-demo-callout',
                 'status' => ComponentStatus::READY,
             ],
         ], $grouped['Modules']);
@@ -83,7 +83,7 @@ final class ModuleStoriesTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('must be namespaced');
 
-        new Story('Modules', 'Demo', 'toolkit/Callout.html.twig', __FILE__);
+        new Story('Modules', 'Callout', 'toolkit/Callout.html.twig', __FILE__);
     }
 
     public function testAStoryRefusesAnUnknownStatus(): void
@@ -91,12 +91,12 @@ final class ModuleStoriesTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unknown status "done"');
 
-        new Story('Modules', 'Demo', '@DemoModule/toolkit/Callout.html.twig', __FILE__, 'done');
+        new Story('Modules', 'Callout', '@FlexyExtensionDemoModule/toolkit/Callout.html.twig', __FILE__, 'done');
     }
 
     private function story(string $category, string $name, ?string $status = null): Story
     {
-        return new Story($category, $name, '@DemoModule/toolkit/Callout.html.twig', __FILE__, $status);
+        return new Story($category, $name, '@FlexyExtensionDemoModule/toolkit/Callout.html.twig', __FILE__, $status);
     }
 
     private function provider(Story ...$stories): StoryProviderInterface

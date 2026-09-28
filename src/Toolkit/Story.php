@@ -25,7 +25,7 @@ final readonly class Story
 {
     /**
      * @param string      $category   the sidebar group the story is listed under, `Modules` for instance
-     * @param string      $name       what the sidebar shows, `Demo / Callout` for instance
+     * @param string      $name       what the sidebar shows, `Flexy extension demo / Callout` for instance
      * @param string      $twigPath   the template the toolkit renders, as a `@Namespace/...` Twig path
      * @param string      $sourcePath the file of that template, shown by "Show the code"
      * @param string|null $status     one of the ComponentStatus constants, or null to claim nothing

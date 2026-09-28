@@ -46,21 +46,21 @@ The SEOne module already answers `layout.head.top` and `layout.head.bottom`, whi
 The toolkit (`/toolkit`, served only while the kernel runs in debug) walks the theme's `components/` directory and nothing else. A module lists its own components by implementing `FlexyBundle\Toolkit\StoryProviderInterface`; autoconfiguration tags it, and the tag priority sets the order in the sidebar. Each story names the template the toolkit renders and the file "Show the code" reads:
 
 ```php
-namespace Demo\Toolkit;
+namespace FlexyExtensionDemo\Toolkit;
 
 use FlexyBundle\Toolkit\ComponentStatus;
 use FlexyBundle\Toolkit\Story;
 use FlexyBundle\Toolkit\StoryProviderInterface;
 
-final readonly class DemoStoryProvider implements StoryProviderInterface
+final readonly class CalloutStoryProvider implements StoryProviderInterface
 {
     public function stories(): array
     {
         return [
             new Story(
                 category: 'Modules',
-                name: 'Demo / Callout',
-                twigPath: '@DemoModule/toolkit/Callout.html.twig',
+                name: 'Flexy extension demo / Callout',
+                twigPath: '@FlexyExtensionDemoModule/toolkit/Callout.html.twig',
                 sourcePath: __DIR__.'/../templates/toolkit/Callout.html.twig',
                 status: ComponentStatus::READY,
             ),
