@@ -501,3 +501,45 @@ VAT exempted (reverse charge), buyer VAT number %number%: VAT exempted (reverse 
 'VAT number %number% is not verified: the order is not exempted from VAT.': 'VAT number %number% is not verified: the order is not exempted from VAT.'
 "The stock of %reference% ran out while your order was placed. Please adjust your cart.": "The stock of %reference% ran out while your order was placed. Please adjust your cart."
 Messages from the shop: Messages from the shop
+Ready: Ready
+'Choose the variant': 'Choose the variant'
+'Unknown reference': 'Unknown reference'
+'Quantity not available': 'Quantity not available'
+'Too many checks in a short time. Please wait a minute and try again.': 'Too many checks in a short time. Please wait a minute and try again.'
+'The table could not be checked: a reference is too long, or the table holds more than 500 lines.': 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.'
+'The text is too long: a table takes at most 500 lines.': 'The text is too long: a table takes at most 500 lines.'
+'expected a reference and a quantity': 'expected a reference and a quantity'
+'the quantity is not a whole number above zero': 'the quantity is not a whole number above zero'
+'%count% line(s) added to your cart.': '%count% line(s) added to your cart.'
+'See my cart': 'See my cart'
+'Paste from a spreadsheet or import a CSV file': 'Paste from a spreadsheet or import a CSV file'
+'The file is too large: a table takes at most 500 lines.': 'The file is too large: a table takes at most 500 lines.'
+'Only a CSV file can be imported.': 'Only a CSV file can be imported.'
+'One line per product: the reference, then the quantity, separated by a tab, a semicolon or a comma.': 'One line per product: the reference, then the quantity, separated by a tab, a semicolon or a comma.'
+'Lines to import': 'Lines to import'
+'Import these lines': 'Import these lines'
+'Or choose a CSV file': 'Or choose a CSV file'
+'%count% line(s) could not be read:': '%count% line(s) could not be read:'
+'Line %line%': 'Line %line%'
+'%count% reference(s) match several variants. The default variant is selected when there is one: check the choices, then keep them.': '%count% reference(s) match several variants. The default variant is selected when there is one: check the choices, then keep them.'
+'Lines of the quick order': 'Lines of the quick order'
+Reference: Reference
+Product: Product
+'Unit price': 'Unit price'
+Status: Status
+Actions: Actions
+'Reference, line %line%': 'Reference, line %line%'
+'Quantity, line %line%': 'Quantity, line %line%'
+'Enter a whole number above zero.': 'Enter a whole number above zero.'
+'Variant, line %line%': 'Variant, line %line%'
+'%quantity% in stock': '%quantity% in stock'
+'To check': 'To check'
+'Remove line %line%': 'Remove line %line%'
+'Add a line': 'Add a line'
+'Keep these choices and check': 'Keep these choices and check'
+'Check the table': 'Check the table'
+'Add %count% line(s) to cart': 'Add %count% line(s) to cart'
+'Quick order': 'Quick order'
+'Type the references you want and their quantities, or paste them from a spreadsheet, then check the table before adding it to your cart.': 'Type the references you want and their quantities, or paste them from a spreadsheet, then check the table before adding it to your cart.'
+default: default
+'the reference is longer than 255 characters': 'the reference is longer than 255 characters'

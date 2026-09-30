@@ -1,0 +1,214 @@
+{# The quick order table. Every field is bound with `norender`: typing re-renders nothing,
+   and only an action (check, import, add, remove) sends the rows back to the server. #}
+{% set fileController = 'Organisms--QuickOrderTable--file' %}
+{% set statusColors = {
+    resolved: 'success',
+    ambiguous: 'warning',
+    unknown: 'error',
+    unavailable: 'error',
+    quantity_refused: 'warning',
+} %}
+{% set statusLabels = {
+    resolved: 'Ready'|trans,
+    ambiguous: 'Choose the variant'|trans,
+    unknown: 'Unknown reference'|trans,
+    unavailable: 'Unavailable'|trans,
+    quantity_refused: 'Quantity not available'|trans,
+} %}
+{% set errorMessages = {
+    rate_limited: 'Too many checks in a short time. Please wait a minute and try again.'|trans,
+    invalid_lines: 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.'|trans,
+    text_refused: 'The text is too long: a table takes at most 500 lines.'|trans,
+} %}
+{% set rejectReasons = {
+    columns: 'expected a reference and a quantity'|trans,
+    quantity: 'the quantity is not a whole number above zero'|trans,
+    reference: 'the reference is longer than 255 characters'|trans,
+} %}
+{% set readyCount = this.readyCount %}
+{% set ambiguousCount = this.ambiguousCount %}
+
+<div class="{{ ('QuickOrderTable ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    <div class="QuickOrderTable-messages" role="status">
+        {% if error %}
+            <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ errorMessages[error]|default('') }}" />
+        {% endif %}
+        {% if addedCount > 0 %}
+            <twig:Molecules:SnackBar:Base
+                variant="success"
+                withIcon
+                text="{{ '%count% line(s) added to your cart.'|trans({'%count%': addedCount}) }} <a href='{{ path('checkout_cart') }}' class='underline'>{{ 'See my cart'|trans }}</a>"
+            />
+        {% endif %}
+    </div>
+
+    <section class="QuickOrderTable-import" aria-labelledby="quick-order-import-title">
+        <h2 id="quick-order-import-title" class="QuickOrderTable-importTitle h4">{{ 'Paste from a spreadsheet or import a CSV file'|trans }}</h2>
+        <div class="QuickOrderTable-importBody" {{ stimulus_controller(fileController, {tooLarge: 'The file is too large: a table takes at most 500 lines.'|trans, notText: 'Only a CSV file can be imported.'|trans}) }}>
+            <p class="QuickOrderTable-help">{{ 'One line per product: the reference, then the quantity, separated by a tab, a semicolon or a comma.'|trans }}</p>
+            <twig:Fields:TextArea:Base
+                id="quick-order-pasted-text"
+                name="quick_order_pasted_text"
+                label="{{ 'Lines to import'|trans }}"
+                rows="5"
+                placeholder="VIS-M6;3"
+                textarea:data-model="norender|pastedText"
+            />
+            <div class="QuickOrderTable-importActions">
+                <twig:Molecules:Button:Base
+                    color="secondary"
+                    size="small"
+                    text="{{ 'Import these lines'|trans }}"
+                    data-action="live#action"
+                    data-live-action-param="import"
+                />
+                <label class="QuickOrderTable-file">
+                    <span class="QuickOrderTable-fileLabel">{{ 'Or choose a CSV file'|trans }}</span>
+                    <input
+                        type="file"
+                        accept=".csv,text/csv,text/plain"
+                        class="QuickOrderTable-fileInput"
+                        {{ stimulus_action(fileController, 'read', 'change') }}
+                    />
+                </label>
+            </div>
+            <p class="QuickOrderTable-fileError" {{ stimulus_target(fileController, 'error') }} hidden></p>
+
+            {% if rejectedLines is not empty %}
+                <div class="QuickOrderTable-rejected">
+                    <p class="QuickOrderTable-rejectedTitle">{{ '%count% line(s) could not be read:'|trans({'%count%': rejectedLines|length}) }}</p>
+                    <ul>
+                        {% for rejected in rejectedLines %}
+                            <li>{{ 'Line %line%'|trans({'%line%': rejected.line}) }} « {{ rejected.content }} » : {{ rejectReasons[rejected.reason]|default('') }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <form class="QuickOrderTable-form" novalidate data-action="live#action:prevent" data-live-action-param="check">
+        {% if ambiguousCount > 0 %}
+            <twig:Molecules:SnackBar:Base
+                variant="warning"
+                withIcon
+                text="{{ '%count% reference(s) match several variants. The default variant is selected when there is one: check the choices, then keep them.'|trans({'%count%': ambiguousCount}) }}"
+            />
+        {% endif %}
+
+        <table class="QuickOrderTable-table">
+            <caption class="sr-only">{{ 'Lines of the quick order'|trans }}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{{ 'Reference'|trans }}</th>
+                    <th scope="col">{{ 'Quantity'|trans }}</th>
+                    <th scope="col">{{ 'Product'|trans }}</th>
+                    <th scope="col" class="QuickOrderTable-price">{{ 'Unit price'|trans }}</th>
+                    <th scope="col">{{ 'Status'|trans }}</th>
+                    <th scope="col"><span class="sr-only">{{ 'Actions'|trans }}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                    {% set index = loop.index0 %}
+                    {% set line = this.lineOf(index) %}
+                    {% set typed = row.reference|trim is not empty %}
+                    <tr id="quick-order-row-{{ row.key }}" class="QuickOrderTable-row{% if line %} QuickOrderTable-row--{{ line.status }}{% endif %}">
+                        <td data-label="{{ 'Reference'|trans }}">
+                            <label class="sr-only" for="quick-order-reference-{{ row.key }}">{{ 'Reference, line %line%'|trans({'%line%': loop.index}) }}</label>
+                            <twig:Fields:Input:Base
+                                id="quick-order-reference-{{ row.key }}"
+                                name="quick_order_reference_{{ row.key }}"
+                                size="small"
+                                autocomplete="off"
+                                input:maxlength="255"
+                                value="{{ row.reference }}"
+                                input:data-model="norender|rows.{{ index }}.reference"
+                            />
+                        </td>
+                        <td data-label="{{ 'Quantity'|trans }}">
+                            <label class="sr-only" for="quick-order-quantity-{{ row.key }}">{{ 'Quantity, line %line%'|trans({'%line%': loop.index}) }}</label>
+                            <twig:Fields:Input:Base
+                                id="quick-order-quantity-{{ row.key }}"
+                                name="quick_order_quantity_{{ row.key }}"
+                                type="number"
+                                size="small"
+                                value="{{ row.quantity }}"
+                                error="{{ this.hasInvalidQuantity(index) ? 'Enter a whole number above zero.'|trans : '' }}"
+                                input:min="1"
+                                input:step="1"
+                                input:inputmode="numeric"
+                                input:data-model="norender|rows.{{ index }}.quantity"
+                            />
+                        </td>
+                        <td data-label="{{ 'Product'|trans }}">
+                            {% if line and line.status == 'ambiguous' %}
+                                <twig:Molecules:CandidateSelect:Base
+                                    id="quick-order-variant-{{ row.key }}"
+                                    label="{{ 'Variant, line %line%'|trans({'%line%': loop.index}) }}"
+                                    :candidates="line.candidates"
+                                    :value="row.productSaleElementsId"
+                                    select:data-model="norender|rows.{{ index }}.productSaleElementsId"
+                                />
+                            {% elseif line and line.title %}
+                                <span class="QuickOrderTable-title">{{ line.title }}</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="{{ 'Unit price'|trans }}" class="QuickOrderTable-price">
+                            {% if line and line.taxedUnitPrice is not null %}
+                                {{ line.taxedUnitPrice|format_currency('EUR', locale: lang_code) }}
+                            {% endif %}
+                        </td>
+                        <td data-label="{{ 'Status'|trans }}">
+                            {% if line %}
+                                <twig:Molecules:Tag:Base color="{{ statusColors[line.status]|default('neutral') }}" customText="{{ statusLabels[line.status]|default('') }}" />
+                                {% if line.status == 'quantity_refused' and line.availableQuantity is not null %}
+                                    <span class="QuickOrderTable-detail">{{ '%quantity% in stock'|trans({'%quantity%': line.availableQuantity|round(0, 'floor')}) }}</span>
+                                {% endif %}
+                            {% elseif typed %}
+                                <twig:Molecules:Tag:Base color="neutral" customText="{{ 'To check'|trans }}" />
+                            {% endif %}
+                        </td>
+                        <td class="QuickOrderTable-actions">
+                            <twig:Molecules:Button:Base
+                                color="minimal"
+                                size="small"
+                                round
+                                icon_left="delete"
+                                text="<span class='sr-only'>{{ 'Remove line %line%'|trans({'%line%': loop.index}) }}</span>"
+                                data-action="live#action"
+                                data-live-action-param="removeRow"
+                                data-live-key-param="{{ row.key }}"
+                            />
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="QuickOrderTable-footer">
+            <twig:Molecules:Button:Base
+                color="secondary"
+                size="small"
+                icon_left="plus"
+                text="{{ 'Add a line'|trans }}"
+                data-action="live#action"
+                data-live-action-param="addRow"
+            />
+            <div class="QuickOrderTable-submit">
+                <twig:Molecules:Button:Base
+                    type="submit"
+                    color="secondary"
+                    text="{{ ambiguousCount > 0 ? 'Keep these choices and check'|trans : 'Check the table'|trans }}"
+                />
+                <twig:Molecules:Button:Base
+                    icon_left="cart"
+                    text="{{ 'Add %count% line(s) to cart'|trans({'%count%': readyCount}) }}"
+                    data-action="live#action"
+                    data-live-action-param="addToCart"
+                    :disabled="readyCount == 0"
+                />
+            </div>
+        </div>
+    </form>
+</div>

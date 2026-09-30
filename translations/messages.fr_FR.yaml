@@ -510,3 +510,45 @@ VAT exempted (reverse charge), buyer VAT number %number%: 'Exonération de TVA (
 'VAT number %number% is not verified: the order is not exempted from VAT.': 'Le numéro de TVA %number% n''est pas vérifié : la commande n''est pas exonérée de TVA.'
 "The stock of %reference% ran out while your order was placed. Please adjust your cart.": "Le stock de %reference% s'est épuisé pendant la validation de votre commande. Veuillez ajuster votre panier."
 Messages from the shop: Messages de la boutique
+Ready: Prête
+'Choose the variant': 'Choisir la déclinaison'
+'Unknown reference': 'Référence inconnue'
+'Quantity not available': 'Quantité indisponible'
+'Too many checks in a short time. Please wait a minute and try again.': 'Trop de vérifications en peu de temps. Patientez une minute puis réessayez.'
+'The table could not be checked: a reference is too long, or the table holds more than 500 lines.': "Le tableau n'a pas pu être vérifié : une référence est trop longue, ou le tableau dépasse 500 lignes."
+'The text is too long: a table takes at most 500 lines.': 'Le texte est trop long : un tableau prend au plus 500 lignes.'
+'expected a reference and a quantity': 'une référence et une quantité sont attendues'
+'the quantity is not a whole number above zero': "la quantité n'est pas un nombre entier supérieur à zéro"
+'%count% line(s) added to your cart.': '%count% ligne(s) ajoutée(s) à votre panier.'
+'See my cart': 'Voir mon panier'
+'Paste from a spreadsheet or import a CSV file': 'Coller depuis un tableur ou importer un fichier CSV'
+'The file is too large: a table takes at most 500 lines.': 'Le fichier est trop volumineux : un tableau prend au plus 500 lignes.'
+'Only a CSV file can be imported.': 'Seul un fichier CSV peut être importé.'
+'One line per product: the reference, then the quantity, separated by a tab, a semicolon or a comma.': 'Une ligne par produit : la référence, puis la quantité, séparées par une tabulation, un point-virgule ou une virgule.'
+'Lines to import': 'Lignes à importer'
+'Import these lines': 'Importer ces lignes'
+'Or choose a CSV file': 'Ou choisissez un fichier CSV'
+'%count% line(s) could not be read:': "%count% ligne(s) n'ont pas pu être lue(s) :"
+'Line %line%': 'Ligne %line%'
+'%count% reference(s) match several variants. The default variant is selected when there is one: check the choices, then keep them.': '%count% référence(s) correspondent à plusieurs déclinaisons. La déclinaison par défaut est sélectionnée quand il y en a une : vérifiez les choix, puis gardez-les.'
+'Lines of the quick order': 'Lignes de la commande rapide'
+Reference: Référence
+Product: Produit
+'Unit price': 'Prix unitaire'
+Status: État
+Actions: Actions
+'Reference, line %line%': 'Référence, ligne %line%'
+'Quantity, line %line%': 'Quantité, ligne %line%'
+'Enter a whole number above zero.': 'Saisissez un nombre entier supérieur à zéro.'
+'Variant, line %line%': 'Déclinaison, ligne %line%'
+'%quantity% in stock': '%quantity% en stock'
+'To check': 'À vérifier'
+'Remove line %line%': 'Supprimer la ligne %line%'
+'Add a line': 'Ajouter une ligne'
+'Keep these choices and check': 'Garder ces choix et vérifier'
+'Check the table': 'Vérifier le tableau'
+'Add %count% line(s) to cart': 'Ajouter %count% ligne(s) au panier'
+'Quick order': 'Commande rapide'
+'Type the references you want and their quantities, or paste them from a spreadsheet, then check the table before adding it to your cart.': "Saisissez les références voulues et leurs quantités, ou collez-les depuis un tableur, puis vérifiez le tableau avant de l'ajouter à votre panier."
+default: 'par défaut'
+'the reference is longer than 255 characters': 'la référence dépasse 255 caractères'

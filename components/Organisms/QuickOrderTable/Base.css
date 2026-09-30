@@ -1,0 +1,173 @@
+.QuickOrderTable {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.QuickOrderTable-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.QuickOrderTable-import {
+  background: var(--color-lightest);
+  padding: 1.25rem;
+}
+
+.QuickOrderTable-importTitle {
+  color: var(--color-black);
+  margin-bottom: 1rem;
+}
+
+.QuickOrderTable-importBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.QuickOrderTable-help,
+.QuickOrderTable-detail {
+  @apply paragraph-3;
+  color: var(--color-grey-dark);
+}
+
+.QuickOrderTable-importActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.QuickOrderTable-file {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.QuickOrderTable-fileLabel {
+  @apply paragraph-3;
+  color: var(--color-grey-darker);
+}
+
+.QuickOrderTable-fileInput:focus-visible {
+  outline: 2px solid var(--color-base);
+  outline-offset: 2px;
+}
+
+.QuickOrderTable-fileError,
+.QuickOrderTable-rejected {
+  @apply paragraph-3;
+  color: var(--color-error-dark);
+}
+
+.QuickOrderTable-rejectedTitle {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.QuickOrderTable-rejected ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+
+.QuickOrderTable-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.QuickOrderTable-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  & th {
+    @apply paragraph-3;
+    color: var(--color-grey-dark);
+    font-weight: 500;
+    text-align: left;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--color-grey-lighter);
+  }
+
+  & td {
+    padding: 0.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--color-grey-lightest);
+  }
+
+  /* Below md each row becomes a card: the header row is dropped and every cell names its
+     column through its data-label. */
+  @variant max-md {
+    & thead {
+      display: none;
+    }
+
+    & tr {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0.5rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--color-grey-lighter);
+    }
+
+    & td {
+      min-width: 0;
+      border-bottom: 0;
+      padding: 0;
+    }
+
+    & td[data-label]::before {
+      @apply paragraph-3;
+      content: attr(data-label);
+      display: block;
+      color: var(--color-grey-dark);
+    }
+  }
+}
+
+.QuickOrderTable-row--unknown,
+.QuickOrderTable-row--unavailable {
+  background: var(--color-error-lightest);
+}
+
+.QuickOrderTable-row--ambiguous,
+.QuickOrderTable-row--quantity_refused {
+  background: var(--color-warning-lightest);
+}
+
+.QuickOrderTable-price {
+  text-align: right;
+  white-space: nowrap;
+
+  @variant max-md {
+    text-align: left;
+  }
+}
+
+.QuickOrderTable-title {
+  @apply paragraph-3;
+  color: var(--color-black);
+}
+
+.QuickOrderTable-actions {
+  text-align: right;
+}
+
+.QuickOrderTable-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.QuickOrderTable-submit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

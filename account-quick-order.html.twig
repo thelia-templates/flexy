@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Quick order'|trans }}{% endblock %}
+
+{% block body %}
+    <twig:Layouts:Subheader:Account
+        title="{{ 'Quick order'|trans }}"
+        selected="quick-order"
+        :breadcrumb="[
+            {title: 'My account'|trans, url: path('account_index')},
+            {title: 'Quick order'|trans},
+        ]"
+    />
+
+    <div class="container-l pt-6 pb-20 md:pt-11 md:pb-30">
+        <p class="paragraph-2 text-grey-darker mb-6">{{ 'Type the references you want and their quantities, or paste them from a spreadsheet, then check the table before adding it to your cart.'|trans }}</p>
+        <twig:Organisms:QuickOrderTable:Base />
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}

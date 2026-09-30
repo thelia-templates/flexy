@@ -1,0 +1,29 @@
+{# The table works for a signed-in customer only, which the toolkit has none of: its
+   actions answer 403 here. What is worth showing is one row in each state the core
+   can return. #}
+{% set sampleRows = [
+    {key: 'demo1', reference: 'VIS-M6-20', quantity: 3, productSaleElementsId: 1},
+    {key: 'demo2', reference: 'TSHIRT-01', quantity: 2, productSaleElementsId: 11},
+    {key: 'demo3', reference: 'VIS-M9', quantity: 1, productSaleElementsId: null},
+    {key: 'demo4', reference: 'ECROU-M6', quantity: 50, productSaleElementsId: 4},
+    {key: 'demo5', reference: 'RONDELLE-M6', quantity: 10, productSaleElementsId: 5},
+    {key: 'demo6', reference: 'CLOU-40', quantity: 'douze', productSaleElementsId: null},
+] %}
+{% set sampleLines = [
+    {reference: 'vis-m6-20', quantity: 3, status: 'resolved', title: 'Hexagon head screw M6 x 20', taxedUnitPrice: 0.42, availableQuantity: null, candidates: []},
+    {reference: 'tshirt-01', quantity: 2, status: 'ambiguous', title: null, taxedUnitPrice: null, availableQuantity: null, candidates: [
+        {productSaleElementsId: 11, ref: 'TSHIRT-01', isDefault: true, preselected: true, attributes: [{attribute: 'Size', value: 'M'}]},
+        {productSaleElementsId: 12, ref: 'TSHIRT-01', isDefault: false, preselected: false, attributes: [{attribute: 'Size', value: 'L'}]},
+    ]},
+    {reference: 'vis-m9', quantity: 1, status: 'unknown', title: null, taxedUnitPrice: null, availableQuantity: null, candidates: []},
+    {reference: 'ecrou-m6', quantity: 50, status: 'quantity_refused', title: 'Hexagon nut M6', taxedUnitPrice: 0.18, availableQuantity: 32.0, candidates: []},
+    {reference: 'rondelle-m6', quantity: 10, status: 'unavailable', title: 'Flat washer M6', taxedUnitPrice: null, availableQuantity: 0.0, candidates: []},
+    null,
+] %}
+
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">A checked table, one row per state</h4>
+        <twig:Organisms:QuickOrderTable:Base :rows="sampleRows" :lines="sampleLines" />
+    </div>
+</div>
