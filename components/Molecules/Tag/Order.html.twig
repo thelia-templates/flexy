@@ -14,6 +14,6 @@
     }
 ) %}
 
-<{{ htmlTag }} class="{{ OrderTag.apply({status}, attributes.render('class')) }} "  {{ attributes.without('class') }}>
+<{{ htmlTag }} class="{{ OrderTag.apply({status}|filter(value => value is not null), attributes.render('class')) }} "  {{ attributes.without('class') }}>
         {{ customText }}
 </{{ htmlTag }}>

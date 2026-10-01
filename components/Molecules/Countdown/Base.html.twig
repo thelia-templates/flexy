@@ -29,7 +29,7 @@
 ) %}
 
 <div
-    class="{{ Countdown.apply({size}, attributes.render('class')) }}"
+    class="{{ Countdown.apply({size}|filter(value => value is not null), attributes.render('class')) }}"
     data-countdown-expired-message="{{ 'This offer has ended.'|trans }}"
     {{ stimulus_controller('Molecules--Countdown--base', {remainingSeconds: totalSeconds}) }}
     {{ attributes.without('class') }}

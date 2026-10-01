@@ -20,7 +20,7 @@
     }
 ) %}
 
-<div class="{{ fieldInput.apply({size: size, success: success}, attributes.render('class')) }}" {{ attributes.without('class') }}>
+<div class="{{ fieldInput.apply({size: size, success: success}|filter(value => value is not null), attributes.render('class')) }}" {{ attributes.without('class') }}>
     {% if label or help %}
         <div class="Input-header">
             {% if label %}

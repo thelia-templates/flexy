@@ -19,7 +19,7 @@
     },
 ) %}
 
-<{{ tag }} class="{{ headerButton.apply({color, small}, attributes.render('class')) }}" {% if tag == 'button' %}type="button"{% endif %} {{ attributes.without('class') }}>
+<{{ tag }} class="{{ headerButton.apply({color, small}|filter(value => value is not null), attributes.render('class')) }}" {% if tag == 'button' %}type="button"{% endif %} {{ attributes.without('class') }}>
     {% if icon %}
         {{ ux_icon(icon, { class: "HeaderButton-icon" }) }}
     {% endif %}

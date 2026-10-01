@@ -10,7 +10,7 @@
     },
 ) %}
 
-<a href="{{ href }}" class="{{ link.apply({size}, attributes.render('class')) }} " {{ attributes.without('class') }}>
+<a href="{{ href }}" class="{{ link.apply({size}|filter(value => value is not null), attributes.render('class')) }} " {{ attributes.without('class') }}>
     {% if iconLeft %}
         <span class="Link-icon">
             {{ ux_icon(iconLeft) }}

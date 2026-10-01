@@ -34,7 +34,7 @@
 ) %}
 
 
-<{{ htmlTag }} class="{{ Tag.apply({color, selected, noBackground, noBorder}, attributes.render('class')) }} "  {{ attributes.without('class', 'data-action') }}>
+<{{ htmlTag }} class="{{ Tag.apply({color, selected, noBackground, noBorder}|filter(value => value is not null), attributes.render('class')) }} "  {{ attributes.without('class', 'data-action') }}>
         {% if icon %}
             <span class="Tag__icon">
                 {{ ux_icon(icon) }}

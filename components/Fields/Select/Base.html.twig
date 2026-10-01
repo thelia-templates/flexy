@@ -42,7 +42,7 @@
     {% set selectDefaults = selectDefaults|merge({ 'aria-label': label ?: placeholder }) %}
 {% endif %}
 
-<div class="{{ select.apply({size, state}, attributes.render('class')) }} " {{attributes.without('class')}}>
+<div class="{{ select.apply({size, state}|filter(value => value is not null), attributes.render('class')) }} " {{attributes.without('class')}}>
 
     <div class="Select-header">
         <label class="Select-label" {% if id %}for="{{ id }}"{% endif %}>{{ label }}{% if required %} *{% endif %}</label>

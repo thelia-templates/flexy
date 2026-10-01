@@ -47,7 +47,7 @@
    Set through defaults() so an explicit type="submit" from the caller still wins. #}
 {% set buttonAttributes = tag == 'button' ? attributes.defaults({type: 'button'}) : attributes %}
 
-<{{ tag }} class="{{ button.apply({color, size, fill, rectangle, sharp, round}, attributes.render('class')) }} " {{ buttonAttributes.without('class') }}>
+<{{ tag }} class="{{ button.apply({color, size, fill, rectangle, sharp, round}|filter(value => value is not null), attributes.render('class')) }} " {{ buttonAttributes.without('class') }}>
     {% if icon_left %}
         <span class="icon icon-left">
             {{ ux_icon(icon_left) }}
