@@ -91,6 +91,14 @@ final class ReferenceQuantityTextParserTest extends TestCase
         self::assertSame(ReferenceQuantityTextParser::REASON_REFERENCE, $parsed->rejected[0]['reason']);
     }
 
+    public function testAQuantityAboveTheMaximumOfTheCoreIsRefusedAlone(): void
+    {
+        $parsed = (new ReferenceQuantityTextParser())->parse("VIS-M6;999999\nECROU-M6;1000000");
+
+        self::assertSame([['reference' => 'VIS-M6', 'quantity' => 999999]], $parsed->rows);
+        self::assertSame([['line' => 2, 'content' => 'ECROU-M6;1000000', 'reason' => ReferenceQuantityTextParser::REASON_QUANTITY]], $parsed->rejected);
+    }
+
     public function testOnlyTheFirstLineMayBeAHeader(): void
     {
         $parsed = (new ReferenceQuantityTextParser())->parse("VIS-M6;3\nReference;Quantity");

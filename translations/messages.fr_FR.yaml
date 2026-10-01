@@ -518,7 +518,7 @@ Ready: Prête
 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.': "Le tableau n'a pas pu être vérifié : une référence est trop longue, ou le tableau dépasse 500 lignes."
 'The text is too long: a table takes at most 500 lines.': 'Le texte est trop long : un tableau prend au plus 500 lignes.'
 'expected a reference and a quantity': 'une référence et une quantité sont attendues'
-'the quantity is not a whole number above zero': "la quantité n'est pas un nombre entier supérieur à zéro"
+'the quantity is not a whole number from 1 to %max%': "la quantité n'est pas un nombre entier de 1 à %max%"
 '%count% line(s) added to your cart.': '%count% ligne(s) ajoutée(s) à votre panier.'
 'See my cart': 'Voir mon panier'
 'Paste from a spreadsheet or import a CSV file': 'Coller depuis un tableur ou importer un fichier CSV'
@@ -539,7 +539,7 @@ Status: État
 Actions: Actions
 'Reference, line %line%': 'Référence, ligne %line%'
 'Quantity, line %line%': 'Quantité, ligne %line%'
-'Enter a whole number above zero.': 'Saisissez un nombre entier supérieur à zéro.'
+'Enter a whole number from 1 to %max%.': 'Saisissez un nombre entier de 1 à %max%.'
 'Variant, line %line%': 'Déclinaison, ligne %line%'
 '%quantity% in stock': '%quantity% en stock'
 'To check': 'À vérifier'

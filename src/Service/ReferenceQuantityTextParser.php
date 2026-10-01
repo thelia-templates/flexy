@@ -85,6 +85,12 @@ final readonly class ReferenceQuantityTextParser
                 continue;
             }
 
+            if ((int) $quantity > ReferenceQuantityLines::MAX_QUANTITY) {
+                $rejected[] = ['line' => $index + 1, 'content' => $line, 'reason' => self::REASON_QUANTITY];
+
+                continue;
+            }
+
             if (mb_strlen($reference) > ReferenceQuantityLines::MAX_REFERENCE_LENGTH) {
                 $rejected[] = ['line' => $index + 1, 'content' => mb_substr($line, 0, 80).'…', 'reason' => self::REASON_REFERENCE];
 

@@ -77,7 +77,7 @@ class Base
 
     /**
      * The control table of the last check, one entry per row, in the same order. A row
-     * left out of the check (its quantity is not a whole number above zero) has none.
+     * left out of the check (its quantity is not a whole number the core takes) has none.
      *
      * @var list<array<string, mixed>|null>
      */
@@ -412,7 +412,7 @@ class Base
     }
 
     /**
-     * A typed row whose quantity is not a whole number above zero: it is left out of the
+     * A typed row whose quantity is not a whole number from 1 to the core's maximum: it is left out of the
      * check rather than let it refuse the whole table.
      */
     public function hasInvalidQuantity(int $index): bool
@@ -548,7 +548,7 @@ class Base
     {
         $quantity = trim((string) $row['quantity']);
 
-        return 1 === preg_match('/^[1-9]\d{0,8}$/', $quantity) ? (int) $quantity : null;
+        return 1 === preg_match('/^[1-9]\d{0,8}$/', $quantity) && (int) $quantity <= ReferenceQuantityLines::MAX_QUANTITY ? (int) $quantity : null;
     }
 
     /**

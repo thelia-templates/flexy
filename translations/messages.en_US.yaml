@@ -509,7 +509,7 @@ Ready: Ready
 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.': 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.'
 'The text is too long: a table takes at most 500 lines.': 'The text is too long: a table takes at most 500 lines.'
 'expected a reference and a quantity': 'expected a reference and a quantity'
-'the quantity is not a whole number above zero': 'the quantity is not a whole number above zero'
+'the quantity is not a whole number from 1 to %max%': 'the quantity is not a whole number from 1 to %max%'
 '%count% line(s) added to your cart.': '%count% line(s) added to your cart.'
 'See my cart': 'See my cart'
 'Paste from a spreadsheet or import a CSV file': 'Paste from a spreadsheet or import a CSV file'
@@ -530,7 +530,7 @@ Status: Status
 Actions: Actions
 'Reference, line %line%': 'Reference, line %line%'
 'Quantity, line %line%': 'Quantity, line %line%'
-'Enter a whole number above zero.': 'Enter a whole number above zero.'
+'Enter a whole number from 1 to %max%.': 'Enter a whole number from 1 to %max%.'
 'Variant, line %line%': 'Variant, line %line%'
 '%quantity% in stock': '%quantity% in stock'
 'To check': 'To check'

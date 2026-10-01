@@ -24,9 +24,10 @@
 } %}
 {% set rejectReasons = {
     columns: 'expected a reference and a quantity'|trans,
-    quantity: 'the quantity is not a whole number above zero'|trans,
+    quantity: 'the quantity is not a whole number from 1 to %max%'|trans({'%max%': maxQuantity}),
     reference: 'the reference is longer than 255 characters'|trans,
 } %}
+{% set maxQuantity = constant('Thelia\\Domain\\Catalog\\DTO\\ReferenceQuantityLines::MAX_QUANTITY')|format_number %}
 {% set readyCount = this.readyCount %}
 {% set ambiguousCount = this.ambiguousCount %}
 
@@ -139,7 +140,7 @@
                                 type="number"
                                 size="small"
                                 value="{{ row.quantity }}"
-                                error="{{ this.hasInvalidQuantity(index) ? 'Enter a whole number above zero.'|trans : '' }}"
+                                error="{{ this.hasInvalidQuantity(index) ? 'Enter a whole number from 1 to %max%.'|trans({'%max%': maxQuantity}) : '' }}"
                                 input:min="1"
                                 input:step="1"
                                 input:inputmode="numeric"
