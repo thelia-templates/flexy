@@ -51,6 +51,15 @@ final readonly class QuickOrderService
 
     /**
      * @throws QuickOrderRateLimitedException
+     * @throws \Thelia\Domain\CustomerList\Exception\PurchaseListNotFoundException
+     */
+    public function resolvePurchaseList(Customer $customer, int $listId): QuickOrderTable
+    {
+        return $this->quickOrderFacade->resolvePurchaseList($customer, $listId, $this->currency());
+    }
+
+    /**
+     * @throws QuickOrderRateLimitedException
      */
     public function addToCart(Customer $customer, ReferenceQuantityLines $lines): QuickOrderTable
     {

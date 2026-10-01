@@ -552,3 +552,24 @@ Actions: Actions
 'Type the references you want and their quantities, or paste them from a spreadsheet, then check the table before adding it to your cart.': "Saisissez les références voulues et leurs quantités, ou collez-les depuis un tableur, puis vérifiez le tableau avant de l'ajouter à votre panier."
 default: 'par défaut'
 'the reference is longer than 255 characters': 'la référence dépasse 255 caractères'
+'The list has been saved.': 'La liste a été enregistrée.'
+'Save the list': 'Enregistrer la liste'
+'Name of the new list': 'Nom de la nouvelle liste'
+'Create the list': 'Créer la liste'
+'%count% list(s) out of %max%': '%count% liste(s) sur %max%'
+'%count% line(s)': '%count% ligne(s)'
+'changed on %date%': 'modifiée le %date%'
+Duplicate: Dupliquer
+'Delete the list « %title% »?': 'Supprimer la liste « %title% » ?'
+'You have no purchase lists yet': "Vous n'avez pas encore de liste d'achat"
+'Create one above to keep the references you order often.': 'Créez-en une ci-dessus pour garder les références que vous commandez souvent.'
+'My purchase lists': "Mes listes d'achat"
+'The list has been deleted.': 'La liste a été supprimée.'
+'The list could not be created: its name is empty or longer than 255 characters, or the account already keeps 100 lists.': "La liste n'a pas pu être créée : son nom est vide ou dépasse 255 caractères, ou le compte a déjà 100 listes."
+'The list has been created. Add its lines below, then save it.': 'La liste a été créée. Ajoutez ses lignes ci-dessous, puis enregistrez-la.'
+'The list has been renamed.': 'La liste a été renommée.'
+'This is a copy of the list.': 'Voici la copie de la liste.'
+'The list could not be renamed: its name is empty or longer than 255 characters.': "La liste n'a pas pu être renommée : son nom est vide ou dépasse 255 caractères."
+'Name of the list': 'Nom de la liste'
+Rename: Renommer
+'Duplicate the list': 'Dupliquer la liste'

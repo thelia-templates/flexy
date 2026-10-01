@@ -33,6 +33,9 @@
         {% if error %}
             <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ errorMessages[error]|default('') }}" />
         {% endif %}
+        {% if saved %}
+            <twig:Molecules:SnackBar:Base variant="success" withIcon text="{{ 'The list has been saved.'|trans }}" />
+        {% endif %}
         {% if addedCount > 0 %}
             <twig:Molecules:SnackBar:Base
                 variant="success"
@@ -196,6 +199,14 @@
                 data-live-action-param="addRow"
             />
             <div class="QuickOrderTable-submit">
+                {% if listId and listWritable %}
+                    <twig:Molecules:Button:Base
+                        color="secondary"
+                        text="{{ 'Save the list'|trans }}"
+                        data-action="live#action"
+                        data-live-action-param="saveList"
+                    />
+                {% endif %}
                 <twig:Molecules:Button:Base
                     type="submit"
                     color="secondary"

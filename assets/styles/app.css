@@ -101,6 +101,7 @@
   @import "../../components/Layouts/Footer/Checkout.css";
   @import "../../components/Layouts/Header/Checkout.css";
   @import "../../components/Layouts/AccountOrders/Base.css";
+  @import "../../components/Layouts/AccountPurchaseLists/Base.css";
   @import "../../components/Layouts/CrossSelling/Base.css";
   @import "../../components/Layouts/Review/Base.css";
   @import "../../components/Layouts/SimilarContent/Base.css";

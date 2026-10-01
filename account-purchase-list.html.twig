@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{# purchaseListId, purchaseListTitle and purchaseListWritable come from the controller.
+   The title is typed by the customer: printed escaped, never raw. #}
+{% block title %}{{ purchaseListTitle }}{% endblock %}
+
+{% block body %}
+    {% set token = csrf_token('purchase_list_action') %}
+    {% set notices = {
+        created: {variant: 'success', text: 'The list has been created. Add its lines below, then save it.'|trans},
+        renamed: {variant: 'success', text: 'The list has been renamed.'|trans},
+        duplicated: {variant: 'success', text: 'This is a copy of the list.'|trans},
+        error: {variant: 'error', text: 'The list could not be renamed: its name is empty or longer than 255 characters.'|trans},
+    } %}
+
+    <twig:Layouts:Subheader:Account
+        title="{{ purchaseListTitle }}"
+        selected="purchase-lists"
+        :breadcrumb="[
+            {title: 'My account'|trans, url: path('account_index')},
+            {title: 'My purchase lists'|trans, url: path('account_purchase_lists')},
+            {title: purchaseListTitle},
+        ]"
+    />
+
+    <div class="container-l pt-6 pb-20 md:pt-11 md:pb-30">
+        <div class="flex flex-col gap-4 mb-6">
+            {% for param, notice in notices %}
+                {% if app.request.query.get(param) %}
+                    <twig:Molecules:SnackBar:Base variant="{{ notice.variant }}" withIcon text="{{ notice.text }}" />
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+            {% if purchaseListWritable %}
+                <form class="flex flex-wrap items-end gap-4" method="post" action="{{ path('account_purchase_list_rename', {listId: purchaseListId}) }}">
+                    <input type="hidden" name="_token" value="{{ token }}">
+                    <twig:Fields:Input:Base
+                        id="purchase-list-title"
+                        name="title"
+                        label="{{ 'Name of the list'|trans }}"
+                        value="{{ purchaseListTitle }}"
+                        required
+                        input:maxlength="255"
+                        class="min-w-0 w-72 max-w-full"
+                    />
+                    <twig:Molecules:Button:Base type="submit" color="secondary" text="{{ 'Rename'|trans }}" />
+                </form>
+            {% endif %}
+            <form method="post" action="{{ path('account_purchase_list_duplicate', {listId: purchaseListId}) }}">
+                <input type="hidden" name="_token" value="{{ token }}">
+                <twig:Molecules:Button:Base type="submit" color="minimal" text="{{ 'Duplicate the list'|trans }}" />
+            </form>
+        </div>
+
+        <twig:Organisms:QuickOrderTable:Base :listId="purchaseListId" />
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}

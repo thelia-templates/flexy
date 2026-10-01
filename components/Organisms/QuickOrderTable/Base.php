@@ -18,6 +18,7 @@ use FlexyBundle\Exception\ReferenceQuantityTextRefusedException;
 use FlexyBundle\Service\QuickOrderService;
 use FlexyBundle\Service\ReferenceQuantityTextParser;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -28,6 +29,10 @@ use Thelia\Core\Security\SecurityContext;
 use Thelia\Domain\Catalog\DTO\ReferenceQuantity;
 use Thelia\Domain\Catalog\DTO\ReferenceQuantityLines;
 use Thelia\Domain\Catalog\Exception\InvalidReferenceQuantityException;
+use Thelia\Domain\CustomerList\Exception\InvalidPurchaseListException;
+use Thelia\Domain\CustomerList\Exception\PurchaseListAccessDeniedException;
+use Thelia\Domain\CustomerList\Exception\PurchaseListNotFoundException;
+use Thelia\Domain\CustomerList\PurchaseListFacade;
 use Thelia\Domain\QuickOrder\DTO\QuickOrderTable;
 use Thelia\Domain\QuickOrder\Enum\LineStatus;
 use Thelia\Domain\QuickOrder\Exception\QuickOrderRateLimitedException;
@@ -45,6 +50,10 @@ use Thelia\Model\Customer;
  *
  * Each row carries a key of its own, so that adding or removing one does not move the
  * focus or the values of the others on the next render.
+ *
+ * Given a purchase list, the table opens on its lines, checked, and can save them back:
+ * a reference that no longer resolves stays on the list and shows as unknown, which is
+ * how a buyer learns that an old list has references the shop dropped.
  */
 #[AsLiveComponent]
 class Base
@@ -78,20 +87,64 @@ class Base
     #[LiveProp]
     public array $rejectedLines = [];
 
+    /** The purchase list the table was opened on, if any. */
+    #[LiveProp]
+    public ?int $listId = null;
+
+    #[LiveProp]
+    public bool $listWritable = false;
+
     public ?string $error = null;
 
     public int $addedCount = 0;
+
+    public bool $saved = false;
 
     public function __construct(
         private readonly QuickOrderService $quickOrderService,
         private readonly ReferenceQuantityTextParser $parser,
         private readonly SecurityContext $securityContext,
+        private readonly PurchaseListFacade $purchaseListFacade,
     ) {
     }
 
-    public function mount(): void
+    public function mount(?int $listId = null): void
     {
         $this->rows = self::emptyRows(self::EMPTY_ROWS);
+
+        if (null === $listId) {
+            return;
+        }
+
+        $customer = $this->customer();
+
+        try {
+            $list = $this->purchaseListFacade->getVisible($customer, $listId);
+        } catch (PurchaseListNotFoundException $exception) {
+            throw new NotFoundHttpException('No such purchase list.', $exception);
+        }
+
+        $this->listId = $listId;
+        $this->listWritable = $this->purchaseListFacade->canWrite($customer, $list);
+
+        try {
+            $table = $this->quickOrderService->resolvePurchaseList($customer, $listId);
+        } catch (QuickOrderRateLimitedException) {
+            // The lines still show, unchecked: the buyer can check them in a minute.
+            $this->error = 'rate_limited';
+            $unchecked = array_map(
+                static fn (ReferenceQuantity $line): array => ['key' => self::newKey(), 'reference' => $line->reference, 'quantity' => $line->quantity, 'productSaleElementsId' => $line->productSaleElementsId],
+                $this->purchaseListFacade->linesToLoad($customer, $listId),
+            );
+            $this->rows = [] === $unchecked ? $this->rows : $unchecked;
+
+            return;
+        }
+
+        if ([] !== $table->lines) {
+            $this->rows = self::rowsOf($table);
+            $this->lines = $table->toArray()['lines'];
+        }
     }
 
     /**
@@ -224,6 +277,48 @@ class Base
     }
 
     /**
+     * Replaces the lines of the list with the typed rows. A row whose quantity is not a
+     * whole number above zero is not saved. The sale element a row names is kept only
+     * when the last check offered it for that row: the row comes from the browser, and
+     * the list stores whatever sale element it is given.
+     */
+    #[LiveAction]
+    public function saveList(): void
+    {
+        $customer = $this->customer();
+
+        if (null === $this->listId) {
+            return;
+        }
+
+        $lines = [];
+
+        foreach ($this->rows as $index => $row) {
+            $quantity = self::quantityOf($row);
+
+            if ('' === trim((string) $row['reference']) || null === $quantity) {
+                continue;
+            }
+
+            $lines[] = new ReferenceQuantity((string) $row['reference'], $quantity, $this->offeredSaleElementsIdOf($index));
+        }
+
+        try {
+            $this->purchaseListFacade->replaceItems($customer, $this->listId, new ReferenceQuantityLines($lines));
+        } catch (PurchaseListNotFoundException $exception) {
+            throw new NotFoundHttpException('No such purchase list.', $exception);
+        } catch (PurchaseListAccessDeniedException $exception) {
+            throw new AccessDeniedHttpException('This purchase list cannot be changed.', $exception);
+        } catch (InvalidReferenceQuantityException|InvalidPurchaseListException) {
+            $this->error = 'invalid_lines';
+
+            return;
+        }
+
+        $this->saved = true;
+    }
+
+    /**
      * The line of the last check for this row, or null when the row was edited since:
      * what the table showed for it no longer says anything about what it holds now.
      *
@@ -345,6 +440,28 @@ class Base
         }
 
         return $rows;
+    }
+
+    /**
+     * The sale element the row names, if the last check offered it for this row: the
+     * one it resolved to, or one of the candidates of an ambiguous reference.
+     */
+    private function offeredSaleElementsIdOf(int $index): ?int
+    {
+        $saleElementsId = self::saleElementsIdOf($this->rows[$index] ?? []);
+        $line = $this->lineOf($index);
+
+        if (null === $saleElementsId || null === $line) {
+            return null;
+        }
+
+        $offered = [(int) ($line['productSaleElementsId'] ?? 0)];
+
+        foreach ((array) ($line['candidates'] ?? []) as $candidate) {
+            $offered[] = (int) ($candidate['productSaleElementsId'] ?? 0);
+        }
+
+        return \in_array($saleElementsId, $offered, true) ? $saleElementsId : null;
     }
 
     /**
