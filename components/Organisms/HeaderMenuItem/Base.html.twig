@@ -44,6 +44,10 @@
             {% endif %}
 
             {% for column in columns %}
+                {# The controller opens the first sub-list carrying the key it is asked for, so each
+                   column needs its own: the position is unique within the menu, whose key is unique
+                   in the header. #}
+                {% set columnKey = menuKey ~ '_' ~ loop.index %}
                 <li class="Submenu-column">
                     <a href="{{ column.branch.href }}" class="Submenu-heading">
                         {{ column.branch.title }}
@@ -52,13 +56,13 @@
                     <button
                         type="button"
                         class="HeaderMenuItem-back"
-                        {{ stimulus_action(headerController, 'displaySubMenu', 'click', {item: menuKey ~ '_5'}) }}
+                        {{ stimulus_action(headerController, 'displaySubMenu', 'click', {item: columnKey}) }}
                         aria-label="{{ 'Open the submenu'|trans }}"
                     >
                         {{ ux_icon('arrow-right') }}
                     </button>
 
-                    <ul class="Submenu-sub" data-menu-sub="{{ menuKey }}_5" data-menu-previous="{{ menuKey }}" {{ stimulus_target(headerController, 'sub') }}>
+                    <ul class="Submenu-sub" data-menu-sub="{{ columnKey }}" data-menu-previous="{{ menuKey }}" {{ stimulus_target(headerController, 'sub') }}>
                         {% for child in column.children %}
                             <li class="Submenu-subItem">
                                 <a href="{{ child.href }}" class="Submenu-link">
