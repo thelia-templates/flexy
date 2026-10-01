@@ -1,9 +1,12 @@
 <footer class="{{ ('FooterCheckout ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
     <ul class="FooterCheckout-links">
-        {% set contents = resources('/api/front/contents', {'contentFolders.folder.id': attr('config', 'information_folder_id'), visible: true}) %}
-        {% for content in contents %}
+        {% for link in content_slot('footer_links') %}
             <li class="paragraph-5">
-                <a href="{{ content.publicUrl }}" class="Footer-link">{{ content.i18ns.title }}</a>
+                {% if link.url %}
+                    <a href="{{ link.url }}" class="Footer-link"{% if link.opensInNewWindow %} target="_blank" rel="noopener"{% endif %}>{{ link.label }}</a>
+                {% else %}
+                    <span class="Footer-link">{{ link.label }}</span>
+                {% endif %}
             </li>
         {% endfor %}
     </ul>
