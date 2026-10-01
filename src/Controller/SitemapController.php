@@ -18,7 +18,7 @@ class SitemapController extends FlexyController
         return $this->buildResponse($sitemapGenerator, 'index');
     }
 
-    #[Route('/sitemap-{section}.xml', name: 'front_sitemap_section', requirements: ['section' => 'categories|products|images'])]
+    #[Route('/sitemap-{section}.xml', name: 'front_sitemap_section', requirements: ['section' => 'categories|products|content|images'])]
     public function section(string $section, SitemapGenerator $sitemapGenerator): Response
     {
         return $this->buildResponse($sitemapGenerator, $section);
