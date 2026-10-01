@@ -23,6 +23,8 @@ use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Thelia\Api\Service\DataAccess\DataAccessService;
+use Thelia\Core\Content\Slot\ContentSlots;
+use Thelia\Core\Content\Slot\ContentSlotService;
 use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
 use Thelia\Domain\Checkout\Service\ConsentAcceptanceStore;
@@ -70,6 +72,7 @@ class Base
         private readonly ConsentProvider $consentProvider,
         private readonly ConsentAcceptanceStore $consentAcceptanceStore,
         private readonly LangService $langService,
+        private readonly ContentSlotService $contentSlotService,
     ) {
     }
 
@@ -92,7 +95,9 @@ class Base
      * sentence the buyer agrees to, not a piece of markup a shop administrator can
      * inject into the payment page. The link to the full text is built here instead,
      * from the content the consent points at, and rendered next to the box rather than
-     * inside its label — a link nested in a label toggles the box when clicked.
+     * inside its label — a link nested in a label toggles the box when clicked. That
+     * content is read through the consent's content slot, so a hidden content gives no
+     * link rather than one to a page the buyer cannot open.
      *
      * @return list<array{code: string, title: string, description: string, url: string|null, mandatory: bool, accepted: bool}>
      */
@@ -108,7 +113,7 @@ class Base
                 'code' => $code,
                 'title' => $this->consentProvider->title($consent, $locale),
                 'description' => $this->consentProvider->description($consent, $locale),
-                'url' => null !== $consent->getContentId() ? $consent->getContent()?->getUrl($locale) : null,
+                'url' => $this->contentSlotService->first(ContentSlots::CONSENT_PREFIX.$code, $locale)?->url,
                 'mandatory' => $consent->isMandatory(),
                 'accepted' => $this->consentAcceptances[$code] ?? false,
             ];
