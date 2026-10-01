@@ -96,7 +96,7 @@ class Base
         }
 
         $this->promo = (bool) $cartItemModel->getPromo();
-        $this->title = $product->getTitle();
+        $this->title = (string) $product->getTitle();
         $this->desc = $product->getChapo();
         $this->url = $product->getUrl($this->langService->getLocale());
         $this->outOfStock = $this->cartStockService->isOutOfStock($cartItem);
