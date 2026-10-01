@@ -49,9 +49,13 @@
                    in the header. #}
                 {% set columnKey = menuKey ~ '_' ~ loop.index %}
                 <li class="Submenu-column">
-                    <a href="{{ column.branch.href }}" class="Submenu-heading">
-                        {{ column.branch.title }}
-                    </a>
+                    {% if column.branch.href %}
+                        <a href="{{ column.branch.href }}" class="Submenu-heading"{% if column.branch.opensInNewWindow|default(false) %} target="_blank" rel="noopener"{% endif %}>
+                            {{ column.branch.title }}
+                        </a>
+                    {% else %}
+                        <span class="Submenu-heading">{{ column.branch.title }}</span>
+                    {% endif %}
 
                     <button
                         type="button"
@@ -65,9 +69,13 @@
                     <ul class="Submenu-sub" data-menu-sub="{{ columnKey }}" data-menu-previous="{{ menuKey }}" {{ stimulus_target(headerController, 'sub') }}>
                         {% for child in column.children %}
                             <li class="Submenu-subItem">
-                                <a href="{{ child.href }}" class="Submenu-link">
-                                    {{ child.title }}
-                                </a>
+                                {% if child.href %}
+                                    <a href="{{ child.href }}" class="Submenu-link"{% if child.opensInNewWindow|default(false) %} target="_blank" rel="noopener"{% endif %}>
+                                        {{ child.title }}
+                                    </a>
+                                {% else %}
+                                    <span class="Submenu-link">{{ child.title }}</span>
+                                {% endif %}
                             </li>
                         {% endfor %}
                     </ul>
@@ -77,20 +85,27 @@
             {% if leafLinks|length %}
                 <li class="Submenu-column Submenu-column--links">
                     {% for leaf in leafLinks %}
-                        <a href="{{ leaf.href }}" class="Submenu-link">
-                            {{ leaf.title }}
-                        </a>
+                        {% if leaf.href %}
+                            <a href="{{ leaf.href }}" class="Submenu-link"{% if leaf.opensInNewWindow|default(false) %} target="_blank" rel="noopener"{% endif %}>
+                                {{ leaf.title }}
+                            </a>
+                        {% else %}
+                            <span class="Submenu-link">{{ leaf.title }}</span>
+                        {% endif %}
                     {% endfor %}
                 </li>
             {% endif %}
         </ul>
-    {% else %}
+    {% elseif href %}
         <a
             href="{{ href }}"
             class="HeaderMenuItem-link"
+            {% if opensInNewWindow %}target="_blank" rel="noopener"{% endif %}
             {{ stimulus_target('Organisms--HeaderMenuItem--base', 'toggler') }}
         >
             {{ title }}
         </a>
+    {% else %}
+        <span class="HeaderMenuItem-link">{{ title }}</span>
     {% endif %}
 </li>

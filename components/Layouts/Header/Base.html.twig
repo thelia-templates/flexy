@@ -45,11 +45,14 @@
                             href="{{ item.href }}"
                             :includeContents="item.includeContents"
                         />
+                    {% elseif item.type == 'tree' %}
+                        <twig:Organisms:HeaderMenuItem:Tree :link="item.link" :position="loop.index0" />
                     {% elseif item.type == 'link' %}
                         <twig:Organisms:HeaderMenuItem:Base
                             id="{{ item.id }}"
                             title="{{ item.title }}"
                             href="{{ item.href }}"
+                            :opensInNewWindow="item.opensInNewWindow"
                         />
                     {% else %}
                         <twig:Organisms:HeaderMenuItem:Category
