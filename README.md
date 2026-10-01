@@ -75,6 +75,10 @@ The SEOne module already answers `layout.head.top` and `layout.head.bottom`, whi
 
 The head also calls a hook named after the view, `layout.head.<view>`, for what a single page needs: a module that links a stylesheet on the product page alone answers `layout.head.product`, one that adds a script to the cart answers `layout.head.checkout-cart`. The view is the request's `_view` attribute: the core sets it for the pages it routes (`index`, `product`, `category`, `content`, `folder`, `brand`...), and `FlexyController` sets it for the pages it renders, from the template name (`checkout-cart`, `account`, `login`...).
 
+Each section of the sitemap calls `sitemap.urls` inside its `<urlset>`, with `context` set to the section (`categories`, `products`, `content`) and `lang` left empty: a module answers with `<url>` entries, `xhtml:link` alternates included. The `content` section holds nothing else, so the pages a module serves have a place of their own.
+
+The header, the footer and the terms links name no content: they read the `header_links`, `footer_links` and `consent.<code>` content slots of the core (`content_slot()` and `content_slot_first()` in a template). The shop fills them from its settings, and a module can answer them instead through `Thelia\Core\Content\Slot\ContentSlotResolverInterface`.
+
 ### Listing a module's component in the toolkit
 
 The toolkit (`/toolkit`, served only while the kernel runs in debug) walks the `components/` directories of the template chain and nothing else. A module lists its own components by implementing `FlexyBundle\Toolkit\StoryProviderInterface`; autoconfiguration tags it, and the tag priority sets the order in the sidebar. Each story names the template the toolkit renders and the file "Show the code" reads:
