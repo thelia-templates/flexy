@@ -15,10 +15,13 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Organisms\QuickOrderTable;
 
 use FlexyBundle\Exception\ReferenceQuantityTextRefusedException;
+use FlexyBundle\Service\PurchaseListChoices;
 use FlexyBundle\Service\QuickOrderService;
 use FlexyBundle\Service\ReferenceQuantityTextParser;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -53,7 +56,8 @@ use Thelia\Model\Customer;
  *
  * Given a purchase list, the table opens on its lines, checked, and can save them back:
  * a reference that no longer resolves stays on the list and shows as unknown, which is
- * how a buyer learns that an old list has references the shop dropped.
+ * how a buyer learns that an old list has references the shop dropped. Opened on no
+ * list, the table saves into a new list or adds to one the customer may change.
  */
 #[AsLiveComponent]
 class Base
@@ -94,6 +98,13 @@ class Base
     #[LiveProp]
     public bool $listWritable = false;
 
+    /** Where "save as a purchase list" goes: empty for a new list, else a list id. */
+    #[LiveProp(writable: true)]
+    public string $saveTarget = PurchaseListChoices::NEW_LIST;
+
+    #[LiveProp(writable: true)]
+    public string $saveTitle = '';
+
     public ?string $error = null;
 
     public int $addedCount = 0;
@@ -105,6 +116,8 @@ class Base
         private readonly ReferenceQuantityTextParser $parser,
         private readonly SecurityContext $securityContext,
         private readonly PurchaseListFacade $purchaseListFacade,
+        private readonly PurchaseListChoices $purchaseListChoices,
+        private readonly UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -277,10 +290,7 @@ class Base
     }
 
     /**
-     * Replaces the lines of the list with the typed rows. A row whose quantity is not a
-     * whole number above zero is not saved. The sale element a row names is kept only
-     * when the last check offered it for that row: the row comes from the browser, and
-     * the list stores whatever sale element it is given.
+     * Replaces the lines of the list with the typed rows that a list can keep.
      */
     #[LiveAction]
     public function saveList(): void
@@ -291,20 +301,8 @@ class Base
             return;
         }
 
-        $lines = [];
-
-        foreach ($this->rows as $index => $row) {
-            $quantity = self::quantityOf($row);
-
-            if ('' === trim((string) $row['reference']) || null === $quantity) {
-                continue;
-            }
-
-            $lines[] = new ReferenceQuantity((string) $row['reference'], $quantity, $this->offeredSaleElementsIdOf($index));
-        }
-
         try {
-            $this->purchaseListFacade->replaceItems($customer, $this->listId, new ReferenceQuantityLines($lines));
+            $this->purchaseListFacade->replaceItems($customer, $this->listId, new ReferenceQuantityLines($this->savableLines()));
         } catch (PurchaseListNotFoundException $exception) {
             throw new NotFoundHttpException('No such purchase list.', $exception);
         } catch (PurchaseListAccessDeniedException $exception) {
@@ -316,6 +314,60 @@ class Base
         }
 
         $this->saved = true;
+    }
+
+    /**
+     * Saves the typed rows into a new list, or adds them to a list the customer may
+     * change, then opens that list. The rows are the ones "save the list" would keep.
+     */
+    #[LiveAction]
+    public function saveAsList(): ?RedirectResponse
+    {
+        $customer = $this->customer();
+        $lines = $this->savableLines();
+
+        if ([] === $lines) {
+            $this->error = 'nothing_to_save';
+
+            return null;
+        }
+
+        try {
+            $lines = new ReferenceQuantityLines($lines);
+            $list = PurchaseListChoices::NEW_LIST === $this->saveTarget
+                ? $this->purchaseListFacade->create($customer, $this->saveTitle, $lines)
+                : $this->purchaseListFacade->appendItems($customer, (int) $this->saveTarget, $lines);
+        } catch (PurchaseListNotFoundException $exception) {
+            throw new NotFoundHttpException('No such purchase list.', $exception);
+        } catch (PurchaseListAccessDeniedException $exception) {
+            throw new AccessDeniedHttpException('This purchase list cannot be changed.', $exception);
+        } catch (InvalidPurchaseListException) {
+            $this->error = 'list_refused';
+
+            return null;
+        } catch (InvalidReferenceQuantityException) {
+            $this->error = 'invalid_lines';
+
+            return null;
+        }
+
+        return new RedirectResponse($this->urlGenerator->generate('account_purchase_list', [
+            'listId' => $list->getId(),
+            PurchaseListChoices::NEW_LIST === $this->saveTarget ? 'created' : 'appended' => 1,
+        ]));
+    }
+
+    /**
+     * The lists the rows can be added to; none when rendered without a customer, as in
+     * the toolkit, where the save action answers 403 anyway.
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    public function writableLists(): array
+    {
+        $customer = $this->securityContext->getCustomerUser();
+
+        return $customer instanceof Customer ? $this->purchaseListChoices->writableListsOf($customer) : [];
     }
 
     /**
@@ -462,6 +514,31 @@ class Base
         }
 
         return \in_array($saleElementsId, $offered, true) ? $saleElementsId : null;
+    }
+
+    /**
+     * The typed rows a list can keep: a row whose quantity is not a whole number above
+     * zero is left out. The sale element a row names is kept only when the last check
+     * offered it for that row: the row comes from the browser, and the list stores
+     * whatever sale element it is given.
+     *
+     * @return list<ReferenceQuantity>
+     */
+    private function savableLines(): array
+    {
+        $lines = [];
+
+        foreach ($this->rows as $index => $row) {
+            $quantity = self::quantityOf($row);
+
+            if ('' === trim((string) $row['reference']) || null === $quantity) {
+                continue;
+            }
+
+            $lines[] = new ReferenceQuantity((string) $row['reference'], $quantity, $this->offeredSaleElementsIdOf($index));
+        }
+
+        return $lines;
     }
 
     /**

@@ -10,6 +10,7 @@
         created: {variant: 'success', text: 'The list has been created. Add its lines below, then save it.'|trans},
         renamed: {variant: 'success', text: 'The list has been renamed.'|trans},
         duplicated: {variant: 'success', text: 'This is a copy of the list.'|trans},
+        appended: {variant: 'success', text: 'The lines have been added to the list.'|trans},
         error: {variant: 'error', text: 'The list could not be renamed: its name is empty or longer than 255 characters.'|trans},
     } %}
 
@@ -50,7 +51,7 @@
             {% endif %}
             <form method="post" action="{{ path('account_purchase_list_duplicate', {listId: purchaseListId}) }}">
                 <input type="hidden" name="_token" value="{{ token }}">
-                <twig:Molecules:Button:Base type="submit" color="minimal" text="{{ 'Duplicate the list'|trans }}" />
+                <twig:Molecules:Button:Base type="submit" color="secondary" text="{{ 'Duplicate the list'|trans }}" />
             </form>
         </div>
 

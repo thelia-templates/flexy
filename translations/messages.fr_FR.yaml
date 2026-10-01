@@ -573,3 +573,15 @@ Duplicate: Dupliquer
 'Name of the list': 'Nom de la liste'
 Rename: Renommer
 'Duplicate the list': 'Dupliquer la liste'
+'Save as a purchase list': "Enregistrer en liste d'achat"
+'Purchase list': "Liste d'achat"
+'A new list': 'Une nouvelle liste'
+'Only used for a new list.': 'Utilisé seulement pour une nouvelle liste.'
+'On an existing list, a reference already there adds its quantity to the line.': 'Sur une liste existante, une référence déjà présente ajoute sa quantité à la ligne.'
+'Save': 'Enregistrer'
+'The list could not be saved: its name is empty or longer than 255 characters, or the account already keeps 100 lists.': "La liste n'a pas pu être enregistrée : son nom est vide ou dépasse 255 caractères, ou le compte a déjà 100 listes."
+'The list could not be saved: a list holds at most 500 lines.': "La liste n'a pas pu être enregistrée : une liste compte au plus 500 lignes."
+'There is no line to save: type a reference and a whole quantity above zero.': 'Aucune ligne à enregistrer : saisissez une référence et une quantité entière supérieure à zéro.'
+'The lines have been added to the list.': 'Les lignes ont été ajoutées à la liste.'
+'Cart of %date%': 'Panier du %date%'
+'Order %ref%': 'Commande %ref%'

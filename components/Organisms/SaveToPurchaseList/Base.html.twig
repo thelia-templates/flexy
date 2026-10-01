@@ -1,0 +1,56 @@
+{# @prop action string URL the choice is posted to #}
+{# @prop defaultTitle string Name proposed for a new list #}
+{# @prop id string Id of the dialog, unique on the page. Defaults to 'save-to-purchase-list' #}
+{# The list titles are typed by the customer: printed escaped, never raw. #}
+{% if signedIn %}
+    {% set newList = constant('FlexyBundle\\Service\\PurchaseListChoices::NEW_LIST') %}
+    {% set errors = {
+        title: 'The list could not be saved: its name is empty or longer than 255 characters, or the account already keeps 100 lists.'|trans,
+        lines: 'The list could not be saved: a list holds at most 500 lines.'|trans,
+    } %}
+    <div class="{{ ('SaveToPurchaseList ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+        {% if errors[app.request.query.get('purchase_list_error')] is defined %}
+            <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ errors[app.request.query.get('purchase_list_error')] }}" />
+        {% endif %}
+
+        <twig:Molecules:Button:Base
+            color="secondary"
+            icon_left="plus"
+            text="{{ 'Save as a purchase list'|trans }}"
+            {{ ...stimulus_controller('Molecules--Modal--open', {id: id}) }}
+            {{ ...stimulus_action('Molecules--Modal--open', 'open', 'click') }}
+        />
+
+        <twig:Molecules:Modal:Base id="{{ id }}">
+            <div class="h4">{{ 'Save as a purchase list'|trans }}</div>
+            <form class="SaveToPurchaseList-form" method="post" action="{{ action }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('purchase_list_action') }}">
+                <twig:Fields:Select:Base
+                    id="{{ id }}-list"
+                    label="{{ 'Purchase list'|trans }}"
+                    :choices="[{value: newList, label: 'A new list'|trans}]|merge(lists)"
+                    value="{{ newList }}"
+                    select:name="listId"
+                />
+                <twig:Fields:Input:Base
+                    id="{{ id }}-title"
+                    name="title"
+                    label="{{ 'Name of the new list'|trans }}"
+                    help="{{ 'Only used for a new list.'|trans }}"
+                    value="{{ defaultTitle }}"
+                    input:maxlength="{{ maxTitleLength }}"
+                />
+                <p class="SaveToPurchaseList-help">{{ 'On an existing list, a reference already there adds its quantity to the line.'|trans }}</p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <twig:Molecules:Button:Base
+                        text="{{ 'Cancel'|trans }}"
+                        color="secondary"
+                        :fill="true"
+                        {{ ...stimulus_action('Molecules--Modal--base', 'close', 'click') }}
+                    />
+                    <twig:Molecules:Button:Base text="{{ 'Save'|trans }}" type="submit" :fill="true" />
+                </div>
+            </form>
+        </twig:Molecules:Modal:Base>
+    </div>
+{% endif %}

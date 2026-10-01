@@ -88,6 +88,7 @@
   @import "../../components/Organisms/CartItem/Base.css";
   @import "../../components/Organisms/CartItemDelete/Base.css";
   @import "../../components/Organisms/QuickOrderTable/Base.css";
+  @import "../../components/Organisms/SaveToPurchaseList/Base.css";
   @import "../../components/Organisms/Summary/Base.css";
   @import "../../components/Organisms/DeliveryTracking/Base.css";
   @import "../../components/Organisms/PaymentCard/Base.css";

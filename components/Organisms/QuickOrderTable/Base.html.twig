@@ -19,6 +19,8 @@
     rate_limited: 'Too many checks in a short time. Please wait a minute and try again.'|trans,
     invalid_lines: 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.'|trans,
     text_refused: 'The text is too long: a table takes at most 500 lines.'|trans,
+    nothing_to_save: 'There is no line to save: type a reference and a whole quantity above zero.'|trans,
+    list_refused: 'The list could not be saved: its name is empty or longer than 255 characters, or the account already keeps 100 lists.'|trans,
 } %}
 {% set rejectReasons = {
     columns: 'expected a reference and a quantity'|trans,
@@ -199,6 +201,14 @@
                 data-live-action-param="addRow"
             />
             <div class="QuickOrderTable-submit">
+                {% if not listId %}
+                    <twig:Molecules:Button:Base
+                        color="secondary"
+                        text="{{ 'Save as a purchase list'|trans }}"
+                        {{ ...stimulus_controller('Molecules--Modal--open', {id: 'quick-order-save-list'}) }}
+                        {{ ...stimulus_action('Molecules--Modal--open', 'open', 'click') }}
+                    />
+                {% endif %}
                 {% if listId and listWritable %}
                     <twig:Molecules:Button:Base
                         color="secondary"
@@ -222,4 +232,51 @@
             </div>
         </div>
     </form>
+
+    {% if not listId %}
+        {# Outside the form: Enter in its fields must not check the table. Inside the
+           dialog, `this` is the modal: what the table holds is read before. #}
+        {% set saveChoices = [{value: constant('FlexyBundle\\Service\\PurchaseListChoices::NEW_LIST'), label: 'A new list'|trans}]|merge(this.writableLists) %}
+        {# Refused, the dialog stays open over the messages of the table: it says so itself. #}
+        {% set saveError = error in ['nothing_to_save', 'list_refused', 'invalid_lines'] ? errorMessages[error] : null %}
+        <twig:Molecules:Modal:Base id="quick-order-save-list">
+            <div class="h4">{{ 'Save as a purchase list'|trans }}</div>
+            <div class="QuickOrderTable-saveList">
+                {% if saveError %}
+                    <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ saveError }}" />
+                {% endif %}
+                <twig:Fields:Select:Base
+                    id="quick-order-save-target"
+                    label="{{ 'Purchase list'|trans }}"
+                    :choices="saveChoices"
+                    value="{{ saveTarget }}"
+                    select:data-model="norender|saveTarget"
+                />
+                <twig:Fields:Input:Base
+                    id="quick-order-save-title"
+                    name="quick_order_save_title"
+                    label="{{ 'Name of the new list'|trans }}"
+                    help="{{ 'Only used for a new list.'|trans }}"
+                    value="{{ saveTitle }}"
+                    input:maxlength="255"
+                    input:data-model="norender|saveTitle"
+                />
+                <p class="QuickOrderTable-help">{{ 'On an existing list, a reference already there adds its quantity to the line.'|trans }}</p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <twig:Molecules:Button:Base
+                        text="{{ 'Cancel'|trans }}"
+                        color="secondary"
+                        :fill="true"
+                        {{ ...stimulus_action('Molecules--Modal--base', 'close', 'click') }}
+                    />
+                    <twig:Molecules:Button:Base
+                        text="{{ 'Save'|trans }}"
+                        :fill="true"
+                        data-action="live#action"
+                        data-live-action-param="saveAsList"
+                    />
+                </div>
+            </div>
+        </twig:Molecules:Modal:Base>
+    {% endif %}
 </div>

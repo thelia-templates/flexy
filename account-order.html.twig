@@ -55,6 +55,14 @@
         {% endif %}
 
         {% if not isQuotation %}
+            <twig:Organisms:SaveToPurchaseList:Base
+                action="{{ path('account_purchase_list_from_order', {orderId: order.id}) }}"
+                defaultTitle="{{ 'Order %ref%'|trans({'%ref%': order.ref}) }}"
+                class="mt-6"
+            />
+        {% endif %}
+
+        {% if not isQuotation %}
             <hr class="my-10" />
 
             <h2 class="h4 mb-6">{{ 'Delivery & payment'|trans }}</h2>
