@@ -74,8 +74,8 @@
 {% endblock %}
 
 {% block modals %}
-    <twig:Molecules:Modal:Base id="confirmDeleteAddress">
-        <div class="h4">{{ 'Are you sure you want to delete this address ?'|trans }}</div>
+    <twig:Molecules:Modal:Base id="confirmDeleteAddress" labelledby="confirmDeleteAddressTitle">
+        <h2 id="confirmDeleteAddressTitle" class="h4">{{ 'Are you sure you want to delete this address ?'|trans }}</h2>
         {# POST + CSRF: this action deletes data, it must not be reachable by navigation #}
         <form method="post" {{ stimulus_target('Molecules--Modal--base', 'confirm') }}>
             <input type="hidden" name="_token" value="{{ csrf_token('address_action') }}">
@@ -91,8 +91,8 @@
         </form>
     </twig:Molecules:Modal:Base>
 
-    <twig:Molecules:Modal:Base id="confirmDefaultAddress">
-        <div class="h4">{{ 'Are you sure you want to choose this address by default ?'|trans }}</div>
+    <twig:Molecules:Modal:Base id="confirmDefaultAddress" labelledby="confirmDefaultAddressTitle">
+        <h2 id="confirmDefaultAddressTitle" class="h4">{{ 'Are you sure you want to choose this address by default ?'|trans }}</h2>
         {# POST + CSRF: this action deletes data, it must not be reachable by navigation #}
         <form method="post" {{ stimulus_target('Molecules--Modal--base', 'confirm') }}>
             <input type="hidden" name="_token" value="{{ csrf_token('address_action') }}">
