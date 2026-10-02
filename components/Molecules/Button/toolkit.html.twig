@@ -1,101 +1,123 @@
-{% macro variants(name, color, quantity = false) %}
-    <div class="Story-section">
-        <h4 class="Story-title">{{ name }}</h4>
-        <div class="Story-row">
-            <twig:Molecules:Button:Base color="{{ color }}" size="large">Large</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" size="large">Large</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}">Base</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" size="small">Small</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" size="large" disabled>Large</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" disabled>Base</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" size="small" disabled>Small</twig:Molecules:Button:Base>
-        </div>
-        <div class="Story-row">
-            <twig:Molecules:Button:Base color="{{ color }}" round size="large">L</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" round>M</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" round size="small">S</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" round size="large" disabled>L</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" round disabled>M</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" round size="small" disabled>S</twig:Molecules:Button:Base>
-        </div>
-        <div class="Story-row">
-            <twig:Molecules:Button:Base color="{{ color }}" rectangle size="large">Large</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" rectangle>Base</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" rectangle size="small">Small</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" rectangle size="large" disabled>Large</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" rectangle disabled>Base</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" rectangle size="small" disabled>Small</twig:Molecules:Button:Base>
-        </div>
-        <div class="Story-row">
-            <twig:Molecules:Button:Base color="{{ color }}" sharp size="large">Large</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" sharp>Base</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" sharp size="small">Small</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" sharp size="large" disabled>Large</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" sharp disabled>Base</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" sharp size="small" disabled>Small</twig:Molecules:Button:Base>
-        </div>
-        <div class="Story-row">
-            <twig:Molecules:Button:Base color="{{ color }}" size="large"  icon_left="chevron-left" icon_right="chevron-right">Large</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}"  icon_left="chevron-left" icon_right="chevron-right">Base</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" size="small"  icon_left="chevron-left" icon_right="chevron-right">Small</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" size="large" disabled icon_left="chevron-left" icon_right="chevron-right">Icon L</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" disabled icon_left="chevron-left" icon_right="chevron-right">Icon M</twig:Molecules:Button:Base>
-            <twig:Molecules:Button:Base color="{{ color }}" size="small" disabled icon_left="chevron-left" icon_right="chevron-right">Icon S</twig:Molecules:Button:Base>
-        </div>
-        <div class="Story-grid Story-grid--6">
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true" size="large">Large fill</twig:Molecules:Button:Base>
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true">Base fill</twig:Molecules:Button:Base>
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true" size="small">Small fill</twig:Molecules:Button:Base>
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true" size="large" disabled>Large fill</twig:Molecules:Button:Base>
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true" disabled>Base fill</twig:Molecules:Button:Base>
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true" size="small" disabled>Small fill</twig:Molecules:Button:Base>
-        </div>
-        <div class="Story-grid Story-grid--6">
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true" size="large" icon_left="chevron-left" icon_right="chevron-right">Large icon fill</twig:Molecules:Button:Base>
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true" icon_left="chevron-left" icon_right="chevron-right">Base icon fill</twig:Molecules:Button:Base>
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true" size="small" icon_left="chevron-left" icon_right="chevron-right">Small icon fill</twig:Molecules:Button:Base>
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true" size="large" icon_left="chevron-left" icon_right="chevron-right" disabled>Large icon fill</twig:Molecules:Button:Base>
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true" icon_left="chevron-left" icon_right="chevron-right" disabled>Base icon fill</twig:Molecules:Button:Base>
-                <twig:Molecules:Button:Base color="{{ color }}" fill="true" size="small" icon_left="chevron-left" icon_right="chevron-right" disabled>Small icon fill</twig:Molecules:Button:Base>
-        </div>
-
-        {% if quantity %}
-        <div class="Story-row">
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:color="{{ color }}" button:size="large" input:max="10" input:min="5" />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:color="{{ color }}" />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:color="{{ color }}" button:size="small" />
-            <twig:Molecules:Button:Quantity color="{{ color }}"  button:color="{{ color }}" button:size="large" disabled />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:color="{{ color }}" disabled />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:color="{{ color }}" button:size="small" disabled />
-        </div>
-        <div class="Story-row">
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:rectangle button:color="{{ color }}" button:size="large" />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:rectangle button:color="{{ color }}" />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:rectangle button:color="{{ color }}" button:size="small" />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:rectangle button:color="{{ color }}" button:size="large" disabled />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:rectangle button:color="{{ color }}" disabled />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:rectangle button:color="{{ color }}" button:size="small" disabled />
-        </div>
-        <div class="Story-row">
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:sharp button:color="{{ color }}" button:size="large"  />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:sharp button:color="{{ color }}"  />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:sharp button:color="{{ color }}" button:size="small"  />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:sharp button:color="{{ color }}" button:size="large" disabled />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:sharp button:color="{{ color }}" disabled />
-            <twig:Molecules:Button:Quantity color="{{ color }}" button:sharp button:color="{{ color }}" button:size="small" disabled />
-        </div>
-        {% endif %}
-
-    </div>
-{% endmacro %}
-
 <div class="Story">
-    {{ _self.variants('Default', null, true) }}
-    {{ _self.variants('Secondary', 'secondary', true) }}
-    {{ _self.variants('Minimal', 'minimal') }}
-    {{ _self.variants('Error', 'error') }}
-    {{ _self.variants('Raised', 'raised') }}
 
+    <div class="Story-section">
+        <div class="Story-heading">
+            <h4 class="Story-title">Colors</h4>
+            <span class="Story-note">
+                Each cell shows the resting state above the disabled one. Hover and focus are
+                interactive, so neither is pictured.
+            </span>
+        </div>
+        <div class="Story-grid Story-grid--3">
+            {% for color, label in {base: 'base (default)', secondary: 'secondary', minimal: 'minimal', error: 'error'} %}
+                <div class="Story-col justify-items-start">
+                    <span class="Story-label">{{ label }}</span>
+                    <twig:Molecules:Button:Base color="{{ color }}" icon_right="chevron-right">Button</twig:Molecules:Button:Base>
+                    <twig:Molecules:Button:Base color="{{ color }}" icon_right="chevron-right" disabled>Button</twig:Molecules:Button:Base>
+                </div>
+            {% endfor %}
+            <div class="Story-col">
+                <span class="Story-label">raised — over a visual or an overlay</span>
+                <div class="Story-canvas Story-row">
+                    <twig:Molecules:Button:Base color="raised" round size="small" aria-label="Zoom on the visual"><span class="icon">{{ ux_icon('zoom') }}</span></twig:Molecules:Button:Base>
+                    <twig:Molecules:Button:Base color="raised" round size="small" aria-label="Zoom on the visual" disabled><span class="icon">{{ ux_icon('zoom') }}</span></twig:Molecules:Button:Base>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="Story-section">
+        <h4 class="Story-title">Sizes</h4>
+        <div class="Story-row">
+            <twig:Molecules:Button:Base size="large" icon_left="chevron-left" icon_right="chevron-right">Large</twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base icon_left="chevron-left" icon_right="chevron-right">Base</twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base size="small" icon_left="chevron-left" icon_right="chevron-right">Small</twig:Molecules:Button:Base>
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <div class="Story-heading">
+            <h4 class="Story-title">Shapes</h4>
+            <span class="Story-note">
+                The pill is the default. The circle takes no label: it holds an icon and is named by
+                its aria-label.
+            </span>
+        </div>
+        <div class="Story-row">
+            <twig:Molecules:Button:Base>Pill</twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base rectangle>Rectangle</twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base sharp>Sharp</twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base round size="large" aria-label="Close"><span class="icon">{{ ux_icon('close') }}</span></twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base round aria-label="Close"><span class="icon">{{ ux_icon('close') }}</span></twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base round size="small" aria-label="Close"><span class="icon">{{ ux_icon('close') }}</span></twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base round color="secondary" aria-label="Close"><span class="icon">{{ ux_icon('close') }}</span></twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base round aria-label="Close" disabled><span class="icon">{{ ux_icon('close') }}</span></twig:Molecules:Button:Base>
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <div class="Story-heading">
+            <h4 class="Story-title">Fill</h4>
+            <span class="Story-note">
+                Compact by default, hugging its content; fill takes the whole width of its container.
+            </span>
+        </div>
+        <div class="Story-col Story-col--slim">
+            <twig:Molecules:Button:Base fill size="large" icon_left="cart">Add to cart</twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base fill color="secondary">Continue shopping</twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base fill disabled>Add to cart</twig:Molecules:Button:Base>
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <div class="Story-heading">
+            <h4 class="Story-title">Rendered as a link</h4>
+            <span class="Story-note">
+                Passing href swaps the tag for an <code>&lt;a&gt;</code>: use it for an action that
+                navigates.
+            </span>
+        </div>
+        <div class="Story-row">
+            <twig:Molecules:Button:Base href="#" icon_right="chevron-right">View cart</twig:Molecules:Button:Base>
+            <twig:Molecules:Button:Base href="#" color="minimal" icon_left="chevron-left">Back</twig:Molecules:Button:Base>
+        </div>
+    </div>
+
+    <div class="Story-section">
+        <div class="Story-heading">
+            <h4 class="Story-title">Quantity</h4>
+            <span class="Story-note">
+                Two buttons around a number field. The buttons take every Button prop through
+                <code>button:</code>, the field its attributes through <code>input:</code>.
+            </span>
+        </div>
+        <div class="Story-grid Story-grid--3">
+            <div class="Story-col justify-items-start">
+                <span class="Story-label">large</span>
+                <twig:Molecules:Button:Quantity button:size="large" input:value="1" input:min="1" input:max="10" />
+            </div>
+            <div class="Story-col justify-items-start">
+                <span class="Story-label">base (default)</span>
+                <twig:Molecules:Button:Quantity input:value="1" input:min="1" input:max="10" />
+            </div>
+            <div class="Story-col justify-items-start">
+                <span class="Story-label">small</span>
+                <twig:Molecules:Button:Quantity button:size="small" input:value="1" input:min="1" input:max="10" />
+            </div>
+            <div class="Story-col justify-items-start">
+                <span class="Story-label">secondary</span>
+                <twig:Molecules:Button:Quantity color="secondary" button:color="secondary" input:value="1" input:min="1" input:max="10" />
+            </div>
+            <div class="Story-col justify-items-start">
+                <span class="Story-label">rectangle and sharp</span>
+                <twig:Molecules:Button:Quantity button:rectangle input:value="1" input:min="1" input:max="10" />
+                <twig:Molecules:Button:Quantity button:sharp input:value="1" input:min="1" input:max="10" />
+            </div>
+            <div class="Story-col justify-items-start">
+                <span class="Story-label">disabled</span>
+                <twig:Molecules:Button:Quantity disabled input:value="1" input:min="1" input:max="10" />
+            </div>
+        </div>
+    </div>
 
 </div>
