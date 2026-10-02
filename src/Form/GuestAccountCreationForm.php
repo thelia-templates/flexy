@@ -50,7 +50,7 @@ class GuestAccountCreationForm extends BaseForm
             ],
             'constraints' => [
                 new NotBlank(),
-                new PasswordStrength(['minScore' => 1]),
+                new PasswordStrength(minScore: 1),
             ],
         ]);
     }
