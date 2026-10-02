@@ -4,7 +4,7 @@
   --on-color-hover: var(--color-grey-dark);
   --off-color-hover: var(--color-black);
   --color-disabled: var(--color-grey-lighter);
-  --color-toggle-focus: #dc2626;
+  --color-toggle-focus: var(--color-focus);
 
   display: flex;
   align-items: center;
