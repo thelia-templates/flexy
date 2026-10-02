@@ -22,6 +22,7 @@ use FlexyBundle\Service\CheckoutTrail;
 use FlexyBundle\Service\GuestCheckoutGate;
 use FlexyBundle\Service\GuestOrderTracking;
 use FlexyBundle\Service\PlacedOrderMemory;
+use FlexyBundle\Service\PrefetchRequest;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -90,11 +91,15 @@ class CheckoutController extends FlexyController
             return $this->renderTheWholeTunnel($cart, $cartGuard, $checkoutFacade, $routes);
         }
 
-        $checkoutFacade->resetCheckout();
+        // A page fetched ahead of a click (hovering "Previous step" on the payment step) is not a visit to the
+        // cart: it must not give the cart its delivery and its payment back under the buyer's feet.
+        if (!PrefetchRequest::is($this->getRequest())) {
+            $checkoutFacade->resetCheckout();
 
-        // The reset gave the cart its delivery and its payment back: what the progression
-        // answered a moment ago was about the cart as it was before that.
-        $progression->forget();
+            // The reset gave the cart its delivery and its payment back: what the progression
+            // answered a moment ago was about the cart as it was before that.
+            $progression->forget();
+        }
 
         $emptyCart = false;
 
