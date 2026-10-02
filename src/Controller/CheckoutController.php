@@ -38,6 +38,7 @@ use Thelia\Domain\Checkout\Exception\EmptyCartException;
 use Thelia\Domain\Checkout\Exception\GuestCheckoutNotAllowedException;
 use Thelia\Domain\Checkout\Exception\IncompleteInvoiceAddressException;
 use Thelia\Domain\Checkout\Exception\InvalidDeliveryException;
+use Thelia\Domain\Checkout\Exception\InvalidPaymentException;
 use Thelia\Domain\Checkout\Exception\MissingAddressException;
 use Thelia\Domain\Checkout\Exception\MissingConsentException;
 use Thelia\Domain\Checkout\Service\CheckoutProgressionService;
@@ -327,6 +328,13 @@ class CheckoutController extends FlexyController
         } catch (StockShortageException $e) {
             // The pre-check above covers the stock read before the placement; this one is the stock lost during it.
             throw $stockRefusal->answer($e, $routes->pathFor(CheckoutStep::CODE_CART), $this->getRequest()->getSession());
+        } catch (InvalidPaymentException $e) {
+            // The payment mode chosen cannot take this order any more (a module that went unavailable, a
+            // mode a module refuses for the cart, a gift card that can no longer pay its share): the buyer
+            // picks again on the payment step, with the reason, and not a 500.
+            $this->addFlash('error', $e->getMessage());
+
+            throw new RedirectException($routes->pathFor(CheckoutStep::CODE_PAYMENT), Response::HTTP_FOUND, $e->getMessage());
         } catch (MissingAddressException|InvalidDeliveryException|IncompleteInvoiceAddressException|MissingConsentException $e) {
             // The rule, not the greyed-out button: a request that reaches here without a
             // carrier, without the legal identifiers of a business invoice or without the
