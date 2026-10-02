@@ -18,6 +18,7 @@ use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Service\DeliveryDateBridge;
 use FlexyBundle\Service\ModuleStepSettlement;
 use Propel\Runtime\Exception\PropelException;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
@@ -31,11 +32,13 @@ use Thelia\Domain\Checkout\Exception\EmptyCartException;
 use Thelia\Domain\Checkout\Exception\IncompleteInvoiceAddressException;
 use Thelia\Domain\Checkout\Exception\MissingAddressException;
 use Thelia\Domain\Checkout\Exception\MissingConsentException;
+use Thelia\Domain\Checkout\Service\CheckoutPaymentOffer;
 use Thelia\Domain\Checkout\Service\CheckoutProgressionService;
 use Thelia\Domain\Checkout\Service\ConsentGuard;
 use Thelia\Domain\Checkout\Service\Step\CheckoutStepProviderInterface;
 use Thelia\Model\Cart;
 use Thelia\Model\CheckoutStep;
+use Thelia\Model\ModuleQuery;
 
 /**
  * The button that leads out of a step, live until the step is settled.
@@ -88,6 +91,7 @@ class Base
         private readonly ConsentGuard $consentGuard,
         private readonly CartGuard $cartGuard,
         private readonly DeliveryDateBridge $deliveryDates,
+        private readonly ContainerInterface $container,
         #[AutowireIterator('thelia.checkout.step_provider')]
         private readonly iterable $stepProviders = [],
     ) {
@@ -109,6 +113,38 @@ class Base
     public function getIsValid(): bool
     {
         return $this->verdict()['valid'];
+    }
+
+    /**
+     * The code of the payment module the buyer chose, when it is a wallet that only takes
+     * express payment: the button then gives its place to the wallet's own button, which
+     * opens the sheet and places the order once paid. The checkout never places an order
+     * with such a module itself.
+     *
+     * Null for every other module, which the button places as it always did, and on any
+     * step but the payment step.
+     */
+    #[LiveListener(CheckoutEvents::SET_PAYMENT_MODULE_ID)]
+    #[LiveListener('updateNextButton')]
+    public function getExpressPaymentModuleCode(): ?string
+    {
+        // Only the button that places the order gives way: the one of an earlier step leads
+        // on through the checkout, whatever payment method the cart already carries.
+        if (CheckoutStep::CODE_PAYMENT !== $this->step) {
+            return null;
+        }
+
+        try {
+            $moduleId = $this->cartFacade->getOrCreateFromSession()->getPaymentModuleId();
+            $module = null === $moduleId ? null : ModuleQuery::create()->findPk($moduleId);
+            $instance = $module?->getPaymentModuleInstance($this->container);
+
+            return null !== $instance && !CheckoutPaymentOffer::canBePaidAtCheckout($instance)
+                ? (string) $module->getCode()
+                : null;
+        } catch (PropelException) {
+            return null;
+        }
     }
 
     /**
