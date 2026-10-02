@@ -137,6 +137,9 @@
   --font-size-h6-m: 1.125rem;
   --line-height-h6-m: 1.625rem;
 
+  /* "Drop Shadow" in the mockups. */
+  --shadow-raised: 0 3px 5px #5454541f;
+
   /* container-double-3's column widths — shared with anything that must align to its slots without duplicating the layout (e.g. Subheader-image) */
   --container-double-3-col-a-md: 25.375rem; /* 406px */
   --container-double-3-col-b-md: 12.875rem; /* 206px */

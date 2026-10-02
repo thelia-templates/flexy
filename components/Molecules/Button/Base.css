@@ -55,6 +55,16 @@
   --button-disabled-border--error: var(--color-error-lightest) solid 1px;
   --button-focus-outline--error: var(--color-error-dark);
 
+  /* Over a visual or an overlay. */
+  --button-color--raised: var(--color-black);
+  --button-background--raised: var(--color-white);
+  --button-border--raised: none;
+  --button-hover-color--raised: var(--color-grey-dark);
+  --button-hover-background--raised: var(--color-grey-lightest);
+  --button-disabled-color--raised: var(--color-grey-lighter);
+  --button-disabled-background--raised: var(--color-white);
+  --button-disabled-border--raised: none;
+
   --button-border-radius--rectangle: 0.5rem;
   --button-border-radius--sharp: 0;
   --button-border-radius--round: 100%;
@@ -81,6 +91,10 @@
     font-family: var(--button-font-family);
     font-weight: var(--button-font-weight);
     cursor: pointer;
+  }
+
+  .button-style--raised {
+    box-shadow: var(--shadow-raised);
   }
 
   /* 1.5em is the label's line box at all three sizes (18/21/24px), the ratio being exactly 1.5.
