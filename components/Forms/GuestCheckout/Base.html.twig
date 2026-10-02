@@ -95,12 +95,22 @@
            nobody can read is one the merchant cannot show was given. It is the content the
            terms and conditions consent points at, the same one the payment step links to,
            so the link disappears on a shop that has not set one, or has hidden it, rather
-           than pointing at nothing. #}
+           than pointing at nothing. A shop that still names its terms through the
+           deprecated terms_conditions_content_id setting only keeps its link. #}
         {% set terms = content_slot_first('consent.terms_and_conditions') %}
         {% if terms and terms.url %}
             <p class="paragraph-5 mt-2">
                 <a href="{{ terms.url }}" target="_blank" rel="noopener">{{ terms.label }}</a>
             </p>
+        {% else %}
+            {% set legalContents = attr('config', 'terms_conditions_content_id')
+                ? resources('/api/front/contents', {id: attr('config', 'terms_conditions_content_id'), visible: true})
+                : [] %}
+            {% for legalContent in legalContents %}
+                <p class="paragraph-5 mt-2">
+                    <a href="{{ legalContent.publicUrl }}" target="_blank" rel="noopener">{{ legalContent.i18ns.title }}</a>
+                </p>
+            {% endfor %}
         {% endif %}
     </div>
 
