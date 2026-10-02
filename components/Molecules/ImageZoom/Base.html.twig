@@ -1,0 +1,53 @@
+{# @block trigger The control that opens the overlay. The host styles and places it. #}
+{# @prop src string|null Visual to load. The host rewrites data-image-zoom-src to follow its own selection #}
+{# @prop alt string Alternative text of the visual. The host rewrites data-image-zoom-alt along with the source #}
+{% props src = null, alt = '' %}
+
+{% set controller = 'Molecules--ImageZoom--base' %}
+
+<div
+    class="{{ ('ImageZoom ' ~ attributes.render('class'))|tailwind_merge }}"
+    data-image-zoom-src="{{ src }}"
+    {% if alt %}data-image-zoom-alt="{{ alt }}"{% endif %}
+    {{ attributes.defaults({...stimulus_controller(controller)}).without('class') }}
+>
+    {% block trigger %}{% endblock %}
+
+    <dialog
+        class="ImageZoom-dialog"
+        aria-label="{{ 'Zoomed visual'|trans }}"
+        {{ stimulus_target(controller, 'dialog') }}
+        {{ stimulus_action(controller, 'pan', 'keydown') }}
+    >
+        {# Filled on open: rendering the visual here would download it with the page. #}
+        <div class="ImageZoom-canvas" {{ stimulus_target(controller, 'canvas') }}></div>
+
+        <twig:Molecules:Button:Base
+            color="raised"
+            round
+            size="small"
+            class="ImageZoom-close"
+            aria-label="{{ 'Close'|trans }}"
+            autofocus
+            {{ ...stimulus_action(controller, 'close', 'click') }}
+        ><span class="icon">{{ ux_icon('close') }}</span></twig:Molecules:Button:Base>
+
+        <div class="ImageZoom-controls">
+            <twig:Molecules:Button:Base
+                color="raised"
+                round
+                size="small"
+                aria-label="{{ 'Zoom out'|trans }}"
+                {{ ...stimulus_action(controller, 'zoomOut', 'click') }}
+            ><span class="icon">{{ ux_icon('minus') }}</span></twig:Molecules:Button:Base>
+
+            <twig:Molecules:Button:Base
+                color="raised"
+                round
+                size="small"
+                aria-label="{{ 'Zoom in'|trans }}"
+                {{ ...stimulus_action(controller, 'zoomIn', 'click') }}
+            ><span class="icon">{{ ux_icon('plus') }}</span></twig:Molecules:Button:Base>
+        </div>
+    </dialog>
+</div>

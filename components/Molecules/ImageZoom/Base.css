@@ -1,0 +1,65 @@
+.ImageZoom-dialog {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+
+  /* Same veil as Molecules/Modal. */
+  &::backdrop {
+    background-color: rgb(0 0 0 / 0.53);
+  }
+}
+
+.ImageZoom-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/*
+ * Fills the canvas from its origin, as Panzoom's zoomToPoint assumes, or the picture drifts while
+ * zooming. contain, not scale-down: a capped picture would not grow with its box.
+ */
+.ImageZoom-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Panzoom handles the pinch itself: leave it every pointer event. */
+  touch-action: none;
+}
+
+.ImageZoom-close {
+  position: absolute;
+  top: 1.25rem;
+  inset-inline-end: 1.25rem;
+}
+
+.ImageZoom-controls {
+  position: absolute;
+  inset-inline-end: 1.25rem;
+  bottom: 1.25rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+/*
+ * These icons draw a third-size glyph in a 44px box: the drawing overflows the 16px icon box of
+ * the 40px button rather than shrinking. The button's padding is a utility this layer cannot
+ * override.
+ */
+.ImageZoom-dialog .button > span.icon {
+  width: 1rem;
+  height: 1rem;
+
+  svg {
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: -0.375rem;
+  }
+}

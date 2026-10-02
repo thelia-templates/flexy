@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Twig;
 
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use TheliaLibrary\Service\ImageService;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -31,11 +32,14 @@ use Twig\TwigFunction;
  * So the address is read through the same service `getImages()` reads it through, and the
  * tag is written here. One filter set, therefore one source and one `<img>`: a media served
  * through a `<picture>` at several breakpoints still belongs to `getImages()`.
+ *
+ * `media_image_url()` gives the address alone, for a visual the page only fetches on demand.
  */
 final class MediaImageExtension extends AbstractExtension
 {
     public function __construct(
         private readonly ImageService $imageService,
+        private readonly CacheManager $cacheManager,
     ) {
     }
 
@@ -43,6 +47,7 @@ final class MediaImageExtension extends AbstractExtension
     {
         return [
             new TwigFunction('media_image', $this->mediaImage(...), ['is_safe' => ['html']]),
+            new TwigFunction('media_image_url', $this->mediaImageUrl(...)),
         ];
     }
 
@@ -72,6 +77,23 @@ final class MediaImageExtension extends AbstractExtension
         }
 
         return $rendered.'>';
+    }
+
+    /**
+     * The address through one filter set, generated on its first request. getImages() writes the
+     * image and its modern formats at render, which a visual fetched on demand must not pay.
+     *
+     * @param array<string, mixed> $params img_id, source_type and filters, as taken by getImages()
+     */
+    public function mediaImageUrl(array $params): ?string
+    {
+        $path = $this->imageService->getImageDataWithType($params)[0]['path'] ?? '';
+
+        if (!\is_string($path) || '' === $path) {
+            return null;
+        }
+
+        return $this->cacheManager->getBrowserPath($path, $params['filters']);
     }
 
     private static function escape(string $value): string

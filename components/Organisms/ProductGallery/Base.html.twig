@@ -97,10 +97,15 @@
             <div class="splide__track">
                 <ul class="splide__list">
                     {% for item in media %}
+                        {# A video has nothing to enlarge: the controller hides the trigger on it. #}
                         <li
                             class="splide__slide"
                             {{ stimulus_target(galleryController, 'slide') }}
                             data-pse-ids="{{ item.pseIds|default([])|join(',') }}"
+                            {% if item.type != 'video' %}
+                                data-zoom-src="{{ media_image_url({img_id: item.id, source_type: 'product', filters: 'product_zoom'}) }}"
+                                data-zoom-alt="{{ item.alt }}"
+                            {% endif %}
                         >
                             {% if item.type == 'video' %}
                                 <twig:Organisms:VideoPlayer:Base
@@ -123,15 +128,43 @@
 
             {% if media|length > 1 %}
                 <div class="splide__arrows">
-                    {# Previous/next along the line of reading: turned round in a right-to-left page. #}
-                    <button class="splide__arrow splide__arrow--prev {{ icon_direction.mirror_class('arrow-left') }}" aria-label="{{ 'Previous visual'|trans }}">
-                        {{ ux_icon('arrow-left') }}
-                    </button>
-                    <button class="splide__arrow splide__arrow--next {{ icon_direction.mirror_class('arrow-right') }}" aria-label="{{ 'Next visual'|trans }}">
-                        {{ ux_icon('arrow-right') }}
-                    </button>
+                    {# Previous/next along the line of reading: turned round in a right-to-left page.
+                       Set here: a component tag's content does not see this template's imports. #}
+                    {% set previousMirror = icon_direction.mirror_class('arrow-left') %}
+                    {% set nextMirror = icon_direction.mirror_class('arrow-right') %}
+                    <twig:Molecules:Button:Base
+                        color="raised"
+                        round
+                        size="small"
+                        class="splide__arrow splide__arrow--prev"
+                        aria-label="{{ 'Previous visual'|trans }}"
+                    ><span class="icon {{ previousMirror }}">{{ ux_icon('arrow-left') }}</span></twig:Molecules:Button:Base>
+                    <twig:Molecules:Button:Base
+                        color="raised"
+                        round
+                        size="small"
+                        class="splide__arrow splide__arrow--next"
+                        aria-label="{{ 'Next visual'|trans }}"
+                    ><span class="icon {{ nextMirror }}">{{ ux_icon('arrow-right') }}</span></twig:Molecules:Button:Base>
                 </div>
             {% endif %}
         </section>
+
+        {# Inside the ignored block: a variant re-render must neither reset the source nor close
+           the overlay. Hidden until the controller points it at a slide. #}
+        {% if media is not empty %}
+            <twig:Molecules:ImageZoom:Base hidden>
+                <twig:block name="trigger">
+                    <twig:Molecules:Button:Base
+                        color="raised"
+                        round
+                        size="small"
+                        class="ProductGallery-zoom"
+                        aria-label="{{ 'Zoom on the visual'|trans }}"
+                        {{ ...stimulus_action('Molecules--ImageZoom--base', 'open', 'click') }}
+                    ><span class="icon">{{ ux_icon('zoom') }}</span></twig:Molecules:Button:Base>
+                </twig:block>
+            </twig:Molecules:ImageZoom:Base>
+        {% endif %}
     </div>
 </div>

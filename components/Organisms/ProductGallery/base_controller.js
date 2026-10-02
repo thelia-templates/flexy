@@ -144,6 +144,22 @@ class BaseController extends Controller {
     });
 
     this.announceActiveSlide(index);
+    this.pointZoomAt(this.slideTargets[Number(index)]);
+  }
+
+  /** The overlay reads these on open: they are its whole contract. */
+  pointZoomAt(slide) {
+    const zoom = this.element.querySelector(".ImageZoom");
+
+    if (!zoom) {
+      return;
+    }
+
+    const src = slide?.dataset.zoomSrc ?? "";
+
+    zoom.dataset.imageZoomSrc = src;
+    zoom.dataset.imageZoomAlt = slide?.dataset.zoomAlt ?? "";
+    zoom.hidden = src === "";
   }
 
   /**

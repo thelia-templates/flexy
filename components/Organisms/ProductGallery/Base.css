@@ -23,6 +23,8 @@
     position: absolute;
     top: 1rem;
     inset-inline-start: 1rem;
+    /* Wraps before the zoom button: its 40px, its inset and a gap. */
+    inset-inline-end: calc(1rem + 2.5rem + 0.625rem);
     z-index: 1;
     display: flex;
     flex-wrap: wrap;
@@ -46,6 +48,33 @@
 
     @variant md {
       grid-column: 2 / 7;
+    }
+  }
+
+  /* Across the visual from the tags. */
+  .ProductGallery-zoom {
+    position: absolute;
+    top: 1rem;
+    inset-inline-end: 1rem;
+    z-index: 1;
+  }
+
+  /* 16px icon, as in the mockups: a 40px button. */
+  .ProductGallery-zoom > span.icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* arrow-right.svg declares a 24x12 size, arrow-left.svg none: the width goes on the SVG. */
+  .ProductGallery .splide__arrow > span.icon {
+    display: flex;
+    align-items: center;
+    width: 1rem;
+    height: 1rem;
+
+    svg {
+      width: 100%;
+      height: auto;
     }
   }
 
@@ -220,26 +249,5 @@
 
   @variant sm {
     display: flex;
-  }
-}
-
-.ProductGallery .splide__arrow {
-  position: static;
-  box-sizing: content-box;
-  padding: 1rem 1.5rem;
-  color: var(--color-black);
-  background: none;
-  border-radius: 0;
-  transform: none;
-  opacity: 1;
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.5;
-  }
-
-  svg {
-    width: 1.5rem;
-    height: 0.75rem;
   }
 }

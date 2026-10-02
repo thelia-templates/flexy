@@ -1,0 +1,24 @@
+<div class="Story">
+
+    <div class="Story-section">
+        <h4 class="Story-title">Base</h4>
+        <span class="Story-label">
+            Only the trigger shows until the overlay opens. Drag to pan, pinch or use the wheel to
+            zoom; the two controls step through the same scale and the arrow keys move the visual.
+            The host renders and places the trigger: this one is a plain button.
+        </span>
+        <twig:Molecules:ImageZoom:Base
+            :src="asset('images/placeholder2.webp')"
+            alt="A placeholder visual"
+        >
+            <twig:block name="trigger">
+                <twig:Molecules:Button:Base
+                    {{ ...stimulus_action('Molecules--ImageZoom--base', 'open', 'click') }}
+                >
+                    Zoom on the visual
+                </twig:Molecules:Button:Base>
+            </twig:block>
+        </twig:Molecules:ImageZoom:Base>
+    </div>
+
+</div>

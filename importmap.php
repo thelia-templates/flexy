@@ -67,4 +67,7 @@ return [
         'version' => '4.1.4',
         'type' => 'css',
     ],
+    '@panzoom/panzoom' => [
+        'version' => '4.6.2',
+    ],
 ];

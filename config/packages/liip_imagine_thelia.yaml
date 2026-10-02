@@ -63,6 +63,10 @@ liip_imagine:
     product_gallery_thumbnail:
       filters:
         thumbnail: { size: [160, 160], mode: inset }
+    # Fetched by the zoom overlay on open. Capped: nothing bounds the size of an upload.
+    product_zoom:
+      filters:
+        thumbnail: { size: [2400, 2400], mode: inset }
     article_card:
       filters:
         thumbnail: { size: [480, 320], mode: outbound }

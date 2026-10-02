@@ -62,6 +62,7 @@
   @import "../../components/Molecules/MenuItem/Base.css";
   @import "../../components/Molecules/HeaderButton/Base.css";
   @import "../../components/Molecules/Modal/Base.css";
+  @import "../../components/Molecules/ImageZoom/Base.css";
   @import "../../components/Molecules/FilterPill/Base.css";
   @import "../../components/Molecules/FilterList/Base.css";
   @import "../../components/Molecules/FilterSelect/Base.css";
