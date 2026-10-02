@@ -33,30 +33,35 @@ class PasswordController extends FlexyController
     #[Route('/forgotten', name: 'forgotten', methods: ['GET'])]
     public function forgotten(): Response
     {
+        if ($this->getSecurityContext()->hasAuthenticatedCustomerUser()) {
+            return $this->generateRedirect($this->generateUrl('account_index'));
+        }
+
         return $this->render('password-forgotten');
     }
 
     #[Route('/forgotten', name: 'forgotten_send', methods: ['POST'])]
     public function forgottenSend(EventDispatcherInterface $eventDispatcher, SessionInterface $session): ?RedirectResponse
     {
+        // A guest checking out has no account to sign into, and keeps the page.
+        if ($this->getSecurityContext()->hasAuthenticatedCustomerUser()) {
+            return $this->generateRedirect($this->generateUrl('account_index'));
+        }
+
         $passwordLost = $this->createForm('thelia_customer_lost_password');
 
-        if (!$this->getSecurityContext()->hasCustomerUser()) {
-            try {
-                $form = $this->validateForm($passwordLost);
-                $email = $form->get('email')->getData();
-                $eventDispatcher->dispatch(new LostPasswordEvent($email), TheliaEvents::LOST_PASSWORD);
-                $session->set('reset_email', $email);
+        try {
+            $form = $this->validateForm($passwordLost);
+            $email = $form->get('email')->getData();
+            $eventDispatcher->dispatch(new LostPasswordEvent($email), TheliaEvents::LOST_PASSWORD);
+            $session->set('reset_email', $email);
 
-                return $this->generateSuccessRedirect($passwordLost);
-            } catch (FormValidationException $e) {
-                // The form only checks the shape of the address, and the shop stays silent
-                // about whether it has an account, so what is left here is a genuinely
-                // unusable submission the visitor can fix.
-                $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
-            }
-        } else {
-            $message = $this->getTranslator()->trans("You're currently logged in. Please log out before requesting a new password.");
+            return $this->generateSuccessRedirect($passwordLost);
+        } catch (FormValidationException $e) {
+            // The form only checks the shape of the address, and the shop stays silent
+            // about whether it has an account, so what is left here is a genuinely
+            // unusable submission the visitor can fix.
+            $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
         }
 
         $passwordLost->setErrorMessage($message);
@@ -66,7 +71,7 @@ class PasswordController extends FlexyController
             return $this->generateErrorRedirect($passwordLost);
         }
 
-        return null;
+        return $this->generateRedirect($this->generateUrl('password_forgotten'));
     }
 
     #[Route('/forgotten/confirm', name: 'reset_link', methods: ['GET'])]
