@@ -85,6 +85,7 @@ class Base
     }
 
     #[LiveListener('cross_selling_add_to_cart')]
+    #[LiveListener(CheckoutEvents::ADD_ITEM_EVENT)]
     public function sync(): void
     {
         $this->fetchCart();
