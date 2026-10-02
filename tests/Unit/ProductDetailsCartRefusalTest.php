@@ -30,11 +30,14 @@ use Thelia\Core\Form\FormServiceInterface;
 use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Cart\Exception\InvalidCartException;
 use Thelia\Domain\Cart\Exception\NotEnoughStockException;
+use Thelia\Domain\Cart\Service\CartGiftWrappingService;
 use Thelia\Domain\Cart\Service\CartItemService;
 use Thelia\Domain\Cart\Service\CartRetriever;
 use Thelia\Domain\Cart\Service\CartSelectionService;
+use Thelia\Domain\Checkout\Service\GiftWrappingProvider;
 use Thelia\Domain\Media\AltTextResolver;
 use Thelia\Domain\Shipping\Service\PostageHandler;
+use Thelia\Domain\Taxation\TaxEngine\TaxCalculatorFactoryInterface;
 use Thelia\Model\Cart;
 use Thelia\Model\CartItem;
 
@@ -119,7 +122,13 @@ final class ProductDetailsCartRefusalTest extends TestCase
             self::createStub(DataAccessService::class),
             self::createStub(ProductSaleElementsAccessService::class),
             $formService,
-            new CartFacade($cartItems, self::createStub(CartSelectionService::class), self::createStub(PostageHandler::class), $cartRetriever),
+            new CartFacade(
+                $cartItems,
+                self::createStub(CartSelectionService::class),
+                self::createStub(PostageHandler::class),
+                $cartRetriever,
+                new CartGiftWrappingService(new GiftWrappingProvider(self::createStub(TaxCalculatorFactoryInterface::class))),
+            ),
             new RequestStack(),
             new RunningSaleResolver(self::createStub(DataAccessService::class)),
             new AltTextResolver(),
