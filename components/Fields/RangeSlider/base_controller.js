@@ -49,7 +49,11 @@ export default class extends Controller {
     const low = Math.min(Number(this.minTarget.value), Number(this.maxTarget.value));
     const high = Math.max(Number(this.minTarget.value), Number(this.maxTarget.value));
 
-    this.progressTarget.style.left = ((low - min) / range) * 100 + "%";
+    // The native range inputs mirror themselves under a right-to-left page: the low value sits at
+    // the right edge. The bar has to start from the same edge, so the offset is written as an
+    // inline one - resolved against the element's own direction, which it inherits from the page -
+    // rather than as a physical `left`, which would draw the mirror of the selected interval.
+    this.progressTarget.style.insetInlineStart = ((low - min) / range) * 100 + "%";
     this.progressTarget.style.width = ((high - low) / range) * 100 + "%";
   }
 }

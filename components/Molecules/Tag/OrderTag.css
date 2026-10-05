@@ -25,7 +25,7 @@
       width: 0.4375rem;
       height: 0.4375rem;
       border-radius: 100%;
-      margin-right: 0.3125rem;
+      margin-inline-end: 0.3125rem;
       background-color: var(--order-tag-dot-color);
     }
   }

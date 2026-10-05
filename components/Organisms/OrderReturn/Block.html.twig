@@ -7,11 +7,14 @@
                 {% for orderReturn in this.returns %}
                     <li class="flex flex-wrap items-center justify-between gap-3 border border-grey-lighter rounded-lg p-4">
                         <div class="flex flex-col gap-1">
+                            {# `customText` is a text slot, so the reference goes in raw: the same
+                               rule as the <title> and the breadcrumb of account-return. Wherever
+                               a reference is rendered as markup it is isolated instead. #}
                             <twig:Molecules:Link:Base
                                 href="{{ path('account_return', {returnId: orderReturn.id}) }}"
                                 customText="{{ 'Return %ref%'|trans({'%ref%': orderReturn.ref}) }}"
                             />
-                            <span class="paragraph-3">{{ orderReturn.createdAt|format_date() }}</span>
+                            <span class="paragraph-3"><bdi>{{ orderReturn.createdAt|format_date() }}</bdi></span>
                         </div>
                         <twig:Molecules:Tag:OrderReturn
                             status="{{ orderReturn.orderReturnStatus.code|default('') }}"

@@ -5,7 +5,7 @@
 {% block title %}{{ address.label }}{% endblock %}
 
 {% block body %}
-    <div class="pt-2 pb-3 md:pt-5 md:pl-5">
+    <div class="pt-2 pb-3 md:pt-5 md:ps-5">
         <twig:Molecules:Breadcrumb:Base :items="[
             {title: 'My addresses'|trans, url: path('account_addresses')},
             {title: address.label},

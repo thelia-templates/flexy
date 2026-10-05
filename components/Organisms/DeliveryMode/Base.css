@@ -29,7 +29,7 @@
 
   .RadioButton {
     margin-top: 0.25rem;
-    margin-right: 0.5rem;
+    margin-inline-end: 0.5rem;
     visibility: hidden;
     max-width: 0;
 

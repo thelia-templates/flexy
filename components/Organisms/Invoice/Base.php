@@ -142,6 +142,7 @@ class Base
 
         $this->emit('hideShowAddressList');
         $this->emit('updateNextButton');
+        $this->emit('syncSummary');
     }
 
     /**

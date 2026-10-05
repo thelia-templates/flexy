@@ -19,6 +19,7 @@ use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
+use Thelia\Action\Coupon;
 use Thelia\Api\Service\DataAccess\AttributeAccessService;
 
 #[AsLiveComponent]
@@ -29,6 +30,7 @@ class Checkout
 
     public function __construct(
         private readonly AttributeAccessService $attributeAccessService,
+        private readonly Coupon $coupon,
     ) {
     }
 
@@ -41,6 +43,8 @@ class Checkout
     #[LiveListener('syncSummary')]
     public function getSummary(): array
     {
+        $this->coupon->reconcileWithVatExemption();
+
         return [
             'item_count' => $this->attributeAccessService->attributeCart('item_count'),
             'raw_taxed_total_price' => $this->attributeAccessService->attributeCart('raw_taxed_total_price'),
@@ -53,6 +57,8 @@ class Checkout
             'taxed_gift_wrapping' => $this->attributeAccessService->attributeCart('taxed_gift_wrapping'),
             'discounts' => $this->readDiscounts(),
             'coupons' => $this->attributeAccessService->attributeCoupon('coupon_list'),
+            'invoice_vat_number' => $this->attributeAccessService->attributeCart('invoice_vat_number'),
+            'vat_exemption_state' => $this->attributeAccessService->attributeCart('vat_exemption_state'),
         ];
     }
 
@@ -138,6 +144,11 @@ class Checkout
         $taxAmount = $this->attributeAccessService->attributeCart('total_tax_amount');
 
         return $taxAmount !== null && $taxAmount > 0;
+    }
+
+    public function isVatExempted(): bool
+    {
+        return (bool) $this->attributeAccessService->attributeCart('is_vat_exempted');
     }
 
     public function hasDiscount(): bool

@@ -46,10 +46,10 @@
                     <span class="AddToCartToast-secondaryTitle">{{ secondaryTitle }}</span>
                 {% endif %}
                 {% for attribute, value in attributesAv %}
-                    <span>{{ attribute }} : {{ value }}</span>
+                    <span><bdi>{{ attribute }} : {{ value }}</bdi></span>
                 {% endfor %}
                 {% if quantity %}
-                    <span>{{ 'Quantity:'|trans }} {{ quantity }}</span>
+                    <span><bdi>{{ 'Quantity:'|trans }} {{ quantity }}</bdi></span>
                 {% endif %}
             </div>
         </div>

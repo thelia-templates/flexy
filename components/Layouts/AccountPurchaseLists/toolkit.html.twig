@@ -1,0 +1,20 @@
+{# The lists are read for the signed-in customer, which the toolkit has none of: the
+   story passes them in, one the customer may change and one it may only read. The empty
+   state is left out: the toolkit does not resolve `source('assets/images/…')`. #}
+{% set sampleLists = [
+    {id: 1, title: 'Monthly restock', itemCount: 24, updatedAt: date('2026-09-28'), writable: true},
+    {id: 2, title: 'Workshop consumables', itemCount: 0, updatedAt: null, writable: false},
+] %}
+
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">Base (the purchase lists of the account)</h4>
+        <p class="Story-label">
+            The creation form, then one row per list. Duplicating is open on every list the
+            customer can see, deleting only on the ones it may change.
+        </p>
+        <div class="Story-stage Story-stage--roomy">
+            <twig:Layouts:AccountPurchaseLists:Base :lists="sampleLists" />
+        </div>
+    </div>
+</div>

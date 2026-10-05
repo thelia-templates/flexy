@@ -101,7 +101,7 @@
     font-size: var(--text-xs);
     line-height: var(--text-xs--line-height);
     min-width: 2ch;
-    text-align: left;
+    text-align: start;
   }
 
   .Countdown--sm .Countdown-label {

@@ -17,6 +17,7 @@ namespace FlexyBundle\Service;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Event\Address\AddressCreateOrUpdateEvent;
 use Thelia\Core\Event\TheliaEvents;
+use Thelia\Domain\Legal\CompanyIdentifier;
 use Thelia\Model\AddressQuery;
 use Thelia\Model\Customer;
 
@@ -111,6 +112,8 @@ final readonly class GuestAddressCreator
             $firstname,
             $lastname,
             self::text($address, 'company'),
+            (string) CompanyIdentifier::forCompany(self::text($address, 'company'), CompanyIdentifier::normalizeSiret(self::text($address, 'siret'))),
+            (string) CompanyIdentifier::forCompany(self::text($address, 'company'), CompanyIdentifier::normalizeVatNumber(self::text($address, 'vat_number'))),
             self::text($address, 'address1'),
             self::text($address, 'address2'),
             self::text($address, 'zipcode'),
@@ -127,6 +130,8 @@ final readonly class GuestAddressCreator
                 (string) $candidate->getFirstname(),
                 (string) $candidate->getLastname(),
                 (string) $candidate->getCompany(),
+                (string) $candidate->getSiret(),
+                (string) $candidate->getVatNumber(),
                 (string) $candidate->getAddress1(),
                 (string) $candidate->getAddress2(),
                 (string) $candidate->getZipcode(),

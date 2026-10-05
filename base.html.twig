@@ -1,7 +1,15 @@
 {% set breadcrumb = SEOneBreadcrumb() %}
 {% set logo = media_url('logo') %}
 <!DOCTYPE html>
-<html lang="{{ lang_code }}">
+{# lang_direction is "ltr" or "rtl", never empty, resolved server-side from the language of
+   the request - never from a query parameter. This attribute is the only place the theme
+   states its direction: Tailwind's rtl: variants key on it, and so does the browser. No
+   component recomputes it, which matters because lang_code and lang_direction are set by
+   the page parser and are absent when a LiveComponent re-renders alone on /_components.
+
+   The |default('ltr') fallback keeps the theme renderable on a shop whose TwigEngine module
+   predates the variable: the attribute is then simply always "ltr", as it was before. #}
+<html lang="{{ lang_code }}" dir="{{ lang_direction|default('ltr') }}">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -66,6 +74,17 @@
         {% endblock %}
 
         {{ theme_hook('layout.head.bottom', {breadcrumb}) }}
+
+        {# A hook named after the view, for what only one page needs in its head (a stylesheet
+           for the product page, a script for the checkout): `layout.head.index`,
+           `layout.head.product`, `layout.head.checkout-cart`... The view is the request's
+           `_view`: the core sets it for the pages it routes, FlexyController for the ones it
+           renders, from the template name. #}
+        {% set view = app.request.attributes.get('_view') %}
+        {% if view %}
+            {{ theme_hook('layout.head.' ~ view, {breadcrumb}) }}
+        {% endif %}
+
         {# Page-level schema.org payloads (WebSite, ContactPage, LocalBusiness…) #}
         {% block structured_data %}{% endblock %}
     </head>

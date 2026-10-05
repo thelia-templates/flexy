@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'My purchase lists'|trans }}{% endblock %}
+
+{% block body %}
+    {% set notices = {
+        deleted: {variant: 'success', text: 'The list has been deleted.'|trans},
+        error: {variant: 'error', text: 'The list could not be created: its name is empty or longer than 255 characters, or the account already keeps 100 lists.'|trans},
+    } %}
+
+    <twig:Layouts:Subheader:Account
+        title="{{ 'My purchase lists'|trans }}"
+        selected="purchase-lists"
+        :breadcrumb="[
+            {title: 'My account'|trans, url: path('account_index')},
+            {title: 'My purchase lists'|trans},
+        ]"
+    />
+
+    <div class="container-l pt-6 pb-20 md:pt-11 md:pb-30">
+        <div class="flex flex-col gap-4 mb-6">
+            {% for param, notice in notices %}
+                {% if app.request.query.get(param) %}
+                    <twig:Molecules:SnackBar:Base variant="{{ notice.variant }}" withIcon text="{{ notice.text }}" />
+                {% endif %}
+            {% endfor %}
+        </div>
+        <twig:Layouts:AccountPurchaseLists:Base />
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}

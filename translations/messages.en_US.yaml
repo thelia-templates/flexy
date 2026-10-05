@@ -236,7 +236,6 @@ Remember to check your spam, then try to resend the e-mail.: Remember to check y
 resend e-mail: resend e-mail
 A link has just been sent to your email address.: A link has just been sent to your email address.
 Wrong email or password. Please try again: Wrong email or password. Please try again
-You're currently logged in. Please log out before requesting a new password.: You're currently logged in. Please log out before requesting a new password.
 A new activation code has been sent to your email address. Please check your mailbox.: A new activation code has been sent to your email address. Please check your mailbox.
 Activation code must contain only digits: Activation code must contain only digits
 Reset your password: Reset your password
@@ -493,3 +492,86 @@ No gift wrapping: No gift wrapping
 Message for the recipient: Message for the recipient
 gift_message_characters_left: '%count% characters left'
 The message must be %max characters at most.: The message must be %max characters at most.
+
+# VAT exemption (Summary/Checkout, Summary/Order, AddressCard)
+VAT verified on %date%: VAT verified on %date%
+VAT exempted (reverse charge), buyer VAT number %number%: VAT exempted (reverse charge), buyer VAT number %number%
+'The verification of VAT number %number% has expired: the order is no longer exempted from VAT.': 'The verification of VAT number %number% has expired: the order is no longer exempted from VAT.'
+'VAT number %number% is not verified: the order is not exempted from VAT.': 'VAT number %number% is not verified: the order is not exempted from VAT.'
+"The stock of %reference% ran out while your order was placed. Please adjust your cart.": "The stock of %reference% ran out while your order was placed. Please adjust your cart."
+Messages from the shop: Messages from the shop
+Ready: Ready
+'Choose the variant': 'Choose the variant'
+'Unknown reference': 'Unknown reference'
+'Quantity not available': 'Quantity not available'
+'Too many checks in a short time. Please wait a minute and try again.': 'Too many checks in a short time. Please wait a minute and try again.'
+'The table could not be checked: a reference is too long, or the table holds more than 500 lines.': 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.'
+'The text is too long: a table takes at most 500 lines.': 'The text is too long: a table takes at most 500 lines.'
+'expected a reference and a quantity': 'expected a reference and a quantity'
+'the quantity is not a whole number from 1 to %max%': 'the quantity is not a whole number from 1 to %max%'
+'%count% line(s) added to your cart.': '%count% line(s) added to your cart.'
+'See my cart': 'See my cart'
+'Paste from a spreadsheet or import a CSV file': 'Paste from a spreadsheet or import a CSV file'
+'The file is too large: a table takes at most 500 lines.': 'The file is too large: a table takes at most 500 lines.'
+'Only a CSV file can be imported.': 'Only a CSV file can be imported.'
+'One line per product: the reference, then the quantity, separated by a tab, a semicolon or a comma.': 'One line per product: the reference, then the quantity, separated by a tab, a semicolon or a comma.'
+'Lines to import': 'Lines to import'
+'Import these lines': 'Import these lines'
+'Or choose a CSV file': 'Or choose a CSV file'
+'%count% line(s) could not be read:': '%count% line(s) could not be read:'
+'Line %line%': 'Line %line%'
+'%count% reference(s) match several variants. The default variant is selected when there is one: check the choices, then keep them.': '%count% reference(s) match several variants. The default variant is selected when there is one: check the choices, then keep them.'
+'Lines of the quick order': 'Lines of the quick order'
+Reference: Reference
+Product: Product
+'Unit price': 'Unit price'
+Status: Status
+Actions: Actions
+'Reference, line %line%': 'Reference, line %line%'
+'Quantity, line %line%': 'Quantity, line %line%'
+'Enter a whole number from 1 to %max%.': 'Enter a whole number from 1 to %max%.'
+'Variant, line %line%': 'Variant, line %line%'
+'%quantity% in stock': '%quantity% in stock'
+'To check': 'To check'
+'Remove line %line%': 'Remove line %line%'
+'Add a line': 'Add a line'
+'Keep these choices and check': 'Keep these choices and check'
+'Check the table': 'Check the table'
+'Add %count% line(s) to cart': 'Add %count% line(s) to cart'
+'Quick order': 'Quick order'
+'Type the references you want and their quantities, or paste them from a spreadsheet, then check the table before adding it to your cart.': 'Type the references you want and their quantities, or paste them from a spreadsheet, then check the table before adding it to your cart.'
+default: default
+'the reference is longer than 255 characters': 'the reference is longer than 255 characters'
+'The list has been saved.': 'The list has been saved.'
+'Save the list': 'Save the list'
+'Name of the new list': 'Name of the new list'
+'Create the list': 'Create the list'
+'%count% list(s) out of %max%': '%count% list(s) out of %max%'
+'%count% line(s)': '%count% line(s)'
+'changed on %date%': 'changed on %date%'
+Duplicate: Duplicate
+'Delete the list « %title% »?': 'Delete the list « %title% »?'
+'You have no purchase lists yet': 'You have no purchase lists yet'
+'Create one above to keep the references you order often.': 'Create one above to keep the references you order often.'
+'My purchase lists': 'My purchase lists'
+'The list has been deleted.': 'The list has been deleted.'
+'The list could not be created: its name is empty or longer than 255 characters, or the account already keeps 100 lists.': 'The list could not be created: its name is empty or longer than 255 characters, or the account already keeps 100 lists.'
+'The list has been created. Add its lines below, then save it.': 'The list has been created. Add its lines below, then save it.'
+'The list has been renamed.': 'The list has been renamed.'
+'This is a copy of the list.': 'This is a copy of the list.'
+'The list could not be renamed: its name is empty or longer than 255 characters.': 'The list could not be renamed: its name is empty or longer than 255 characters.'
+'Name of the list': 'Name of the list'
+Rename: Rename
+'Duplicate the list': 'Duplicate the list'
+'Save as a purchase list': 'Save as a purchase list'
+'Purchase list': 'Purchase list'
+'A new list': 'A new list'
+'Only used for a new list.': 'Only used for a new list.'
+'On an existing list, a reference already there adds its quantity to the line.': 'On an existing list, a reference already there adds its quantity to the line.'
+'Save': 'Save'
+'The list could not be saved: its name is empty or longer than 255 characters, or the account already keeps 100 lists.': 'The list could not be saved: its name is empty or longer than 255 characters, or the account already keeps 100 lists.'
+'The list could not be saved: a list holds at most 500 lines.': 'The list could not be saved: a list holds at most 500 lines.'
+'There is no line to save: type a reference and a whole quantity above zero.': 'There is no line to save: type a reference and a whole quantity above zero.'
+'The lines have been added to the list.': 'The lines have been added to the list.'
+'Cart of %date%': 'Cart of %date%'
+'Order %ref%': 'Order %ref%'

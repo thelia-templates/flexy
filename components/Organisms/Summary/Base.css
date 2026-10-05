@@ -9,8 +9,8 @@
 
 .Summary-list {
   background: var(--color-white);
-  border-top-left-radius: var(--summary-border-radius);
-  border-top-right-radius: var(--summary-border-radius);
+  border-start-start-radius: var(--summary-border-radius);
+  border-start-end-radius: var(--summary-border-radius);
   padding-top: 0.5rem;
 }
 
@@ -33,7 +33,7 @@
 
   & > div:last-child {
     max-width: 7.5rem;
-    text-align: right;
+    text-align: end;
     color: var(--color-grey-dark);
   }
 
@@ -51,8 +51,8 @@
 
 .Summary-footer {
   background: var(--color-medium);
-  border-bottom-left-radius: var(--summary-border-radius);
-  border-bottom-right-radius: var(--summary-border-radius);
+  border-end-start-radius: var(--summary-border-radius);
+  border-end-end-radius: var(--summary-border-radius);
   padding-bottom: 1.25rem;
   color: var(--color-black);
 }
@@ -66,6 +66,6 @@
   font-weight: var(--font-weight-semibold);
 
   & > div:last-child {
-    text-align: right;
+    text-align: end;
   }
 }

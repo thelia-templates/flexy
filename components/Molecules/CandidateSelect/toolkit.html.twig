@@ -1,0 +1,21 @@
+{% set sameProduct = [
+    {productSaleElementsId: 11, ref: 'TSHIRT-01', isDefault: true, preselected: true, attributes: [{attribute: 'Size', value: 'M'}, {attribute: 'Colour', value: 'Blue'}]},
+    {productSaleElementsId: 12, ref: 'TSHIRT-01', isDefault: false, preselected: false, attributes: [{attribute: 'Size', value: 'L'}, {attribute: 'Colour', value: 'Blue'}]},
+    {productSaleElementsId: 13, ref: 'TSHIRT-01', isDefault: false, preselected: false, attributes: [{attribute: 'Size', value: 'XL'}, {attribute: 'Colour', value: 'Blue'}]},
+] %}
+{% set twoProducts = [
+    {productSaleElementsId: 21, ref: 'CUP-10', isDefault: true, preselected: false, attributes: []},
+    {productSaleElementsId: 31, ref: 'CUP-10', isDefault: true, preselected: false, attributes: [{attribute: 'Colour', value: 'Red'}]},
+] %}
+
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">Several variants of one product: the default one opens selected</h4>
+        <twig:Molecules:CandidateSelect:Base id="demo-candidate-same" label="Variant, line 1" :candidates="sameProduct" :value="11" class="max-w-md" />
+    </div>
+
+    <div class="Story-section">
+        <h4 class="Story-title">Variants of two products: nothing is selected</h4>
+        <twig:Molecules:CandidateSelect:Base id="demo-candidate-two" label="Variant, line 2" :candidates="twoProducts" class="max-w-md" />
+    </div>
+</div>

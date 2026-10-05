@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+{# The toolkit is rendered by a plain Symfony controller, not by the page parser, so the
+   `lang_direction` variable the theme shell reads is not assigned here - the function is, and it
+   reads the current locale. Without it the stories are always laid out left to right and the
+   toolkit cannot be used to look at a component in a right-to-left page. #}
+<html lang="{{ current_locale()|replace({'_': '-'}) }}" dir="{{ lang_direction() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

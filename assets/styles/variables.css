@@ -20,6 +20,9 @@
   --color-black: #282828;
   --color-white: #ffffff;
 
+  /* --color-base stays under the 3:1 contrast a focus indicator needs. */
+  --color-focus: var(--color-dark);
+
   --color-grey-darker: #424242;
   --color-grey-dark: #545454;
   --color-grey: #767676;

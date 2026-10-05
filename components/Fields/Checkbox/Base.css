@@ -9,7 +9,7 @@
   --checkbox-color: var(--color-black);
   --checkbox-hover: var(--color-grey-dark);
   --checkbox-disabled: var(--color-grey-lighter);
-  --color-checkbox-focus: #dc2626;
+  --color-checkbox-focus: var(--color-focus);
 
   display: inline-flex;
   align-items: center;

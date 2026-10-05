@@ -4,7 +4,7 @@
             <div class="DeliveryTracking-title">{{ 'Delivery tracking'|trans }}</div>
             {% if this.trackingRef %}
                 <div class="DeliveryTracking-desc">
-                    {{ 'Tracking number'|trans }} {{ this.trackingRef }}
+                    {{ 'Tracking number'|trans }} <span dir="ltr">{{ this.trackingRef }}</span>
                 </div>
             {% endif %}
         </div>

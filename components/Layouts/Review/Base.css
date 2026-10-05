@@ -19,8 +19,9 @@
     width: 16.9375rem;
     flex-shrink: 0;
 
+    /* Trailing gutter at the scrolling end of the strip. */
     &:last-child {
-      margin-right: 3rem;
+      margin-inline-end: 3rem;
     }
   }
 
@@ -33,7 +34,7 @@
     }
 
     &:last-child {
-      margin-right: 0;
+      margin-inline-end: 0;
     }
   }
 }

@@ -4,15 +4,15 @@
 <div class="{{ ('OrderCard ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
     <div class="justify-between 2xl:flex">
         <div>
-            <div class="OrderCard-title">{{ 'Order N°'|trans }} {{ order.ref }}</div>
-            <div class="OrderCard-date">{{ 'order placed on'|trans }} {{ order.createdAt|format_date() }}</div>
+            <div class="OrderCard-title">{{ 'Order N°'|trans }} <span dir="ltr">{{ order.ref }}</span></div>
+            <div class="OrderCard-date"><bdi>{{ 'order placed on'|trans }} {{ order.createdAt|format_date() }}</bdi></div>
         </div>
         <div class="flex justify-between mt-1 2xl:block 2xl:mt-0">
-            <div class="paragraph-3 text-black text-right">
-                {{ this.itemCount }} {{ (this.itemCount > 1 ? 'items' : 'item')|trans }}
+            <div class="paragraph-3 text-black text-end">
+                <bdi>{{ this.itemCount }} {{ (this.itemCount > 1 ? 'items' : 'item')|trans }}</bdi>
             </div>
             <div class="paragraph-1 font-semibold text-black">
-                {{ order.totalAmount|format_currency('EUR', locale: lang_code) }}
+                <span dir="ltr">{{ order.totalAmount|format_currency('EUR', locale: lang_code) }}</span>
             </div>
         </div>
     </div>
@@ -24,7 +24,7 @@
         />
         {% if order.deliveryDate is defined and order.deliveryDate %}
             <div class="OrderCard-delivery">
-                {{ 'Scheduled for delivery on'|trans }} {{ order.deliveryDate|format_date() }}
+                <bdi>{{ 'Scheduled for delivery on'|trans }} {{ order.deliveryDate|format_date() }}</bdi>
             </div>
         {% endif %}
     </div>
@@ -56,7 +56,7 @@
         <div class="OrderCard-nbImages" aria-hidden="true"></div>
     </div>
 
-    <div class="mt-6 text-center md:text-left">
+    <div class="mt-6 text-center md:text-start">
         <twig:Molecules:Button:Base
             text="{{ 'See order details'|trans }}"
             href="{{ path('account_order', {orderId: order.id}) }}"

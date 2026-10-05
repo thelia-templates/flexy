@@ -75,7 +75,8 @@
   padding: 0.625rem 0 0;
 
   @variant sm {
-    padding: 0 0.5rem 0 0;
+    padding-block: 0;
+    padding-inline: 0 0.5rem;
   }
 }
 
@@ -190,11 +191,11 @@
     gap: 0.375rem;
     cursor: pointer;
     border-top: 1px solid var(--color-grey-lighter);
-    border-right: 1px solid var(--color-grey-lighter);
+    border-inline-end: 1px solid var(--color-grey-lighter);
     font-size: var(--text-xs);
 
     &:last-child {
-      border-right: none;
+      border-inline-end: none;
     }
 
     span {

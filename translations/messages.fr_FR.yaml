@@ -237,7 +237,6 @@ Remember to check your spam, then try to resend the e-mail.: Pensez à vérifier
 resend e-mail: renvoyer le mail.
 A link has just been sent to your email address.: Un lien vient d'être renvoyé sur votre adresse e-mail.
 Wrong email or password. Please try again: Email ou mot de passe incorrect. Veuillez réessayer
-You're currently logged in. Please log out before requesting a new password.: Vous êtes actuellement connecté. Veuillez vous déconnecter avant de demander un nouveau mot de passe.
 A new activation code has been sent to your email address. Please check your mailbox.: Un nouveau code d'activation a été envoyé à votre adresse e-mail. Veuillez vérifier votre boîte de réception.
 Activation code must contain only digits: Le code d'activation ne doit contenir que des chiffres
 Reset your password: Réinitialiser votre mot de passe
@@ -502,3 +501,86 @@ No gift wrapping: Pas d'emballage cadeau
 Message for the recipient: Message pour le destinataire
 gift_message_characters_left: '%count% caractères restants'
 The message must be %max characters at most.: Le message doit faire %max caractères au maximum.
+
+# VAT exemption (Summary/Checkout, Summary/Order, AddressCard)
+VAT verified on %date%: TVA vérifiée le %date%
+VAT exempted (reverse charge), buyer VAT number %number%: 'Exonération de TVA (autoliquidation), numéro de TVA de l''acheteur : %number%'
+'The verification of VAT number %number% has expired: the order is no longer exempted from VAT.': 'La vérification du numéro de TVA %number% a expiré : la commande n''est plus exonérée de TVA.'
+'VAT number %number% is not verified: the order is not exempted from VAT.': 'Le numéro de TVA %number% n''est pas vérifié : la commande n''est pas exonérée de TVA.'
+"The stock of %reference% ran out while your order was placed. Please adjust your cart.": "Le stock de %reference% s'est épuisé pendant la validation de votre commande. Veuillez ajuster votre panier."
+Messages from the shop: Messages de la boutique
+Ready: Prête
+'Choose the variant': 'Choisir la déclinaison'
+'Unknown reference': 'Référence inconnue'
+'Quantity not available': 'Quantité indisponible'
+'Too many checks in a short time. Please wait a minute and try again.': 'Trop de vérifications en peu de temps. Patientez une minute puis réessayez.'
+'The table could not be checked: a reference is too long, or the table holds more than 500 lines.': "Le tableau n'a pas pu être vérifié : une référence est trop longue, ou le tableau dépasse 500 lignes."
+'The text is too long: a table takes at most 500 lines.': 'Le texte est trop long : un tableau prend au plus 500 lignes.'
+'expected a reference and a quantity': 'une référence et une quantité sont attendues'
+'the quantity is not a whole number from 1 to %max%': "la quantité n'est pas un nombre entier de 1 à %max%"
+'%count% line(s) added to your cart.': '%count% ligne(s) ajoutée(s) à votre panier.'
+'See my cart': 'Voir mon panier'
+'Paste from a spreadsheet or import a CSV file': 'Coller depuis un tableur ou importer un fichier CSV'
+'The file is too large: a table takes at most 500 lines.': 'Le fichier est trop volumineux : un tableau prend au plus 500 lignes.'
+'Only a CSV file can be imported.': 'Seul un fichier CSV peut être importé.'
+'One line per product: the reference, then the quantity, separated by a tab, a semicolon or a comma.': 'Une ligne par produit : la référence, puis la quantité, séparées par une tabulation, un point-virgule ou une virgule.'
+'Lines to import': 'Lignes à importer'
+'Import these lines': 'Importer ces lignes'
+'Or choose a CSV file': 'Ou choisissez un fichier CSV'
+'%count% line(s) could not be read:': "%count% ligne(s) n'ont pas pu être lue(s) :"
+'Line %line%': 'Ligne %line%'
+'%count% reference(s) match several variants. The default variant is selected when there is one: check the choices, then keep them.': '%count% référence(s) correspondent à plusieurs déclinaisons. La déclinaison par défaut est sélectionnée quand il y en a une : vérifiez les choix, puis gardez-les.'
+'Lines of the quick order': 'Lignes de la commande rapide'
+Reference: Référence
+Product: Produit
+'Unit price': 'Prix unitaire'
+Status: État
+Actions: Actions
+'Reference, line %line%': 'Référence, ligne %line%'
+'Quantity, line %line%': 'Quantité, ligne %line%'
+'Enter a whole number from 1 to %max%.': 'Saisissez un nombre entier de 1 à %max%.'
+'Variant, line %line%': 'Déclinaison, ligne %line%'
+'%quantity% in stock': '%quantity% en stock'
+'To check': 'À vérifier'
+'Remove line %line%': 'Supprimer la ligne %line%'
+'Add a line': 'Ajouter une ligne'
+'Keep these choices and check': 'Garder ces choix et vérifier'
+'Check the table': 'Vérifier le tableau'
+'Add %count% line(s) to cart': 'Ajouter %count% ligne(s) au panier'
+'Quick order': 'Commande rapide'
+'Type the references you want and their quantities, or paste them from a spreadsheet, then check the table before adding it to your cart.': "Saisissez les références voulues et leurs quantités, ou collez-les depuis un tableur, puis vérifiez le tableau avant de l'ajouter à votre panier."
+default: 'par défaut'
+'the reference is longer than 255 characters': 'la référence dépasse 255 caractères'
+'The list has been saved.': 'La liste a été enregistrée.'
+'Save the list': 'Enregistrer la liste'
+'Name of the new list': 'Nom de la nouvelle liste'
+'Create the list': 'Créer la liste'
+'%count% list(s) out of %max%': '%count% liste(s) sur %max%'
+'%count% line(s)': '%count% ligne(s)'
+'changed on %date%': 'modifiée le %date%'
+Duplicate: Dupliquer
+'Delete the list « %title% »?': 'Supprimer la liste « %title% » ?'
+'You have no purchase lists yet': "Vous n'avez pas encore de liste d'achat"
+'Create one above to keep the references you order often.': 'Créez-en une ci-dessus pour garder les références que vous commandez souvent.'
+'My purchase lists': "Mes listes d'achat"
+'The list has been deleted.': 'La liste a été supprimée.'
+'The list could not be created: its name is empty or longer than 255 characters, or the account already keeps 100 lists.': "La liste n'a pas pu être créée : son nom est vide ou dépasse 255 caractères, ou le compte a déjà 100 listes."
+'The list has been created. Add its lines below, then save it.': 'La liste a été créée. Ajoutez ses lignes ci-dessous, puis enregistrez-la.'
+'The list has been renamed.': 'La liste a été renommée.'
+'This is a copy of the list.': 'Voici la copie de la liste.'
+'The list could not be renamed: its name is empty or longer than 255 characters.': "La liste n'a pas pu être renommée : son nom est vide ou dépasse 255 caractères."
+'Name of the list': 'Nom de la liste'
+Rename: Renommer
+'Duplicate the list': 'Dupliquer la liste'
+'Save as a purchase list': "Enregistrer en liste d'achat"
+'Purchase list': "Liste d'achat"
+'A new list': 'Une nouvelle liste'
+'Only used for a new list.': 'Utilisé seulement pour une nouvelle liste.'
+'On an existing list, a reference already there adds its quantity to the line.': 'Sur une liste existante, une référence déjà présente ajoute sa quantité à la ligne.'
+'Save': 'Enregistrer'
+'The list could not be saved: its name is empty or longer than 255 characters, or the account already keeps 100 lists.': "La liste n'a pas pu être enregistrée : son nom est vide ou dépasse 255 caractères, ou le compte a déjà 100 listes."
+'The list could not be saved: a list holds at most 500 lines.': "La liste n'a pas pu être enregistrée : une liste compte au plus 500 lignes."
+'There is no line to save: type a reference and a whole quantity above zero.': 'Aucune ligne à enregistrer : saisissez une référence et une quantité entière supérieure à zéro.'
+'The lines have been added to the list.': 'Les lignes ont été ajoutées à la liste.'
+'Cart of %date%': 'Panier du %date%'
+'Order %ref%': 'Commande %ref%'

@@ -25,12 +25,19 @@
     {% endif %}
 
     <span class="HeaderButton-content">
+        {# Translatable, and a count glued to a word ("2 items") for the cart caller: <bdi>
+           isolates the label and reads its direction off its own first strong character, so the
+           figure stays in front of the noun on a right-to-left page. Inline, so the block keeps
+           resolving its own text-align against the page. #}
         <span class="HeaderButton-text">
-            {{ this.text }}
+            <bdi>{{ this.text }}</bdi>
         </span>
         {% if subText %}
+            {# The only caller passes the cart amount: a value, not a sentence. The class
+               blockifies this span (flex item, line-clamp), so dir="ltr" goes on an inner
+               inline span rather than on the box that resolves its own alignment. #}
             <span class="HeaderButton-subText">
-                {{ subText }}
+                <span dir="ltr">{{ subText }}</span>
             </span>
         {% endif %}
     </span>

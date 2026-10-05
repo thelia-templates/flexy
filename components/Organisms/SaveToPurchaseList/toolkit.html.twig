@@ -1,0 +1,21 @@
+{# The component reads the lists of the signed-in customer, which the toolkit has none
+   of: the story passes them in. The form posts to an action the toolkit does not have. #}
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">Base (save a cart or an order as a purchase list)</h4>
+        <p class="Story-label">
+            The button opens the choice between a new list and one the customer may change.
+            The name only counts for a new list; on an existing one, a reference already
+            there adds its quantity to the line.
+        </p>
+        <div class="Story-stage Story-stage--roomy">
+            <twig:Organisms:SaveToPurchaseList:Base
+                action="#"
+                defaultTitle="Cart of 10/1/26"
+                id="toolkit-save-to-purchase-list"
+                :signedIn="true"
+                :lists="[{value: '1', label: 'Monthly restock'}, {value: '2', label: 'Workshop consumables'}]"
+            />
+        </div>
+    </div>
+</div>

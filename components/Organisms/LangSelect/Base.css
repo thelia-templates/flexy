@@ -16,7 +16,8 @@
   gap: 0.5rem;
   text-transform: uppercase;
   font-weight: 500;
-  padding: 1rem 0 1rem 1rem;
+  padding-block: 1rem;
+  padding-inline: 1rem 0;
   cursor: pointer;
 
   @variant md {
@@ -53,8 +54,13 @@
   transition-duration: 0.15s;
   position: absolute;
   top: 100%;
-  left: 0;
+  inset-inline-start: 0;
+  /* A graphic nudge outward past the trigger's own padding, so it follows the reading side. */
   transform: translate(-0.625rem, 0.125rem);
+
+  @variant rtl {
+    transform: translate(0.625rem, 0.125rem);
+  }
   background-color: var(--color-white);
   padding: 0.5rem;
   flex-direction: column;
@@ -83,7 +89,7 @@
   color: var(--color-black);
   width: 1rem;
   height: 1rem;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .LangSelect.is-open .LangSelect-current {
@@ -140,7 +146,7 @@
 }
 
 .LangSelect-mobileItem .LangSelect-check {
-  margin-left: auto;
+  margin-inline-start: auto;
   width: 1.5rem;
   height: 1.5rem;
   color: var(--color-base);

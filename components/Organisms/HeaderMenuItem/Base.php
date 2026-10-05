@@ -23,6 +23,7 @@ class Base
     public string $menuKey = '';
     public string $title = '';
     public string $href = '';
+    public bool $opensInNewWindow = false;
     public array $columns = [];
     public array $leafLinks = [];
     public bool $showSeeMore = false;

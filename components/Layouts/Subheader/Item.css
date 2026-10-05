@@ -22,30 +22,36 @@
     display: block;
   }
 
+  /* The image bleeds to the edge of the viewport on the side where container-double-3 puts its
+     column B — its last child, so the end of the reading direction, right in ltr and left in
+     rtl. Written against the two inline edges, which swap together: the inline-end inset pins
+     it to the viewport edge and the inline-start inset carries it back to column B's inner
+     edge, so the same formulas mirror without a rtl: variant. */
   @variant md {
     position: absolute;
     top: 0;
-    right: 0;
+    inset-inline-end: 0;
     bottom: 0;
-    left: calc(100% - --spacing(13) - var(--container-double-3-col-b-md));
+    inset-inline-start: calc(100% - --spacing(13) - var(--container-double-3-col-b-md));
     width: auto;
     height: auto;
   }
 
   @variant lg {
-    left: calc(100% - --spacing(20) - var(--container-double-3-col-b-lg));
+    inset-inline-start: calc(100% - --spacing(20) - var(--container-double-3-col-b-lg));
   }
 
   @variant xl {
-    /* container-double-3 caps at --breakpoint-xl and centers past it, so column B's absolute left edge becomes
-       viewport/2 + breakpoint-xl/2 - padding - col-b (col-a and the gap between columns cancel out algebraically). */
-    left: calc(50% + (var(--breakpoint-xl) / 2) - --spacing(20) - var(--container-double-3-col-b-xl));
+    /* container-double-3 caps at --breakpoint-xl and centers past it, so column B's inner edge sits at
+       viewport/2 + breakpoint-xl/2 - padding - col-b from the start edge (col-a and the gap between
+       columns cancel out algebraically). */
+    inset-inline-start: calc(50% + (var(--breakpoint-xl) / 2) - --spacing(20) - var(--container-double-3-col-b-xl));
   }
 
   @variant 3xl {
     /* Freezes the image at the width the xl formula above would produce at our largest breakpoint, instead of
        letting it keep growing unbounded on very large screens. */
-    left: auto;
+    inset-inline-start: auto;
     width: calc((var(--breakpoint-3xl) / 2) - (var(--breakpoint-xl) / 2) + --spacing(20) + var(--container-double-3-col-b-xl));
   }
 }

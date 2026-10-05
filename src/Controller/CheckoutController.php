@@ -15,7 +15,9 @@ declare(strict_types=1);
 namespace FlexyBundle\Controller;
 
 use FlexyBundle\Service\CartStockService;
+use FlexyBundle\Service\CheckoutModuleStepScreen;
 use FlexyBundle\Service\CheckoutStepRouteResolver;
+use FlexyBundle\Service\CheckoutStockRefusal;
 use FlexyBundle\Service\CheckoutTrail;
 use FlexyBundle\Service\GuestCheckoutGate;
 use FlexyBundle\Service\GuestOrderTracking;
@@ -39,6 +41,7 @@ use Thelia\Domain\Checkout\Exception\MissingAddressException;
 use Thelia\Domain\Checkout\Exception\MissingConsentException;
 use Thelia\Domain\Checkout\Service\CheckoutProgressionService;
 use Thelia\Domain\Customer\Service\AuthenticationReturnUrl;
+use Thelia\Domain\Order\Exception\StockShortageException;
 use Thelia\Model\Cart;
 use Thelia\Model\CheckoutStep;
 use Thelia\Model\Order;
@@ -179,6 +182,51 @@ class CheckoutController extends FlexyController
     }
 
     /**
+     * The screen of a step a module declared (`CheckoutStepProviderInterface`), drawn by the component the step names.
+     *
+     * One route for all of them, told apart by the code. A code that is no active step of this cart, or whose step
+     * names no component, has no screen here, and a step the cart has not got to yet is not shown: the buyer goes back
+     * to the step that still has something to do, as on the core steps.
+     *
+     * @throws PropelException
+     */
+    #[Route('/step/{code}', name: 'step', requirements: ['code' => CheckoutModuleStepScreen::CODE_PATTERN])]
+    public function moduleStepAction(
+        string $code,
+        CartFacade $cartFacade,
+        GuestCheckoutGate $guestCheckoutGate,
+        CheckoutProgressionService $progression,
+        CheckoutStepRouteResolver $routes,
+        CheckoutTrail $trail,
+    ): Response {
+        $this->checkCheckoutAccess($guestCheckoutGate);
+
+        $cart = $cartFacade->getOrCreateFromSession();
+
+        $component = null;
+
+        foreach ($progression->activeSteps($cart) as $step) {
+            if ($step->code === $code) {
+                $component = $step->componentName;
+
+                break;
+            }
+        }
+
+        if ($routes->isOnePage() || null === $component || '' === $component || !$progression->isReachable($cart, $code)) {
+            return $this->generateRedirect($routes->pathOfTheFirstIncompleteStep($cart));
+        }
+
+        return $this->render('checkout-step', [
+            'current' => $code,
+            'steps' => $trail->of($cart),
+            'step_component' => $component,
+            'next_step_url' => $routes->pathAfter($cart, $code),
+            'previous_step_url' => $routes->pathBefore($cart, $code),
+        ]);
+    }
+
+    /**
      * @throws PropelException
      */
     #[Route('/gateway', name: 'gateway')]
@@ -209,6 +257,7 @@ class CheckoutController extends FlexyController
         CartFacade $cartFacade,
         CheckoutFacade $checkoutFacade,
         CartStockService $cartStockService,
+        CheckoutStockRefusal $stockRefusal,
         GuestCheckoutGate $guestCheckoutGate,
         GuestOrderTracking $guestOrderTracking,
         CheckoutStepRouteResolver $routes,
@@ -270,6 +319,9 @@ class CheckoutController extends FlexyController
             throw new RedirectException($this->generateUrl($guestCheckoutGate->entryPointRoute()), Response::HTTP_FOUND, $this->translator->trans('This order can no longer be placed without an account. Please sign in or create one.'));
         } catch (EmptyCartException $e) {
             throw new RedirectException($routes->pathFor(CheckoutStep::CODE_CART), Response::HTTP_FOUND, $e->getMessage());
+        } catch (StockShortageException $e) {
+            // The pre-check above covers the stock read before the placement; this one is the stock lost during it.
+            throw $stockRefusal->answer($e, $routes->pathFor(CheckoutStep::CODE_CART), $this->getRequest()->getSession());
         } catch (MissingAddressException|InvalidDeliveryException|IncompleteInvoiceAddressException|MissingConsentException $e) {
             // The rule, not the greyed-out button: a request that reaches here without a
             // carrier, without the legal identifiers of a business invoice or without the

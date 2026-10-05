@@ -4,6 +4,7 @@
    never queries by customer, so there is no other order to reach from here. #}
 {% set statusCode = order.orderStatus.code %}
 {% set isClosed = statusCode in ['canceled', 'refunded'] %}
+{# Plain text for the <title>; the visible heading isolates the reference - see the <h1> below. #}
 {% set heading = 'Order N°'|trans ~ ' ' ~ order.ref %}
 
 {% block title %}{{ heading }}{% endblock %}
@@ -13,8 +14,8 @@
 
 {% block body %}
     <div class="container-m pt-8 pb-14 md:pb-24">
-        <h1 class="h3 text-black">{{ heading }}</h1>
-        <p class="paragraph-3 mb-6 lg:mb-11">{{ order.createdAt|format_date() }}</p>
+        <h1 class="h3 text-black">{{ 'Order N°'|trans }} <span dir="ltr">{{ order.ref }}</span></h1>
+        <p class="paragraph-3 mb-6 lg:mb-11"><bdi>{{ order.createdAt|format_date() }}</bdi></p>
 
         {% if not isClosed %}
             <twig:Organisms:DeliveryTracking:Base

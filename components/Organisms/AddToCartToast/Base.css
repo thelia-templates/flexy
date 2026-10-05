@@ -3,7 +3,7 @@
   .AddToCartToast {
     position: fixed;
     bottom: 0;
-    left: 0;
+    inset-inline-start: 0;
     z-index: 99;
     width: 100%;
     max-width: 100%;
@@ -13,8 +13,8 @@
 
     @variant sm {
       top: 1.875rem;
-      right: 1.875rem;
-      left: auto;
+      inset-inline-end: 1.875rem;
+      inset-inline-start: auto;
       height: fit-content;
       width: calc(100vw - 3.75rem);
       max-width: 32.375rem; /* 518px */
@@ -26,7 +26,7 @@
   .AddToCartToast-iconClose {
     position: absolute;
     top: 0.625rem;
-    right: 0.625rem;
+    inset-inline-end: 0.625rem;
     width: 2.1875rem;
     cursor: pointer;
   }
@@ -42,7 +42,7 @@
       @apply paragraph-1;
 
       max-width: 90%;
-      text-align: left;
+      text-align: start;
     }
   }
 
@@ -98,7 +98,7 @@
 
     @variant sm {
       padding-top: 0;
-      padding-right: 0.5rem;
+      padding-inline-end: 0.5rem;
     }
   }
 

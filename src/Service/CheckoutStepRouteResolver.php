@@ -39,12 +39,12 @@ use Thelia\Model\ConfigQuery;
 final readonly class CheckoutStepRouteResolver
 {
     /**
-     * The steps this theme serves a screen of its own for.
+     * The steps this theme has a screen of its own for.
      *
-     * A step that is not in here — one a module declared without giving this theme a
-     * screen for it — has no url of its own: asked for one it answers with the start of
-     * the tunnel ({@see routeFor()}), and the navigation walks past it rather than
-     * through it ({@see navigableCodesOf()}).
+     * A step a module declared is not in here: it is served by the shared `checkout_step`
+     * route when it names the component that draws it ({@see CheckoutModuleStepScreen}),
+     * and the navigation walks past it rather than through it when it does not
+     * ({@see navigableCodesOf()}).
      */
     private const ROUTES = [
         CheckoutStep::CODE_CART => 'checkout_cart',
@@ -60,6 +60,7 @@ final readonly class CheckoutStepRouteResolver
     public function __construct(
         private CheckoutProgressionService $progression,
         private UrlGeneratorInterface $urlGenerator,
+        private CheckoutModuleStepScreen $moduleStepScreen = new CheckoutModuleStepScreen(),
     ) {
     }
 
@@ -93,6 +94,15 @@ final readonly class CheckoutStepRouteResolver
 
     public function pathFor(string $stepCode): string
     {
+        // A step a module declared is served by the one route they share, told apart by its code. Whether this
+        // theme can draw it is asked by the navigation (navigableCodesOf), and by the route itself, which sends
+        // a buyer back to the tunnel for a step it cannot serve.
+        if (!$this->isOnePage()) {
+            [$route, $parameters] = $this->moduleStepScreen->locate($stepCode, self::ROUTES, self::ENTRY_ROUTE);
+
+            return $this->urlGenerator->generate($route, $parameters);
+        }
+
         return $this->urlGenerator->generate($this->routeFor($stepCode));
     }
 
@@ -219,59 +229,27 @@ final readonly class CheckoutStepRouteResolver
      */
     private function navigableCodesOf(Cart $cart): array
     {
-        $codes = $this->codesOf($cart);
-
         if ($this->isOnePage()) {
-            return $codes;
+            return $this->codesOf($cart);
         }
 
-        return array_values(array_filter(
-            $codes,
-            static fn (string $code): bool => isset(self::ROUTES[$code]),
-        ));
+        return $this->moduleStepScreen->navigableCodes($this->progression->activeSteps($cart), array_keys(self::ROUTES));
     }
 
     /**
      * That step when this theme serves a screen for it, and otherwise the last step
      * before it that it does.
      *
-     * The known limit of the several-screen layout, written down rather than worked
-     * around: a step a module declares has no screen of its own here — nothing in this
-     * theme knows what to render for it — so its check applies to the navigation and to
-     * the placement, and not to a page the buyer is shown. Sent to the start of the
-     * tunnel instead, the buyer would be walked straight back down to that same step by
-     * the "next" links, which is a loop between two pages rather than a checkout; held
-     * at the last screen they can act on, they at least read the flash that says what is
-     * missing, and the order is still refused until the module's own check passes. A
-     * screen of its own is an extension point for the routes, to be opened when a story
-     * actually calls for one.
+     * A step a module declared with no component to draw it has no screen here, so its
+     * check applies to the navigation and to the placement and not to a page the buyer is
+     * shown. Sent to the start of the tunnel instead, the buyer would be walked straight
+     * back down to that same step by the "next" links, a loop between two pages.
      *
      * @throws PropelException
      */
     private function navigableCodeAtOrBefore(Cart $cart, string $stepCode): string
     {
-        $navigable = $this->navigableCodesOf($cart);
-
-        if (\in_array($stepCode, $navigable, true)) {
-            return $stepCode;
-        }
-
-        $codes = $this->codesOf($cart);
-        $position = array_search($stepCode, $codes, true);
-
-        if (false === $position) {
-            return CheckoutStep::CODE_CART;
-        }
-
-        foreach (array_reverse(\array_slice($codes, 0, $position)) as $code) {
-            if (\in_array($code, $navigable, true)) {
-                return $code;
-            }
-        }
-
-        // Nothing navigable stands in front of it: the cart is the one screen that is
-        // always there to land on.
-        return CheckoutStep::CODE_CART;
+        return $this->moduleStepScreen->landingFor($stepCode, $this->progression->activeSteps($cart), array_keys(self::ROUTES), CheckoutStep::CODE_CART);
     }
 
     /**

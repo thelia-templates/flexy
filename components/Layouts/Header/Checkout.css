@@ -43,7 +43,7 @@
 @variant sm {
   .HeaderCheckout-reassurance {
     position: absolute;
-    right: 1.5rem;
+    inset-inline-end: 1.5rem;
     top: 50%;
     translate: 0 -50%;
   }

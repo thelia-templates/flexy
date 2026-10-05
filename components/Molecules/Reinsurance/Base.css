@@ -1,7 +1,8 @@
 .Reinsurance {
   @apply paragraph-4;
 
-  padding: 1.25rem 1.875rem 1.25rem 2rem;
+  padding-block: 1.25rem;
+  padding-inline: 2rem 1.875rem;
   border-radius: 0.25rem;
   background: var(--color-lighter);
 }

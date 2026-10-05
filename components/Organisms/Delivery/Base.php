@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Organisms\Delivery;
 
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\DeliveryOptionChoice;
 use FlexyBundle\Service\GuestCheckoutGate;
 use Propel\Runtime\Exception\PropelException;
 use Psr\Log\LoggerInterface;
@@ -190,6 +191,14 @@ class Base
     #[LiveListener(CheckoutEvents::SET_DELIVERY_MODULE_OPTION)]
     public function selectDeliveryModuleOption(#[LiveArg] string $optionCode, #[LiveArg] int $moduleId): void
     {
+        // The option and the module come from the page: only one the cart can be shipped
+        // with is written to it.
+        if (!DeliveryOptionChoice::isOffered($this->getDeliveryModulesOptions(), $optionCode, $moduleId)) {
+            $this->logger->warning(\sprintf('Delivery option %s of module #%d is not offered for this cart', $optionCode, $moduleId));
+
+            return;
+        }
+
         $this->cartFacade->setDeliveryAddress(new CheckoutDTO($this->cartFacade->getOrCreateFromSession()));
 
         $this->invoiceAddressId = null;

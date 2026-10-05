@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Controller;
 
+use FlexyBundle\View\ViewName;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -99,7 +100,25 @@ class FlexyController extends BaseController
 
     protected function renderRaw(string $templateName, array $args = [], string|TemplateDefinition|null $templateDir = null): string
     {
+        $this->nameTheView($templateName);
+
         return $this->getParser()->render($templateName, $args);
+    }
+
+    /**
+     * The core sets `_view` on the pages it routes itself, and the layout calls a theme hook
+     * named after it. A page rendered here has none, so it takes its template's name; one
+     * the request already carries (a rewritten URL) is kept.
+     */
+    private function nameTheView(string $templateName): void
+    {
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (null === $request || '' !== (string) $request->attributes->get('_view', '')) {
+            return;
+        }
+
+        $request->attributes->set('_view', ViewName::fromTemplate($templateName));
     }
 
     protected function getParser(?string $template = null)

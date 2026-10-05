@@ -1,0 +1,29 @@
+{% extends 'checkout-base.html.twig' %}
+
+{# The screen of a step a module declared: the component the step names (CheckoutStepProviderInterface::componentName())
+   draws it, the rest of the page is the tunnel's. #}
+{% block checkoutContent %}
+    {{ component(step_component) }}
+{% endblock %}
+
+{% block checkoutBackButton %}
+    {%- if previous_step_url|default(null) -%}
+        <twig:Molecules:Link:Base
+            iconLeft="chevron-left"
+            customText="{{ 'Previous Step'|trans }}"
+            href="{{ previous_step_url }}"
+            class="gap-2 mt-6 inline-flex"
+        />
+    {%- endif -%}
+{% endblock %}
+
+{% block checkoutSummary %}
+    <twig:Organisms:Summary:Checkout />
+{% endblock %}
+
+{% block checkoutNextButton %}
+    <twig:Organisms:NextButton:Base
+        :step="current"
+        href="{{ next_step_url }}"
+    />
+{% endblock %}

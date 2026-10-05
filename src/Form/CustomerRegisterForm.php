@@ -75,9 +75,7 @@ class CustomerRegisterForm extends BaseForm
         $this->formBuilder->add('password', PasswordType::class, [
             'constraints' => [
                 new NotBlank(),
-                new PasswordStrength([
-                    'minScore' => 1,
-                ]),
+                new PasswordStrength(minScore: 1),
             ],
             'label' => Translator::getInstance()->trans('Password'),
             'label_attr' => [

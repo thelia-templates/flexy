@@ -22,6 +22,7 @@ use Symfonycasts\DynamicForms\DynamicFormBuilder;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\AddressCountryValidationTrait;
 use Thelia\Form\AddressCreateForm;
+use Thelia\Model\CountryQuery;
 
 class AddressEditForm extends AddressCreateForm
 {
@@ -56,7 +57,9 @@ class AddressEditForm extends AddressCreateForm
             }
 
             $field->add(ChoiceType::class, [
-                'required' => true,
+                // Required only where the country asks for one (verifyState() of the core): the departments of
+                // France are listed but optional.
+                'required' => (bool) CountryQuery::create()->findPk($countryId)?->getHasStates(),
                 'constraints' => [
                     new Callback($this->verifyState(...)),
                 ],

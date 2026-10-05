@@ -1,0 +1,17 @@
+/* Social sign-in buttons stay on a light background at every state. Google's brand
+   guidelines require the "G" logo to sit on a light background, and Apple's mark is drawn
+   in the button's text colour, so both break when the shared secondary button turns black
+   on hover. The hover is kept light here instead; the light grey matches Google's own
+   neutral button fill. */
+.button.social-button:hover:not(:disabled):not(input) {
+  background: var(--color-grey-lightest);
+  color: var(--color-black);
+}
+
+/* The brand mark fills the button's icon slot. Kept here rather than as an inline style
+   on each SVG: one rule, no repetition, and no dependency on an inline-style CSP. */
+.social-button .icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

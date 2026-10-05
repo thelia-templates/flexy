@@ -8,11 +8,11 @@
 .Subheader .Breadcrumb {
   position: absolute;
   top: 0.5rem;
-  left: 0;
+  inset-inline-start: 0;
 
   @variant md {
     top: 1.25rem;
-    left: 1.25rem;
+    inset-inline-start: 1.25rem;
   }
 }
 

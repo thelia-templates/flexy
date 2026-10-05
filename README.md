@@ -73,6 +73,12 @@ The template declares `theme_hook()` extension points across its pages — `layo
 
 The SEOne module already answers `layout.head.top` and `layout.head.bottom`, which is where the title, description, canonical, hreflang and structured data come from.
 
+The head also calls a hook named after the view, `layout.head.<view>`, for what a single page needs: a module that links a stylesheet on the product page alone answers `layout.head.product`, one that adds a script to the cart answers `layout.head.checkout-cart`. The view is the request's `_view` attribute: the core sets it for the pages it routes (`index`, `product`, `category`, `content`, `folder`, `brand`...), and `FlexyController` sets it for the pages it renders, from the template name (`checkout-cart`, `account`, `login`...).
+
+Each section of the sitemap calls `sitemap.urls` inside its `<urlset>`, with `context` set to the section (`categories`, `products`, `content`) and `lang` left empty: a module answers with `<url>` entries, `xhtml:link` alternates included. The `content` section holds nothing else, so the pages a module serves have a place of their own.
+
+The header, the footer and the terms links name no content: they read the `header_links`, `footer_links` and `consent.<code>` content slots of the core (`content_slot()` and `content_slot_first()` in a template). The shop fills them from its settings, and a module can answer them instead through `Thelia\Core\Content\Slot\ContentSlotResolverInterface`.
+
 ### Listing a module's component in the toolkit
 
 The toolkit (`/toolkit`, served only while the kernel runs in debug) walks the `components/` directories of the template chain and nothing else. A module lists its own components by implementing `FlexyBundle\Toolkit\StoryProviderInterface`; autoconfiguration tags it, and the tag priority sets the order in the sidebar. Each story names the template the toolkit renders and the file "Show the code" reads:
@@ -104,6 +110,16 @@ final readonly class CalloutStoryProvider implements StoryProviderInterface
 A module's `templates/` directory is registered by the core as the `@{Code}Module` Twig namespace, so the story template needs nothing more. Its status follows the theme's rules (`READY`, `WAITING`, `HIDDEN` drops it), but `story-statuses.php` does not apply to it. Module stories come after those of the templates, and a story whose slug collides with a template story, the child's or one it inherits, stops the page rather than shadowing it.
 
 Mind the stylesheet: `assets/styles/app.css` limits the Tailwind scan to the theme's own files, so a utility class used only in a module template is never compiled. Build a module component out of the theme's components and classes.
+
+### Giving a checkout step of a module a screen
+
+A step declared through `CheckoutStepProviderInterface` is served by this theme when its `componentName()` names a
+Twig or Live component: `GET /checkout/step/{code}` (route `checkout_step`, `code` in lower case, digits and
+underscores, the code the provider answers) renders `checkout-step.html.twig` with that component in the frame of the
+tunnel, with the previous and next links of the configured order. The step is reachable only once the steps before it are
+settled; otherwise the buyer is sent back to the first incomplete step that has a screen. A step that names no component
+has no screen: the navigation walks past it, its check still applies at the placement. On a one-page checkout the route
+redirects, every step being on the cart page.
 
 ## Deploying
 

@@ -6,6 +6,8 @@
 {% set galleryController = 'Organisms--ProductGallery--base' %}
 {% set placeholder = asset('images/placeholder2.webp') %}
 
+{% import '@Flexy/Atoms/Icon/direction.html.twig' as icon_direction %}
+
 {# Splide rewrites the aria-label of the arrows it wires with its own English wording, so the
    shop's own is handed to the controller rather than only written on the buttons below. #}
 <div
@@ -121,10 +123,11 @@
 
             {% if media|length > 1 %}
                 <div class="splide__arrows">
-                    <button class="splide__arrow splide__arrow--prev" aria-label="{{ 'Previous visual'|trans }}">
+                    {# Previous/next along the line of reading: turned round in a right-to-left page. #}
+                    <button class="splide__arrow splide__arrow--prev {{ icon_direction.mirror_class('arrow-left') }}" aria-label="{{ 'Previous visual'|trans }}">
                         {{ ux_icon('arrow-left') }}
                     </button>
-                    <button class="splide__arrow splide__arrow--next" aria-label="{{ 'Next visual'|trans }}">
+                    <button class="splide__arrow splide__arrow--next {{ icon_direction.mirror_class('arrow-right') }}" aria-label="{{ 'Next visual'|trans }}">
                         {{ ux_icon('arrow-right') }}
                     </button>
                 </div>

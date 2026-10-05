@@ -20,11 +20,13 @@
 
     <span class="ProductCard-desc">
         <span class="ProductCard-title">{{ this.product.title }}</span>
+        {# .ProductCard-desc is a stretching flex column here, so these spans are blockified:
+           dir="ltr" goes on an inner inline span, never on the flex item itself. #}
         {% if this.isPromo %}
-            <span class="ProductCard-price">{{ this.promoTaxedPrice|format_currency('EUR', locale: lang_code) }}</span>
-            <span class="ProductCard-originalPrice">{{ this.taxedPrice|format_currency('EUR', locale: lang_code) }}</span>
+            <span class="ProductCard-price"><span dir="ltr">{{ this.promoTaxedPrice|format_currency('EUR', locale: lang_code) }}</span></span>
+            <span class="ProductCard-originalPrice"><span dir="ltr">{{ this.taxedPrice|format_currency('EUR', locale: lang_code) }}</span></span>
         {% else %}
-            <span class="ProductCard-price">{{ this.taxedPrice|format_currency('EUR', locale: lang_code) }}</span>
+            <span class="ProductCard-price"><span dir="ltr">{{ this.taxedPrice|format_currency('EUR', locale: lang_code) }}</span></span>
         {% endif %}
     </span>
 </a>

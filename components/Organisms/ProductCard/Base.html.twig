@@ -76,13 +76,16 @@
 						{% endif %}
 					</div>
 				{% endif %}
+				{# A price keeps its own order, so it carries dir="ltr" — on the inline span only.
+				   On the block it would re-resolve the block's own text-align: start and pin the
+				   figure to the left of a right-to-left card while the title stays on the right. #}
 				{% if this.isPromo %}
 					<div class="ProductCard-footerRight">
-						<div class="ProductCard-price">{{ this.promoTaxedPrice|format_currency('EUR', locale: lang_code) }}</div>
-						<div class="ProductCard-originalPrice">{{ this.taxedPrice|format_currency('EUR', locale: lang_code) }}</div>
+						<div class="ProductCard-price"><span dir="ltr">{{ this.promoTaxedPrice|format_currency('EUR', locale: lang_code) }}</span></div>
+						<div class="ProductCard-originalPrice"><span dir="ltr">{{ this.taxedPrice|format_currency('EUR', locale: lang_code) }}</span></div>
 					</div>
 				{% else %}
-					<div class="ProductCard-price">{{ this.taxedPrice|format_currency('EUR', locale: lang_code) }}</div>
+					<div class="ProductCard-price"><span dir="ltr">{{ this.taxedPrice|format_currency('EUR', locale: lang_code) }}</span></div>
 				{% endif %}
 			</div>
 			{% if this.runningSaleTag and this.runningSaleTag.shouldDisplayCountdown and this.runningSaleTag.countdownRemainingSeconds is not null %}

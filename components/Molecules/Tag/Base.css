@@ -19,7 +19,7 @@
 
   .Tag__icon {
     --icon-color: var(--tag-color);
-    margin-right: 0.25rem;
+    margin-inline-end: 0.25rem;
     color: var(--icon-color);
     width: 0.75rem;
     height: 0.75rem;
@@ -29,7 +29,7 @@
     width: 0.75rem;
     height: 0.75rem;
     display: inline-block;
-    margin-left: 0.375rem;
+    margin-inline-start: 0.375rem;
     cursor: pointer;
     color: var(--tag-color);
 

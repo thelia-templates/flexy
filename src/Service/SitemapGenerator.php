@@ -67,8 +67,11 @@ final readonly class SitemapGenerator
     /**
      * Secondary sitemaps referenced by the sitemap index (/sitemap.xml).
      * "images" is a Google image sitemap (different XML schema), the others are plain urlsets.
+     * Every urlset calls the `sitemap.urls` theme hook with its section as the context, so
+     * a module adds its own addresses where they belong; "content" is the section whose
+     * addresses all come from modules (the pages of a CMS, for one).
      */
-    public const SECTIONS = ['categories', 'products', 'images'];
+    public const SECTIONS = ['categories', 'products', 'content', 'images'];
 
     public function __construct(
         private readonly AdapterInterface $cache,
@@ -93,7 +96,7 @@ final readonly class SitemapGenerator
             [$template, $variables] = match ($section) {
                 'index' => ['sitemap-index', ['sitemaps' => $this->getIndexSitemaps()]],
                 'images' => ['sitemap-images', ['entries' => $this->getImageEntries()]],
-                default => ['sitemap-urlset', ['urls' => $this->getSectionUrls($section)]],
+                default => ['sitemap-urlset', ['urls' => $this->getSectionUrls($section), 'section' => $section]],
             };
 
             $cacheItem->expiresAfter($cacheExpire);

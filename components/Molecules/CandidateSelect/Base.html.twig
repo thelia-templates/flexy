@@ -1,0 +1,25 @@
+{# @prop candidates array The sale elements an ambiguous reference may mean, as the core's quick order table lists them: [{productSaleElementsId, ref, isDefault, preselected, attributes: [{attribute, value}]}] #}
+{# @prop value int|null The sale element currently chosen #}
+{# @prop id string Id of the select, which its label points to #}
+{# @prop label string Visible label #}
+{# Any `select:*` attribute (a data-model, for instance) reaches the <select> itself. #}
+{% props candidates = [], value = null, id = null, label = null %}
+
+{% set choices = candidates|map(candidate => {
+    value: candidate.productSaleElementsId,
+    label: ([candidate.ref]
+        |merge(candidate.attributes|map(attribute => attribute.attribute ~ ' : ' ~ attribute.value))
+        |join(' · '))
+        ~ (candidate.isDefault ? ' (' ~ 'default'|trans ~ ')' : ''),
+}) %}
+
+<twig:Fields:Select:Base
+    class="{{ ('CandidateSelect ' ~ attributes.render('class'))|tailwind_merge }}"
+    size="small"
+    id="{{ id }}"
+    label="{{ label ?: 'Choose the variant'|trans }}"
+    placeholder="{{ 'Choose the variant'|trans }}"
+    :choices="choices"
+    :value="value"
+    {{ ...attributes.without('class') }}
+/>

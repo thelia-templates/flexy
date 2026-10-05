@@ -11,7 +11,7 @@
 {%- set _accordionTrigger_swapIcons = iconOpen is not null and iconOpen != iconClosed -%}
 <h3 class="flex" data-orientation="{{ _accordionItem_orientation }}">
     <button
-        class="{{ ('group/accordion-trigger relative flex flex-1 items-center justify-between gap-4 px-4 py-2.5 text-left rtl:text-start text-sm font-medium transition-all cursor-pointer hover:text-grey-dark disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 ' ~ attributes.render('class'))|tailwind_merge }}"
+        class="{{ ('group/accordion-trigger relative flex flex-1 items-center justify-between gap-4 px-4 py-2.5 text-start text-sm font-medium transition-all cursor-pointer hover:text-grey-dark disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 ' ~ attributes.render('class'))|tailwind_merge }}"
         {{ attributes.defaults({
             type: 'button',
             id: _accordionItem_triggerId,

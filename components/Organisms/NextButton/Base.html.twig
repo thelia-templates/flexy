@@ -12,7 +12,7 @@
 <div class="{{ ('flex flex-col items-end gap-2 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class').defaults(stimulus_controller('live-refresh-on-focus')) }}>
     {{ component('Molecules:Button:Base', buttonProps) }}
     {% if disabledReason %}
-        <p class="paragraph-4 text-grey-dark text-right" role="status">
+        <p class="paragraph-4 text-grey-dark text-end" role="status">
             {% if disabledReason == 'cart_empty' %}
                 {{ 'Your cart is empty.'|trans }}
             {% elseif disabledReason == 'delivery_address' %}

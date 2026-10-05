@@ -75,9 +75,14 @@
   border: 1px solid var(--color-success);
   background-image: var(--background-image-icon-check);
   background-repeat: no-repeat;
-  /* Centered on the first line, not the box: padding-top + half a line - half the icon. */
+  /* Centered on the first line, not the box: padding-top + half a line - half the icon.
+     background-position has no logical form: the side is spelled out per reading direction. */
   background-position: right 0.625rem top 0.375rem;
   background-size: 2.5rem;
+
+  @variant rtl {
+    background-position: left 0.625rem top 0.375rem;
+  }
 }
 
 .TextArea ::placeholder {

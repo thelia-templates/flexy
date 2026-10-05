@@ -1,8 +1,7 @@
 @layer components {
   .MobileDrawer {
     position: fixed;
-    left: 0;
-    right: 0;
+    inset-inline: 0;
     bottom: 0;
     z-index: 20;
     padding: 3.125rem 2.5rem 2.625rem;
@@ -35,7 +34,7 @@
   .MobileDrawer-close {
     position: absolute;
     top: 0;
-    right: 0;
+    inset-inline-end: 0;
     width: 2.375rem;
     height: 2.375rem;
     padding: 0.625rem;

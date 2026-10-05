@@ -33,7 +33,7 @@
     transition: height 250ms ease;
 
     @variant sm {
-      padding-left: 1.875rem;
+      padding-inline-start: 1.875rem;
     }
 
     @variant md {
@@ -107,8 +107,7 @@
     .MobilePanel {
       position: fixed;
       top: 0;
-      left: 0;
-      right: 0;
+      inset-inline: 0;
       bottom: var(--header-nav-height);
       display: none;
       background-color: var(--color-white);
@@ -145,8 +144,11 @@
       gap: 0;
       padding-top: var(--padding-top-menu);
       padding-bottom: var(--header-nav-height);
-      padding-right: calc(var(--padding-x-menu) - var(--padding-button-sub));
-      padding-left: var(--padding-x-menu);
+      /* Asymmetric on purpose: the row ends with the "open submenu" button, whose own padding
+         already provides part of the gutter on that side. The button sits at the end of the
+         reading direction, so the trimmed gutter has to follow it. */
+      padding-inline-end: calc(var(--padding-x-menu) - var(--padding-button-sub));
+      padding-inline-start: var(--padding-x-menu);
     }
 
     .Header-menu ul li {
@@ -169,9 +171,8 @@
       display: none;
       position: fixed;
       top: var(--padding-top-menu);
-      right: 0;
+      inset-inline: 0;
       bottom: var(--header-nav-height);
-      left: 0;
       padding-top: 0;
       background-color: var(--color-white);
     }
@@ -195,8 +196,7 @@
         top: calc(
           100% + 1px
         ); /* leaves the Header's own border-bottom visible instead of covering it */
-        left: 0;
-        right: 0;
+        inset-inline: 0;
         display: none;
         height: var(--header-height); /* 80px at md */
         background-color: var(--color-white);
@@ -213,7 +213,8 @@
     display: block;
     position: absolute;
     top: 0;
-    right: 0;
+    /* The corner opposite the start of the reading direction: top-right in ltr, top-left in rtl. */
+    inset-inline-end: 0;
     z-index: 10;
     padding: var(--padding-button-close);
 
@@ -231,7 +232,9 @@
     position: absolute;
     z-index: 10;
     transform: translateY(-50%);
-    left: calc(var(--padding-x-menu) - var(--padding-button-close));
+    /* "Back" leads out of the submenu, so it stays where the reading starts; its chevron is
+       mirrored by the rtl:-scale-x-100 the Button puts on a directional icon. */
+    inset-inline-start: calc(var(--padding-x-menu) - var(--padding-button-close));
     top: calc(var(--padding-top-menu) / 2);
 
     @variant md {
@@ -259,7 +262,7 @@
     .Header-searchClose {
       position: absolute;
       top: 0.625rem;
-      right: 0.625rem;
+      inset-inline-end: 0.625rem;
     }
   }
 
@@ -269,8 +272,7 @@
     .Header-searchPanel {
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
+      inset-inline: 0;
       z-index: 60;
       display: none;
       grid-template-columns: auto minmax(0, 1fr) auto;
@@ -294,12 +296,14 @@
       display: contents;
     }
 
+    /* Outer gutters of the first and the last grid column: they follow the columns, which the
+       grid itself already reorders with the direction. */
     .Header-searchLogo {
-      margin-left: 1.875rem;
+      margin-inline-start: 1.875rem;
     }
 
     .Header-searchClose {
-      margin-right: 3.125rem;
+      margin-inline-end: 3.125rem;
     }
 
     /* Centred in its column, capped at the mockup's width */

@@ -36,12 +36,12 @@
 .FormErrors-list {
   @apply paragraph-4;
   list-style: none;
-  padding-left: 0;
+  padding-inline-start: 0;
 }
 
 .FormErrors-list li:not(:only-child) {
   list-style: disc;
-  margin-left: 1.25rem;
+  margin-inline-start: 1.25rem;
 }
 
 .FormErrors-list a {

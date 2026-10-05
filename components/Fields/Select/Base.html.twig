@@ -59,8 +59,11 @@
         {% if multiple %}multiple{% endif %}
         {% if required %}required{% endif %}
     >
+        {# A form hands an unchosen value over as '' (ChoiceType view), not null: the placeholder must stay selected then,
+           or the browser shows and posts the first choice as if the buyer had picked it. It can be chosen back only when
+           the field is optional. #}
         {% if placeholder %}
-            <option value="" {% if value is null %}selected{% endif %} disabled>{{ placeholder }}</option>
+            <option value="" {% if value is null or value is same as('') %}selected{% endif %}{% if required %} disabled{% endif %}>{{ placeholder }}</option>
         {% endif %}
         {% for choice in choices %}
             <option value="{{ choice.value }}" {% if value == choice.value %}selected{% endif %}>{{ choice.label }}</option>

@@ -25,6 +25,7 @@
 /* Components managing their own layering internally (@theme / @utility / @layer) : imported unwrapped, the file is the sole source of truth for its own layer */
 /* If a component needs to override styles from external lib (carousel, etc), it should be put here, and have fine-tuned layering inside it's own file */
 @import "../../components/Molecules/Button/Base.css";
+@import "../../components/Molecules/SocialButton/Base.css";
 @import "../../components/Molecules/Link/Base.css";
 @import "../../components/Molecules/Tag/Base.css";
 @import "../../components/Molecules/Tag/OrderTag.css";
@@ -86,6 +87,8 @@
   @import "../../components/Organisms/AddressCard/Base.css";
   @import "../../components/Organisms/CartItem/Base.css";
   @import "../../components/Organisms/CartItemDelete/Base.css";
+  @import "../../components/Organisms/QuickOrderTable/Base.css";
+  @import "../../components/Organisms/SaveToPurchaseList/Base.css";
   @import "../../components/Organisms/Summary/Base.css";
   @import "../../components/Organisms/DeliveryTracking/Base.css";
   @import "../../components/Organisms/PaymentCard/Base.css";
@@ -99,6 +102,7 @@
   @import "../../components/Layouts/Footer/Checkout.css";
   @import "../../components/Layouts/Header/Checkout.css";
   @import "../../components/Layouts/AccountOrders/Base.css";
+  @import "../../components/Layouts/AccountPurchaseLists/Base.css";
   @import "../../components/Layouts/CrossSelling/Base.css";
   @import "../../components/Layouts/Review/Base.css";
   @import "../../components/Layouts/SimilarContent/Base.css";

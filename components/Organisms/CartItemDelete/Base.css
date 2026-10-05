@@ -28,6 +28,7 @@
   padding-top: 0.625rem;
 
   @variant sm {
-    padding: 0 0.5rem 0 0;
+    padding-block: 0;
+    padding-inline: 0 0.5rem;
   }
 }

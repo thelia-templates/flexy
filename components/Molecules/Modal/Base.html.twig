@@ -1,9 +1,11 @@
 {# @block content Content displayed inside the modal #}
 {# @prop id string Unique id of the dialog, used by outlet controllers to target this modal #}
-{% props id %}
+{# @prop labelledby string Id of the title that names the dialog #}
+{% props id, labelledby = null %}
 
 <dialog
     id="{{ id }}"
+    {% if labelledby %}aria-labelledby="{{ labelledby }}"{% endif %}
     class="{{ ('Modal ' ~ attributes.render('class'))|tailwind_merge }}"
     {{ attributes.defaults({...stimulus_controller('Molecules--Modal--base')}).without('class') }}
 >

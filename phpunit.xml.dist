@@ -55,5 +55,8 @@
         <testsuite name="component">
             <directory>tests/Component</directory>
         </testsuite>
+        <testsuite name="integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
     </testsuites>
 </phpunit>

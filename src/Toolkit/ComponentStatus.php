@@ -71,6 +71,8 @@ final class ComponentStatus
             'Toolkit/welcome' => self::READY,
 
             'Organisms/VideoPlayer' => self::READY,
+            // Stories handled on our side and open to review:
+            'Organisms/OrderNotes' => self::READY,
 
             default => null,
         };
