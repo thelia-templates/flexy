@@ -40,7 +40,7 @@ final class CartSyncOnAddTest extends TestCase
      */
     private function eventsOfSync(): array
     {
-        $attributes = new \ReflectionMethod(Cart::class, 'sync')->getAttributes(LiveListener::class);
+        $attributes = (new \ReflectionMethod(Cart::class, 'sync'))->getAttributes(LiveListener::class);
 
         return array_map(static fn (\ReflectionAttribute $attribute): string => $attribute->newInstance()->getEventName(), $attributes);
     }
