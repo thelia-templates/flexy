@@ -57,6 +57,14 @@ final class DeliveryTrackingRenderTest extends KernelTestCase
         self::assertMatchesRegularExpression('/rel="[^"]*noopener[^"]*"/', $link);
     }
 
+    /** A screen reader announces the new tab before the click. */
+    public function testTheNewTabIsAnnouncedToScreenReaders(): void
+    {
+        $html = $this->render(['statusCode' => 'sent', 'trackingRef' => '6A12', 'trackLink' => 'https://carrier.example/6A12']);
+
+        self::assertMatchesRegularExpression('#<span class="sr-only">\s*\(opens in a new tab\)</span>#', $html);
+    }
+
     public function testWithoutLinkTheNumberIsShownAndNoEmptyButton(): void
     {
         foreach ([null, ''] as $noLink) {
