@@ -44,7 +44,11 @@ class Base
     /** Carrier tracking number, when the shop filled one in. */
     public ?string $trackingRef = null;
 
-    /** No carrier tracking URL exists in the core: a delivery module has to provide it. */
+    /**
+     * The carrier page following the parcel, as the order gives it (its
+     * deliveryTrackingUrl): null without a tracking number or when the carrier has no
+     * tracking address, and no button is shown then.
+     */
     public ?string $trackLink = null;
 
     /**
