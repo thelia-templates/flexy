@@ -62,8 +62,9 @@
             href="{{ path('account_order', {orderId: order.id}) }}"
         />
         {% if this.trackingUrl %}
+            {% set trackLabel %}{{ 'Track my package'|trans }}<span class="sr-only"> {{ '(opens in a new tab)'|trans }}</span>{% endset %}
             <twig:Molecules:Button:Base
-                text="{{ 'Track my package'|trans }}"
+                :text="trackLabel"
                 href="{{ this.trackingUrl }}"
                 color="secondary"
                 target="_blank"

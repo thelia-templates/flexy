@@ -9,9 +9,11 @@
             {% endif %}
         </div>
         {% if this.trackLink %}
-            {# The carrier site opens in a tab of its own, without a handle on this page. #}
+            {# The carrier site opens in a tab of its own, without a handle on this page,
+               and a screen reader says so before the click. #}
+            {% set trackLabel %}{{ 'Track my package'|trans }}<span class="sr-only"> {{ '(opens in a new tab)'|trans }}</span>{% endset %}
             <twig:Molecules:Button:Base
-                text="{{ 'Track my package'|trans }}"
+                :text="trackLabel"
                 href="{{ this.trackLink }}"
                 target="_blank"
                 rel="noopener noreferrer"
