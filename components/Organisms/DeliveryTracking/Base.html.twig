@@ -9,10 +9,14 @@
             {% endif %}
         </div>
         {% if this.trackLink %}
+            {# The carrier site opens in a tab of its own, without a handle on this page. #}
             <twig:Molecules:Button:Base
                 text="{{ 'Track my package'|trans }}"
                 href="{{ this.trackLink }}"
+                target="_blank"
+                rel="noopener noreferrer"
                 size="small"
+                data-testid="delivery-tracking-link"
             />
         {% endif %}
     </div>

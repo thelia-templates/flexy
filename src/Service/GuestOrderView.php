@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Service;
 
 use Propel\Runtime\Map\TableMap;
+use Thelia\Domain\Order\Service\OrderTrackingUrlResolver;
 use Thelia\Model\Order;
 
 /**
@@ -31,6 +32,14 @@ use Thelia\Model\Order;
 final readonly class GuestOrderView
 {
     /**
+     * The tracking resolver is optional so the page keeps working on a core that
+     * predates the parcel tracking link.
+     */
+    public function __construct(private ?OrderTrackingUrlResolver $trackingUrlResolver = null)
+    {
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function build(Order $order): array
@@ -43,6 +52,7 @@ final readonly class GuestOrderView
             'ref' => $order->getRef(),
             'createdAt' => $order->getCreatedAt(),
             'deliveryRef' => $order->getDeliveryRef(),
+            'deliveryTrackingUrl' => $this->trackingUrlResolver?->resolve($order),
             'orderStatus' => ['code' => $order->getOrderStatus()?->getCode()],
             'deliveryOrderAddress' => ['id' => $order->getDeliveryOrderAddressId()],
             'invoiceOrderAddress' => ['id' => $order->getInvoiceOrderAddressId()],

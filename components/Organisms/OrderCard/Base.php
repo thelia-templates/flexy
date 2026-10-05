@@ -17,6 +17,7 @@ namespace FlexyBundle\Components\Organisms\OrderCard;
 use FlexyBundle\Service\OrderProductResolver;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Api\Service\DataAccess\DataAccessService;
+use Thelia\Model\OrderStatus;
 
 #[AsTwigComponent]
 class Base
@@ -69,5 +70,20 @@ class Base
             $this->order['orderProducts'] ?? [],
             self::RESOLVED_THUMBNAILS,
         );
+    }
+
+    /**
+     * The carrier page following the parcel, offered on a shipped order only (a custom
+     * status equivalent to "sent" included): a tracking number may be typed before the
+     * parcel has left.
+     */
+    public function getTrackingUrl(): ?string
+    {
+        $status = $this->order['orderStatus'] ?? [];
+        $shipped = OrderStatus::CODE_SENT === ($status['code'] ?? null)
+            || OrderStatus::CODE_SENT === ($status['equivalentCode'] ?? null);
+        $url = $this->order['deliveryTrackingUrl'] ?? null;
+
+        return $shipped && \is_string($url) && '' !== $url ? $url : null;
     }
 }

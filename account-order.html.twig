@@ -31,6 +31,7 @@
             <twig:Organisms:DeliveryTracking:Base
                 statusCode="{{ statusCode }}"
                 trackingRef="{{ order.deliveryRef }}"
+                :trackLink="order.deliveryTrackingUrl|default(null)"
             />
         {% endif %}
 
