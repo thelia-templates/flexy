@@ -9,8 +9,20 @@
    leaves the buyer clicking at it; the component names the refusal, the sentences live
    here so they stay translatable. #}
 {% set disabledReason = this.isValid ? null : this.disabledReason %}
+{% set expressPaymentModuleCode = this.expressPaymentModuleCode %}
 <div class="{{ ('flex flex-col items-end gap-2 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class').defaults(stimulus_controller('live-refresh-on-focus')) }}>
-    {{ component('Molecules:Button:Base', buttonProps) }}
+    {% if expressPaymentModuleCode %}
+        {# The buyer chose a wallet: its own button stands where the order button was,
+           live exactly when the order button would be. It is rendered with the page and
+           carried in here by the express-payment-dock controller, since the script next
+           to it would not run if this re-render inserted it. The slot itself is left alone
+           by the re-renders; the state around it is not. #}
+        <div class="w-full" data-express-payment-slot data-module="{{ expressPaymentModuleCode }}" data-enabled="{{ this.isValid ? '1' : '0' }}">
+            <div id="checkout-express-payment-slot" data-live-ignore class="w-full"></div>
+        </div>
+    {% else %}
+        {{ component('Molecules:Button:Base', buttonProps) }}
+    {% endif %}
     {% if disabledReason %}
         <p class="paragraph-4 text-grey-dark text-end" role="status">
             {% if disabledReason == 'cart_empty' %}

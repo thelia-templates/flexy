@@ -17,6 +17,7 @@ namespace FlexyBundle\Components\Organisms\Summary;
 use FlexyBundle\Event\CheckoutEvents;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
+use Symfony\UX\LiveComponent\Attribute\PreReRender;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Thelia\Action\Coupon;
@@ -32,6 +33,23 @@ class Checkout
         private readonly AttributeAccessService $attributeAccessService,
         private readonly Coupon $coupon,
     ) {
+    }
+
+    /**
+     * Every re-render of the summary follows a change an express payment module has to know
+     * about: a carrier, an address, a quantity, or a change made in another tab. Its button
+     * waits for a carrier and its sheet charges the total, so it is told with a browser event,
+     * which spares the module being rebuilt with this component.
+     *
+     * Dispatched before the re-render rather than from the getter: the component's root
+     * attributes are computed before its template runs, and an event dispatched while the
+     * template runs lands on the next component rendered, where nobody reads it. Only a
+     * re-render: the first render has nothing new to tell.
+     */
+    #[PreReRender]
+    public function tellExpressPaymentTheSummaryChanged(): void
+    {
+        $this->dispatchBrowserEvent('checkout:summary-changed');
     }
 
     /**
