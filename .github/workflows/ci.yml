@@ -54,7 +54,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: thelia/thelia
-          ref: 3.2.0
+          ref: 3.2
           path: thelia
 
       - name: Start MySQL
