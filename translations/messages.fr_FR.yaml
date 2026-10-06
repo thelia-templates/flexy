@@ -589,3 +589,20 @@ Rename: Renommer
 'Cart of %date%': 'Panier du %date%'
 'Order %ref%': 'Commande %ref%'
 '(opens in a new tab)': "(s'ouvre dans un nouvel onglet)"
+Choose a delivery day: Choisissez un jour de livraison
+Choose a delivery day, then a slot: Choisissez un jour de livraison, puis un créneau
+No delivery date is available for this carrier at the moment.: "Aucune date de livraison n'est disponible pour ce transporteur pour le moment."
+Previous month: Mois précédent
+Next month: Mois suivant
+closed: fermé
+full: complet
+Full: Complet
+"Slots on %date%": "Créneaux du %date%"
+"from %start% to %end%": "de %start% à %end%"
+No slot is left on this day.: Plus aucun créneau ce jour-là.
+"Delivery on %date%": "Livraison le %date%"
+Choose a delivery date to continue.: Choisissez une date de livraison pour continuer.
+Delivery date: Date de livraison
+Requested delivery: Livraison souhaitée
+The delivery date you picked is no longer available for this address. Please choose another one.: "La date de livraison choisie n'est plus disponible pour cette adresse. Veuillez en choisir une autre."
+"The carrier you chose does not deliver to this address: your delivery date was cleared. Please choose a delivery method again.": "Le transporteur choisi ne livre pas à cette adresse : votre date de livraison a été effacée. Veuillez choisir de nouveau un mode de livraison."

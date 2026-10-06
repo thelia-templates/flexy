@@ -72,6 +72,14 @@
             <hr class="my-10" />
 
             <h2 class="h4 mb-6">{{ 'Delivery & payment'|trans }}</h2>
+            {% if order.deliveryDate is defined and order.deliveryDate %}
+                <p class="paragraph-3 mb-4" data-testid="order-delivery-date">
+                    {{ 'Requested delivery'|trans }}: <strong>{{ order.deliveryDate|format_date('full') }}</strong>
+                    {% if order.deliverySlotStart is defined and order.deliverySlotStart %}
+                        <span dir="ltr">{{ 'from %start% to %end%'|trans({'%start%': order.deliverySlotStart, '%end%': order.deliverySlotEnd ?? ''}) }}</span>
+                    {% endif %}
+                </p>
+            {% endif %}
             <div class="flex flex-col gap-2">
                 <twig:Organisms:AddressCard:Base
                     :addressId="order.deliveryOrderAddress.id"

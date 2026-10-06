@@ -59,6 +59,10 @@ final class ComponentStatus
             // The gift block of the checkout, shipped with the core feature it renders.
             'Organisms/GiftWrapping' => self::READY,
 
+            // The day and slot of a carrier that offers delivery dates, shipped with the core
+            // feature it renders.
+            'Organisms/DeliveryDatePicker' => self::READY,
+
             // The guide waits on the one thing the theme cannot do for a project: being read,
             // then removed. Deleting `components/Toolkit/getting-started.html.twig` retires the
             // page; remove this arm and its SECTIONS entry by hand — nothing here does it for you.

@@ -46,8 +46,15 @@
     <h2 class="text-black h4">
         {{ 'Choose a delivery method'|trans }}
     </h2>
+    {% if this.deliveryDateNotice %}
+        {% set noticeText = this.deliveryDateNotice == 'carrier_gone'
+            ? 'The carrier you chose does not deliver to this address: your delivery date was cleared. Please choose a delivery method again.'|trans
+            : 'The delivery date you picked is no longer available for this address. Please choose another one.'|trans %}
+        <twig:Molecules:SnackBar:Base variant="warning" withIcon text="{{ noticeText }}" data-testid="delivery-date-notice" />
+    {% endif %}
     <div class="flex flex-col gap-3.5 my-5">
         {% set deliveryOptions = this.deliveryModulesOptions %}
+        {% set datePickerShown = false %}
         {% if deliveryOptions|length > 0 %}
             {% for option in deliveryOptions %}
                 {% if option.deliveryMode == enum('Thelia\\Domain\\Checkout\\Enum\\DeliveryMode').DELIVERY.value %}
@@ -76,6 +83,12 @@
                         :moduleId="option.moduleId"
                         icon="reinsurance-pickup"
                     />
+                {% endif %}
+                {# Under the carrier selected, outside its card: a click in the calendar must
+                   not reach the radio of the card, which a label around it would do. #}
+                {% if not datePickerShown and option.moduleId == this.deliveryModuleId and (option.deliveryDateChoice ?? 'none') != 'none' %}
+                    {% set datePickerShown = true %}
+                    <twig:Organisms:DeliveryDatePicker:Base :moduleId="option.moduleId" key="delivery-date-{{ option.moduleId }}" />
                 {% endif %}
             {% endfor %}
         {% else %}
