@@ -1,0 +1,41 @@
+{# The picker reads the carrier of the session cart and the days the core computes for it,
+   so it has nothing to show in the toolkit. What is worth looking at is its markup, drawn
+   here statically: a month of days with closed and full days disabled, the slots of the day
+   picked, one of them full, and the confirmation line. #}
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">Base (LiveComponent — a day, then a slot, under the carrier selected)</h4>
+        <p class="Story-label">Rendered by the delivery step under a carrier whose delivery date setting is a day or a slot of a day.</p>
+        <div class="Story-stage Story-stage--roomy">
+            <div class="DeliveryDatePicker">
+                <p class="DeliveryDatePicker-title">Choose a delivery day, then a slot</p>
+                <div class="DeliveryDatePicker-month">
+                    <button type="button" class="DeliveryDatePicker-nav" disabled aria-label="Previous month">{{ ux_icon('chevron-left', {'aria-hidden': 'true'}) }}</button>
+                    <p class="DeliveryDatePicker-monthName">October 2026</p>
+                    <button type="button" class="DeliveryDatePicker-nav" aria-label="Next month">{{ ux_icon('chevron-right', {'aria-hidden': 'true'}) }}</button>
+                </div>
+                <table class="DeliveryDatePicker-grid">
+                    <thead><tr>{% for d in ['M', 'T', 'W', 'T', 'F', 'S', 'S'] %}<th scope="col">{{ d }}</th>{% endfor %}</tr></thead>
+                    <tbody>
+                        <tr>
+                            <td></td><td></td>
+                            <td><button type="button" class="DeliveryDatePicker-day" disabled>7</button></td>
+                            <td><button type="button" class="DeliveryDatePicker-day">8</button></td>
+                            <td><button type="button" class="DeliveryDatePicker-day is-selected" aria-pressed="true">9</button></td>
+                            <td><button type="button" class="DeliveryDatePicker-day">10</button></td>
+                            <td><button type="button" class="DeliveryDatePicker-day" disabled>11</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <fieldset class="DeliveryDatePicker-slots">
+                    <legend class="DeliveryDatePicker-title">Slots on Friday 9 October 2026</legend>
+                    <ul>
+                        <li><button type="button" class="DeliveryDatePicker-slot" disabled><span class="DeliveryDatePicker-slotTitle">Morning</span><span>from 09:00 to 11:00</span><span class="DeliveryDatePicker-slotFull">Full</span></button></li>
+                        <li><button type="button" class="DeliveryDatePicker-slot is-selected" aria-pressed="true"><span>from 11:00 to 13:00</span></button></li>
+                    </ul>
+                </fieldset>
+                <p class="DeliveryDatePicker-chosen">{{ ux_icon('check', {'aria-hidden': 'true'}) }} Delivery on Friday 9 October 2026</p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -19,6 +19,8 @@
                 {{ 'Choose a delivery address to continue.'|trans }}
             {% elseif disabledReason == 'delivery_module' %}
                 {{ 'Choose a delivery method to continue.'|trans }}
+            {% elseif disabledReason == 'delivery_date' %}
+                {{ 'Choose a delivery date to continue.'|trans }}
             {% elseif disabledReason == 'payment_method' %}
                 {{ 'Choose a payment method to continue.'|trans }}
             {% elseif disabledReason == 'billing_address' %}

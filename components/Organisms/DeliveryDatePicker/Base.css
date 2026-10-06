@@ -1,0 +1,168 @@
+.DeliveryDatePicker {
+  margin-top: -0.25rem;
+  padding: 1rem;
+  border: 1px solid var(--color-medium);
+  border-top: 0;
+  border-radius: 0 0 0.5rem 0.5rem;
+  background: var(--color-white);
+}
+
+.DeliveryDatePicker-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-black);
+  margin-bottom: 0.75rem;
+}
+
+.DeliveryDatePicker-month {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 22rem;
+  margin-bottom: 0.5rem;
+}
+
+.DeliveryDatePicker-monthName {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-black);
+}
+
+.DeliveryDatePicker-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  color: var(--color-black);
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--color-lighter);
+  }
+
+  &:disabled {
+    color: var(--color-grey-lighter);
+    cursor: not-allowed;
+  }
+}
+
+.DeliveryDatePicker-grid {
+  width: 100%;
+  max-width: 22rem;
+  border-collapse: separate;
+  border-spacing: 0.25rem;
+  table-layout: fixed;
+
+  th {
+    font-weight: var(--font-weight-normal);
+    color: var(--color-grey-dark);
+    text-align: center;
+    padding-bottom: 0.25rem;
+
+    abbr {
+      text-decoration: none;
+    }
+  }
+
+  td {
+    text-align: center;
+    padding: 0;
+  }
+}
+
+.DeliveryDatePicker-day {
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: 2.5rem;
+  border: 1px solid var(--color-grey-lighter);
+  border-radius: 0.375rem;
+  background: var(--color-white);
+  color: var(--color-black);
+  font-weight: var(--font-weight-semibold);
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-dark);
+  }
+
+  &:disabled {
+    background: var(--color-grey-lightest);
+    border-color: var(--color-grey-lightest);
+    color: var(--color-grey);
+    font-weight: var(--font-weight-normal);
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+
+  &.is-selected {
+    background: var(--color-black);
+    border-color: var(--color-black);
+    color: var(--color-white);
+  }
+}
+
+.DeliveryDatePicker-slots {
+  margin-top: 1rem;
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+.DeliveryDatePicker-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+  min-width: 9rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-grey-lighter);
+  border-radius: 0.375rem;
+  background: var(--color-white);
+  color: var(--color-black);
+  text-align: start;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-dark);
+  }
+
+  &:disabled {
+    background: var(--color-grey-lightest);
+    color: var(--color-grey);
+    cursor: not-allowed;
+  }
+
+  &.is-selected {
+    background: var(--color-black);
+    border-color: var(--color-black);
+    color: var(--color-white);
+  }
+}
+
+.DeliveryDatePicker-slotTitle {
+  font-weight: var(--font-weight-semibold);
+}
+
+.DeliveryDatePicker-slotFull {
+  font-size: 0.875rem;
+}
+
+.DeliveryDatePicker-chosen {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  color: var(--color-black);
+  font-weight: var(--font-weight-semibold);
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-success-dark);
+  }
+}

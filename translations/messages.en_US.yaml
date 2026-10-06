@@ -580,3 +580,20 @@ Rename: Rename
 'Cart of %date%': 'Cart of %date%'
 'Order %ref%': 'Order %ref%'
 '(opens in a new tab)': "(opens in a new tab)"
+Choose a delivery day: Choose a delivery day
+Choose a delivery day, then a slot: Choose a delivery day, then a slot
+No delivery date is available for this carrier at the moment.: No delivery date is available for this carrier at the moment.
+Previous month: Previous month
+Next month: Next month
+closed: closed
+full: full
+Full: Full
+"Slots on %date%": "Slots on %date%"
+"from %start% to %end%": "from %start% to %end%"
+No slot is left on this day.: No slot is left on this day.
+"Delivery on %date%": "Delivery on %date%"
+Choose a delivery date to continue.: Choose a delivery date to continue.
+Delivery date: Delivery date
+Requested delivery: Requested delivery
+The delivery date you picked is no longer available for this address. Please choose another one.: The delivery date you picked is no longer available for this address. Please choose another one.
+"The carrier you chose does not deliver to this address: your delivery date was cleared. Please choose a delivery method again.": "The carrier you chose does not deliver to this address: your delivery date was cleared. Please choose a delivery method again."

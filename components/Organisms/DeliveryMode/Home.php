@@ -54,6 +54,9 @@ class Home
     }
 
     #[LiveListener(CheckoutEvents::SET_DELIVERY_MODULE_OPTION)]
+    // Heard again once the step wrote the carrier on the cart: the click reaches this card
+    // and the step at the same time, and the card can render before the cart says so.
+    #[LiveListener(CheckoutEvents::DELIVERY_MODULE_OPTION_SAVED)]
     public function getChecked(): bool
     {
         return $this->cartFacade->getDeliveryModuleId() === $this->moduleId;

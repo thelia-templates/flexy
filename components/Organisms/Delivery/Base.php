@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Organisms\Delivery;
 
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\DeliveryDateBridge;
 use FlexyBundle\Service\DeliveryOptionChoice;
 use FlexyBundle\Service\GuestCheckoutGate;
 use Propel\Runtime\Exception\PropelException;
@@ -69,6 +70,15 @@ class Base
     #[LiveProp]
     public ?int $editingAddressId = null;
 
+    /**
+     * Said once, after an address change took away the delivery day the buyer had picked:
+     * `date_gone` when the carrier stays and the day is no longer offered, `carrier_gone`
+     * when the carrier no longer serves the address. Worded by the template, which reads the
+     * catalogues of the theme.
+     */
+    #[LiveProp]
+    public ?string $deliveryDateNotice = null;
+
     public function __construct(
         private readonly Session $session,
         private readonly ShippingFacade $shippingFacade,
@@ -77,6 +87,7 @@ class Base
         private readonly LangService $langService,
         private readonly LoggerInterface $logger,
         private readonly GuestCheckoutGate $guestCheckoutGate,
+        private readonly DeliveryDateBridge $deliveryDates,
     ) {
     }
 
@@ -181,6 +192,9 @@ class Base
                     'moduleId' => $module->getId(),
                     'deliveryMode' => $module->getDeliveryMode(),
                     'postage' => $option->getPostage(),
+                    // What the buyer picks with this carrier: none, a day, or a slot. A core
+                    // that predates delivery dates answers nothing, which is none.
+                    'deliveryDateChoice' => method_exists($module, 'getDeliveryDateChoice') ? $module->getDeliveryDateChoice() : 'none',
                 ];
             }
         }
@@ -209,6 +223,7 @@ class Base
         ));
 
         $this->session->set('deliveryModuleOption', $optionCode);
+        $this->deliveryDateNotice = null;
 
         $this->deliveryModuleId = $moduleId;
         $this->deliveryModuleOptionCode = $optionCode;
@@ -217,6 +232,7 @@ class Base
             $this->shippingFacade->setCustomerDefaultDeliveryAddress($this->cartFacade->getOrCreateFromSession());
         }
 
+        $this->emit(CheckoutEvents::DELIVERY_MODULE_OPTION_SAVED);
         $this->emit('syncSummary');
         $this->emit('updateNextButton');
     }
@@ -227,16 +243,56 @@ class Base
         $this->guestCheckoutGate->assertVisible($addressId);
 
         $cart = $this->cartFacade->getOrCreateFromSession();
+        $carrierOfTheDay = null === $this->deliveryDates->chosenOn($cart, null) ? null : $cart->getDeliveryModuleId();
+
         $this->cartFacade->setDeliveryAddress(new CheckoutDTO(
             cart: $cart,
             deliveryAddressId: $addressId,
         ));
         $this->deliveryAddressId = $this->cartFacade->getDeliveryAddressId();
-        $cart->setDeliveryModuleId(null)->save();
-        $this->deliveryModuleId = null;
+        $this->deliveryDateNotice = null;
+
+        if (null !== $carrierOfTheDay && $this->offersModule($carrierOfTheDay)) {
+            // The buyer picked a day: it stays as long as the carrier serves the new address
+            // and the day is still offered. Choosing the carrier again requotes its postage
+            // for that address, and takes it off if it cannot quote.
+            $this->cartFacade->setDeliveryModule(new CheckoutDTO(cart: $cart, deliveryModuleId: $carrierOfTheDay));
+            $this->deliveryModuleId = $cart->getDeliveryModuleId();
+
+            if (null === $this->deliveryModuleId) {
+                // The carrier could not quote the new address after all: it went, and the day with it.
+                $this->deliveryDateNotice = 'carrier_gone';
+            } elseif ($this->deliveryDates->dropIfNoLongerPossible($cart)) {
+                $this->deliveryDateNotice = 'date_gone';
+            }
+        } else {
+            $cart->setDeliveryModuleId(null)->save();
+            $this->deliveryModuleId = null;
+
+            if (null !== $carrierOfTheDay) {
+                $this->deliveryDateNotice = 'carrier_gone';
+            }
+        }
 
         $this->emit('syncSummary');
         $this->emit('updateNextButton');
+    }
+
+    private function offersModule(int $moduleId): bool
+    {
+        foreach ($this->getDeliveryModulesOptions() as $option) {
+            if ($option['moduleId'] === $moduleId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    #[LiveListener(CheckoutEvents::DELIVERY_DATE_CHOSEN)]
+    public function forgetTheDeliveryDateNotice(): void
+    {
+        $this->deliveryDateNotice = null;
     }
 
     #[LiveListener(CheckoutEvents::SET_INVOICE_ORDER_ADDRESS_ID)]

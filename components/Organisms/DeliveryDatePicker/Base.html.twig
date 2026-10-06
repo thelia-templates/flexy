@@ -1,0 +1,108 @@
+{# The day, then the slot, of a carrier that offers delivery dates. Nothing at all for a
+   carrier that offers none: the delivery step is then exactly what it was. #}
+{% set mode = this.choiceMode %}
+{% if mode != 'none' %}
+    {% set month = this.currentMonth %}
+    {% set chosenDay = this.chosenDay %}
+    {% set chosenSlotId = this.chosenSlotId %}
+    {% set visibleDay = this.visibleDay %}
+    {% set monthCount = this.months|length %}
+    <div {{ attributes.defaults({class: 'DeliveryDatePicker'}) }} data-loading="addClass(opacity-50 pointer-events-none)" data-testid="delivery-date-picker">
+        <p class="DeliveryDatePicker-title" id="delivery-date-title-{{ this.moduleId }}">
+            {{ (mode == 'slot' ? 'Choose a delivery day, then a slot' : 'Choose a delivery day')|trans }}
+        </p>
+
+        {% if this.error %}
+            <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ this.error }}" data-testid="delivery-date-error" />
+        {% endif %}
+
+        {% if month is null %}
+            <p class="paragraph-4 text-grey-dark">{{ 'No delivery date is available for this carrier at the moment.'|trans }}</p>
+        {% else %}
+            <div class="DeliveryDatePicker-month">
+                <button type="button" class="DeliveryDatePicker-nav"
+                        {% if this.monthPage <= 0 %}disabled{% endif %}
+                        data-action="live#action" data-live-action-param="showMonth" data-live-page-param="{{ this.monthPage - 1 }}"
+                        aria-label="{{ 'Previous month'|trans }}">
+                    {{ ux_icon('chevron-left', {'aria-hidden': 'true'}) }}
+                </button>
+                <p class="DeliveryDatePicker-monthName" aria-live="polite">{{ month.first|format_date(pattern: 'MMMM yyyy')|capitalize }}</p>
+                <button type="button" class="DeliveryDatePicker-nav"
+                        {% if this.monthPage >= monthCount - 1 %}disabled{% endif %}
+                        data-action="live#action" data-live-action-param="showMonth" data-live-page-param="{{ this.monthPage + 1 }}"
+                        aria-label="{{ 'Next month'|trans }}">
+                    {{ ux_icon('chevron-right', {'aria-hidden': 'true'}) }}
+                </button>
+            </div>
+
+            <table class="DeliveryDatePicker-grid" aria-labelledby="delivery-date-title-{{ this.moduleId }}">
+                <thead>
+                    <tr>
+                        {% for weekday in 1..7 %}
+                            {% set sample = date('2024-01-0' ~ weekday) %}
+                            <th scope="col"><abbr title="{{ sample|format_date(pattern: 'EEEE') }}">{{ sample|format_date(pattern: 'EEEEE') }}</abbr></th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in month.weeks %}
+                        <tr>
+                            {% for day in week %}
+                                <td>
+                                    {% if day %}
+                                        {% set key = day.date|date('Y-m-d') %}
+                                        {% set selected = key == (this.pendingDay ?? chosenDay) %}
+                                        <button type="button"
+                                                class="DeliveryDatePicker-day {{ selected ? 'is-selected' }}"
+                                                {% if not day.available %}disabled{% endif %}
+                                                aria-pressed="{{ selected ? 'true' : 'false' }}"
+                                                aria-label="{{ day.date|format_date('full') }}{% if not day.open %} — {{ 'closed'|trans }}{% elseif not day.available %} — {{ 'full'|trans }}{% endif %}"
+                                                data-action="live#action" data-live-action-param="chooseDay" data-live-date-param="{{ key }}"
+                                                data-testid="delivery-date-day-{{ key }}">
+                                            {{ day.date|date('j') }}
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if mode == 'slot' and visibleDay %}
+                <fieldset class="DeliveryDatePicker-slots" data-testid="delivery-date-slots">
+                    <legend class="DeliveryDatePicker-title">{{ 'Slots on %date%'|trans({'%date%': visibleDay.date|format_date('full')}) }}</legend>
+                    <ul>
+                        {% for slot in this.visibleSlots %}
+                            {% set selectedSlot = chosenSlotId == slot.id and chosenDay == visibleDay.date|date('Y-m-d') %}
+                            <li>
+                                <button type="button"
+                                        class="DeliveryDatePicker-slot {{ selectedSlot ? 'is-selected' }}"
+                                        {% if not slot.available %}disabled{% endif %}
+                                        aria-pressed="{{ selectedSlot ? 'true' : 'false' }}"
+                                        data-action="live#action" data-live-action-param="chooseSlot"
+                                        data-live-date-param="{{ visibleDay.date|date('Y-m-d') }}" data-live-slot-id-param="{{ slot.id }}"
+                                        data-testid="delivery-date-slot-{{ slot.id }}">
+                                    {% if slot.title %}<span class="DeliveryDatePicker-slotTitle">{{ slot.title }}</span>{% endif %}
+                                    <span dir="ltr">{{ 'from %start% to %end%'|trans({'%start%': slot.startTime, '%end%': slot.endTime}) }}</span>
+                                    {% if not slot.available %}<span class="DeliveryDatePicker-slotFull">{{ 'Full'|trans }}</span>{% endif %}
+                                </button>
+                            </li>
+                        {% else %}
+                            <li class="paragraph-4 text-grey-dark">{{ 'No slot is left on this day.'|trans }}</li>
+                        {% endfor %}
+                    </ul>
+                </fieldset>
+            {% endif %}
+
+            {% if chosenDay and (mode == 'date' or chosenSlotId) %}
+                <p class="DeliveryDatePicker-chosen" role="status" data-testid="delivery-date-chosen">
+                    {{ ux_icon('check', {'aria-hidden': 'true'}) }}
+                    {{ 'Delivery on %date%'|trans({'%date%': chosenDay|format_date('full')}) }}
+                </p>
+            {% endif %}
+        {% endif %}
+    </div>
+{% else %}
+    <div {{ attributes }}></div>
+{% endif %}
