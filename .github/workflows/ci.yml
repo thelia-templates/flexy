@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, '1.2' ]
   pull_request:
 
 jobs:
@@ -54,7 +54,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: thelia/thelia
-          ref: main
+          ref: 3.2.0
           path: thelia
 
       - name: Start MySQL
