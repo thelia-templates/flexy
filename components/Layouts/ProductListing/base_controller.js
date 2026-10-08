@@ -1,6 +1,9 @@
 import { Controller } from "@hotwired/stimulus";
 import { getComponent } from "@symfony/ux-live-component";
 
+// How long a range slider has to stay still before the listing follows it, in milliseconds.
+const RANGE_SAVE_DELAY = 400;
+
 // Bridges plain form/select input to the LiveComponent's save() action. Filter checkboxes are
 // watched through a single change listener rather than one data-action per pill, since the pills
 // are rendered by the form theme.
@@ -9,8 +12,27 @@ export default class extends Controller {
     this.component = await getComponent(this.element);
   }
 
-  filterChange() {
+  filterChange(event) {
+    // A range slider moved with the keyboard fires a change at every step of an arrow key: one
+    // save per step would queue requests that come back on handles which have moved since, and
+    // the listing would stay on the first step while the slider shows the last. Wait until the
+    // visitor stops moving it; a mouse drag fires a single change on release and is barely held.
+    if (event?.target?.type === "range") {
+      clearTimeout(this.rangeSaveTimeout);
+      this.rangeSaveTimeout = setTimeout(() => this.save(), RANGE_SAVE_DELAY);
+
+      return;
+    }
+
+    this.save();
+  }
+
+  save() {
     this.component.action("save").then(() => this.afterSave());
+  }
+
+  disconnect() {
+    clearTimeout(this.rangeSaveTimeout);
   }
 
   sortChange(event) {
