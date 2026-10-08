@@ -17,6 +17,7 @@ namespace FlexyBundle\Controller;
 use FlexyBundle\Service\CartStockService;
 use FlexyBundle\Service\CheckoutModuleStepScreen;
 use FlexyBundle\Service\CheckoutStepRouteResolver;
+use FlexyBundle\Service\CheckoutStepRefusal;
 use FlexyBundle\Service\CheckoutStockRefusal;
 use FlexyBundle\Service\CheckoutTrail;
 use FlexyBundle\Service\GuestCheckoutGate;
@@ -34,13 +35,10 @@ use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Cart\Service\CartGuard;
 use Thelia\Domain\Checkout\CheckoutFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
+use Thelia\Domain\Checkout\Exception\CheckoutException;
 use Thelia\Domain\Checkout\Exception\EmptyCartException;
 use Thelia\Domain\Checkout\Exception\GuestCheckoutNotAllowedException;
-use Thelia\Domain\Checkout\Exception\IncompleteInvoiceAddressException;
-use Thelia\Domain\Checkout\Exception\InvalidDeliveryException;
 use Thelia\Domain\Checkout\Exception\InvalidPaymentException;
-use Thelia\Domain\Checkout\Exception\MissingAddressException;
-use Thelia\Domain\Checkout\Exception\MissingConsentException;
 use Thelia\Domain\Checkout\Service\CheckoutProgressionService;
 use Thelia\Domain\Customer\Service\AuthenticationReturnUrl;
 use Thelia\Domain\Order\Exception\StockShortageException;
@@ -264,6 +262,7 @@ class CheckoutController extends FlexyController
         CheckoutFacade $checkoutFacade,
         CartStockService $cartStockService,
         CheckoutStockRefusal $stockRefusal,
+        CheckoutStepRefusal $stepRefusal,
         GuestCheckoutGate $guestCheckoutGate,
         GuestOrderTracking $guestOrderTracking,
         CheckoutStepRouteResolver $routes,
@@ -335,11 +334,13 @@ class CheckoutController extends FlexyController
             $this->addFlash('error', $e->getMessage());
 
             throw new RedirectException($routes->pathFor(CheckoutStep::CODE_PAYMENT), Response::HTTP_FOUND, $e->getMessage());
-        } catch (MissingAddressException|InvalidDeliveryException|IncompleteInvoiceAddressException|MissingConsentException $e) {
+        } catch (CheckoutException $e) {
             // The rule, not the greyed-out button: a request that reaches here without a
             // carrier, without the legal identifiers of a business invoice or without the
             // boxes ticked — a typed url, a consent the shop made mandatory while the page
-            // was open — places no order.
+            // was open — places no order. The same goes for the step of a module (a phone
+            // number, a gift message): its refusal is a CheckoutException too, and reaching
+            // the end of the list of the core ones is no reason for a 500.
             //
             // Where it lands is the progression's answer rather than one written per
             // exception: the step that still has something missing is the step the buyer
@@ -350,9 +351,7 @@ class CheckoutController extends FlexyController
             // wording — which names the consent, or the field — onto the page they land on.
             // A cart there is none of raises EmptyCartException, which the catch above
             // answers: by here there is one to read the progression off.
-            $this->addFlash('error', $e->getMessage());
-
-            throw new RedirectException($routes->pathOfTheFirstIncompleteStep($cart), Response::HTTP_FOUND, $e->getMessage());
+            throw $stepRefusal->answer($e, $routes->pathOfTheFirstIncompleteStep($cart), $this->getRequest()->getSession());
         }
     }
 
