@@ -63,6 +63,7 @@
                 {% elseif option.deliveryMode == enum('Thelia\\Domain\\Checkout\\Enum\\DeliveryMode').LOCAL_PICKUP.value %}
                     <twig:Organisms:DeliveryMode:Store
                         title="{{ option.title }}"
+                        description="{{ option.description ?? '' }}"
                         price="{{ option.postage ?? '' }}"
                         optionCode="{{ option.code }}"
                         :moduleId="option.moduleId"

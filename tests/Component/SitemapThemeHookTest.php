@@ -68,6 +68,36 @@ final class SitemapThemeHookTest extends KernelTestCase
         self::assertNotFalse(simplexml_load_string($xml), 'What a module adds, languages included, must leave a well-formed document.');
     }
 
+    /**
+     * The Sitemap module active on a shop showing several languages, each entry names its
+     * language versions; otherwise the entry is printed as it always was, without a link.
+     */
+    public function testAnEntryPrintsItsLanguageAlternatesOnlyWhenItHasSome(): void
+    {
+        $twig = new Environment(new FilesystemLoader(\dirname(__DIR__, 2)));
+        $twig->addFunction(new TwigFunction('theme_hook', static fn (): string => '', ['is_safe' => ['html']]));
+
+        $plain = ['loc' => 'https://shop.example/chair.html', 'lastmod' => null, 'priority' => null, 'changefreq' => null, 'alternates' => []];
+        $localized = ['loc' => 'https://shop.example/chaise.html', 'alternates' => [
+            ['hreflang' => 'fr', 'href' => 'https://shop.example/chaise.html'],
+            ['hreflang' => 'en', 'href' => 'https://shop.example/chair.html'],
+            ['hreflang' => 'x-default', 'href' => 'https://shop.example/chair.html'],
+            ['hreflang' => 'es', 'href' => 'https://shop.example/?view=product&lang=es_ES&product_id=1'],
+        ]] + $plain;
+
+        $xml = $twig->render('sitemap-urlset.html.twig', ['urls' => [$plain], 'section' => 'products']);
+        self::assertStringNotContainsString('xhtml:link', $xml);
+
+        $xml = $twig->render('sitemap-urlset.html.twig', ['urls' => [$localized], 'section' => 'products']);
+        $document = simplexml_load_string($xml);
+        self::assertNotFalse($document, 'An address carrying a query string must leave a well-formed document.');
+
+        $links = $document->url[0]->children('http://www.w3.org/1999/xhtml')->link;
+        self::assertCount(4, $links);
+        self::assertSame('x-default', (string) $links[2]->attributes()->hreflang);
+        self::assertSame('https://shop.example/?view=product&lang=es_ES&product_id=1', (string) $links[3]->attributes()->href);
+    }
+
     private function generate(string $section): string
     {
         $container = self::getContainer();

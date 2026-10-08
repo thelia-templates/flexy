@@ -15,29 +15,64 @@ declare(strict_types=1);
 namespace FlexyBundle\Service;
 
 use FlexyBundle\DTO\ProductDTO;
+use FlexyBundle\Search\ProductSearchEngineInterface;
+use FlexyBundle\Search\VisibleProductIds;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 use Thelia\Core\Event\Product\ProductSearchedEvent;
 use Thelia\Domain\Localization\Service\LangService;
 
 /**
- * Single entry point for product search, so swapping in a Thelia search module (TntSearch and the
- * like) means reimplementing this class rather than hunting down call sites.
- * A module that logs its own searches (TntSearch does) would then log each one twice, once
- * itself and once through the ProductSearchedEvent countSubmitted() dispatches.
+ * Single entry point for product search: the search page, the listing and the suggestions all
+ * go through it.
  *
- * The API limits what it can do: `title` matches on word starts only ("Claire" misses
- * "Marie-Claire"), nothing but titles is searchable, and the i18n filter has no locale fallback —
- * a locale without translations returns nothing even though pages show fallback titles.
+ * Who finds the products is replaceable. A module registers a
+ * FlexyBundle\Search\ProductSearchEngineInterface service (TntSearch does) and the one with the
+ * highest tag priority answers which products match; the theme keeps what the visitor sees —
+ * visibility, pagination and sort — and reads the products through the API as anywhere else:
+ *
+ * - no sort chosen: the engine's relevance order, paginated over the visible matches;
+ * - a sort chosen: the API sorts and paginates the matches like any listing.
+ *
+ * An engine answering nothing means nothing matched: the theme does not second-guess it with
+ * its own search. A module that logs its own searches would log each one twice, once itself and
+ * once through the ProductSearchedEvent countSubmitted() dispatches.
+ *
+ * Without an engine, the API's `title` filter answers, and its limits show: it matches on word
+ * starts only ("Claire" misses "Marie-Claire"), nothing but titles is searchable, and the i18n
+ * filter has no locale fallback — a locale without translations returns nothing even though
+ * pages show fallback titles.
  */
 final readonly class ProductSearch
 {
+    /**
+     * The most matches an engine is asked for. Past a thousand, nobody pages that far, and the
+     * ids travel in the API query.
+     */
+    public const ENGINE_LIMIT = 1000;
+
+    private ?ProductSearchEngineInterface $engine;
+
+    /**
+     * @param iterable<ProductSearchEngineInterface> $engines highest priority first
+     */
     public function __construct(
         private DataAccessService $dataAccessService,
         private ProductSort $productSort,
         private EventDispatcherInterface $dispatcher,
         private LangService $langService,
+        #[AutowireIterator('flexy.product_search_engine')]
+        iterable $engines = [],
+        private ?VisibleProductIds $visibleProductIds = null,
     ) {
+        $engine = null;
+
+        foreach ($engines as $engine) {
+            break;
+        }
+
+        $this->engine = $engine;
     }
 
     /**
@@ -51,17 +86,11 @@ final readonly class ProductSearch
             return ['products' => [], 'total' => 0];
         }
 
-        $response = $this->dataAccessService->resources(
-            '/api/front/products',
-            $this->parameters($term, $page, $itemsPerPage, $sort),
-            'jsonld',
-        );
+        if ($this->engine !== null) {
+            return $this->searchWithEngine($this->engine, trim($term), max(1, $page), $itemsPerPage, $sort);
+        }
 
-        return [
-            'products' => ProductDTO::fromCollection($response['hydra:member'] ?? []),
-            // JSON-LD decoding hands the total back as a float
-            'total' => (int) ($response['hydra:totalItems'] ?? 0),
-        ];
+        return $this->fetch($this->parameters(['title' => trim($term)], $page, $itemsPerPage, $sort));
     }
 
     public function count(string $term): int
@@ -88,12 +117,80 @@ final readonly class ProductSearch
     }
 
     /**
+     * The engine's matches are first narrowed to the visible ones, so that both paths paginate
+     * the same list and agree on the total.
+     *
+     * With a sort, the API sorts and cuts the page out of those ids. Without one, the page is cut
+     * here, out of the visible ids in relevance order, and only that page is read through the
+     * API: the API cannot order by a relevance it does not know, and cutting its pages by id
+     * would scatter the best match anywhere in the results. Page n is thus always the n-th slice
+     * of one ordered list, whatever the page size.
+     *
+     * @return array{products: list<ProductDTO>, total: int}
+     */
+    private function searchWithEngine(ProductSearchEngineInterface $engine, string $term, int $page, int $itemsPerPage, ?string $sort): array
+    {
+        $ids = array_values(array_unique(array_map(
+            'intval',
+            $engine->productIds($term, (string) $this->langService->getLocale(), self::ENGINE_LIMIT),
+        )));
+
+        if ($this->visibleProductIds !== null) {
+            $ids = $this->visibleProductIds->filter($ids);
+        }
+
+        if ($ids === []) {
+            return ['products' => [], 'total' => 0];
+        }
+
+        if ($this->productSort->knows($sort)) {
+            return $this->fetch($this->parameters(['id' => $ids], $page, $itemsPerPage, $sort));
+        }
+
+        $pageIds = \array_slice($ids, ($page - 1) * $itemsPerPage, $itemsPerPage);
+
+        if ($pageIds === []) {
+            return ['products' => [], 'total' => \count($ids)];
+        }
+
+        $result = $this->fetch([
+            'id' => $pageIds,
+            'visible' => true,
+            'itemsPerPage' => \count($pageIds),
+            'page' => 1,
+        ]);
+
+        $rank = array_flip($pageIds);
+        $products = $result['products'];
+        usort($products, static fn (ProductDTO $left, ProductDTO $right): int => ($rank[$left->id] ?? \PHP_INT_MAX) <=> ($rank[$right->id] ?? \PHP_INT_MAX));
+
+        return ['products' => $products, 'total' => \count($ids)];
+    }
+
+    /**
+     * @param array<string, mixed> $parameters
+     *
+     * @return array{products: list<ProductDTO>, total: int}
+     */
+    private function fetch(array $parameters): array
+    {
+        $response = $this->dataAccessService->resources('/api/front/products', $parameters, 'jsonld');
+
+        return [
+            'products' => ProductDTO::fromCollection($response['hydra:member'] ?? []),
+            // JSON-LD decoding hands the total back as a float
+            'total' => (int) ($response['hydra:totalItems'] ?? 0),
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $filter
+     *
      * @return array<string, mixed>
      */
-    private function parameters(string $term, int $page, int $itemsPerPage, ?string $sort): array
+    private function parameters(array $filter, int $page, int $itemsPerPage, ?string $sort): array
     {
-        $parameters = [
-            'title' => trim($term),
+        $parameters = $filter + [
             'visible' => true,
             'itemsPerPage' => $itemsPerPage,
             'page' => max(1, $page),

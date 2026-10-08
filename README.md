@@ -71,13 +71,70 @@ as `<prefix>/<name>.svg`), not the child's: move the imported file into the chil
 
 The template declares `theme_hook()` extension points across its pages — `layout.head.top`, `product.bottom`, `cart.top` and others. A module answers one by implementing `Thelia\Core\Hook\Theme\ThemeHookInterface`; the tag priority drives the rendering order.
 
+The points are part of the theme's public surface: their names and parameters are not renamed.
+
+| Hook point | Where | Parameters |
+|---|---|---|
+| `layout.head.top`, `layout.head.bottom`, `layout.head.<view>` | `<head>` of every page | `breadcrumb` (and `title`, `description`, `og_type` on `top`) |
+| `layout.body.top`, `layout.body.bottom` | First and last thing of `<body>` | — |
+| `layout.header.actions` | Header action row, between the account button and the cart | — |
+| `layout.header.bottom` | Under the header | — |
+| `layout.footer.top` | Above the footer | — |
+| `home.top`, `home.bottom` | Home page | — |
+| `category.top`, `category.bottom` | Category page | `category` |
+| `brand.top`, `brand.bottom` | Brand page | `brand` |
+| `product.top`, `product.details.bottom`, `product.bottom` | Product page | `product` |
+| `product.pse.alerts` | Under the variant selector, outside the cart form | `pseId`, `outOfStock`, `taxedPrice` |
+| `product-card.bottom` | Product card of every listing, under the price, outside the card links | `productId` |
+| `cart.top`, `cart.bottom` | Cart page (and one-page checkout) | — |
+| `cart.item.bottom` | Each cart line | `cartItem` |
+| `checkout.top`, `checkout.bottom` | Every checkout step | — |
+| `checkout-identify.form.bottom` | Identification step | `next_step_url` |
+| `order-placed.top`, `order-placed.bottom` | Order confirmation | — |
+| `login.form.top`, `login.form.bottom`, `register.form.top`, `register.form.bottom` | Login and registration forms | — |
+| `account.top`, `account.bottom` | Account home | `customer` |
+| `account-order.top`, `account-order.bottom` | Order detail | `order` |
+| `account-order.item.top`, `account-order.item.bottom` | Each line of an order | `order`, `orderProduct` |
+| `account-order-return.top`, `account-order-return.bottom` | Return request of an order | `order` |
+| `account-return.top`, `account-return.bottom` | Return detail | `orderReturn` |
+| `sitemap.urls` | Inside each `<urlset>` of the sitemap | `context`, `lang` |
+
+`product-card.bottom` is rendered once per card, thirty times on a listing page: an answer reads what it needs for the whole page at once rather than one query per product. A control a module adds there sits outside the card's links, so a button does not end up inside an anchor. `layout.header.actions` takes a header button; the `Molecules:HeaderButton` component keeps it aligned with the others.
+
 The SEOne module already answers `layout.head.top` and `layout.head.bottom`, which is where the title, description, canonical, hreflang and structured data come from.
 
 The head also calls a hook named after the view, `layout.head.<view>`, for what a single page needs: a module that links a stylesheet on the product page alone answers `layout.head.product`, one that adds a script to the cart answers `layout.head.checkout-cart`. The view is the request's `_view` attribute: the core sets it for the pages it routes (`index`, `product`, `category`, `content`, `folder`, `brand`...), and `FlexyController` sets it for the pages it renders, from the template name (`checkout-cart`, `account`, `login`...).
 
-Each section of the sitemap calls `sitemap.urls` inside its `<urlset>`, with `context` set to the section (`categories`, `products`, `content`) and `lang` left empty: a module answers with `<url>` entries, `xhtml:link` alternates included. The `content` section holds nothing else, so the pages a module serves have a place of their own.
+Each section of the sitemap calls `sitemap.urls` inside its `<urlset>`, with `context` set to the section (`categories`, `products`, `content`) and `lang` left empty: a module answers with `<url>` entries, `xhtml:link` alternates included. The `content` section holds nothing else, so the pages a module serves have a place of their own. With the Sitemap module active and more than one language shown, the categories and products are listed once per language, each entry with the `xhtml:link` alternates of all of them and an `x-default` on the default language, the codes SEOne prints in the page head; otherwise one entry per element, in the default language. The sitemap is cached (`sitemap_ttl`, two hours by default): `?flush=1` regenerates a section.
 
 The header, the footer and the terms links name no content: they read the `header_links`, `footer_links` and `consent.<code>` content slots of the core (`content_slot()` and `content_slot_first()` in a template). The shop fills them from its settings, and a module can answer them instead through `Thelia\Core\Content\Slot\ContentSlotResolverInterface`.
+
+### Replacing the product search
+
+The search page, the listing and the suggestions ask `FlexyBundle\Service\ProductSearch`, which by default matches the API's `title` filter (word starts, titles only). A module replaces who finds the products by implementing `FlexyBundle\Search\ProductSearchEngineInterface`: autoconfiguration tags it `flexy.product_search_engine`, and the engine with the highest tag priority answers.
+
+```php
+public function productIds(string $term, string $locale, int $limit): array; // [12, 4, 27], most relevant first
+```
+
+The engine only says which products match. The theme keeps the rest: it drops the products a visitor may not see, paginates, and reads the page through the product API. With no sort chosen the results follow the engine's order; a sort chosen in the selector applies to the matches. An engine returning `[]` means no result: the theme does not fall back on its own search.
+
+### Front events
+
+The cart dispatches DOM events a module's script can listen to on `window` (they bubble from the component), part of the theme's public surface like the hook points:
+
+| Event | When | `event.detail` |
+|---|---|---|
+| `addPseToCart` | A product is added from its page, a cart line goes up, a removed line is restored | `{pse: int, quantity: int}` |
+| `removePseFromCart` | A cart line is removed or goes down | `{pse: int, quantity: int}` |
+
+`pse` is the product sale element id, `quantity` the number of units added or removed by that change, not the new total of the line.
+
+```js
+window.addEventListener('addPseToCart', (event) => {
+    console.log(event.detail.pse, event.detail.quantity);
+});
+```
 
 ### Listing a module's component in the toolkit
 

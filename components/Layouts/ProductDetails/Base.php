@@ -315,6 +315,11 @@ class Base
 
         $this->emit('addToCart', ['values' => $this->formValues]);
         $this->emit(CheckoutEvents::ADD_ITEM_EVENT);
+        // Public front event (see the README): what was added, for a module's script to read.
+        $this->dispatchBrowserEvent('addPseToCart', [
+            'pse' => (int) $formData['product_sale_elements_id'],
+            'quantity' => (int) $formData['quantity'],
+        ]);
     }
 
     protected function instantiateForm(): FormInterface

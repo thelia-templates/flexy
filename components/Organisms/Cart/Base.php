@@ -300,6 +300,7 @@ class Base
             quantity: $newQuantity,
         ));
         $this->emit(CheckoutEvents::UPDATE_ITEM_QUANTITY_EVENT);
+        $this->dispatchCartChange($cartItem->productSaleElementsId, $newQuantity - $cartItem->quantity);
     }
 
     #[LiveAction]
@@ -320,6 +321,7 @@ class Base
             quantity: $newQuantity,
         ));
         $this->emit(CheckoutEvents::UPDATE_ITEM_QUANTITY_EVENT);
+        $this->dispatchCartChange($cartItem->productSaleElementsId, $newQuantity - $cartItem->quantity);
     }
 
     #[LiveAction]
@@ -344,6 +346,24 @@ class Base
             cartItemId: $match->id,
         ));
         $this->emit(CheckoutEvents::DELETE_ITEM_EVENT);
+        $this->dispatchCartChange($match->productSaleElementsId, -$match->quantity);
+    }
+
+    /**
+     * The public front events of a cart change (see the README): `addPseToCart` or
+     * `removePseFromCart`, with the sale element and the quantity that changed hands — not
+     * the line's new total, so a listener counting additions and removals adds them up.
+     */
+    private function dispatchCartChange(int $pseId, int $quantityDelta): void
+    {
+        if (0 === $quantityDelta) {
+            return;
+        }
+
+        $this->dispatchBrowserEvent(
+            $quantityDelta > 0 ? 'addPseToCart' : 'removePseFromCart',
+            ['pse' => $pseId, 'quantity' => abs($quantityDelta)],
+        );
     }
 
     #[LiveAction]
@@ -379,6 +399,7 @@ class Base
         }
 
         $this->emit(CheckoutEvents::ADD_ITEM_EVENT, ['pseId' => $pseId]);
+        $this->dispatchCartChange($pseId, $quantity ?? 1);
     }
 
     /**

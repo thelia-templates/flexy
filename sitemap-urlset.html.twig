@@ -12,6 +12,9 @@
         {%- if url.priority is not null %}
         <priority>{{ url.priority }}</priority>
         {%- endif %}
+        {%- for alternate in url.alternates|default([]) %}
+        <xhtml:link rel="alternate" hreflang="{{ alternate.hreflang }}" href="{{ alternate.href }}"/>
+        {%- endfor %}
     </url>
 {% endfor %}
 {# The addresses modules add to this section, the language left to them. #}

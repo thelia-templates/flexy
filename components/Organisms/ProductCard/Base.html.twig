@@ -91,6 +91,11 @@
 			{% if this.runningSaleTag and this.runningSaleTag.shouldDisplayCountdown and this.runningSaleTag.countdownRemainingSeconds is not null %}
 				<twig:Molecules:Countdown:Base :remainingSeconds="this.runningSaleTag.countdownRemainingSeconds" size="sm" class="ProductCard-countdown" />
 			{% endif %}
+
+			{# Public extension point: a module adds a control under the price (wish list, compare...).
+			   Rendered once per card, so an answer must not cost a query per product. Outside the
+			   two links, so a button it adds does not nest inside an anchor. #}
+			{{ theme_hook('product-card.bottom', {productId: this.product.id}) }}
 		</div>
 	</div>
 </div>
