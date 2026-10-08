@@ -43,9 +43,9 @@ use Thelia\Model\CartItem;
 
 /**
  * An add the cart refuses (a module's CART_ADDITEM listener throwing InvalidCartException, the
- * stock gone since the page was rendered) is told to the shopper: the component flags it and
- * emits nothing, where the live request used to answer 500. A successful add still emits the
- * events the mini cart listens to.
+ * stock gone since the page was rendered) is told to the shopper, with the module's reason but
+ * never the core's stock message: the component flags it and emits nothing, where the live
+ * request used to answer 500. A successful add still emits the events the mini cart listens to.
  *
  * The cart is a generated Propel model: the test is skipped where those are not on the autoload.
  */
@@ -68,16 +68,18 @@ final class ProductDetailsCartRefusalTest extends TestCase
         $component->save();
 
         self::assertTrue($component->cartRefused);
+        self::assertSame('refused by a module rule', $component->cartRefusalReason);
         self::assertSame([], $responder->getEventsToEmit());
     }
 
     public function testAStockGoneSinceTheRenderIsFlaggedTheSameWay(): void
     {
-        $component = $this->component(new NotEnoughStockException(), new LiveResponder());
+        $component = $this->component(new NotEnoughStockException('Not enough stock for product REF-1'), new LiveResponder());
 
         $component->save();
 
         self::assertTrue($component->cartRefused);
+        self::assertSame('', $component->cartRefusalReason);
     }
 
     public function testAnAcceptedAddEmitsTheCartEvents(): void

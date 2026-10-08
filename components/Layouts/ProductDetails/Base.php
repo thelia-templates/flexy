@@ -133,10 +133,16 @@ class Base
      * Set when the cart refused the last add: a module rule (an InvalidCartException thrown by a
      * CART_ADDITEM listener) or the stock that ran out since the page was rendered. A plain
      * property, not a LiveProp: it belongs to the response of the action that failed, and the next
-     * action renders without it. The message is the theme's own, never the exception's: a module's
-     * message is not written for the shopper.
+     * action renders without it.
      */
     public bool $cartRefused = false;
+
+    /**
+     * The reason a module gave with its refusal, shown after the theme's sentence and printed
+     * escaped, as on the cart. Never the core's stock message, which names the product reference
+     * and is not translated.
+     */
+    public string $cartRefusalReason = '';
 
     private ?array $pses = null;
 
@@ -307,8 +313,9 @@ class Base
                     newness: (bool) $formData['newness'],
                 )
             );
-        } catch (InvalidCartException|NotEnoughStockException) {
+        } catch (InvalidCartException|NotEnoughStockException $exception) {
             $this->cartRefused = true;
+            $this->cartRefusalReason = $exception instanceof InvalidCartException ? trim($exception->getMessage()) : '';
 
             return;
         }
