@@ -26,6 +26,9 @@ Accept the privacy policy to continue.: Acepta la política de privacidad para c
 This form contains %count% errors.: Este formulario contiene %count% errores.
 This form contains one error.: Este formulario contiene un error.
 This product could not be added to your cart.: No se ha podido añadir este producto a su carrito.
+The quantity of %product% could not be changed.: No se ha podido cambiar la cantidad de %product%.
+There is not enough stock of %product% for this quantity.: No hay suficiente stock de %product% para esta cantidad.
+The product you removed could not be put back in your cart.: No se ha podido volver a añadir a su carrito el producto que ha retirado.
 Wrap it as a gift: Envolver para regalo
 No gift wrapping: Sin envoltorio de regalo
 Message for the recipient: Mensaje para el destinatario

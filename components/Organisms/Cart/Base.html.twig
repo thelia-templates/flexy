@@ -1,4 +1,23 @@
 <div {{ attributes.defaults(stimulus_controller('live-refresh-on-focus')) }} data-loading="addClass(opacity-50 pointer-events-none)">
+    {# Outside the totalItems test: a restore refused on an emptied cart still has to say so.
+       The sentence says what was refused, a module's reason follows it. SnackBar prints its text
+       raw, and the reason and the title are not the theme's: escaped here. #}
+    {% if this.refusal %}
+        {% set refusalMessages = {
+            quantity: 'The quantity of %product% could not be changed.'|trans({'%product%': this.refusalProduct}),
+            stock: 'There is not enough stock of %product% for this quantity.'|trans({'%product%': this.refusalProduct}),
+            restore: 'The product you removed could not be put back in your cart.'|trans,
+        } %}
+        {% set refusalText = refusalMessages[this.refusal] ~ (this.refusalReason ? ' ' ~ this.refusalReason : '') %}
+        <twig:Molecules:SnackBar:Base
+            variant="error"
+            withIcon
+            role="alert"
+            class="mb-6"
+            text="{{ refusalText|escape('html') }}"
+        />
+    {% endif %}
+
     {% if this.totalItems %}
         {% if this.itemHasNoStockMessage %}
             <twig:Molecules:SnackBar:Base

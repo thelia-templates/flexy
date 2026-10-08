@@ -291,6 +291,9 @@ every_cat: Discover %cat
 Product's visuals: Product's visuals
 This product combination is not available: This product combination is not available
 This product could not be added to your cart.: This product could not be added to your cart.
+The quantity of %product% could not be changed.: The quantity of %product% could not be changed.
+There is not enough stock of %product% for this quantity.: There is not enough stock of %product% for this quantity.
+The product you removed could not be put back in your cart.: The product you removed could not be put back in your cart.
 This product combination is currently out of stock.: This product combination is currently out of stock.
 Select your state: Select your state
 State: State
