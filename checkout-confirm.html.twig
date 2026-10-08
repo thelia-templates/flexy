@@ -8,7 +8,13 @@
         {{ ux_icon('cart-illustration', {class: 'w-40 h-auto block mx-auto mb-6'}) }}
         <h3 class="mt-4 h3">{{ 'Thanks for your order !'|trans }}</h3>
         <p class="paragraph-3 mt-4 mb-8">
-            <span class="block">{{ 'Your payment has been confirmed'|trans }}</span>
+            {# Only an order the shop already counts as paid: a cheque or a transfer is
+               settled later, and its buyer has not paid anything yet. #}
+            {% if order_paid|default(false) %}
+                <span class="block">{{ 'Your payment has been confirmed'|trans }}</span>
+            {% else %}
+                <span class="block">{{ 'Your order has been placed.'|trans }}</span>
+            {% endif %}
             <span>{{ "We'll do everything we can to send your order as quickly as possible!"|trans }}</span>
         </p>
         {# An order placed without an account: the only way back to it is the link, which

@@ -269,6 +269,7 @@ class CheckoutController extends FlexyController
         GuestOrderTracking $guestOrderTracking,
         CheckoutStepRouteResolver $routes,
         CheckoutTrail $trail,
+        PlacedOrderMemory $placedOrderMemory,
     ): Response {
         $cart = $cartFacade->getCartFromSession();
 
@@ -317,6 +318,7 @@ class CheckoutController extends FlexyController
                 // one the order was placed through, not the one an empty cart describes.
                 'steps' => $trail->ofTheOrderJustPlaced(),
                 'guest_order_token' => $guestOrderTracking->tokenOfPlacedOrder(),
+                'order_paid' => $placedOrderMemory->isPaid(),
             ]);
         } catch (GuestCheckoutNotAllowedException) {
             // The shop's answer changed while the buyer was in the checkout: the setting
@@ -408,6 +410,9 @@ class CheckoutController extends FlexyController
             'current' => CheckoutStep::CODE_CONFIRMATION,
             'steps' => $steps,
             'guest_order_token' => $guestOrderToken,
+            // Read before the memory could be cleared: a cheque or a transfer leaves the
+            // order unpaid, and the page must not thank the buyer for a payment not received.
+            'order_paid' => $placedOrderMemory->isPaid(),
         ]);
     }
 
