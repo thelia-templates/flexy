@@ -24,6 +24,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccountStatusException;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Thelia\Core\Event\DefaultActionEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -32,6 +34,7 @@ use Thelia\Core\Security\Exception\CustomerNotConfirmedException;
 use Thelia\Core\Security\Exception\WrongPasswordException;
 use Thelia\Domain\Addressing\Service\AddressService;
 use Thelia\Domain\Customer\DTO\CustomerRegisterDTO;
+use Thelia\Domain\Customer\Exception\CustomerNotEnabledException;
 use Thelia\Domain\Customer\Service\AuthenticationReturnUrl;
 use Thelia\Domain\Customer\Service\CustomerAuthenticator;
 use Thelia\Domain\Customer\Service\CustomerCodeManager;
@@ -154,6 +157,14 @@ class CustomerController extends FlexyController
                 $message = $this->translator->trans(
                     'Your account is not yet confirmed. A confirmation email has been sent to your email address, please check your mailbox'
                 );
+            } catch (CustomerNotEnabledException $e) {
+                // Raised by the core with a message already translated for the visitor.
+                $message = $e->getMessage();
+            } catch (AccountStatusException|CustomUserMessageAuthenticationException $e) {
+                // A sign-in refused after the password check, by the core or by a module listening to
+                // CUSTOMER_LOGIN (an account that may not sign in by itself, a closed account). Their
+                // message key is meant for the visitor; any other failure still ends in an error page.
+                $message = $this->getTranslator()->trans($e->getMessageKey(), $e->getMessageData());
             }
         } catch (FormValidationException $e) {
             $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
