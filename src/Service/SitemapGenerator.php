@@ -41,12 +41,21 @@ use Thelia\Tools\URL;
  * through LiipImagine. The optional Sitemap and SEOne modules refine the output
  * (priority/changefreq, noindex exclusions) and degrade gracefully when absent.
  *
+ * Several languages: when the Sitemap module is active and the shop shows more than one
+ * language, every category and product is listed once per language, each entry carrying the
+ * xhtml:link alternates of all of them and an x-default on the default language — the same set
+ * of URLs, hreflang codes included, the SEOne module prints in the page head, so the sitemap and
+ * the pages agree. Without the module, or with a single language, one entry per element in the
+ * default language, as before.
+ *
  * Generic base implementation: it lists visible categories and products only.
  * Site-specific sections (curated CMS pages, editorial folders, …) are meant to
  * be added by the overriding theme.
  *
- * @phpstan-type SitemapUrl array{loc: string, lastmod: \DateTimeInterface|null, priority: string|null, changefreq: string|null}
- * @phpstan-type SitemapSettings array{changefreq: string, exclude_empty_category: bool, priority: array<string, mixed>}
+ * @phpstan-type SitemapAlternate array{hreflang: string, href: string}
+ * @phpstan-type SitemapUrl array{loc: string, lastmod: \DateTimeInterface|null, priority: string|null, changefreq: string|null, alternates: list<SitemapAlternate>}
+ * @phpstan-type SitemapLang array{locale: string, hreflang: string, default: bool}
+ * @phpstan-type SitemapSettings array{changefreq: string, exclude_empty_category: bool, priority: array<string, mixed>, overrides: array<int, string>}
  * @phpstan-type SitemapImageEntry array{loc: string, image_loc: string, image_title: string|null}
  */
 final readonly class SitemapGenerator
@@ -138,7 +147,7 @@ final readonly class SitemapGenerator
     private function getCategoryUrls(): array
     {
         $locale = $this->getDefaultLocale();
-        $settings = $this->getModuleSettings();
+        $settings = $this->getModuleSettings('category');
         $excluded = $this->getNoindexObjectIds('category');
 
         $categories = CategoryQuery::create()
@@ -146,6 +155,9 @@ final readonly class SitemapGenerator
             ->filterByParent(0)
             ->orderByPosition()
             ->find();
+
+        $langs = $this->getAlternateLangs();
+        $this->preloadUrls('category', $langs, array_map(static fn ($category): int => $category->getId(), iterator_to_array($categories)));
 
         $urls = [];
         foreach ($categories as $category) {
@@ -159,7 +171,13 @@ final readonly class SitemapGenerator
                 continue;
             }
 
-            $urls[] = $this->buildUrl($category->getUrl($locale), $category->getUpdatedAt(), $settings, 'category', 'category', $categoryId);
+            if ([] === $langs) {
+                $urls[] = $this->buildUrl($category->getUrl($locale), $category->getUpdatedAt(), $settings, 'category', $categoryId);
+
+                continue;
+            }
+
+            array_push($urls, ...$this->buildLocalizedUrls($category->getUrl(...), $langs, $category->getUpdatedAt(), $settings, 'category', $categoryId));
         }
 
         return $urls;
@@ -171,7 +189,7 @@ final readonly class SitemapGenerator
     private function getProductUrls(): array
     {
         $locale = $this->getDefaultLocale();
-        $settings = $this->getModuleSettings();
+        $settings = $this->getModuleSettings('product');
         $excluded = $this->getNoindexObjectIds('product');
 
         $products = ProductQuery::create()
@@ -185,15 +203,25 @@ final readonly class SitemapGenerator
         // visitor's own catalog does.
         $this->reservedSaleVisibility->applyTo($products, ProductTableMap::COL_ID);
 
+        $products = $products->find();
+        $langs = $this->getAlternateLangs();
+        $this->preloadUrls('product', $langs, array_map(static fn ($product): int => $product->getId(), iterator_to_array($products)));
+
         $urls = [];
-        foreach ($products->find() as $product) {
+        foreach ($products as $product) {
             $productId = $product->getId();
 
             if (\in_array($productId, $excluded, true)) {
                 continue;
             }
 
-            $urls[] = $this->buildUrl($product->getUrl($locale), $product->getUpdatedAt(), $settings, 'product', 'product', $productId);
+            if ([] === $langs) {
+                $urls[] = $this->buildUrl($product->getUrl($locale), $product->getUpdatedAt(), $settings, 'product', $productId);
+
+                continue;
+            }
+
+            array_push($urls, ...$this->buildLocalizedUrls($product->getUrl(...), $langs, $product->getUpdatedAt(), $settings, 'product', $productId));
         }
 
         return $urls;
@@ -349,38 +377,166 @@ final readonly class SitemapGenerator
         ?\DateTimeInterface $lastmod,
         ?array $settings,
         string $priorityKey,
-        ?string $sourceType = null,
         ?int $sourceId = null,
     ): array {
         return [
             'loc' => $loc,
             'lastmod' => $lastmod,
-            'priority' => null === $settings ? null : $this->resolvePriority($settings['priority'][$priorityKey] ?? null, $sourceType, $sourceId),
+            'priority' => null === $settings ? null : $this->resolvePriority($settings, $priorityKey, $sourceId),
             'changefreq' => $settings['changefreq'] ?? null,
+            'alternates' => [],
         ];
     }
 
     /**
-     * Per-element priority (set in the Sitemap module) overrides the default per-type priority.
+     * One entry per language of an element, each listing the alternates of all of them: a
+     * search engine reads the language versions as a set only when every one names the others.
+     * Two languages answering the same address (a locale with no URL of its own falling back
+     * on another's) share one entry.
+     *
+     * @param callable(string): string $urlOf      the element's URL in a locale
+     * @param non-empty-list<SitemapLang> $langs
+     * @param SitemapSettings|null     $settings
+     *
+     * @return list<SitemapUrl>
      */
-    private function resolvePriority(mixed $default, ?string $sourceType, ?int $sourceId): ?string
-    {
-        if (null !== $sourceType && null !== $sourceId) {
-            try {
-                $override = SitemapPriorityQuery::create()
-                    ->filterBySource($sourceType)
-                    ->filterBySourceId($sourceId)
-                    ->findOne();
+    private function buildLocalizedUrls(
+        callable $urlOf,
+        array $langs,
+        ?\DateTimeInterface $lastmod,
+        ?array $settings,
+        string $priorityKey,
+        int $sourceId,
+    ): array {
+        $alternates = [];
+        $locs = [];
 
-                if (null !== $override && null !== $override->getValue()) {
-                    return $this->formatPriority($override->getValue());
-                }
-            } catch (\Throwable) {
-                // sitemap_priority table unavailable: fall back to the default priority.
+        foreach ($langs as $lang) {
+            $href = $urlOf($lang['locale']);
+            $locs[$href] = true;
+            $alternates[] = ['hreflang' => $lang['hreflang'], 'href' => $href];
+
+            if ($lang['default']) {
+                $alternates[] = ['hreflang' => 'x-default', 'href' => $href];
             }
         }
 
+        $base = $this->buildUrl('', $lastmod, $settings, $priorityKey, $sourceId);
+
+        return array_map(
+            static fn (string $loc): array => ['loc' => $loc, 'alternates' => $alternates] + $base,
+            array_keys($locs),
+        );
+    }
+
+    /**
+     * The languages each element is listed in, or an empty list for a single listing in the
+     * default language: without the Sitemap module, or when the shop shows one language only.
+     *
+     * The languages are the active and visible ones, like the hreflang links SEOne prints in the
+     * page head, with the same codes — the language alone ("fr"), or the full locale ("fr-ca")
+     * for the languages that share it, which the language alone would not tell apart.
+     *
+     * @return list<SitemapLang>
+     */
+    private function getAlternateLangs(): array
+    {
+        if (!$this->isSitemapModuleActive()) {
+            return [];
+        }
+
+        $langs = LangQuery::create()
+            ->filterByActive(1)
+            ->filterByVisible(1)
+            ->orderByPosition()
+            ->find();
+
+        if (\count($langs) < 2) {
+            return [];
+        }
+
+        $languageOf = static fn (string $locale): string => strtolower(explode('_', $locale)[0]);
+        $languageCount = array_count_values(array_map(static fn ($lang): string => $languageOf($lang->getLocale()), iterator_to_array($langs)));
+
+        $alternateLangs = [];
+        foreach ($langs as $lang) {
+            $language = $languageOf($lang->getLocale());
+
+            $alternateLangs[] = [
+                'locale' => $lang->getLocale(),
+                'hreflang' => $languageCount[$language] > 1 ? strtolower(str_replace('_', '-', $lang->getLocale())) : $language,
+                'default' => (bool) $lang->getByDefault(),
+            ];
+        }
+
+        return $alternateLangs;
+    }
+
+    /**
+     * Reads the rewritten URLs of a whole section in one query per language, rather than one
+     * per element and language.
+     *
+     * @param list<SitemapLang> $langs
+     * @param list<int>         $ids
+     */
+    private function preloadUrls(string $view, array $langs, array $ids): void
+    {
+        if ([] === $ids) {
+            return;
+        }
+
+        $locales = [] === $langs ? [$this->getDefaultLocale()] : array_column($langs, 'locale');
+
+        foreach ($locales as $locale) {
+            URL::getInstance()->preloadRewrittenUrls($view, $locale, $ids);
+        }
+    }
+
+    /**
+     * Per-element priority (set in the Sitemap module) overrides the default per-type priority.
+     *
+     * @param SitemapSettings $settings
+     */
+    private function resolvePriority(array $settings, string $priorityKey, ?int $sourceId): ?string
+    {
+        if (null !== $sourceId && isset($settings['overrides'][$sourceId])) {
+            return $settings['overrides'][$sourceId];
+        }
+
+        $default = $settings['priority'][$priorityKey] ?? null;
+
         return null === $default ? null : $this->formatPriority($default);
+    }
+
+    /**
+     * The per-element priorities of a source type, read once per section rather than once
+     * per address. When an element has several rows, the oldest wins, as findOne() did.
+     *
+     * @return array<int, string> formatted priority by element id
+     */
+    private function getPriorityOverrides(string $sourceType): array
+    {
+        try {
+            $rows = SitemapPriorityQuery::create()
+                ->filterBySource($sourceType)
+                ->orderById()
+                ->find();
+        } catch (\Throwable) {
+            // sitemap_priority table unavailable: fall back to the default priorities.
+            return [];
+        }
+
+        $firstRows = [];
+        foreach ($rows as $row) {
+            $sourceId = $row->getSourceId();
+
+            if (null !== $sourceId && !\array_key_exists((int) $sourceId, $firstRows)) {
+                $firstRows[(int) $sourceId] = $row->getValue();
+            }
+        }
+
+        // A first row without a value leaves the default priority, as it did when read alone.
+        return array_map($this->formatPriority(...), array_filter($firstRows, static fn (mixed $value): bool => null !== $value));
     }
 
     private function formatPriority(mixed $value): string
@@ -395,7 +551,7 @@ final readonly class SitemapGenerator
      *
      * @return SitemapSettings|null
      */
-    private function getModuleSettings(): ?array
+    private function getModuleSettings(string $sourceType): ?array
     {
         if (!$this->isSitemapModuleActive()) {
             return null;
@@ -408,6 +564,7 @@ final readonly class SitemapGenerator
                 'category' => Sitemap::getConfigValue('default_priority_category_value', Sitemap::DEFAULT_PRIORITY_CATEGORY_VALUE),
                 'product' => Sitemap::getConfigValue('default_priority_product_value', Sitemap::DEFAULT_PRIORITY_PRODUCT_VALUE),
             ],
+            'overrides' => $this->getPriorityOverrides($sourceType),
         ];
     }
 
