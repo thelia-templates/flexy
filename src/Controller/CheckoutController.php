@@ -34,6 +34,7 @@ use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Cart\Service\CartGuard;
 use Thelia\Domain\Checkout\CheckoutFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
+use Thelia\Domain\Checkout\Exception\CheckoutException;
 use Thelia\Domain\Checkout\Exception\EmptyCartException;
 use Thelia\Domain\Checkout\Exception\GuestCheckoutNotAllowedException;
 use Thelia\Domain\Checkout\Exception\IncompleteInvoiceAddressException;
@@ -350,6 +351,15 @@ class CheckoutController extends FlexyController
             // wording — which names the consent, or the field — onto the page they land on.
             // A cart there is none of raises EmptyCartException, which the catch above
             // answers: by here there is one to read the progression off.
+            $this->addFlash('error', $e->getMessage());
+
+            throw new RedirectException($routes->pathOfTheFirstIncompleteStep($cart), Response::HTTP_FOUND, $e->getMessage());
+        } catch (CheckoutException $e) {
+            // A refusal the theme knows nothing about: the step of a module (a minimum
+            // order amount, an age check) refusing the cart at placement. Answered as the
+            // core refusals above, the wording on the page the progression points to,
+            // rather than an error page. A step with no screen of its own sends the buyer
+            // back to the last screen before it, or to the cart when it is skipped.
             $this->addFlash('error', $e->getMessage());
 
             throw new RedirectException($routes->pathOfTheFirstIncompleteStep($cart), Response::HTTP_FOUND, $e->getMessage());
