@@ -21,6 +21,7 @@
     text_refused: 'The text is too long: a table takes at most 500 lines.'|trans,
     nothing_to_save: 'There is no line to save: type a reference and a whole quantity above zero.'|trans,
     list_refused: 'The list could not be saved: its name is empty or longer than 255 characters, or the account already keeps 100 lists.'|trans,
+    cart_refused: 'None of these lines could be added to your cart.'|trans,
 } %}
 {% set rejectReasons = {
     columns: 'expected a reference and a quantity'|trans,
@@ -34,7 +35,9 @@
 <div class="{{ ('QuickOrderTable ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
     <div class="QuickOrderTable-messages" role="status">
         {% if error %}
-            <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ errorMessages[error]|default('') }}" />
+            {# The reason of a cart refusal is module-authored, and SnackBar prints its text raw. #}
+            {% set errorText = errorMessages[error]|default('') ~ ('cart_refused' == error and cartRefusalReason ? ' ' ~ cartRefusalReason : '') %}
+            <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ errorText|escape('html') }}" />
         {% endif %}
         {% if saved %}
             <twig:Molecules:SnackBar:Base variant="success" withIcon text="{{ 'The list has been saved.'|trans }}" />

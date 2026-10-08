@@ -29,6 +29,7 @@ use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\Attribute\PostHydrate;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Thelia\Core\Security\SecurityContext;
+use Thelia\Domain\Cart\Exception\InvalidCartException;
 use Thelia\Domain\Catalog\DTO\ReferenceQuantity;
 use Thelia\Domain\Catalog\DTO\ReferenceQuantityLines;
 use Thelia\Domain\Catalog\Exception\InvalidReferenceQuantityException;
@@ -106,6 +107,11 @@ class Base
     public string $saveTitle = '';
 
     public ?string $error = null;
+
+    /**
+     * The reason a module gave when the cart refused the lines ('cart_refused'), printed escaped.
+     */
+    public string $cartRefusalReason = '';
 
     public int $addedCount = 0;
 
@@ -270,6 +276,13 @@ class Base
             return;
         } catch (InvalidReferenceQuantityException) {
             $this->error = 'invalid_lines';
+
+            return;
+        } catch (InvalidCartException $exception) {
+            // A module's CART_ADDITEM listener refused a line: the core rolls the whole table
+            // back, so nothing reached the cart and every row stays for the buyer to correct.
+            $this->error = 'cart_refused';
+            $this->cartRefusalReason = trim($exception->getMessage());
 
             return;
         }
