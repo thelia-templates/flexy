@@ -521,6 +521,7 @@ Ready: Prête
 'Unknown reference': 'Référence inconnue'
 'Quantity not available': 'Quantité indisponible'
 'Too many checks in a short time. Please wait a minute and try again.': 'Trop de vérifications en peu de temps. Patientez une minute puis réessayez.'
+'None of these lines could be added to your cart.': 'Aucune de ces lignes n''a pu être ajoutée à votre panier.'
 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.': "Le tableau n'a pas pu être vérifié : une référence est trop longue, ou le tableau dépasse 500 lignes."
 'The text is too long: a table takes at most 500 lines.': 'Le texte est trop long : un tableau prend au plus 500 lignes.'
 'expected a reference and a quantity': 'une référence et une quantité sont attendues'

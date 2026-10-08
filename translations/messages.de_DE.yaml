@@ -514,6 +514,7 @@ VAT exempted (reverse charge), buyer VAT number %number%: 'Steuerfrei (Reverse-C
 'Unknown reference': 'Unbekannte Artikelnummer'
 'Quantity not available': 'Menge nicht verfügbar'
 'Too many checks in a short time. Please wait a minute and try again.': 'Zu viele Prüfungen in kurzer Zeit. Bitte warten Sie eine Minute und versuchen Sie es erneut.'
+'None of these lines could be added to your cart.': 'Keine dieser Zeilen konnte in Ihren Warenkorb gelegt werden.'
 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.': 'Die Tabelle konnte nicht geprüft werden: Eine Artikelnummer ist zu lang oder die Tabelle enthält mehr als 500 Zeilen.'
 'The text is too long: a table takes at most 500 lines.': 'Der Text ist zu lang: Eine Tabelle darf höchstens 500 Zeilen enthalten.'
 'expected a reference and a quantity': 'Artikelnummer und Menge erwartet'

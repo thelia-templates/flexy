@@ -512,6 +512,7 @@ Ready: Ready
 'Unknown reference': 'Unknown reference'
 'Quantity not available': 'Quantity not available'
 'Too many checks in a short time. Please wait a minute and try again.': 'Too many checks in a short time. Please wait a minute and try again.'
+'None of these lines could be added to your cart.': 'None of these lines could be added to your cart.'
 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.': 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.'
 'The text is too long: a table takes at most 500 lines.': 'The text is too long: a table takes at most 500 lines.'
 'expected a reference and a quantity': 'expected a reference and a quantity'

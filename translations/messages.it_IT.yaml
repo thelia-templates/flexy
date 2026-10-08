@@ -42,6 +42,7 @@ Messages from the shop: Messaggi del negozio
 'Unknown reference': 'Riferimento sconosciuto'
 'Quantity not available': 'Quantità non disponibile'
 'Too many checks in a short time. Please wait a minute and try again.': 'Troppe verifiche in poco tempo. Attendi un minuto e riprova.'
+'None of these lines could be added to your cart.': 'Non è stato possibile aggiungere nessuna di queste righe al carrello.'
 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.': 'Non è stato possibile verificare la tabella: un riferimento è troppo lungo oppure la tabella contiene più di 500 righe.'
 'The text is too long: a table takes at most 500 lines.': 'Il testo è troppo lungo: una tabella può contenere al massimo 500 righe.'
 'expected a reference and a quantity': 'attesi un riferimento e una quantità'
