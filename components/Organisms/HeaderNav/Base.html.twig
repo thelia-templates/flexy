@@ -30,6 +30,10 @@
         />
     {% endif %}
 
+    {# Public extension point: a module adds a header action (wish list, compare...) between the
+       account and the cart, with the HeaderButton molecule to keep the row aligned. #}
+    {{ theme_hook('layout.header.actions') }}
+
     <twig:Organisms:CartButton:Base />
 
     <twig:Molecules:HeaderButton:Base
