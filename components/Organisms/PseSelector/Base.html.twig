@@ -7,6 +7,7 @@
 {# @prop remainingStock int Stock left once what is already in the cart is deducted #}
 {# @prop maxQuantityReached bool The cart already holds the whole available stock #}
 {# @prop cartRefused bool The cart refused the last add (a module rule, the stock gone meanwhile) #}
+{# @prop cartRefusalReason string The reason a module gave with its refusal, printed escaped after the sentence #}
 {% props
     form,
     productAttrs = [],
@@ -16,7 +17,8 @@
     stockManaged = false,
     remainingStock = 0,
     maxQuantityReached = false,
-    cartRefused = false
+    cartRefused = false,
+    cartRefusalReason = ''
 %}
 
 {# The Flexy form theme is no longer global: without this the widgets below silently fall back to
@@ -113,7 +115,7 @@
             variant="error"
             withIcon
             role="alert"
-            text="{{ 'This product could not be added to your cart.'|trans }}"
+            text="{{ ('This product could not be added to your cart.'|trans ~ (cartRefusalReason ? ' ' ~ cartRefusalReason : ''))|escape('html') }}"
         />
     {% endif %}
 
