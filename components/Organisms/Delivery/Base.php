@@ -26,6 +26,7 @@ use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
+use Thelia\Api\Resource\DeliveryModuleOption;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Domain\Addressing\Exception\AddressNotFoundException;
 use Thelia\Domain\Addressing\Service\AddressService;
@@ -181,11 +182,28 @@ class Base
                     'moduleId' => $module->getId(),
                     'deliveryMode' => $module->getDeliveryMode(),
                     'postage' => $option->getPostage(),
+                    // What the module tells the buyer about the option: the pickup hours of a
+                    // store, the delay of a carrier. Plain text, escaped where it is printed.
+                    'description' => self::descriptionOf($option),
                 ];
             }
         }
 
         return $deliveryOptions;
+    }
+
+    /**
+     * The core option declares its description without a default, so a module that never
+     * sets one leaves a property PHP refuses to read: that option gets no description
+     * rather than taking the delivery step down.
+     */
+    private static function descriptionOf(DeliveryModuleOption $option): string
+    {
+        try {
+            return $option->getDescription();
+        } catch (\Error) {
+            return '';
+        }
     }
 
     #[LiveListener(CheckoutEvents::SET_DELIVERY_MODULE_OPTION)]
