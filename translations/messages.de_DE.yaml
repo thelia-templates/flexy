@@ -291,6 +291,9 @@ every_cat: '%cat entdecken'
 Product's visuals: Produktbilder
 This product combination is not available: Diese Variante ist nicht verfügbar
 This product could not be added to your cart.: Dieses Produkt konnte nicht in Ihren Warenkorb gelegt werden.
+The quantity of %product% could not be changed.: Die Menge von %product% konnte nicht geändert werden.
+There is not enough stock of %product% for this quantity.: Für diese Menge von %product% ist nicht genügend Bestand vorhanden.
+The product you removed could not be put back in your cart.: Das entfernte Produkt konnte nicht wieder in Ihren Warenkorb gelegt werden.
 This product combination is currently out of stock.: Diese Variante ist derzeit nicht vorrätig.
 Select your state: Wählen Sie Ihr Bundesland
 State: Bundesland

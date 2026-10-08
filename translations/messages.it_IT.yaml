@@ -26,6 +26,9 @@ Accept the privacy policy to continue.: Accetta l'informativa sulla privacy per 
 This form contains %count% errors.: Questo modulo contiene %count% errori.
 This form contains one error.: Questo modulo contiene un errore.
 This product could not be added to your cart.: Non è stato possibile aggiungere questo prodotto al carrello.
+The quantity of %product% could not be changed.: Non è stato possibile modificare la quantità di %product%.
+There is not enough stock of %product% for this quantity.: Lo stock di %product% non è sufficiente per questa quantità.
+The product you removed could not be put back in your cart.: Non è stato possibile rimettere nel carrello il prodotto rimosso.
 Wrap it as a gift: Confeziona come regalo
 No gift wrapping: Nessuna confezione regalo
 Message for the recipient: Messaggio per il destinatario

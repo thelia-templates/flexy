@@ -277,6 +277,9 @@ every_cat: Découvrir %cat
 Product's visuals: Visuels produit
 This product combination is not available: Cette combinaison n'est pas disponible
 This product could not be added to your cart.: "Ce produit n'a pas pu être ajouté à votre panier."
+The quantity of %product% could not be changed.: La quantité de %product% n'a pas pu être modifiée.
+There is not enough stock of %product% for this quantity.: Stock insuffisant de %product% pour cette quantité.
+The product you removed could not be put back in your cart.: Le produit retiré n'a pas pu être remis dans votre panier.
 This product combination is currently out of stock.: Cette combinaison de produit est actuellement en rupture de stock
 Out of stock: Rupture de stock
 You already have the maximum available quantity of this product in your cart: Vous avez déjà la quantité maximale disponible de ce produit dans votre panier

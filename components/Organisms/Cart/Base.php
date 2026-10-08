@@ -32,6 +32,8 @@ use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Cart\DTO\CartItemAddDTO;
 use Thelia\Domain\Cart\DTO\CartItemDeleteDTO;
 use Thelia\Domain\Cart\DTO\CartItemUpdateQuantityDTO;
+use Thelia\Domain\Cart\Exception\InvalidCartException;
+use Thelia\Domain\Cart\Exception\NotEnoughStockException;
 use Thelia\Form\Definition\FrontForm;
 use Thelia\Model\ProductImageQuery;
 use Thelia\Model\ProductSaleElementsProductImageQuery;
@@ -70,6 +72,22 @@ class Base
      * @var list<string>
      */
     public array $unavailablePromotionMessages = [];
+
+    /**
+     * What the cart refused in this request: 'quantity' (a module rule), 'stock' (gone since the
+     * cart was rendered) or 'restore' (a removed line that could not be put back). Not a
+     * LiveProp: the message answers the action that was refused, and the next render forgets it.
+     */
+    public ?string $refusal = null;
+
+    /**
+     * The reason a module gave with its refusal, printed escaped. Never the core's stock
+     * message, which names the product reference and is not translated.
+     */
+    public string $refusalReason = '';
+
+    /** The title of the line whose quantity was refused, so the message says which one. */
+    public string $refusalProduct = '';
 
     public function __construct(
         private readonly CartFacade $cartFacade,
@@ -294,12 +312,7 @@ class Base
             return;
         }
 
-        $this->cartFacade->updateItemQuantity(new CartItemUpdateQuantityDTO(
-            cart: $this->cartFacade->getOrCreateFromSession(),
-            cartItemId: $cartItem->id,
-            quantity: $newQuantity,
-        ));
-        $this->emit(CheckoutEvents::UPDATE_ITEM_QUANTITY_EVENT);
+        $this->updateQuantity($cartItem, $newQuantity);
     }
 
     #[LiveAction]
@@ -314,12 +327,36 @@ class Base
         $maxQuantity = $cartItem->stockManaged ? $cartItem->stock : \PHP_INT_MAX;
         $newQuantity = min($maxQuantity, $quantity ?? $cartItem->quantity + 1);
 
-        $this->cartFacade->updateItemQuantity(new CartItemUpdateQuantityDTO(
-            cart: $this->cartFacade->getOrCreateFromSession(),
-            cartItemId: $cartItem->id,
-            quantity: $newQuantity,
-        ));
+        $this->updateQuantity($cartItem, $newQuantity);
+    }
+
+    /**
+     * A refusal of the cart is the shopper's business, not a server error: without the catch the
+     * live request answered 500. The line the shopper typed into is put back by the re-render,
+     * which reads the cart again (refreshBeforeRender()).
+     */
+    private function updateQuantity(CartItemDto $cartItem, int $quantity): void
+    {
+        try {
+            $this->cartFacade->updateItemQuantity(new CartItemUpdateQuantityDTO(
+                cart: $this->cartFacade->getOrCreateFromSession(),
+                cartItemId: $cartItem->id,
+                quantity: $quantity,
+            ));
+        } catch (InvalidCartException|NotEnoughStockException $exception) {
+            $this->recordRefusal('quantity', $exception);
+            $this->refusalProduct = $cartItem->title;
+
+            return;
+        }
+
         $this->emit(CheckoutEvents::UPDATE_ITEM_QUANTITY_EVENT);
+    }
+
+    private function recordRefusal(string $refusal, InvalidCartException|NotEnoughStockException $exception): void
+    {
+        $this->refusal = $exception instanceof NotEnoughStockException && 'quantity' === $refusal ? 'stock' : $refusal;
+        $this->refusalReason = $exception instanceof InvalidCartException ? trim($exception->getMessage()) : '';
     }
 
     #[LiveAction]
@@ -367,12 +404,20 @@ class Base
             'newness' => 0,
         ]);
 
-        $this->cartFacade->addItem(new CartItemAddDTO(
-            cart: $cart,
-            productId: $productId,
-            productSaleElementId: $pseId,
-            quantity: $quantity ?? 1,
-        ));
+        try {
+            $this->cartFacade->addItem(new CartItemAddDTO(
+                cart: $cart,
+                productId: $productId,
+                productSaleElementId: $pseId,
+                quantity: $quantity ?? 1,
+            ));
+        } catch (InvalidCartException|NotEnoughStockException $exception) {
+            // The undo tile is gone with this render (pendingDelete is not a LiveProp): the
+            // message alone tells the shopper the line is still out of the cart.
+            $this->recordRefusal('restore', $exception);
+
+            return;
+        }
 
         if ($this->pendingDelete && $this->pendingDelete['pseId'] === $pseId) {
             $this->pendingDelete = null;
