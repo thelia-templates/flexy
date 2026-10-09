@@ -51,9 +51,17 @@ class UnpaidOrderPaymentController extends FlexyController
 
         $current = $this->securityContext->getCustomerUser();
 
+        // A signed-in account is never swapped for the guest of the order behind the
+        // visitor's back: it would lose its session and its cart without a word.
+        if ($customer->isGuest() && $this->securityContext->hasAuthenticatedCustomerUser()) {
+            $this->addFlash('warning', $this->translator->trans('This payment link belongs to another account.'));
+
+            return $this->generateRedirect($this->generateUrl('checkout_cart'));
+        }
+
         if (!$customer->isGuest()) {
             if (!$this->securityContext->hasAuthenticatedCustomerUser()) {
-                $this->addFlash('information', $this->translator->trans('Sign in to complete the payment of your order %ref.', ['%ref' => (string) $order->getRef()]));
+                $this->addFlash('information', $this->translator->trans('Sign in to complete the payment of your order %ref%.', ['%ref%' => (string) $order->getRef()]));
 
                 return $this->generateRedirect($this->generateUrl('customer_login', [
                     AuthenticationReturnUrl::PARAMETER => $this->getRequest()->getRequestUri(),

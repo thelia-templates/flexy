@@ -589,5 +589,5 @@ Rename: Renommer
 'Cart of %date%': 'Panier du %date%'
 'Order %ref%': 'Commande %ref%'
 'This payment link no longer opens an order to pay: it was paid, cancelled, or the link has expired.': 'Ce lien de paiement n''ouvre plus de commande à payer : elle a été payée, annulée, ou le lien a expiré.'
-'Sign in to complete the payment of your order %ref.': 'Connectez-vous pour finaliser le paiement de votre commande %ref.'
+'Sign in to complete the payment of your order %ref%.': 'Connectez-vous pour finaliser le paiement de votre commande %ref%.'
 'This payment link belongs to another account.': 'Ce lien de paiement appartient à un autre compte.'
