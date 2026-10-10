@@ -22,7 +22,7 @@
                         {% if current != loop.length and loop.index <= current %}
                             {% if step_item.link %}<a href="{{ step_item.link }}" class="no-underline">{% endif %}
                         {% endif %}
-                        {{- step_item.translate|default(true) ? step_item.text|trans : step_item.text -}}
+                        {{- (step_item.translate ?? true) ? step_item.text|trans : step_item.text -}}
                         {% if current != loop.length and loop.index <= current %}
                             {% if step_item.link %}</a>{% endif %}
                         {% endif %}
