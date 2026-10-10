@@ -91,7 +91,7 @@
                                                 label="{{ value.label }}"
                                                 color="{{ value.color|default(null) }}"
                                                 :selected="currentCombination[attr.id] == value.id"
-                                                :disabled="not value.available|default(true)"
+                                                :disabled="not (value.available ?? true)"
                                                 data-action="live#action {{ mobileDrawerController }}#close"
                                                 data-live-action-param="updateCurrentCombination"
                                                 data-live-attr-param="{{ attr.id }}"
