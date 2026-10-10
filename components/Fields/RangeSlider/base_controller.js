@@ -6,9 +6,14 @@ import { Controller } from "@hotwired/stimulus";
 // them (the source removed fresh references, leaking them), and values are read as floats so the
 // slider works for decimal ranges (e.g. prices), not just integers.
 export default class extends Controller {
-  static targets = ["min", "max", "progress"];
+  static targets = ["min", "max", "progress", "low", "high"];
+
+  // Set when the values are amounts (the price facet): the two amounts are written under the
+  // slider and read out by assistive technologies instead of the bare figures.
+  static values = { currency: String, locale: String };
 
   connect() {
+    this.amountFormat = this.hasCurrencyValue ? this.createAmountFormat() : null;
     // The listing is re-rendered by the LiveComponent on filter/reset; Layouts--ProductListing
     // dispatches these so the bar re-syncs after the inputs are patched in place.
     this.onSave = () => this.updateProgress();
@@ -55,5 +60,41 @@ export default class extends Controller {
     // rather than as a physical `left`, which would draw the mirror of the selected interval.
     this.progressTarget.style.insetInlineStart = ((low - min) / range) * 100 + "%";
     this.progressTarget.style.width = ((high - low) / range) * 100 + "%";
+    this.updateAmounts(low, high);
+  }
+
+  // Thelia writes locales the ICU way (fr_FR) while Intl wants a language tag (fr-FR). A tag
+  // the browser still refuses falls back on the browser's own language rather than leaving the
+  // slider without its controller.
+  createAmountFormat() {
+    const options = {
+      style: "currency",
+      currency: this.currencyValue,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    };
+
+    try {
+      return new Intl.NumberFormat(this.localeValue.replace("_", "-") || undefined, options);
+    } catch {
+      return new Intl.NumberFormat(undefined, options);
+    }
+  }
+
+  updateAmounts(low, high) {
+    if (!this.amountFormat) {
+      return;
+    }
+
+    this.minTarget.setAttribute("aria-valuetext", this.amountFormat.format(Number(this.minTarget.value)));
+    this.maxTarget.setAttribute("aria-valuetext", this.amountFormat.format(Number(this.maxTarget.value)));
+
+    if (this.hasLowTarget) {
+      this.lowTarget.textContent = this.amountFormat.format(low);
+    }
+
+    if (this.hasHighTarget) {
+      this.highTarget.textContent = this.amountFormat.format(high);
+    }
   }
 }

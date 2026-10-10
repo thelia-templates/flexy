@@ -25,6 +25,9 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Thelia\Core\HttpFoundation\Session\Session;
+use Thelia\Model\Currency;
 
 /**
  * Turns a product filter coming from /api/front/tfilters/* into a form field.
@@ -37,8 +40,16 @@ final readonly class FormService
 {
     public const RANGE_SUB_INPUTS = ['min', 'max'];
 
+    /**
+     * The type of the price facet of the core, whose bounds are amounts in the visitor's currency.
+     */
+    private const PRICE_FILTER_TYPE = 'price';
+
     public function __construct(
         private EventDispatcherInterface $dispatcher,
+        // Optional so that a caller building the service by hand keeps working; without it the
+        // price slider shows no amounts.
+        private ?RequestStack $requestStack = null,
     ) {
     }
 
@@ -161,6 +172,8 @@ final readonly class FormService
             [
                 'label' => $filter['title'],
                 'mapped' => true,
+                // Read back by the range_group_row block, which hands it to Fields/RangeSlider.
+                'attr' => $filter['type'] === self::PRICE_FILTER_TYPE ? ['data-currency' => $this->currencyCode()] : [],
             ]
         ));
 
@@ -221,5 +234,16 @@ final readonly class FormService
             $formEvent->getType(),
             $formEvent->getOptions()
         );
+    }
+
+    /**
+     * The currency the shop is browsed in, the one the core prices the facet in.
+     */
+    private function currencyCode(): ?string
+    {
+        $request = $this->requestStack?->getCurrentRequest();
+        $session = $request?->hasSession() ? $request->getSession() : null;
+
+        return ($session instanceof Session ? $session->getCurrency() : Currency::getDefaultCurrency())->getCode();
     }
 }
