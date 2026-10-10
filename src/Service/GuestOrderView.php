@@ -53,7 +53,10 @@ final readonly class GuestOrderView
             'createdAt' => $order->getCreatedAt(),
             'deliveryRef' => $order->getDeliveryRef(),
             'deliveryTrackingUrl' => $this->trackingUrlResolver?->resolve($order),
-            'orderStatus' => ['code' => $order->getOrderStatus()?->getCode()],
+            'orderStatus' => [
+                'code' => $order->getOrderStatus()?->getCode(),
+                'equivalentCode' => $order->getOrderStatus()?->getEquivalentCode(),
+            ],
             'deliveryOrderAddress' => ['id' => $order->getDeliveryOrderAddressId()],
             'invoiceOrderAddress' => ['id' => $order->getInvoiceOrderAddressId()],
             'orderProducts' => $this->orderProducts($order),
