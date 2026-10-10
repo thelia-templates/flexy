@@ -8,9 +8,20 @@
         {{ ux_icon('cart-illustration', {class: 'w-40 h-auto block mx-auto mb-6'}) }}
         <h3 class="mt-4 h3">{{ 'Thanks for your order !'|trans }}</h3>
         <p class="paragraph-3 mt-4 mb-8">
-            <span class="block">{{ 'Your payment has been confirmed'|trans }}</span>
+            {# Paid only when the payment module says so: a cheque, a bank transfer or a
+               payment the gateway confirms later leave the order waiting for its money. #}
+            {% if placed_order|default(null) and placed_order.isPaid() %}
+                <span class="block">{{ 'Your payment has been confirmed'|trans }}</span>
+            {% else %}
+                <span class="block">{{ 'Your order has been placed'|trans }}</span>
+            {% endif %}
             <span>{{ "We'll do everything we can to send your order as quickly as possible!"|trans }}</span>
         </p>
+        {# What the payment module has left to say about the order: where to send a cheque,
+           which bank account to transfer to. Each module answers for its own orders. #}
+        {% if placed_order|default(null) %}
+            {{ theme_hook('order-placed.additional-payment-info', {order: placed_order}) }}
+        {% endif %}
         {# An order placed without an account: the only way back to it is the link, which
            the buyer also receives by email. Offered here while it is still on screen. #}
         {% if guest_order_token|default(null) %}

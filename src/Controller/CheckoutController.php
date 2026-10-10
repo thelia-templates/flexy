@@ -48,6 +48,7 @@ use Thelia\Domain\Order\Exception\StockShortageException;
 use Thelia\Model\Cart;
 use Thelia\Model\CheckoutStep;
 use Thelia\Model\Order;
+use Thelia\Model\OrderQuery;
 
 /**
  * The checkout, as the shop configured it.
@@ -266,9 +267,7 @@ class CheckoutController extends FlexyController
         CartStockService $cartStockService,
         CheckoutStockRefusal $stockRefusal,
         GuestCheckoutGate $guestCheckoutGate,
-        GuestOrderTracking $guestOrderTracking,
         CheckoutStepRouteResolver $routes,
-        CheckoutTrail $trail,
     ): Response {
         $cart = $cartFacade->getCartFromSession();
 
@@ -311,13 +310,12 @@ class CheckoutController extends FlexyController
                 return $response;
             }
 
-            return $this->render('checkout-confirm', [
-                'current' => CheckoutStep::CODE_CONFIRMATION,
-                // The cart was emptied by the placement a few lines ago: the bar is the
-                // one the order was placed through, not the one an empty cart describes.
-                'steps' => $trail->ofTheOrderJustPlaced(),
-                'guest_order_token' => $guestOrderTracking->tokenOfPlacedOrder(),
-            ]);
+            // A payment that needs no gateway (a cheque, a bank transfer, a gift card
+            // covering everything) is confirmed on the confirmation page itself, by a
+            // redirection: the core keeps the cart of an order until it is paid, and only
+            // that page lets it go. Rendered here, the cart stayed full after the order,
+            // and reloading the page placed the same order a second time.
+            return $this->generateRedirect($this->generateUrl('checkout_confirm'));
         } catch (GuestCheckoutNotAllowedException) {
             // The shop's answer changed while the buyer was in the checkout: the setting
             // was turned off, or the cart gained a product that requires an account. Back
@@ -398,8 +396,9 @@ class CheckoutController extends FlexyController
 
         // Only for a session that actually placed an order. This page is reachable by
         // typing its url, and emptying the cart of someone halfway through the checkout
-        // would throw away what they had put in it. The core already empties the cart on
-        // the order itself, so there is nothing to lose by asking first.
+        // would throw away what they had put in it. The core keeps the cart of an order
+        // until that order is paid, so this is where the cart is let go, once the order
+        // is remembered.
         if ($placedOrderMemory->hasOne()) {
             $session->clearSessionCart($dispatcher);
         }
@@ -408,6 +407,7 @@ class CheckoutController extends FlexyController
             'current' => CheckoutStep::CODE_CONFIRMATION,
             'steps' => $steps,
             'guest_order_token' => $guestOrderToken,
+            'placed_order' => $this->orderPlacedBy($session, $placedOrderMemory),
         ]);
     }
 
@@ -420,11 +420,13 @@ class CheckoutController extends FlexyController
         Request $request,
         GuestOrderTracking $guestOrderTracking,
         CheckoutTrail $trail,
+        PlacedOrderMemory $placedOrderMemory,
     ): Response {
         $order = $this->cancelFailedOrder(
             $checkoutFacade,
             $request->query->getInt('order_id'),
             $guestOrderTracking->tokenOfPlacedOrder(),
+            $placedOrderMemory,
         );
 
         return $this->render('checkout-failed', [
@@ -530,6 +532,41 @@ class CheckoutController extends FlexyController
     }
 
     /**
+     * The order this session has just placed, for the confirmation page to show it: its
+     * reference, its amount, its payment mode, and what the payment module has to say about
+     * it (a cheque to send, a bank account to transfer to).
+     *
+     * Read from the session, never from the address of the page. A signed-in customer
+     * only ever gets an order of their own: a browser that changed hands without signing
+     * out — someone signing in over a guest who placed an order — gets nothing rather
+     * than somebody else's order.
+     *
+     * @throws PropelException
+     */
+    private function orderPlacedBy(Session $session, PlacedOrderMemory $placedOrderMemory): ?Order
+    {
+        $orderId = $placedOrderMemory->placedOrderId();
+
+        if (null === $orderId) {
+            return null;
+        }
+
+        $order = OrderQuery::create()->findPk($orderId);
+
+        if (null === $order) {
+            return null;
+        }
+
+        $customer = $session->getCustomerUser();
+
+        if (null !== $customer && (int) $order->getCustomerId() !== (int) $customer->getId()) {
+            return null;
+        }
+
+        return $order;
+    }
+
+    /**
      * Takes back the order whose payment did not go through, and answers with it.
      *
      * A buyer coming back from a payment gateway may come back without the session they
@@ -549,13 +586,20 @@ class CheckoutController extends FlexyController
      * waiting for its payment — a gateway returning twice, a page refreshed, or a late
      * confirmation crossing a failure return. None of them is a server error, and none of
      * them may take the failure page down with it.
+     *
+     * Only the order this session has just placed is cancelled. The page is a plain GET
+     * anybody can be sent to with any number in it, and the customer an order names may
+     * have others waiting for their money — a cheque in the post, a bank transfer — which
+     * a link must not cancel. A return that lost its session cancels nothing: the order
+     * stays waiting for its payment, as the gateway left it.
      */
     private function cancelFailedOrder(
         CheckoutFacade $checkoutFacade,
         int $orderId,
         ?string $guestOrderToken,
+        PlacedOrderMemory $placedOrderMemory,
     ): ?Order {
-        if ($orderId <= 0) {
+        if ($orderId <= 0 || $orderId !== $placedOrderMemory->placedOrderId()) {
             return null;
         }
 
