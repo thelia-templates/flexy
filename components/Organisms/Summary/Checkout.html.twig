@@ -1,12 +1,10 @@
-{# @prop showPromoCodeForm bool Renders the coupon form above the totals #}
-{% props showPromoCodeForm = true %}
 <div {{ attributes.defaults(stimulus_controller('live-refresh-on-focus')) }}>
     {% set summary = this.summary %}
     {% set coupons = summary.coupons ?? [] %}
     {% set discounts = summary.discounts %}
 
     <div class="Summary">
-        {% if showPromoCodeForm %}
+        {% if this.showPromoCodeForm %}
             <div class="mb-4">
                 <twig:Forms:PromoCode:Base />
             </div>
