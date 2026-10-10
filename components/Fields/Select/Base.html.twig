@@ -44,14 +44,20 @@
 
 <div class="{{ select.apply({size, state}|filter(value => value is not null), attributes.render('class')) }} " {{attributes.without('class')}}>
 
-    <div class="Select-header">
-        <label class="Select-label" {% if id %}for="{{ id }}"{% endif %}>{{ label }}{% if required %} *{% endif %}</label>
-        {% if help %}
-            <twig:Molecules:Tooltip:Help tooltip="{{ help }}" />
-            {# The tooltip hides its text until opened, and a hidden target is not announced. #}
-            {% if helpId %}<span id="{{ helpId }}" class="sr-only">{{ help }}</span>{% endif %}
-        {% endif %}
-    </div>
+    {# Like the other fields: a select its caller labels elsewhere (a form drawing its labels
+       in a column of its own) gets no empty label printing the required star on its own. #}
+    {% if label or help %}
+        <div class="Select-header">
+            {% if label %}
+                <label class="Select-label" {% if id %}for="{{ id }}"{% endif %}>{{ label }}{% if required %} *{% endif %}</label>
+            {% endif %}
+            {% if help %}
+                <twig:Molecules:Tooltip:Help tooltip="{{ help }}" />
+                {# The tooltip hides its text until opened, and a hidden target is not announced. #}
+                {% if helpId %}<span id="{{ helpId }}" class="sr-only">{{ help }}</span>{% endif %}
+            {% endif %}
+        </div>
+    {% endif %}
 
     <select
         {{attributes.nested('select').defaults(selectDefaults).without('disabled', 'multiple') }}
