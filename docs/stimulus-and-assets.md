@@ -174,3 +174,30 @@ Two recommendations for whoever implements it:
    the `%thelia_front_template%` pattern exists to preserve in the first place.
 
 Both points are additive: they can be implemented later without touching this theme.
+
+---
+
+## 7. The DOM events the cart components dispatch
+
+The cart components talk to each other with LiveComponent events (`CheckoutEvents::ADD_ITEM_EVENT` and the
+others). Those stay inside the Live layer: a script that is not a Stimulus controller of a Live component does not
+see them. For analytics and other scripts written against the plain DOM, the components also dispatch two browser
+events once a change went through the cart (never for a change the cart refused):
+
+| Event (constant in `CheckoutEvents`) | Dispatched by | `detail` |
+|---|---|---|
+| `addPseToCart` (`BROWSER_ADD_PSE`) | `Layouts:ProductDetails` `save()`; `Organisms:Cart` `plus()`, `minus()`, `restoreCartItem()` and the typed quantity, when the line gained; `Organisms:QuickOrderTable` `addToCart()`, one per line the cart took | `{pse, quantity}`: the product sale element and the quantity the cart gained |
+| `removePseFromCart` (`BROWSER_REMOVE_PSE`) | `Organisms:Cart` `remove()`, and `plus()`, `minus()`, the typed quantity and `Layouts:ProductDetails` `save()` when the line lost | `{pse, quantity}`: the product sale element and the quantity the cart lost |
+
+Which of the two is sent depends on the direction of the change, not on the name of the action: `plus()` and `minus()`
+clamp the quantity to the stock of the line, so a `plus()` on a line that already holds more than its stock lowers it and
+sends `removePseFromCart`; `save()` with `append` off replaces the quantity of an existing line, so it reports the real
+difference (a line taken from 5 to 2 sends `removePseFromCart` with a quantity of 3).
+
+Not covered: a line the quick order table asked for and the cart took only in part (the stock) or turned down is not
+reported, the table does not say how much of it went in.
+
+Live Components dispatch browser events after the DOM has been morphed, on the root element of the component, with
+`bubbles: true`: a listener on `document` receives them, and reads the refreshed DOM. The names are the ones the
+`GoogleTagManager` module listens to (`addToCart.js`). A change of nothing (a quantity put back to itself) dispatches
+nothing.

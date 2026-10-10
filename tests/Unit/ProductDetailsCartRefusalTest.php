@@ -18,6 +18,7 @@ use FlexyBundle\Components\Layouts\ProductDetails\Base as ProductDetails;
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Service\RunningSaleResolver;
 use PHPUnit\Framework\TestCase;
+use Propel\Runtime\Collection\ObjectCollection;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
@@ -51,6 +52,8 @@ use Thelia\Model\CartItem;
  */
 final class ProductDetailsCartRefusalTest extends TestCase
 {
+    private const LINE_ID = 100;
+
     protected function setUp(): void
     {
         try {
@@ -69,15 +72,18 @@ final class ProductDetailsCartRefusalTest extends TestCase
 
         self::assertTrue($component->cartRefused);
         self::assertSame([], $responder->getEventsToEmit());
+        self::assertSame([], $responder->getBrowserEventsToDispatch(), 'nothing is told to the page when the cart refused');
     }
 
     public function testAStockGoneSinceTheRenderIsFlaggedTheSameWay(): void
     {
-        $component = $this->component(new NotEnoughStockException(), new LiveResponder());
+        $responder = new LiveResponder();
+        $component = $this->component(new NotEnoughStockException(), $responder);
 
         $component->save();
 
         self::assertTrue($component->cartRefused);
+        self::assertSame([], $responder->getBrowserEventsToDispatch());
     }
 
     public function testAnAcceptedAddEmitsTheCartEvents(): void
@@ -91,18 +97,103 @@ final class ProductDetailsCartRefusalTest extends TestCase
         self::assertSame(['addToCart', CheckoutEvents::ADD_ITEM_EVENT], array_column($responder->getEventsToEmit(), 'event'));
     }
 
-    private function component(?\Throwable $refusal, LiveResponder $responder): ProductDetails
+    public function testAnAcceptedAddIsToldToThePageWithTheDeclinationAndTheQuantity(): void
+    {
+        $responder = new LiveResponder();
+        $component = $this->component(null, $responder, quantityAfter: 3);
+        $component->formValues['quantity'] = 3;
+
+        $component->save();
+
+        self::assertSame(
+            [['event' => CheckoutEvents::BROWSER_ADD_PSE, 'payload' => ['pse' => 7, 'quantity' => 3]]],
+            $responder->getBrowserEventsToDispatch(),
+        );
+    }
+
+    public function testAnAddedQuantityOnALineThatExistsIsToldAsTheQuantityGained(): void
+    {
+        $responder = new LiveResponder();
+        $component = $this->component(null, $responder, quantityBefore: 2, quantityAfter: 5);
+        $component->formValues['quantity'] = 3;
+
+        $component->save();
+
+        self::assertSame(
+            [['event' => CheckoutEvents::BROWSER_ADD_PSE, 'payload' => ['pse' => 7, 'quantity' => 3]]],
+            $responder->getBrowserEventsToDispatch(),
+        );
+    }
+
+    public function testAQuantityThatReplacesTheOneOfTheLineIsToldAsTheDifference(): void
+    {
+        $responder = new LiveResponder();
+        // `append` off: the form's 5 replaces the 2 the line held, which is a gain of 3, not of 5.
+        $component = $this->component(null, $responder, quantityBefore: 2, quantityAfter: 5);
+        $component->formValues['quantity'] = 5;
+        $component->formValues['append'] = 0;
+
+        $component->save();
+
+        self::assertSame(
+            [['event' => CheckoutEvents::BROWSER_ADD_PSE, 'payload' => ['pse' => 7, 'quantity' => 3]]],
+            $responder->getBrowserEventsToDispatch(),
+        );
+    }
+
+    public function testAQuantityThatReplacesTheOneOfTheLineWithALowerOneIsToldAsARemoval(): void
+    {
+        $responder = new LiveResponder();
+        $component = $this->component(null, $responder, quantityBefore: 5, quantityAfter: 2);
+        $component->formValues['quantity'] = 2;
+        $component->formValues['append'] = 0;
+
+        $component->save();
+
+        self::assertSame(
+            [['event' => CheckoutEvents::BROWSER_REMOVE_PSE, 'payload' => ['pse' => 7, 'quantity' => 3]]],
+            $responder->getBrowserEventsToDispatch(),
+        );
+    }
+
+    public function testAQuantityThatLeavesTheLineAsItWasIsToldToNobody(): void
+    {
+        $responder = new LiveResponder();
+        $component = $this->component(null, $responder, quantityBefore: 3, quantityAfter: 3);
+        $component->formValues['append'] = 0;
+
+        $component->save();
+
+        self::assertSame([], $responder->getBrowserEventsToDispatch());
+    }
+
+    private function line(int $id, int $quantity): CartItem
+    {
+        $line = self::createStub(CartItem::class);
+        $line->method('getId')->willReturn($id);
+        $line->method('hashCode')->willReturn('line-'.$id);
+        $line->method('getQuantity')->willReturn((float) $quantity);
+
+        return $line;
+    }
+
+    private function component(?\Throwable $refusal, LiveResponder $responder, int $quantityBefore = 0, int $quantityAfter = 0): ProductDetails
     {
         $cartItems = self::createStub(CartItemService::class);
 
         if (null === $refusal) {
-            $cartItems->method('addItem')->willReturn(self::createStub(CartItem::class));
+            $cartItems->method('addItem')->willReturn($this->line(self::LINE_ID, $quantityAfter));
         } else {
             $cartItems->method('addItem')->willThrowException($refusal);
         }
 
         $cartRetriever = self::createStub(CartRetriever::class);
         $cartRetriever->method('fromSessionOrCreateNew')->willReturn(self::createStub(Cart::class));
+
+        // The cart of the session as it is before the add: one line, unless the declination is not in it yet.
+        $cartOfTheSession = self::createStub(Cart::class);
+        $cartOfTheSession->method('getCartItems')->willReturn(new ObjectCollection(0 === $quantityBefore ? [] : [$this->line(self::LINE_ID, $quantityBefore)]));
+        $cartRetriever->method('fromSession')->willReturn($cartOfTheSession);
 
         $formService = self::createStub(FormServiceInterface::class);
         $formService->method('getFormByName')->willReturnCallback(static function (): Form {

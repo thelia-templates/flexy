@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\QuickOrderTable;
 
+use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Exception\ReferenceQuantityTextRefusedException;
 use FlexyBundle\Service\PurchaseListChoices;
 use FlexyBundle\Service\QuickOrderService;
@@ -27,6 +28,7 @@ use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\Attribute\PostHydrate;
+use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Domain\Catalog\DTO\ReferenceQuantity;
@@ -62,6 +64,7 @@ use Thelia\Model\Customer;
 #[AsLiveComponent]
 class Base
 {
+    use ComponentToolsTrait;
     use DefaultActionTrait;
 
     public const int EMPTY_ROWS = 1;
@@ -275,6 +278,9 @@ class Base
         }
 
         $this->addedCount = \count(array_filter($table->lines, static fn ($line): bool => $line->added));
+
+        $this->tellThePageWhatWasAdded($table);
+
         $rows = [];
         $lines = [];
 
@@ -287,6 +293,19 @@ class Base
 
         $this->rows = [] === $rows ? self::emptyRows(self::EMPTY_ROWS) : $rows;
         $this->lines = [] === $rows ? [] : $lines;
+    }
+
+    /**
+     * Tells the page, through a DOM event per line (CheckoutEvents::BROWSER_ADD_PSE), what the cart took. A line the cart took
+     * whole is told; one it took only in part (the stock) or turned down is not: the table does not say how much of it went in.
+     */
+    protected function tellThePageWhatWasAdded(QuickOrderTable $table): void
+    {
+        foreach ($table->lines as $line) {
+            if ($line->added) {
+                $this->dispatchBrowserEvent(CheckoutEvents::BROWSER_ADD_PSE, ['pse' => (int) $line->productSaleElementsId, 'quantity' => $line->quantity]);
+            }
+        }
     }
 
     /**

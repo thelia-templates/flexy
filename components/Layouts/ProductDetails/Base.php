@@ -294,10 +294,12 @@ class Base
         $this->submitForm();
         $formData = $this->getForm()->getData();
 
+        $quantitiesBefore = $this->quantitiesInCart();
+
         // A refusal of the cart is the shopper's business, not a server error: without this the
         // live request answered 500 and the selector stayed as it was, with no word of why.
         try {
-            $this->cartFacade->addItem(
+            $cartItem = $this->cartFacade->addItem(
                 new CartItemAddDTO(
                     cart: $this->cartFacade->getOrCreateFromSession(),
                     productId: (int) $formData['product'],
@@ -315,6 +317,16 @@ class Base
 
         $this->emit('addToCart', ['values' => $this->formValues]);
         $this->emit(CheckoutEvents::ADD_ITEM_EVENT);
+
+        // What the line gained, not what the form asked for: with `append` off the form's quantity replaces the one the line had.
+        $difference = (int) $cartItem->getQuantity() - ($quantitiesBefore[(int) $cartItem->getId()] ?? 0);
+
+        if (0 !== $difference) {
+            $this->dispatchBrowserEvent(
+                $difference > 0 ? CheckoutEvents::BROWSER_ADD_PSE : CheckoutEvents::BROWSER_REMOVE_PSE,
+                ['pse' => (int) $formData['product_sale_elements_id'], 'quantity' => abs($difference)],
+            );
+        }
     }
 
     protected function instantiateForm(): FormInterface
@@ -373,6 +385,22 @@ class Base
     private function matchesCombination(array $pseCombination, array $combination): bool
     {
         return $pseCombination == $combination;
+    }
+
+    /**
+     * The quantity of each line of the session's cart, by line id (none when there is no cart yet).
+     *
+     * @return array<int, int>
+     */
+    private function quantitiesInCart(): array
+    {
+        $quantities = [];
+
+        foreach ($this->cartFacade->getCartFromSession()?->getCartItems() ?? [] as $cartItem) {
+            $quantities[(int) $cartItem->getId()] = (int) $cartItem->getQuantity();
+        }
+
+        return $quantities;
     }
 
     private function getCartQuantityForCurrentPse(): int
