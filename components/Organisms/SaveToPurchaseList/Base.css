@@ -1,0 +1,18 @@
+.SaveToPurchaseList {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.SaveToPurchaseList-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.SaveToPurchaseList-help {
+  @apply paragraph-3;
+  color: var(--color-grey-dark);
+}

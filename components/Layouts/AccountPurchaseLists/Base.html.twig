@@ -1,0 +1,80 @@
+{# The titles are typed by the customer: they are printed escaped, never raw. #}
+{% set token = csrf_token('purchase_list_action') %}
+
+<div class="AccountPurchaseLists">
+    <form class="AccountPurchaseLists-create" method="post" action="{{ path('account_purchase_list_create') }}">
+        <input type="hidden" name="_token" value="{{ token }}">
+        <twig:Fields:Input:Base
+            id="purchase-list-new-title"
+            name="title"
+            label="{{ 'Name of the new list'|trans }}"
+            required
+            input:maxlength="{{ maxTitleLength }}"
+            class="AccountPurchaseLists-createField"
+        />
+        <twig:Molecules:Button:Base type="submit" icon_left="plus" text="{{ 'Create the list'|trans }}" />
+    </form>
+
+    {% if lists|length %}
+        <p class="AccountPurchaseLists-count">{{ '%count% list(s) out of %max%'|trans({'%count%': lists|length, '%max%': maxLists}) }}</p>
+
+        <ul class="AccountPurchaseLists-list">
+            {% for list in lists %}
+                <li class="AccountPurchaseLists-item">
+                    <div class="AccountPurchaseLists-summary">
+                        <a class="AccountPurchaseLists-title" href="{{ path('account_purchase_list', {listId: list.id}) }}">{{ list.title }}</a>
+                        <span class="AccountPurchaseLists-meta">
+                            {{ '%count% line(s)'|trans({'%count%': list.itemCount}) }}
+                            {% if list.updatedAt %} · {{ 'changed on %date%'|trans({'%date%': list.updatedAt|format_date()}) }}{% endif %}
+                        </span>
+                    </div>
+                    <div class="AccountPurchaseLists-actions">
+                        <twig:Molecules:Button:Base
+                            color="secondary"
+                            size="small"
+                            href="{{ path('account_purchase_list', {listId: list.id}) }}"
+                            text="{{ 'Open'|trans }}"
+                        />
+                        <form method="post" action="{{ path('account_purchase_list_duplicate', {listId: list.id}) }}">
+                            <input type="hidden" name="_token" value="{{ token }}">
+                            <twig:Molecules:Button:Base type="submit" color="minimal" size="small" text="{{ 'Duplicate'|trans }}" />
+                        </form>
+                        {% if list.writable %}
+                            <twig:Molecules:Button:Base
+                                color="minimal"
+                                size="small"
+                                icon_left="delete"
+                                text="{{ 'Delete'|trans }}"
+                                {{ ...stimulus_controller('Molecules--Modal--open', {id: 'confirmDeleteList' ~ list.id}) }}
+                                {{ ...stimulus_action('Molecules--Modal--open', 'open', 'click') }}
+                            />
+                            <twig:Molecules:Modal:Base id="confirmDeleteList{{ list.id }}">
+                                <div class="h4">{{ 'Delete the list « %title% »?'|trans({'%title%': list.title}) }}</div>
+                                <form method="post" action="{{ path('account_purchase_list_delete', {listId: list.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ token }}">
+                                    <div class="grid md:grid-cols-2 gap-4 mt-8">
+                                        <twig:Molecules:Button:Base
+                                            text="{{ 'Cancel'|trans }}"
+                                            color="secondary"
+                                            :fill="true"
+                                            {{ ...stimulus_action('Molecules--Modal--base', 'close', 'click') }}
+                                        />
+                                        <twig:Molecules:Button:Base text="{{ 'Delete'|trans }}" type="submit" :fill="true" />
+                                    </div>
+                                </form>
+                            </twig:Molecules:Modal:Base>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="flex flex-col items-center text-center">
+            <div class="w-36 h-auto lg:w-60">
+                {{ source('assets/images/nothing.svg') }}
+            </div>
+            <h3 class="h3 mt-4 mb-6">{{ 'You have no purchase lists yet'|trans }}</h3>
+            <p class="paragraph-2">{{ 'Create one above to keep the references you order often.'|trans }}</p>
+        </div>
+    {% endif %}
+</div>

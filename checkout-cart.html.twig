@@ -5,6 +5,13 @@
 {% block checkoutContent %}
     {{ theme_hook('cart.top') }}
     <twig:Organisms:Cart:Base />
+    {%- if not emptyCart -%}
+        <twig:Organisms:SaveToPurchaseList:Base
+            action="{{ path('account_purchase_list_from_cart') }}"
+            defaultTitle="{{ 'Cart of %date%'|trans({'%date%': 'now'|format_date()}) }}"
+            class="mt-6"
+        />
+    {%- endif -%}
     {{ theme_hook('cart.bottom') }}
 {% endblock %}
 

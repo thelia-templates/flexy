@@ -52,6 +52,16 @@ final readonly class AccountMenuService
                 'text' => $this->translator->trans('My addresses'),
                 'href' => $this->urlGenerator->generate('account_addresses'),
             ],
+            [
+                'slug' => 'purchase-lists',
+                'text' => $this->translator->trans('My purchase lists'),
+                'href' => $this->urlGenerator->generate('account_purchase_lists'),
+            ],
+            [
+                'slug' => 'quick-order',
+                'text' => $this->translator->trans('Quick order'),
+                'href' => $this->urlGenerator->generate('account_quick_order'),
+            ],
         ];
     }
 }
