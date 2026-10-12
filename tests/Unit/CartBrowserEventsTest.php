@@ -122,11 +122,11 @@ final class CartBrowserEventsTest extends TestCase
         $cart = $this->cart($responder, refusal: new NotEnoughStockException());
 
         foreach (['plus', 'minus'] as $action) {
-            try {
-                $cart->{$action}(0);
-                self::fail('The refusal of the cart is not swallowed.');
-            } catch (NotEnoughStockException) {
-            }
+            $cart->refusal = null;
+
+            $cart->{$action}(0);
+
+            self::assertSame('stock', $cart->refusal, $action.': the refusal is told to the shopper');
         }
 
         self::assertSame([], $responder->getBrowserEventsToDispatch(), 'the cart refused: nothing changed, nothing is told');
