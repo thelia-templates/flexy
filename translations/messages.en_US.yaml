@@ -601,3 +601,8 @@ Delivery date: Delivery date
 Requested delivery: Requested delivery
 The delivery date you picked is no longer available for this address. Please choose another one.: The delivery date you picked is no longer available for this address. Please choose another one.
 "The carrier you chose does not deliver to this address: your delivery date was cleared. Please choose a delivery method again.": "The carrier you chose does not deliver to this address: your delivery date was cleared. Please choose a delivery method again."
+Shipment %position% of %total%: Shipment %position% of %total%
+Shipped on %date%: Shipped on %date%
+Shipped: Shipped
+Being prepared: Being prepared
+Download the delivery note: Download the delivery note

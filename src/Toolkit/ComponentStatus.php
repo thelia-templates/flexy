@@ -77,6 +77,9 @@ final class ComponentStatus
             'Organisms/VideoPlayer' => self::READY,
             // Stories handled on our side and open to review:
             'Organisms/OrderNotes' => self::READY,
+            // Waiting for the design of the lines of a parcel: listed as quantity and title
+            // until the mockup says whether they get the full product card.
+            'Organisms/Shipment' => self::WAITING,
 
             default => null,
         };

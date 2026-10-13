@@ -28,12 +28,35 @@
         <h1 class="h3 text-black">{{ (isQuotation ? 'Quote N°' : 'Order N°')|trans }} <span dir="ltr">{{ order.ref }}</span></h1>
         <p class="paragraph-3 mb-6 lg:mb-11"><bdi>{{ order.createdAt|format_date() }}</bdi></p>
 
+        {# The parcels the order left in, oldest first, a cancelled draft never counted.
+           `default([])` keeps a core whose payload predates shipments from breaking the page. #}
+        {% set shipments = (order.orderShipments|default([]))|filter(shipment => shipment.status|default('') != 'cancelled') %}
+
         {% if not isQuotation and not isClosed %}
-            <twig:Organisms:DeliveryTracking:Base
-                statusCode="{{ statusCode }}"
-                trackingRef="{{ order.deliveryRef }}"
-                :trackLink="order.deliveryTrackingUrl|default(null)"
-            />
+            {% if shipments|length > 1 %}
+                {# Several parcels: one card each, with its own lines, number and delivery note. #}
+                <div class="flex flex-col gap-4" data-testid="order-shipments">
+                    {% for shipment in shipments %}
+                        {{ theme_hook('account-order.shipment.top', {order: order, shipment: shipment}) }}
+                        <twig:Organisms:Shipment:Base
+                            :shipment="shipment"
+                            :position="loop.index"
+                            :total="shipments|length"
+                            deliveryNoteUrl="{{ path('account_order_pdf_delivery_shipment', {orderId: order.id, shipmentId: shipment.id}) }}"
+                        />
+                        {{ theme_hook('account-order.shipment.bottom', {order: order, shipment: shipment}) }}
+                    {% endfor %}
+                </div>
+            {% else %}
+                {# One parcel, or none yet: the tracker the page always had, fed by that parcel
+                   when there is one, by the order itself otherwise. #}
+                {% set parcel = shipments|length > 0 ? shipments|first : null %}
+                <twig:Organisms:DeliveryTracking:Base
+                    statusCode="{{ statusCode }}"
+                    trackingRef="{{ parcel ? parcel.deliveryRef|default('') : order.deliveryRef }}"
+                    :trackLink="parcel ? parcel.trackingUrl|default(null) : order.deliveryTrackingUrl|default(null)"
+                />
+            {% endif %}
         {% endif %}
 
         {# What the shop wrote for this customer, above the order itself: a message about a

@@ -1,0 +1,54 @@
+<div class="Story">
+<div class="Story-section">
+    <h4 class="Story-title">Base (a parcel that left, with its carrier page and delivery note)</h4>
+    <p class="Story-label">
+        One parcel of an order shipped in several, as the order page of the account shows them,
+        one card per parcel above the products. The lines are listed as quantity and title:
+        whether they get the full product card is not decided yet, which is why the component
+        waits in the toolkit.
+    </p>
+    <div class="Story-stage Story-stage--roomy">
+        <twig:Organisms:Shipment:Base
+            :shipment="{
+                ref: 'ORD000000000042-1',
+                status: 'shipped',
+                deliveryRef: '6A12345678',
+                deliveryModuleTitle: 'Colissimo',
+                trackingUrl: 'https://carrier.example/track?parcel=6A12345678',
+                shippedAt: '2026-10-13T10:00:00+00:00',
+                orderShipmentItems: [
+                    {quantity: 2, orderProduct: {title: 'Mesh running shoes', productRef: 'SHOE-42'}},
+                    {quantity: 1, orderProduct: {title: 'Cotton socks', productRef: 'SOCK-7'}},
+                ],
+            }"
+            :position="1"
+            :total="2"
+            deliveryNoteUrl="#"
+        />
+    </div>
+</div>
+<div class="Story-section">
+    <h4 class="Story-title">Base (a parcel still being prepared)</h4>
+    <p class="Story-label">
+        No tracking number yet and no carrier page: the card says the parcel is being prepared
+        and lists what it will carry.
+    </p>
+    <div class="Story-stage Story-stage--roomy">
+        <twig:Organisms:Shipment:Base
+            :shipment="{
+                ref: 'ORD000000000042-2',
+                status: 'draft',
+                deliveryRef: null,
+                deliveryModuleTitle: 'Colissimo',
+                trackingUrl: null,
+                shippedAt: null,
+                orderShipmentItems: [
+                    {quantity: 1, orderProduct: {title: 'Rain jacket', productRef: 'JACKET-3'}},
+                ],
+            }"
+            :position="2"
+            :total="2"
+        />
+    </div>
+</div>
+</div>

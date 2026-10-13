@@ -92,6 +92,7 @@
   @import "../../components/Organisms/SaveToPurchaseList/Base.css";
   @import "../../components/Organisms/Summary/Base.css";
   @import "../../components/Organisms/DeliveryTracking/Base.css";
+  @import "../../components/Organisms/Shipment/Base.css";
   @import "../../components/Organisms/PaymentCard/Base.css";
   @import "../../components/Organisms/InvoiceCard/Base.css";
   @import "../../components/Organisms/DeliveryMode/Base.css";

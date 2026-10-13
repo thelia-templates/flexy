@@ -610,3 +610,8 @@ Delivery date: Date de livraison
 Requested delivery: Livraison souhaitée
 The delivery date you picked is no longer available for this address. Please choose another one.: "La date de livraison choisie n'est plus disponible pour cette adresse. Veuillez en choisir une autre."
 "The carrier you chose does not deliver to this address: your delivery date was cleared. Please choose a delivery method again.": "Le transporteur choisi ne livre pas à cette adresse : votre date de livraison a été effacée. Veuillez choisir de nouveau un mode de livraison."
+Shipment %position% of %total%: Envoi %position% sur %total%
+Shipped on %date%: Expédié le %date%
+Shipped: Expédié
+Being prepared: En préparation
+Download the delivery note: Télécharger le bon de livraison

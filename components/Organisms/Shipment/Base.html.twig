@@ -1,0 +1,65 @@
+{# @prop shipment array One parcel of the order read, as the front order resource publishes it #}
+{# @prop position int The rank of this parcel among the parcels of the order #}
+{# @prop total int How many parcels the order has #}
+{# @prop deliveryNoteUrl string|null The address of this parcel's delivery note #}
+<div class="{{ ('Shipment ' ~ attributes.render('class'))|tailwind_merge }}" data-testid="order-shipment" data-shipment-status="{{ this.shipment.status|default('') }}" {{ attributes.without('class') }}>
+    <div class="Shipment-content">
+        <div>
+            <div class="Shipment-title">
+                {{ 'Shipment %position% of %total%'|trans({'%position%': position, '%total%': total}) }}
+                <span class="Shipment-ref" dir="ltr">{{ this.reference }}</span>
+            </div>
+            <div class="Shipment-desc">
+                {% if this.shipped %}
+                    {{ this.shippedAt ? 'Shipped on %date%'|trans({'%date%': this.shippedAt|format_date()}) : 'Shipped'|trans }}
+                    {%- if this.carrier %} · {{ this.carrier }}{% endif %}
+                {% else %}
+                    {{ 'Being prepared'|trans }}
+                {% endif %}
+            </div>
+            {% if this.trackingNumber %}
+                <div class="Shipment-desc">
+                    {{ 'Tracking number'|trans }} <span dir="ltr">{{ this.trackingNumber }}</span>
+                </div>
+            {% endif %}
+        </div>
+        {% if this.trackingUrl %}
+            {# The carrier site opens in a tab of its own, without a handle on this page,
+               and a screen reader says so before the click. #}
+            {% set trackLabel %}{{ 'Track my package'|trans }}<span class="sr-only"> {{ '(opens in a new tab)'|trans }}</span>{% endset %}
+            <twig:Molecules:Button:Base
+                :text="trackLabel"
+                href="{{ this.trackingUrl }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                size="small"
+                data-testid="shipment-tracking-link"
+            />
+        {% endif %}
+    </div>
+
+    <hr />
+
+    <ul class="Shipment-lines" data-testid="shipment-lines">
+        {% for line in this.lines %}
+            <li class="Shipment-line">
+                <span class="Shipment-quantity" dir="ltr">{{ line.quantity }} &times;</span>
+                <span>{{ line.title }}</span>
+                {% if line.ref %}<span class="Shipment-lineRef" dir="ltr">{{ line.ref }}</span>{% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    {% if deliveryNoteUrl %}
+        <div>
+            <twig:Molecules:Button:Base
+                text="{{ 'Download the delivery note'|trans }}"
+                href="{{ deliveryNoteUrl }}"
+                icon_right="download"
+                color="secondary"
+                size="small"
+                data-testid="shipment-delivery-note-link"
+            />
+        </div>
+    {% endif %}
+</div>

@@ -96,6 +96,25 @@ class AccountOrderController extends FlexyController
         );
     }
 
+    /**
+     * The delivery note of one parcel of the order. A parcel that is not the order's answers
+     * the same 404 as an order that is not the customer's: nothing says which one is wrong.
+     */
+    #[Route('/order/pdf/delivery/{orderId}/{shipmentId}', name: 'order_pdf_delivery_shipment', requirements: ['orderId' => '\d+', 'shipmentId' => '\d+'])]
+    public function generateShipmentDeliveryPdf(EventDispatcherInterface $eventDispatcher, int $orderId, int $shipmentId): Response
+    {
+        $this->findCustomerOrder($orderId);
+
+        return $this->generateOrderPdf(
+            $eventDispatcher,
+            $orderId,
+            ConfigQuery::read('pdf_delivery_file', 'delivery'),
+            checkOrderStatus: true,
+            checkAdminUser: true,
+            shipmentId: $shipmentId,
+        );
+    }
+
     #[Route('/order/pdf/invoice/{orderId}', name: 'order_pdf_invoice', requirements: ['orderId' => '\d+'])]
     public function generateInvoicePdf(EventDispatcherInterface $eventDispatcher, int $orderId): Response
     {
