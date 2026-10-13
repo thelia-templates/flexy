@@ -64,3 +64,9 @@
   color: var(--color-grey-dark);
   font-size: 0.75rem;
 }
+
+/* What no parcel has taken yet: the same card, drawn as a placeholder for the parcel to come. */
+.Shipment--remaining {
+  border-style: dashed;
+  background: var(--color-white);
+}

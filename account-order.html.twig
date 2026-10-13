@@ -46,6 +46,8 @@
                         />
                         {{ theme_hook('account-order.shipment.bottom', {order: order, shipment: shipment}) }}
                     {% endfor %}
+                    {# What no parcel has taken yet, after the parcels: nothing when everything left. #}
+                    <twig:Organisms:Shipment:Remaining :order="order" />
                 </div>
             {% else %}
                 {# One parcel, or none yet: the tracker the page always had, fed by that parcel
@@ -56,6 +58,9 @@
                     trackingRef="{{ parcel ? parcel.deliveryRef|default('') : order.deliveryRef }}"
                     :trackLink="parcel ? parcel.trackingUrl|default(null) : order.deliveryTrackingUrl|default(null)"
                 />
+                {# A first parcel that left part of the order: what it owes, under the tracker.
+                   Nothing before a parcel exists, nothing once the only parcel took everything. #}
+                <twig:Organisms:Shipment:Remaining :order="order" class="mt-4" />
             {% endif %}
         {% endif %}
 

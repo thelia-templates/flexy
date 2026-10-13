@@ -51,4 +51,30 @@
         />
     </div>
 </div>
+<div class="Story-section">
+    <h4 class="Story-title">Remaining (what no parcel has taken yet)</h4>
+    <p class="Story-label">
+        Under the parcels of an order shipped in several: each line that still has to leave,
+        with the quantity owed. Computed from the order payload (lines, parcels and their
+        items); a cancelled parcel holds nothing, a service line and a virtual product never
+        ship. Renders nothing before a first parcel exists or once everything left.
+    </p>
+    <div class="Story-stage Story-stage--roomy">
+        <twig:Organisms:Shipment:Remaining
+            :order="{
+                orderProducts: [
+                    {id: 1, title: 'Mesh running shoes', productRef: 'SHOE-42', quantity: 3, virtual: false, lineType: 'product'},
+                    {id: 2, title: 'Cotton socks', productRef: 'SOCK-7', quantity: 1, virtual: false, lineType: 'product'},
+                    {id: 3, title: 'Rain jacket', productRef: 'JACKET-3', quantity: 1, virtual: false, lineType: 'product'},
+                ],
+                orderShipments: [
+                    {status: 'shipped', orderShipmentItems: [
+                        {quantity: 2, orderProduct: {id: 1}},
+                        {quantity: 1, orderProduct: {id: 2}},
+                    ]},
+                ],
+            }"
+        />
+    </div>
+</div>
 </div>

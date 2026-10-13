@@ -1,0 +1,21 @@
+{# @prop order array The order read, with its lines and its parcels, as the front order resource publishes it #}
+{% if this.shown %}
+    <div class="{{ ('Shipment Shipment--remaining ' ~ attributes.render('class'))|tailwind_merge }}" data-testid="order-shipment-remaining" {{ attributes.without('class') }}>
+        <div>
+            <div class="Shipment-title">{{ 'Still to be shipped'|trans }}</div>
+            <div class="Shipment-desc">{{ 'These items will leave in a later shipment.'|trans }}</div>
+        </div>
+
+        <hr />
+
+        <ul class="Shipment-lines" data-testid="shipment-remaining-lines">
+            {% for line in this.lines %}
+                <li class="Shipment-line">
+                    <span class="Shipment-quantity" dir="ltr">{{ line.quantity }} &times;</span>
+                    <span>{{ line.title }}</span>
+                    {% if line.ref %}<span class="Shipment-lineRef" dir="ltr">{{ line.ref }}</span>{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
