@@ -27,7 +27,8 @@
   font-family: var(--font-roboto);
   font-weight: var(--font-weight-normal);
   font-size: 0.875rem;
-  color: var(--color-dark);
+  /* Grey rather than the accent: the accent sits under 4.5:1 on the card background. */
+  color: var(--color-grey-dark);
   margin-inline-start: 0.5rem;
 }
 
@@ -60,6 +61,6 @@
 }
 
 .Shipment-lineRef {
-  color: var(--color-dark);
+  color: var(--color-grey-dark);
   font-size: 0.75rem;
 }
