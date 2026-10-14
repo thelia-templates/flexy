@@ -35,6 +35,8 @@ use Thelia\Domain\Cart\DTO\CartItemUpdateQuantityDTO;
 use Thelia\Domain\Cart\Exception\InvalidCartException;
 use Thelia\Domain\Cart\Exception\NotEnoughStockException;
 use Thelia\Form\Definition\FrontForm;
+use Thelia\Model\CartItemQuery;
+use Thelia\Model\ConfigQuery;
 use Thelia\Model\ProductImageQuery;
 use Thelia\Model\ProductSaleElementsProductImageQuery;
 use Thelia\Model\ProductSaleElementsQuery;
@@ -55,6 +57,13 @@ class Base
     #[LiveProp]
     public string $headingLevel = 'h1';
 
+    /**
+     * The line just removed, kept for the "undo" offer. A LiveProp so that it comes back signed with the next
+     * request: the undo can only put back what this component removed, in the quantity it removed.
+     *
+     * @var array{title: string, productId: int, pseId: int, quantity: int|float, imageId: int|null}|null
+     */
+    #[LiveProp]
     public ?array $pendingDelete = null;
 
     /** @var CartItemDto[] */
@@ -373,26 +382,48 @@ class Base
             return;
         }
 
+        // `items` is writable from the browser: the declination and the quantity to put back are read from the
+        // line stored in the cart of the session, only the title comes from the item.
+        $cart = $this->cartFacade->getOrCreateFromSession();
+        $line = CartItemQuery::create()->filterByCartId($cart->getId())->filterById($match->id)->findOne();
+
+        if (null === $line) {
+            return;
+        }
+
         $this->pendingDelete = [
             'title' => $match->title,
-            'productId' => $match->productId,
-            'pseId' => $match->productSaleElementsId,
-            'quantity' => $match->quantity,
-            'imageId' => $this->resolveImageId($match->productId, $match->productSaleElementsId),
+            'productId' => $line->getProductId(),
+            'pseId' => $line->getProductSaleElementsId(),
+            'quantity' => (int) $line->getQuantity(),
+            'imageId' => $this->resolveImageId($line->getProductId(), $line->getProductSaleElementsId()),
         ];
 
         $this->cartFacade->removeItem(new CartItemDeleteDTO(
-            cart: $this->cartFacade->getOrCreateFromSession(),
-            cartItemId: $match->id,
+            cart: $cart,
+            cartItemId: $line->getId(),
         ));
         $this->emit(CheckoutEvents::DELETE_ITEM_EVENT);
-        $this->dispatchQuantityChange($match->productSaleElementsId, -$match->quantity);
+        $this->dispatchQuantityChange((int) $line->getProductSaleElementsId(), -(int) $line->getQuantity());
     }
 
     #[LiveAction]
     public function restoreCartItem(#[LiveArg] int $pseId, #[LiveArg] int $productId, #[LiveArg] ?int $quantity = null): void
     {
-        if (!$pseId || !$productId) {
+        // Only the line this component removed comes back, in the quantity it had: the arguments come from the
+        // browser, the pending removal is the component's own signed state.
+        if (!$pseId || !$productId || null === $this->pendingDelete
+            || $this->pendingDelete['pseId'] !== $pseId || $this->pendingDelete['productId'] !== $productId) {
+            return;
+        }
+
+        $quantity = max(1, min($quantity ?? (int) $this->pendingDelete['quantity'], (int) $this->pendingDelete['quantity']));
+
+        // The cart form is replayed below for its side effects only (its CSRF token cannot be given from a live
+        // action), so the stock rule it holds is applied here: a line is not put back above what is left.
+        if ($this->isShortOfStock($pseId, $quantity)) {
+            $this->pendingDelete = null;
+
             return;
         }
 
@@ -405,7 +436,7 @@ class Base
         $form->submit([
             'product' => $productId,
             'product_sale_elements_id' => $pseId,
-            'quantity' => $quantity ?? 1,
+            'quantity' => $quantity,
             'append' => 1,
             'newness' => 0,
         ]);
@@ -415,22 +446,20 @@ class Base
                 cart: $cart,
                 productId: $productId,
                 productSaleElementId: $pseId,
-                quantity: $quantity ?? 1,
+                quantity: $quantity,
             ));
         } catch (InvalidCartException|NotEnoughStockException $exception) {
-            // The undo tile is gone with this render (pendingDelete is not a LiveProp): the
-            // message alone tells the shopper the line is still out of the cart.
+            // pendingDelete is kept (a signed LiveProp): the undo tile stays, and the message tells the
+            // shopper the line was not put back.
             $this->recordRefusal('restore', $exception);
 
             return;
         }
 
-        if ($this->pendingDelete && $this->pendingDelete['pseId'] === $pseId) {
-            $this->pendingDelete = null;
-        }
+        $this->pendingDelete = null;
 
         $this->emit(CheckoutEvents::ADD_ITEM_EVENT, ['pseId' => $pseId]);
-        $this->dispatchQuantityChange($pseId, $quantity ?? 1);
+        $this->dispatchQuantityChange($pseId, $quantity);
     }
 
     /**
@@ -447,6 +476,18 @@ class Base
             $difference > 0 ? CheckoutEvents::BROWSER_ADD_PSE : CheckoutEvents::BROWSER_REMOVE_PSE,
             ['pse' => $pseId, 'quantity' => abs($difference)],
         );
+    }
+
+    private function isShortOfStock(int $pseId, int $quantity): bool
+    {
+        if (!ConfigQuery::checkAvailableStock()) {
+            return false;
+        }
+
+        $productSaleElements = ProductSaleElementsQuery::create()->findPk($pseId);
+
+        return null === $productSaleElements
+            || (0 === $productSaleElements->getProduct()->getVirtual() && $productSaleElements->getQuantity() < $quantity);
     }
 
     /**

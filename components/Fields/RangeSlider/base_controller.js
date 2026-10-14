@@ -5,6 +5,7 @@ import { Controller } from "@hotwired/stimulus";
 // `delta` controller, with two fixes: listeners are bound once so disconnect() actually removes
 // them (the source removed fresh references, leaking them), and values are read as floats so the
 // slider works for decimal ranges (e.g. prices), not just integers.
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
   static targets = ["min", "max", "progress"];
 

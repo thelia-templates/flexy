@@ -63,6 +63,8 @@ would then lose every anonymous component of Flexy.
 `components/` directory of the chain instead: the child's anonymous components are listed under
 their own name, the ones it inherits under the `theme_<name>:` prefix only.
 
+The shop setting `address_legal_identifiers_required` decides whether the SIRET and the VAT number, which appear once a company name is typed, are mandatory. Only the value `0` makes them optional (address and customer information forms; on the guest checkout, only the `required` marking follows it); by default they are mandatory.
+
 `ux:icons:import` writes into Flexy's `assets/icons/` (the `ux_icons.icon_dir` Flexy configures,
 as `<prefix>/<name>.svg`), not the child's: move the imported file into the child's
 `assets/icons/` afterwards.

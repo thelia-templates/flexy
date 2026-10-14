@@ -4,6 +4,7 @@ import { getComponent } from "@symfony/ux-live-component";
 // Bridges plain form/select input to the LiveComponent's save() action. Filter checkboxes are
 // watched through a single change listener rather than one data-action per pill, since the pills
 // are rendered by the form theme.
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
   async initialize() {
     this.component = await getComponent(this.element);

@@ -7,6 +7,7 @@ const answered = new Set();
 
 // Moves the focus to what a rejected submission has to say, so submitting lands the visitor on
 // the errors rather than back at the top of the page.
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
   static targets = ["summary"];
   static values = { submission: String };

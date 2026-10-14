@@ -57,6 +57,7 @@ use Thelia\Model\StateQuery;
 class GuestCheckoutForm extends AddressCreateForm
 {
     use AddressCountryValidationTrait;
+    use LegalIdentifierFieldsTrait;
 
     public const FORM_NAME = 'flexybundle_form_guest_checkout';
 
@@ -357,8 +358,9 @@ class GuestCheckoutForm extends AddressCreateForm
 
                     $countryCode = self::countryCodeOf($countryId);
 
+                    // Only the marking follows the shop setting: the guest billing identifiers have never been enforced.
                     $dependentField->add(TextType::class, [
-                        'required' => true,
+                        'required' => self::legalIdentifiersRequired(),
                         'constraints' => [new Callback($check)],
                         'label' => Translator::getInstance()->trans(
                             'siret' === $field

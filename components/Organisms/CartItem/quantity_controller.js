@@ -5,6 +5,7 @@ import { Controller } from '@hotwired/stimulus';
  * Wired through data-action (survives LiveComponent re-renders, unlike
  * listeners attached in initialize()).
  */
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
   enforce(event) {
     const el = event.target;

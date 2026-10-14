@@ -1,5 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
     connect() {
         this.watcher = { isDown: false, startX: 0, scrollLeft: 0 };

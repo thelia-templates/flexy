@@ -81,6 +81,19 @@ final readonly class PlacedOrderMemory
     }
 
     /**
+     * The order this session placed last, so that the confirmation page can show it.
+     *
+     * The id comes from the session, written at the placement: never from the address of
+     * the page, which anybody can type with any number in it.
+     */
+    public function placedOrderId(): ?int
+    {
+        $orderId = $this->session()?->get(self::PLACED_ORDER_ID_KEY);
+
+        return is_numeric($orderId) && (int) $orderId > 0 ? (int) $orderId : null;
+    }
+
+    /**
      * @return list<string>|null null when this session has not placed an order, and when
      *                          it placed one before this memory existed
      */

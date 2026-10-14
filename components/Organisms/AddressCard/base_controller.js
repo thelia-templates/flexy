@@ -4,6 +4,7 @@ import { Controller } from "@hotwired/stimulus";
 // case-insensitively in HTML documents, so the lowercase form is safe here.
 const CONFIRM_SELECTOR = '[data-molecules--modal--base-target~="confirm"]';
 
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
   openModal(event) {
     const trigger = event.currentTarget;

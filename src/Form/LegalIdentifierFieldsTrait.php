@@ -21,6 +21,7 @@ use Symfonycasts\DynamicForms\DependentField;
 use Thelia\Core\Translation\Translator;
 use Thelia\Domain\Legal\CompanyIdentifier;
 use Thelia\Domain\Legal\CompanyIdentifierLabels;
+use Thelia\Model\ConfigQuery;
 use Thelia\Model\CountryQuery;
 
 /**
@@ -32,13 +33,19 @@ use Thelia\Model\CountryQuery;
  * exactly the fields the buyer was asked for. The server-side rule in
  * AddressLegalIdentifiersValidationTrait still decides, so a forged post gains nothing.
  *
- * Both are then mandatory: those shared rules only check the format of a value that was
- * typed, so the obligation belongs here, with the condition that raises the fields.
+ * Both are then mandatory by default: those shared rules only check the format of a value that
+ * was typed, so the obligation belongs here, with the condition that raises the fields. A shop
+ * whose business buyers may leave them out (an association, a business outside the Union, the
+ * addresses it already holds with a company and no number) sets
+ * `address_legal_identifiers_required` to 0: the fields still appear, and the format of what is
+ * typed is still checked, but an empty field passes, as the core rules allow.
  *
  * They also depend on `country`, because what the identifiers are called changes with it.
  */
 trait LegalIdentifierFieldsTrait
 {
+    public const LEGAL_IDENTIFIERS_REQUIRED_CONFIG_KEY = 'address_legal_identifiers_required';
+
     private function addLegalIdentifierFields(): void
     {
         $this->formBuilder->remove('siret');
@@ -52,9 +59,11 @@ trait LegalIdentifierFieldsTrait
                     return;
                 }
 
+                $required = self::legalIdentifiersRequired();
+
                 $field->add(TextType::class, [
-                    'required' => true,
-                    'constraints' => [new NotBlank(), new Callback($this->verifySiret(...))],
+                    'required' => $required,
+                    'constraints' => array_merge($required ? [new NotBlank()] : [], [new Callback($this->verifySiret(...))]),
                     'label' => Translator::getInstance()->trans(
                         CompanyIdentifierLabels::siret(self::legalIdentifierCountryCode($countryId)),
                     ),
@@ -71,9 +80,11 @@ trait LegalIdentifierFieldsTrait
                     return;
                 }
 
+                $required = self::legalIdentifiersRequired();
+
                 $field->add(TextType::class, [
-                    'required' => true,
-                    'constraints' => [new NotBlank(), new Callback($this->verifyVatNumber(...))],
+                    'required' => $required,
+                    'constraints' => array_merge($required ? [new NotBlank()] : [], [new Callback($this->verifyVatNumber(...))]),
                     'label' => Translator::getInstance()->trans(
                         CompanyIdentifierLabels::vatNumber(self::legalIdentifierCountryCode($countryId)),
                     ),
@@ -81,6 +92,11 @@ trait LegalIdentifierFieldsTrait
                 ]);
             },
         );
+    }
+
+    private static function legalIdentifiersRequired(): bool
+    {
+        return '0' !== (string) ConfigQuery::read(self::LEGAL_IDENTIFIERS_REQUIRED_CONFIG_KEY, '1');
     }
 
     private static function legalIdentifierCountryCode(mixed $countryId): ?string

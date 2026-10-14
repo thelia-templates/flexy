@@ -107,15 +107,6 @@ final class CartBrowserEventsTest extends TestCase
         self::assertSame([$this->removed(7, 3)], $responder->getBrowserEventsToDispatch());
     }
 
-    public function testARestoredLineTellsTheQuantityBack(): void
-    {
-        $responder = new LiveResponder();
-
-        $this->cart($responder)->restoreCartItem(7, 70, 2);
-
-        self::assertSame([$this->added(7, 2)], $responder->getBrowserEventsToDispatch());
-    }
-
     public function testAChangeTheCartRefusesTellsNothing(): void
     {
         $responder = new LiveResponder();

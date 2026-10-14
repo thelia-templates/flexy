@@ -54,6 +54,7 @@ function leaveSharedInterval(instance) {
   }
 }
 
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
   static targets = ["days", "hours", "minutes", "seconds", "announcement"];
   static values = { remainingSeconds: Number };

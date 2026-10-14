@@ -4,6 +4,7 @@ import { Controller } from "@hotwired/stimulus";
 // LiveComponent, so filtering never re-renders it. It listens for the total broadcast after each
 // save() and updates its own number in place. The desktop toolbar count is inside the component
 // and needs none of this.
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
   static targets = ["value"];
 
