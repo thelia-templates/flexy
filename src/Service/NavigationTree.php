@@ -34,6 +34,9 @@ use Thelia\Api\Service\DataAccess\DataAccessService;
  */
 class NavigationTree implements ResetInterface
 {
+    /** The back-office order: without it, the API returns categories by id. */
+    private const CATEGORY_ORDER = ['order[position]' => 'asc'];
+
     /** @var array<int, array<string, mixed>>|null */
     private ?array $categoryTree = null;
 
@@ -118,19 +121,19 @@ class NavigationTree implements ResetInterface
         $roots = $this->normalise($this->fetch('/api/front/categories', [
             'parent' => 0,
             'visible' => true,
-        ]));
+        ] + self::CATEGORY_ORDER));
 
         if ($roots === []) {
             return $this->categoryTree = [];
         }
 
-        $branchesByRoot = $this->childrenByParent('/api/front/categories', ['parent' => array_column($roots, 'id')]);
+        $branchesByRoot = $this->childrenByParent('/api/front/categories', ['parent' => array_column($roots, 'id')] + self::CATEGORY_ORDER);
         $branchIds = array_merge(...array_values(array_map(
             static fn (array $branches): array => array_column($branches, 'id'),
             $branchesByRoot,
         ))) ?: [];
 
-        $leavesByBranch = $branchIds === [] ? [] : $this->childrenByParent('/api/front/categories', ['parent' => $branchIds]);
+        $leavesByBranch = $branchIds === [] ? [] : $this->childrenByParent('/api/front/categories', ['parent' => $branchIds] + self::CATEGORY_ORDER);
 
         foreach ($roots as &$root) {
             $root['children'] = $branchesByRoot[$root['id']] ?? [];
