@@ -71,7 +71,13 @@ class Base
         }
 
         $pse = $cartItemModel->getProductSaleElements();
-        $product = $cartItemModel->getProduct();
+        $locale = $this->langService->getLocale();
+        // The model of the line applies the rule of the shop for a product without a translation in this language.
+        $product = $cartItemModel->getProduct(null, $locale);
+        // Read before the pricing below: it asks the line for its product again, without a locale, which puts the
+        // same instance back in the default language.
+        $this->title = (string) $product->getTitle();
+        $this->desc = $product->getChapo();
         $taxCountry = $this->taxEngine->getDeliveryCountry();
 
         $this->prices = [
@@ -96,9 +102,7 @@ class Base
         }
 
         $this->promo = (bool) $cartItemModel->getPromo();
-        $this->title = (string) $product->getTitle();
-        $this->desc = $product->getChapo();
-        $this->url = $product->getUrl($this->langService->getLocale());
+        $this->url = $product->getUrl($locale);
         $this->outOfStock = $this->cartStockService->isOutOfStock($cartItem);
         $this->insufficientStock = $this->cartStockService->isInsufficient($cartItem);
         $this->attributesAv = $this->pseService->getAttributesAvFromPse($pse);

@@ -34,10 +34,13 @@ use Thelia\Domain\Cart\DTO\CartItemDeleteDTO;
 use Thelia\Domain\Cart\DTO\CartItemUpdateQuantityDTO;
 use Thelia\Domain\Cart\Exception\InvalidCartException;
 use Thelia\Domain\Cart\Exception\NotEnoughStockException;
+use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Form\Definition\FrontForm;
+use Thelia\Model\CartItem;
 use Thelia\Model\CartItemQuery;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\ProductImageQuery;
+use Thelia\Model\ProductSaleElements;
 use Thelia\Model\ProductSaleElementsProductImageQuery;
 use Thelia\Model\ProductSaleElementsQuery;
 
@@ -103,6 +106,7 @@ class Base
         private readonly FormServiceInterface $formService,
         private readonly CartStockService $cartStockService,
         private readonly AttributeAccessService $attributeAccessService,
+        private readonly LangService $langService,
     ) {
     }
 
@@ -142,12 +146,17 @@ class Base
         }
 
         $this->unavailablePromotionMessages = $this->readUnavailablePromotions();
+        $locale = $this->langService->getLocale();
         $offeredDiscounts = $this->readOfferedLineDiscounts();
 
         // TYPE_CAMELNAME, so `is_offered` reaches the DTO as `isOffered` along with every
         // other column of the line.
-        foreach ($cart->getCartItems()->toArray(null, false, TableMap::TYPE_CAMELNAME) as $item) {
-            $pse = ProductSaleElementsQuery::create()->findOneById($item['productSaleElementsId']);
+        $lines = $cart->getCartItems();
+        $combinations = $this->readCombinations($lines, $locale);
+
+        foreach ($lines as $cartItemModel) {
+            $item = $cartItemModel->toArray(TableMap::TYPE_CAMELNAME, true, [], true);
+            $pse = $combinations[(int) $item['productSaleElementsId']] ?? null;
 
             if (null === $pse) {
                 continue;
@@ -163,7 +172,9 @@ class Base
                 'product' => null,
                 'stock' => (int) $pse->getQuantity(),
                 'stockManaged' => $stockManaged,
-                'title' => $pse->getProduct()->getTitle(),
+                // The product read with the combination is handed to the line, so that the rule of the core
+                // (CartItem::getProduct: the default language for a product not translated) runs without a query.
+                'title' => $cartItemModel->setProduct($pse->getProduct())->getProduct(null, $locale)->getTitle(),
                 'offeredTaxedDiscount' => $offeredDiscounts[(int) $item['id']] ?? 0.0,
             ]);
 
@@ -175,6 +186,49 @@ class Base
                 $this->itemHasInsufficientStockMessage = true;
             }
         }
+    }
+
+    /**
+     * The combinations the lines point at, indexed by id, each with its product and the
+     * translation of that product in the language of the session, in one query: a query per
+     * line would make every render of the cart (the cart page, the cart step of the checkout)
+     * cost more with each product in it.
+     *
+     * The translation is joined with a LEFT JOIN, so a product with no translation in that
+     * language stays in the cart: `CartItem::getProduct()` then falls back to the default
+     * language of the shop, at the cost of a query for that product only.
+     *
+     * @param iterable<CartItem> $lines
+     *
+     * @return array<int, ProductSaleElements>
+     */
+    private function readCombinations(iterable $lines, string $locale): array
+    {
+        $combinationIds = [];
+
+        foreach ($lines as $line) {
+            $combinationIds[(int) $line->getProductSaleElementsId()] = (int) $line->getProductSaleElementsId();
+        }
+
+        $combinationIds = array_values($combinationIds);
+
+        if ([] === $combinationIds) {
+            return [];
+        }
+
+        $combinations = [];
+
+        foreach (ProductSaleElementsQuery::create()
+            ->filterById($combinationIds)
+            ->joinWithProduct()
+            ->useProductQuery()
+                ->joinWithI18n($locale)
+            ->endUse()
+            ->find() as $combination) {
+            $combinations[$combination->getId()] = $combination;
+        }
+
+        return $combinations;
     }
 
     /**

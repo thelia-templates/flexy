@@ -24,6 +24,7 @@ use Thelia\Api\Service\DataAccess\AttributeAccessService;
 use Thelia\Core\Form\FormServiceInterface;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Domain\Cart\CartFacade;
+use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Model\CartItemQuery;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\CartQuery;
@@ -167,6 +168,7 @@ final class CartRestoreStockTest extends IntegrationTestCase
             $this->getService(FormServiceInterface::class),
             $this->getService(CartStockService::class),
             $this->getService(AttributeAccessService::class),
+            $this->getService(LangService::class),
         );
         $component->setLiveResponder(new LiveResponder());
         $component->pendingDelete = [

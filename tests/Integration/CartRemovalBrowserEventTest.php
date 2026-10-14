@@ -25,6 +25,7 @@ use Thelia\Api\Service\DataAccess\AttributeAccessService;
 use Thelia\Core\Form\FormServiceInterface;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Domain\Cart\CartFacade;
+use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Model\CartItem;
 use Thelia\Model\CartQuery;
 use Thelia\Test\FixtureFactory;
@@ -99,6 +100,7 @@ final class CartRemovalBrowserEventTest extends IntegrationTestCase
             $this->getService(FormServiceInterface::class),
             $this->getService(CartStockService::class),
             $this->getService(AttributeAccessService::class),
+            $this->getService(LangService::class),
         );
         $cart->setLiveResponder($responder);
         $cart->items = [CartItemDto::fromArray([

@@ -31,6 +31,7 @@ use Thelia\Domain\Cart\Service\CartItemService;
 use Thelia\Domain\Cart\Service\CartRetriever;
 use Thelia\Domain\Cart\Service\CartSelectionService;
 use Thelia\Domain\Checkout\Service\GiftWrappingProvider;
+use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Domain\Shipping\Service\PostageHandler;
 use Thelia\Domain\Taxation\TaxEngine\TaxCalculatorFactoryInterface;
 use Thelia\Model\CartItem;
@@ -121,6 +122,7 @@ final class CartRestoreRefusalTest extends IntegrationTestCase
             $this->getService(FormServiceInterface::class),
             $this->getService(CartStockService::class),
             $this->getService(AttributeAccessService::class),
+            $this->getService(LangService::class),
         );
         $component->setLiveResponder($responder);
         $component->pendingDelete = [
