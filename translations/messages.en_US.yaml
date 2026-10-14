@@ -340,6 +340,7 @@ Quote details: Quote details
 Download quote: Download quote
 This email is already used: This email is already used
 No delivery method is available for this order.: No delivery method is available for this order.
+"No carrier delivers to the postal code %code%. Check it, or choose another delivery address.": "No carrier delivers to the postal code %code%. Check it, or choose another delivery address."
 Choose a delivery address: Choose a delivery address
 Your order: Your order
 Payment Gateway: Payment Gateway

@@ -338,6 +338,7 @@ Quote details: Détails du devis
 Download quote: Télécharger le devis
 This email is already used: Cet e-mail est déjà utilisé
 No delivery method is available for this order.: Aucun mode de livraison disponible.
+"No carrier delivers to the postal code %code%. Check it, or choose another delivery address.": "Aucun transporteur ne livre le code postal %code%. Vérifiez-le, ou choisissez une autre adresse de livraison."
 Choose a delivery address: Choisir une adresse
 Your order: Votre commande
 Payment Gateway: Passerelle de paiement

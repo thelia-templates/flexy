@@ -202,6 +202,20 @@ class Base
         return $deliveryOptions;
     }
 
+    /**
+     * The postal code of the delivery address when it is why no carrier is offered, so that
+     * the step says so instead of only showing an empty list. Null on a core that does not
+     * know postal code rules yet.
+     */
+    public function getPostalCodeWithoutCarrier(): ?string
+    {
+        if (!method_exists($this->shippingFacade, 'postalCodeWithoutCarrier')) {
+            return null;
+        }
+
+        return $this->shippingFacade->postalCodeWithoutCarrier($this->cartFacade->getOrCreateFromSession());
+    }
+
     #[LiveListener(CheckoutEvents::SET_DELIVERY_MODULE_OPTION)]
     public function selectDeliveryModuleOption(#[LiveArg] string $optionCode, #[LiveArg] int $moduleId): void
     {
