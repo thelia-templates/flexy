@@ -51,6 +51,11 @@
   color: var(--color-grey);
 }
 
+.DeliveryMode-estimate {
+  font-weight: var(--font-weight-normal);
+  color: var(--color-grey-dark);
+}
+
 .DeliveryMode-price {
   font-weight: var(--font-weight-semibold);
   color: var(--color-black);

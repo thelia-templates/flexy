@@ -1,0 +1,12 @@
+.DeliveryEstimate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-grey-dark);
+}
+
+.DeliveryEstimate-icon {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+}

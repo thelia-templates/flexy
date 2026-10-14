@@ -43,6 +43,12 @@ class Home
     public string $price = '';
 
     #[LiveProp(updateFromParent: true)]
+    public ?string $earliestDelivery = null;
+
+    #[LiveProp(updateFromParent: true)]
+    public ?string $latestDelivery = null;
+
+    #[LiveProp(updateFromParent: true)]
     public ?int $deliveryAddressId = null;
 
     #[LiveProp(updateFromParent: true)]

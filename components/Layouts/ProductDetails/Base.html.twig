@@ -63,6 +63,8 @@
             :cartRefusalReason="this.cartRefusalReason"
         />
 
+        <twig:Organisms:DeliveryEstimate:Base :productId="this.productId" class="mt-5" />
+
         <twig:Molecules:Reinsurance:Base
             class="mt-7.5"
             :items="[

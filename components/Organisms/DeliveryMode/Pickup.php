@@ -42,6 +42,12 @@ class Pickup
     #[LiveProp(updateFromParent: true)]
     public string $price = '';
 
+    #[LiveProp(updateFromParent: true)]
+    public ?string $earliestDelivery = null;
+
+    #[LiveProp(updateFromParent: true)]
+    public ?string $latestDelivery = null;
+
     public function __construct(
         private readonly CartFacade $cartFacade,
     ) {

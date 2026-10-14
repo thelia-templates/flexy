@@ -20,6 +20,18 @@
                     {% if this.description %}
                         <span class="DeliveryMode-description">{{ this.description }}</span>
                     {% endif %}
+                    {# Filled by whatever estimates delivery times; a date alone stands for both bounds. #}
+                    {% set earliest = this.earliestDelivery ?: this.latestDelivery %}
+                    {% set latest = this.latestDelivery ?: this.earliestDelivery %}
+                    {% if earliest %}
+                        <span class="DeliveryMode-estimate" data-testid="delivery-estimate">
+                            {% if earliest == latest %}
+                                {{ 'Estimated delivery on'|trans }} {{ earliest|format_date(pattern: 'EEEE d MMMM') }}
+                            {% else %}
+                                {{ 'delivery_estimation'|trans({'%min%': earliest|format_date(pattern: 'EEEE d MMMM'), '%max%': latest|format_date(pattern: 'EEEE d MMMM')}) }}
+                            {% endif %}
+                        </span>
+                    {% endif %}
                 </span>
                 {% if icon ?? null %}
                     <span class="DeliveryMode-icon">

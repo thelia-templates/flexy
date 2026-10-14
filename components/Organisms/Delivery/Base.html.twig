@@ -62,6 +62,8 @@
                         title="{{ option.title }}"
                         price="{{ option.postage ?? '0' }}"
                         optionCode="{{ option.code }}"
+                        :earliestDelivery="option.earliestDelivery ?? null"
+                        :latestDelivery="option.latestDelivery ?? null"
                         :moduleId="option.moduleId"
                         :deliveryAddressId="this.deliveryAddressId"
                         :invoiceAddressId="this.invoiceAddressId"
@@ -72,6 +74,8 @@
                         title="{{ option.title }}"
                         price="{{ option.postage ?? '' }}"
                         optionCode="{{ option.code }}"
+                        :earliestDelivery="option.earliestDelivery ?? null"
+                        :latestDelivery="option.latestDelivery ?? null"
                         :moduleId="option.moduleId"
                         icon="reinsurance-store"
                     />
@@ -80,6 +84,8 @@
                         title="{{ option.title }}"
                         price="{{ option.postage ?? '' }}"
                         optionCode="{{ option.code }}"
+                        :earliestDelivery="option.earliestDelivery ?? null"
+                        :latestDelivery="option.latestDelivery ?? null"
                         :moduleId="option.moduleId"
                         icon="reinsurance-pickup"
                     />

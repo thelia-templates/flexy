@@ -1,0 +1,13 @@
+{% set estimate = this.estimate %}
+{% if estimate %}
+    <p class="{{ ('DeliveryEstimate ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }} data-testid="product-delivery-estimate">
+        {{ ux_icon('reinsurance-delivery', {'aria-hidden': 'true', class: 'DeliveryEstimate-icon'}) }}
+        <span>
+            {% if estimate.earliest == estimate.latest %}
+                {{ 'Estimated delivery on %date% (%country%)'|trans({'%country%': estimate.country, '%date%': estimate.earliest|format_date(pattern: 'EEEE d MMMM')}) }}
+            {% else %}
+                {{ 'Estimated delivery between %min% and %max% (%country%)'|trans({'%country%': estimate.country, '%min%': estimate.earliest|format_date(pattern: 'EEEE d MMMM'), '%max%': estimate.latest|format_date(pattern: 'EEEE d MMMM')}) }}
+            {% endif %}
+        </span>
+    </p>
+{% endif %}

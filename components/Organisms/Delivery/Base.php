@@ -192,6 +192,8 @@ class Base
                     'moduleId' => $module->getId(),
                     'deliveryMode' => $module->getDeliveryMode(),
                     'postage' => $option->getPostage(),
+                    'earliestDelivery' => $option->getMinimumDeliveryDate(),
+                    'latestDelivery' => $option->getMaximumDeliveryDate(),
                     // What the buyer picks with this carrier: none, a day, or a slot. A core
                     // that predates delivery dates answers nothing, which is none.
                     'deliveryDateChoice' => method_exists($module, 'getDeliveryDateChoice') ? $module->getDeliveryDateChoice() : 'none',
