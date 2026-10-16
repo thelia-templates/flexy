@@ -135,7 +135,7 @@
             <strong class="h4">
                 <span dir="ltr">{{ (currentPse.isPromo ? currentPse.promoPrice : currentPse.price)|format_currency('EUR', locale: lang_code) }}</span>
             </strong>
-            {% if currentPse.isPromo %}
+            {% if currentPse.isPromo and currentPse.displayInitialPrice|default(true) %}
                 <span class="PseSelector-originalPrice paragraph-4">
                     <span dir="ltr">{{ currentPse.price|format_currency('EUR', locale: lang_code) }}</span>
                 </span>

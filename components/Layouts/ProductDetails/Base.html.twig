@@ -12,7 +12,7 @@
         {% if currentPse.isNew|default(false) %}
             {% set galleryTags = galleryTags|merge([{text: 'New'|trans, color: 'warning'}]) %}
         {% endif %}
-        {% if currentPse.isPromo|default(false) %}
+        {% if currentPse.isPromo|default(false) and currentPse.displayInitialPrice|default(true) %}
             {% set galleryTags = galleryTags|merge([{text: this.promoRate|format_number(style: 'percent'), color: 'error'}]) %}
         {% endif %}
     {% endif %}

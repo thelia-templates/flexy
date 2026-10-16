@@ -32,6 +32,7 @@ class Base extends AbstractProductCard
     private ?float $promoPrice = null;
     private ?float $promoTaxedPrice = null;
     private bool $isPromo = false;
+    private bool $displayInitialPrice = true;
     private bool $isNew = false;
 
     /** @var RunningSaleResolver::forProduct()'s return type */
@@ -74,6 +75,7 @@ class Base extends AbstractProductCard
             $this->promoPrice = $defaultPse->productPrices[0]->promoPrice;
             $this->promoTaxedPrice = $this->productTaxationResolver->taxedPrice($this->product->id, $this->promoPrice);
             $this->isPromo = $defaultPse->promo;
+            $this->displayInitialPrice = $defaultPse->displayInitialPrice;
             $this->isNew = $defaultPse->newness;
         }
     }
@@ -118,6 +120,16 @@ class Base extends AbstractProductCard
         return $this->isPromo;
     }
 
+    /**
+     * Whether the catalog price is shown struck through, with the discount badge, next to the
+     * price charged. A price that differs from the catalog one without being a promotion (a
+     * price per sales unit, say) is shown alone.
+     */
+    public function getShowsInitialPrice(): bool
+    {
+        return $this->isPromo && $this->displayInitialPrice;
+    }
+
     public function getIsNew()
     {
         return $this->isNew;
@@ -137,7 +149,7 @@ class Base extends AbstractProductCard
 
     public function getPromoRate(): float
     {
-        if ($this->isPromo) {
+        if ($this->getShowsInitialPrice()) {
             return (($this->price - $this->promoPrice) / $this->price) * -1;
         }
 
