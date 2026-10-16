@@ -11,13 +11,15 @@ const LOCK_CLASS = "locked";
 // the page must stay scrollable.
 const PANEL_SELECTOR = ".MobileDrawer.is-open, .Header-menu.is-open, .MobilePanel.is-open";
 
+const MODAL_SELECTOR = ".Modal[open]";
+
 /**
  * Derived from what is open, so any number of writers may call this in any order. Anything
  * that adds or removes a PANEL_SELECTOR class has to call this right after, including from a
  * Stimulus disconnect() or after a LiveComponent re-render.
  */
 export function syncBodyLock() {
-  const shouldLock = [...document.querySelectorAll(PANEL_SELECTOR)].some(
+  const shouldLock = [...document.querySelectorAll(`${PANEL_SELECTOR}, ${MODAL_SELECTOR}`)].some(
     (panel) => getComputedStyle(panel).position === "fixed",
   );
 
