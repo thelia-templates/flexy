@@ -1,13 +1,14 @@
 {# @block content Content displayed inside the modal #}
 {# @prop id string Unique id of the dialog, used by outlet controllers to target this modal #}
 {# @prop labelledby string Id of the title that names the dialog #}
-{% props id, labelledby = null %}
+{# @prop closeOnBackdrop boolean Whether a click on the backdrop closes the dialog. Defaults to `false` #}
+{% props id, labelledby = null, closeOnBackdrop = false %}
 
 <dialog
     id="{{ id }}"
     {% if labelledby %}aria-labelledby="{{ labelledby }}"{% endif %}
     class="{{ ('Modal ' ~ attributes.render('class'))|tailwind_merge }}"
-    {{ attributes.defaults({...stimulus_controller('Molecules--Modal--base')}).without('class') }}
+    {{ attributes.defaults({...stimulus_controller('Molecules--Modal--base', closeOnBackdrop ? {closeOnBackdrop: true} : {})}).without('class') }}
 >
     <button
         type="button"

@@ -37,6 +37,30 @@
                 </twig:Molecules:Modal:Base>
             </div>
 
+            <div class="Story-col Story-col--centered">
+                <span class="Story-label">
+                    <code>closeOnBackdrop</code>: a click on the backdrop closes the dialog too.
+                </span>
+                <twig:Molecules:Button:Base
+                    {{ ...stimulus_controller('Molecules--Modal--open', {id: 'toolkitModalBackdrop'}) }}
+                    {{ ...stimulus_action('Molecules--Modal--open', 'open', 'click') }}
+                >
+                    Open the modal
+                </twig:Molecules:Button:Base>
+
+                <twig:Molecules:Modal:Base id="toolkitModalBackdrop" labelledby="toolkitModalBackdropTitle" closeOnBackdrop>
+                    <h2 id="toolkitModalBackdropTitle" class="h4">Close by clicking outside</h2>
+                    <p class="paragraph-2">Click outside this box to close it.</p>
+                    <div class="Story-row">
+                        <twig:Molecules:Button:Base
+                            {{ ...stimulus_action('Molecules--Modal--base', 'close', 'click') }}
+                        >
+                            Close
+                        </twig:Molecules:Button:Base>
+                    </div>
+                </twig:Molecules:Modal:Base>
+            </div>
+
         </div>
     </div>
 

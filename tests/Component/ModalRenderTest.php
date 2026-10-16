@@ -44,4 +44,17 @@ final class ModalRenderTest extends KernelTestCase
     {
         self::assertStringNotContainsString('aria-labelledby', $this->dialog(['id' => 'confirmDelete']));
     }
+
+    public function testTheDialogOptsIntoClosingOnTheBackdropWhenAsked(): void
+    {
+        self::assertStringContainsStringIgnoringCase(
+            'data-molecules--modal--base-close-on-backdrop-value="true"',
+            $this->dialog(['id' => 'confirmDelete', 'closeOnBackdrop' => true]),
+        );
+    }
+
+    public function testTheDialogDoesNotOptIntoClosingOnTheBackdropByDefault(): void
+    {
+        self::assertStringNotContainsStringIgnoringCase('close-on-backdrop', $this->dialog(['id' => 'confirmDelete']));
+    }
 }
