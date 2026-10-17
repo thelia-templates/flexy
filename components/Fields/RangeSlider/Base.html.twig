@@ -5,11 +5,18 @@
 {# @prop valueMin number|null Current lower value. Defaults to `min` #}
 {# @prop valueMax number|null Current upper value. Defaults to `max` #}
 {# @prop step number Step increment. Defaults to 1 #}
-{% props nameMin, nameMax, min, max, valueMin = null, valueMax = null, step = 1 %}
+{# @prop currency string|null ISO code of the currency the values are amounts in. When given, the two values are shown under the slider, as amounts #}
+{# @prop locale string|null Locale the amounts are written in. Defaults to the language of the page #}
+{% props nameMin, nameMax, min, max, valueMin = null, valueMax = null, step = 1, currency = null, locale = null %}
+
+{% if currency and locale is null %}
+    {% set locale = lang_code is defined ? lang_code : app.request.locale %}
+{% endif %}
+{% set amountOptions = {fraction_digit: 0} %}
 
 <div
     class="{{ ('RangeSlider ' ~ attributes.render('class'))|tailwind_merge }}"
-    {{ attributes.defaults({...stimulus_controller('Fields--RangeSlider--base')}).without('class') }}
+    {{ attributes.defaults({...stimulus_controller('Fields--RangeSlider--base', currency ? {currency: currency, locale: locale} : {})}).without('class') }}
 >
     <input
         type="range"
@@ -19,6 +26,7 @@
         step="{{ step }}"
         value="{{ valueMin ?? min }}"
         aria-label="{{ 'Minimum'|trans }}"
+        {% if currency %}aria-valuetext="{{ (valueMin ?? min)|format_currency(currency, amountOptions, locale) }}"{% endif %}
         {{ stimulus_target('Fields--RangeSlider--base', 'min') }}
         {{ stimulus_action('Fields--RangeSlider--base', 'updateInput', 'input') }}
     />
@@ -30,10 +38,19 @@
         step="{{ step }}"
         value="{{ valueMax ?? max }}"
         aria-label="{{ 'Maximum'|trans }}"
+        {% if currency %}aria-valuetext="{{ (valueMax ?? max)|format_currency(currency, amountOptions, locale) }}"{% endif %}
         {{ stimulus_target('Fields--RangeSlider--base', 'max') }}
         {{ stimulus_action('Fields--RangeSlider--base', 'updateInput', 'input') }}
     />
     <div class="RangeSlider-track">
         <div class="RangeSlider-progress" {{ stimulus_target('Fields--RangeSlider--base', 'progress') }}></div>
     </div>
+    {% if currency %}
+        {# The lower value first in reading order, whichever handle holds it: the controller
+           writes the two amounts in ascending order, as the bar draws them. #}
+        <div class="RangeSlider-values" aria-hidden="true">
+            <span dir="ltr" {{ stimulus_target('Fields--RangeSlider--base', 'low') }}>{{ min(valueMin ?? min, valueMax ?? max)|format_currency(currency, amountOptions, locale) }}</span>
+            <span dir="ltr" {{ stimulus_target('Fields--RangeSlider--base', 'high') }}>{{ max(valueMin ?? min, valueMax ?? max)|format_currency(currency, amountOptions, locale) }}</span>
+        </div>
+    {% endif %}
 </div>
