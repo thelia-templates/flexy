@@ -587,3 +587,5 @@ VAT exempted (reverse charge), buyer VAT number %number%: 'Steuerfrei (Reverse-C
 'Cart of %date%': 'Warenkorb vom %date%'
 'Order %ref%': 'Bestellung %ref%'
 '(opens in a new tab)': "(öffnet in einem neuen Tab)"
+'No carrier can ship: %products%. Remove it from your cart to complete your order.': "Kein Versanddienstleister kann liefern: %products%. Entfernen Sie diesen Artikel aus Ihrem Warenkorb, um Ihre Bestellung abzuschließen."
+'No carrier can ship: %products%. Remove them from your cart to complete your order.': "Kein Versanddienstleister kann liefern: %products%. Entfernen Sie diese Artikel aus Ihrem Warenkorb, um Ihre Bestellung abzuschließen."

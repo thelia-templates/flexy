@@ -115,3 +115,5 @@ Messages from the shop: Mensajes de la tienda
 'Order %ref%': 'Pedido %ref%'
 '(opens in a new tab)': "(se abre en una pestaña nueva)"
 Track my package: Seguir mi paquete
+'No carrier can ship: %products%. Remove it from your cart to complete your order.': "Ningún transportista puede enviar: %products%. Quítelo de su carrito para completar su pedido."
+'No carrier can ship: %products%. Remove them from your cart to complete your order.': "Ningún transportista puede enviar: %products%. Quítelos de su carrito para completar su pedido."

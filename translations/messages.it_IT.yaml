@@ -115,3 +115,5 @@ Messages from the shop: Messaggi del negozio
 'Order %ref%': 'Ordine %ref%'
 '(opens in a new tab)': "(si apre in una nuova scheda)"
 Track my package: Traccia il mio pacco
+'No carrier can ship: %products%. Remove it from your cart to complete your order.': "Nessun corriere può spedire: %products%. Rimuovilo dal carrello per completare l'ordine."
+'No carrier can ship: %products%. Remove them from your cart to complete your order.': "Nessun corriere può spedire: %products%. Rimuovili dal carrello per completare l'ordine."

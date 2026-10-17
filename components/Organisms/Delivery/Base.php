@@ -207,6 +207,33 @@ class Base
     }
 
     /**
+     * The titles of the products that leave the cart with no carrier at all, to be named in
+     * place of the generic "no delivery method" sentence. Data only: the template words and
+     * translates the sentence, as a translation made here would not see the catalogues of
+     * the theme. Empty while a carrier is left, and with a core that predates the shipping
+     * rules of a product.
+     *
+     * @return list<string>
+     */
+    public function getProductsBlockingEveryCarrier(): array
+    {
+        if (!method_exists(ShippingFacade::class, 'productsBlockingEveryCarrier')) {
+            return [];
+        }
+
+        $cart = $this->cartFacade->getOrCreateFromSession();
+        $country = $this->shippingFacade->getCountryForCart($cart);
+
+        if (null === $country) {
+            return [];
+        }
+
+        $state = $cart->getCartAddressRelatedByAddressDeliveryId()?->getState();
+
+        return array_values($this->shippingFacade->productsBlockingEveryCarrier($cart, $country, $state, $this->langService->getLocale()));
+    }
+
+    /**
      * The core option declares its description without a default, so a module that never
      * sets one leaves a property PHP refuses to read: that option gets no description
      * rather than taking the delivery step down.
