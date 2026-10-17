@@ -33,7 +33,11 @@ use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Cart\DTO\CartItemAddDTO;
 use Thelia\Domain\Cart\Exception\InvalidCartException;
 use Thelia\Domain\Cart\Exception\NotEnoughStockException;
+use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Domain\Media\AltTextResolver;
+use Thelia\Domain\Shipping\DestinationRestriction\CartDestinations;
+use Thelia\Domain\Shipping\DestinationRestriction\DestinationRestrictionChecker;
+use Thelia\Domain\Shipping\DestinationRestriction\ProductDestinationRestrictionReader;
 use Thelia\Form\Definition\FrontForm;
 use Thelia\Model\ConfigQuery;
 
@@ -154,6 +158,10 @@ class Base
         private readonly RequestStack $requestStack,
         private readonly RunningSaleResolver $runningSaleResolver,
         private readonly AltTextResolver $altTextResolver,
+        // Optional: the destination restrictions exist only in a core that carries them, and a unit test builds this component by hand.
+        private readonly ?ProductDestinationRestrictionReader $destinationRestrictionReader = null,
+        private readonly ?DestinationRestrictionChecker $destinationRestrictionChecker = null,
+        private readonly ?LangService $langService = null,
     ) {
     }
 
@@ -194,6 +202,57 @@ class Base
         }
 
         return $attributes;
+    }
+
+    /**
+     * What the sheet says about where the product ships: its active destination groups, by
+     * country name, and whether the address the visitor is known to have is refused by one of
+     * them. The address is the delivery address of the cart, else the default address of the
+     * customer, and never the country of the shop: a visitor nobody knows gets the lists alone.
+     * Data only, the template words and translates it. Computed at render time, as the cart
+     * and the address book change without the product page being mounted again.
+     *
+     * @return array{groups: list<array{onlyServed: bool, reason: string, destinations: list<string>}>, refusesAddress: bool}
+     */
+    #[ExposeInTemplate('destinationRestrictions')]
+    public function getDestinationRestrictions(): array
+    {
+        $none = ['groups' => [], 'refusesAddress' => false];
+
+        if (
+            !class_exists(ProductDestinationRestrictionReader::class)
+            || !class_exists(DestinationRestrictionChecker::class)
+            || null === $this->destinationRestrictionReader
+            || null === $this->destinationRestrictionChecker
+            || !$this->destinationRestrictionChecker->hasActiveGroup()
+        ) {
+            return $none;
+        }
+
+        $locale = $this->langService?->getLocale() ?? 'en_US';
+        $groups = $this->destinationRestrictionReader->forProduct($this->productId, $locale);
+
+        if ([] === $groups) {
+            return $none;
+        }
+
+        $cart = $this->cartFacade->getCartFromSession();
+        $delivery = null === $cart ? null : CartDestinations::delivery($cart, true);
+        $billing = null === $cart ? null : CartDestinations::billing($cart, true);
+        // A download is licensed to the billing address and a parcel goes to the delivery one: the checker picks.
+        $refusesAddress = [] !== $this->destinationRestrictionChecker->violationsForProducts([$this->productId], $delivery, $billing, $locale);
+
+        return [
+            'groups' => array_map(
+                static fn (array $group): array => [
+                    'onlyServed' => $group['onlyServed'],
+                    'reason' => $group['reason'],
+                    'destinations' => $group['destinations'],
+                ],
+                $groups,
+            ),
+            'refusesAddress' => $refusesAddress,
+        ];
     }
 
     /**

@@ -115,3 +115,8 @@ Messages from the shop: Messaggi del negozio
 'Order %ref%': 'Ordine %ref%'
 '(opens in a new tab)': "(si apre in una nuova scheda)"
 Track my package: Traccia il mio pacco
+'Cannot be delivered to: %destinations%.': "Non può essere consegnato in: %destinations%."
+'Can only be delivered to: %destinations%.': "Consegnabile solo in: %destinations%."
+'This product cannot be delivered to your address.': "Questo prodotto non può essere consegnato al tuo indirizzo."
+'%products% cannot be shipped to this address. Remove it from your cart or choose another address.': "%products% non può essere spedito a questo indirizzo. Rimuovilo dal carrello o scegli un altro indirizzo."
+'%products% cannot be shipped to this address. Remove them from your cart or choose another address.': "%products% non possono essere spediti a questo indirizzo. Rimuovili dal carrello o scegli un altro indirizzo."

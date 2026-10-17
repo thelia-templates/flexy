@@ -587,3 +587,8 @@ VAT exempted (reverse charge), buyer VAT number %number%: 'Steuerfrei (Reverse-C
 'Cart of %date%': 'Warenkorb vom %date%'
 'Order %ref%': 'Bestellung %ref%'
 '(opens in a new tab)': "(öffnet in einem neuen Tab)"
+'Cannot be delivered to: %destinations%.': "Kann nicht geliefert werden nach: %destinations%."
+'Can only be delivered to: %destinations%.': "Nur lieferbar nach: %destinations%."
+'This product cannot be delivered to your address.': "Dieses Produkt kann nicht an Ihre Adresse geliefert werden."
+'%products% cannot be shipped to this address. Remove it from your cart or choose another address.': "%products% kann nicht an diese Adresse versendet werden. Entfernen Sie den Artikel aus Ihrem Warenkorb oder wählen Sie eine andere Adresse."
+'%products% cannot be shipped to this address. Remove them from your cart or choose another address.': "%products% können nicht an diese Adresse versendet werden. Entfernen Sie die Artikel aus Ihrem Warenkorb oder wählen Sie eine andere Adresse."

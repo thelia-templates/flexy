@@ -43,6 +43,16 @@
         {% endif %}
     </div>
 
+    {% if this.restrictedProducts is not empty %}
+        {# SnackBar prints its text raw: the labels are the merchant's, escaped one by one before they join the sentence. #}
+        {% set restrictedLabels = this.restrictedProducts|map(label => label|e)|join(', ') %}
+        {% if this.restrictedProducts|length == 1 %}
+            {% set restrictedMessage = '%products% cannot be shipped to this address. Remove it from your cart or choose another address.'|trans({'%products%': restrictedLabels}) %}
+        {% else %}
+            {% set restrictedMessage = '%products% cannot be shipped to this address. Remove them from your cart or choose another address.'|trans({'%products%': restrictedLabels}) %}
+        {% endif %}
+        <twig:Molecules:SnackBar:Base variant="warning" withIcon class="mb-5" text="{{ restrictedMessage }}" data-testid="delivery-destination-restricted" />
+    {% endif %}
     <h2 class="text-black h4">
         {{ 'Choose a delivery method'|trans }}
     </h2>

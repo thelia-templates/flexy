@@ -35,6 +35,14 @@ final class PseSelectorRefusalRenderTest extends KernelTestCase
         self::assertCount(0, $alert->filter('b'));
     }
 
+    public function testTheDestinationRestrictionReasonOfTheCoreIsShownToTheShopper(): void
+    {
+        // The message the core gives an add the visitor's address refuses, already worded and translated.
+        $alert = $this->alert(['cartRefused' => true, 'cartRefusalReason' => 'Calvados (Alcohol licence) cannot be shipped to your address.']);
+
+        self::assertStringContainsString('Calvados (Alcohol licence) cannot be shipped to your address.', $alert->text());
+    }
+
     public function testARefusalWithoutReasonKeepsTheSentenceAlone(): void
     {
         self::assertStringNotContainsString('Sold', $this->alert(['cartRefused' => true])->text());

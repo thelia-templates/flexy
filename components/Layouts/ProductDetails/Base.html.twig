@@ -63,6 +63,25 @@
             :cartRefusalReason="this.cartRefusalReason"
         />
 
+        {% set restrictions = this.destinationRestrictions %}
+        {% if restrictions.groups is not empty %}
+            <div class="mt-4 flex flex-col gap-1 paragraph-3 text-grey" data-testid="destination-restrictions">
+                {% for group in restrictions.groups %}
+                    <p>
+                        {% if group.onlyServed %}
+                            {{ 'Can only be delivered to: %destinations%.'|trans({'%destinations%': group.destinations|join(', ')}) }}
+                        {% else %}
+                            {{ 'Cannot be delivered to: %destinations%.'|trans({'%destinations%': group.destinations|join(', ')}) }}
+                        {% endif %}
+                        {% if group.reason %}{{ group.reason }}{% endif %}
+                    </p>
+                {% endfor %}
+            </div>
+            {% if restrictions.refusesAddress %}
+                <twig:Molecules:SnackBar:Base variant="warning" withIcon class="mt-3" text="{{ 'This product cannot be delivered to your address.'|trans }}" data-testid="destination-refused" />
+            {% endif %}
+        {% endif %}
+
         <twig:Molecules:Reinsurance:Base
             class="mt-7.5"
             :items="[

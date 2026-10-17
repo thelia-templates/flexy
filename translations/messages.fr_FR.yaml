@@ -618,3 +618,8 @@ Being prepared: En préparation
 Download the delivery note: Télécharger le bon de livraison
 Still to be shipped: Reste à expédier
 These items will leave in a later shipment.: Ces articles partiront dans un prochain envoi.
+'Cannot be delivered to: %destinations%.': "Ne peut pas être livré vers : %destinations%."
+'Can only be delivered to: %destinations%.': "Livrable uniquement vers : %destinations%."
+'This product cannot be delivered to your address.': "Ce produit ne peut pas être livré à votre adresse."
+'%products% cannot be shipped to this address. Remove it from your cart or choose another address.': "%products% ne peut pas être expédié à cette adresse. Retirez-le de votre panier ou choisissez une autre adresse."
+'%products% cannot be shipped to this address. Remove them from your cart or choose another address.': "%products% ne peuvent pas être expédiés à cette adresse. Retirez-les de votre panier ou choisissez une autre adresse."

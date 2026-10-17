@@ -33,6 +33,7 @@ use Thelia\Domain\Addressing\Exception\AddressNotFoundException;
 use Thelia\Domain\Addressing\Service\AddressService;
 use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
+use Thelia\Domain\Checkout\Exception\DestinationRestrictedException;
 use Thelia\Domain\Customer\Exception\CustomerException;
 use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Domain\Shipping\ShippingFacade;
@@ -79,6 +80,17 @@ class Base
      */
     #[LiveProp]
     public ?string $deliveryDateNotice = null;
+
+    /**
+     * The products of the cart that cannot ship to the address the buyer just picked (or to the
+     * default one the step selected on its own), each as the core labels it: title and reason.
+     * Data only: the template words and translates the warning. The address is refused before it
+     * is written, so the cart keeps the one it had.
+     *
+     * @var list<string>
+     */
+    #[LiveProp]
+    public array $restrictedProducts = [];
 
     public function __construct(
         private readonly Session $session,
@@ -263,10 +275,21 @@ class Base
         $cart = $this->cartFacade->getOrCreateFromSession();
         $carrierOfTheDay = null === $this->deliveryDates->chosenOn($cart, null) ? null : $cart->getDeliveryModuleId();
 
-        $this->cartFacade->setDeliveryAddress(new CheckoutDTO(
-            cart: $cart,
-            deliveryAddressId: $addressId,
-        ));
+        try {
+            $this->cartFacade->setDeliveryAddress(new CheckoutDTO(
+                cart: $cart,
+                deliveryAddressId: $addressId,
+            ));
+        } catch (DestinationRestrictedException $exception) {
+            // The buyer's business, not a server error: nothing was written, the step names what to remove.
+            $this->restrictedProducts = array_map(static fn ($line): string => $line->label(), $exception->lines);
+            $this->deliveryAddressId = $this->cartFacade->getDeliveryAddressId();
+            $this->emit('updateNextButton');
+
+            return;
+        }
+
+        $this->restrictedProducts = [];
         $this->deliveryAddressId = $this->cartFacade->getDeliveryAddressId();
         $this->deliveryDateNotice = null;
 
