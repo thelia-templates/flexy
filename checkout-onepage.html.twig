@@ -18,6 +18,16 @@
     {{ theme_hook('cart.top') }}
     <twig:Organisms:CheckoutOnePage:Base />
     {{ theme_hook('cart.bottom') }}
+
+    {# On this layout a wallet is one of the payment methods, and once chosen its button
+       takes the place of the order button. Rendered here, with the page, so that the
+       scripts the modules put next to their buttons run; the dock controller carries the
+       chosen one into the order button's place. #}
+    <div {{ stimulus_controller('express-payment-dock') }} hidden>
+        <div {{ stimulus_target('express-payment-dock', 'content') }}>
+            {{ theme_hook('checkout.express-payment') }}
+        </div>
+    </div>
 {% endblock %}
 
 {% block checkoutSummary %}
