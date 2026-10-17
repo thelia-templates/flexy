@@ -40,9 +40,18 @@ final class ProductGalleryZoomRenderTest extends KernelTestCase
     /** @return list<string> the opening tag of each slide, in order */
     private function slides(string $html): array
     {
-        preg_match_all('/<li[^>]*class="splide__slide"[^>]*>/', $html, $slides);
+        preg_match_all('/<div[^>]*class="splide__slide"[^>]*>/', $html, $slides);
 
         return $slides[0];
+    }
+
+    /** Splide gives every slide a role a list item may not take ("group", "tabpanel"): no slide is an li. */
+    public function testNoSlideIsAListItem(): void
+    {
+        $html = $this->render(self::MEDIA);
+
+        self::assertCount(2, $this->slides($html));
+        self::assertDoesNotMatchRegularExpression('/<(ul|li)[^>]*class="splide__(list|slide)"/', $html);
     }
 
     public function testAnImageSlideCarriesWhatTheOverlayShows(): void

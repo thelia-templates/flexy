@@ -94,11 +94,13 @@
 
     <div class="ProductGallery-main" data-live-ignore>
         <section class="splide" aria-label="{{ 'Product visuals'|trans }}" {{ stimulus_target(galleryController, 'slider') }}>
+            {# Slides in div, not li: Splide gives each slide the role "group" (or "tabpanel" once
+               it shows its dots), which ARIA does not allow on a list item (axe aria-allowed-role). #}
             <div class="splide__track">
-                <ul class="splide__list">
+                <div class="splide__list">
                     {% for item in media %}
                         {# A video has nothing to enlarge: the controller hides the trigger on it. #}
-                        <li
+                        <div
                             class="splide__slide"
                             {{ stimulus_target(galleryController, 'slide') }}
                             data-pse-ids="{{ item.pseIds|default([])|join(',') }}"
@@ -121,9 +123,9 @@
                                     {alt: item.alt, loading: 'lazy', 'data-image-id': item.id}
                                 ) }}
                             {% endif %}
-                        </li>
+                        </div>
                     {% endfor %}
-                </ul>
+                </div>
             </div>
 
             {% if media|length > 1 %}
