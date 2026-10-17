@@ -202,6 +202,8 @@ ddev composer test:http-flexy  # HTTP smoke tests
 
 Run test suites through the `composer test:*` scripts only. Calling `vendor/bin/phpunit` directly resolves to the development database instead of the test one.
 
+Pull requests to `main` go through the merge queue: use "Merge when ready", or `gh pr merge <number>` without a merge method.
+
 ## Licence
 
 GPL-3.0-or-later. See [LICENSE](LICENSE).
