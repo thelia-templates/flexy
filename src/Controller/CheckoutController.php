@@ -306,7 +306,9 @@ class CheckoutController extends FlexyController
                 )
             );
 
-            if ($response instanceof Response && $response->getStatusCode() === 200) {
+            // A gateway form page answers 200, a hosted payment page is reached through the
+            // redirection the module answers with: both are where the buyer goes next.
+            if ($response instanceof Response && ($response->getStatusCode() === 200 || $response->isRedirection())) {
                 return $response;
             }
 
