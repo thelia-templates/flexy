@@ -31,6 +31,9 @@
         {{ form_row(form.lastname) }}
         {{ form_row(form.email) }}
         {{ form_row(form.password) }}
+        {# Fields a module adds to this form (TheliaEvents::FORM_AFTER_BUILD.'.'.form name) come
+           out here, above the button: form_end() would print them after it. #}
+        {{ form_rest(form) }}
 
         <div class="flex flex-col items-start gap-9">
             <twig:Molecules:Button:Base text="{{ 'Next step'|trans }}" type="submit" size="large" icon_right="chevron-right" />
