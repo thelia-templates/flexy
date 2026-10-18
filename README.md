@@ -91,6 +91,7 @@ The points are part of the theme's public surface: their names and parameters ar
 | `cart.top`, `cart.bottom` | Cart page (and one-page checkout) | — |
 | `cart.item.bottom` | Each cart line | `cartItem` |
 | `checkout.top`, `checkout.bottom` | Every checkout step | — |
+| `checkout.payment.extra` | Under the payment method the buyer chose, after its options | `module` (id), `code`, `optionChoices` |
 | `checkout-identify.form.bottom` | Identification step | `next_step_url` |
 | `order-placed.top`, `order-placed.bottom` | Order confirmation | — |
 | `login.form.top`, `login.form.bottom`, `register.form.top`, `register.form.bottom` | Login and registration forms | — |
@@ -110,6 +111,19 @@ The head also calls a hook named after the view, `layout.head.<view>`, for what 
 Each section of the sitemap calls `sitemap.urls` inside its `<urlset>`, with `context` set to the section (`categories`, `products`, `content`) and `lang` left empty: a module answers with `<url>` entries, `xhtml:link` alternates included. The `content` section holds nothing else, so the pages a module serves have a place of their own. With the Sitemap module active and more than one language shown, the categories and products are listed once per language, each entry with the `xhtml:link` alternates of all of them and an `x-default` on the default language, the codes SEOne prints in the page head; otherwise one entry per element, in the default language. The sitemap is cached (`sitemap_ttl`, two hours by default): `?flush=1` regenerates a section.
 
 The header, the footer and the terms links name no content: they read the `header_links`, `footer_links` and `consent.<code>` content slots of the core (`content_slot()` and `content_slot_first()` in a template). The shop fills them from its settings, and a module can answer them instead through `Thelia\Core\Content\Slot\ContentSlotResolverInterface`.
+
+### Payment options
+
+A payment module offers choices of its own — paying in three instalments, keeping the card for next time — by answering the core's `TheliaEvents::MODULE_PAYMENT_GET_OPTIONS` event with `PaymentModuleOptionGroup`s. The payment step shows the groups of the method the buyer chose under its card: a group that takes exactly one option (`minimumSelectedOptions` and `maximumSelectedOptions` at 1) as radios, any other as boxes.
+
+The order button is a link to `/checkout/pay`, not a form, so each answer is kept as soon as it is given: in the session, under `payment_module_option_choices`, as a list of `{group, values}` entries — the shape of the core's `PaymentModuleOptionChoice`. Only the options the module offers for the cart are kept, and the list is emptied when the buyer changes method. The module reads it in its `pay()`:
+
+```php
+$choices = $request->getSession()->get('payment_module_option_choices', []);
+// [['group' => 'my_module_instalments', 'values' => ['three']]]
+```
+
+No entry for a group means the buyer picked nothing in it: the module applies its default. What does not fit an option — a saved card to name, a notice — goes in the `checkout.payment.extra` hook, rendered under the chosen method only. That hook sits in a live component, where a `<script>` does not run on a re-render: a module that needs a script on the payment step loads it from `layout.head.checkout-payment` and `layout.head.checkout-onepage`.
 
 ### Replacing the product search
 

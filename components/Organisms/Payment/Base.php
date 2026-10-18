@@ -15,6 +15,8 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Organisms\Payment;
 
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\PaymentOptionChoice;
+use FlexyBundle\Service\PaymentOptionChoiceStore;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -66,6 +68,18 @@ class Base
     #[LiveProp]
     public array $consentAcceptances = [];
 
+    /**
+     * The options of the chosen payment module the buyer has picked, as the session
+     * holds them: refilled from the store on mount and after every answer.
+     *
+     * @var list<array{group: string, values: list<string>}>
+     */
+    #[LiveProp]
+    public array $paymentOptionChoices = [];
+
+    /** @var array<array-key, array<string, mixed>>|null */
+    private ?array $modules = null;
+
     public function __construct(
         private readonly DataAccessService $dataAccessService,
         private readonly CartFacade $cartFacade,
@@ -73,6 +87,7 @@ class Base
         private readonly ConsentAcceptanceStore $consentAcceptanceStore,
         private readonly LangService $langService,
         private readonly ContentSlotService $contentSlotService,
+        private readonly PaymentOptionChoiceStore $paymentOptionChoiceStore,
     ) {
     }
 
@@ -81,11 +96,47 @@ class Base
         $this->invoiceAddressId = $this->cartFacade->getInvoiceAddressId();
         $this->paymentModuleId = $this->cartFacade->getPaymentModuleId();
         $this->consentAcceptances = $this->consentAcceptanceStore->all();
+        $this->paymentOptionChoices = $this->paymentOptionChoiceStore->all();
     }
 
     public function getModules(): array
     {
-        return $this->dataAccessService->resources('/api/front/payment/modules') ?? [];
+        return $this->modules ??= $this->dataAccessService->resources('/api/front/payment/modules') ?? [];
+    }
+
+    /**
+     * Records one option of the chosen payment module, picked or let go.
+     *
+     * The answer is passed rather than flipped, as for the consents, so that a change
+     * event fired twice writes it twice instead of undoing it. Only an option the chosen
+     * module offers for this cart is kept: see PaymentOptionChoice.
+     */
+    #[LiveAction]
+    public function choosePaymentOption(#[LiveArg] string $group, #[LiveArg] string $option, #[LiveArg] bool $chosen): void
+    {
+        $this->paymentOptionChoiceStore->replace(PaymentOptionChoice::answer(
+            $this->offeredOptionGroups(),
+            $this->paymentOptionChoiceStore->all(),
+            $group,
+            $option,
+            $chosen,
+        ));
+
+        $this->paymentOptionChoices = $this->paymentOptionChoiceStore->all();
+    }
+
+    /**
+     * @return array<array-key, array<string, mixed>>
+     */
+    private function offeredOptionGroups(): array
+    {
+        foreach ($this->getModules() as $module) {
+            if (($module['valid'] ?? false) && (int) $module['id'] === $this->paymentModuleId) {
+                return $module['optionGroups'] ?? [];
+            }
+        }
+
+        return [];
     }
 
     /**
@@ -170,7 +221,14 @@ class Base
             paymentModuleId: $moduleId,
         ));
 
+        $previousModuleId = $this->paymentModuleId;
         $this->paymentModuleId = $this->cartFacade->getPaymentModuleId();
+
+        // The options picked belong to the module they were picked for.
+        if ($previousModuleId !== $this->paymentModuleId) {
+            $this->paymentOptionChoiceStore->replace([]);
+            $this->paymentOptionChoices = [];
+        }
 
         $this->emit('updateNextButton');
     }

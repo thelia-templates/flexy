@@ -24,6 +24,13 @@ class Base
     public ?array $module = null;
     public bool $checked = false;
 
+    /**
+     * The options of this module the buyer has picked, as the session holds them.
+     *
+     * @var list<array{group: string, values: list<string>}>
+     */
+    public array $optionChoices = [];
+
     public function __construct(private readonly CartFacade $cartFacade)
     {
     }
@@ -33,5 +40,16 @@ class Base
     {
         $this->checked = null !== $this->module
             && $this->module['id'] === $this->cartFacade->getPaymentModuleId();
+    }
+
+    public function isOptionPicked(string $groupCode, string $optionCode): bool
+    {
+        foreach ($this->optionChoices as $choice) {
+            if ($choice['group'] === $groupCode) {
+                return \in_array($optionCode, $choice['values'], true);
+            }
+        }
+
+        return false;
     }
 }

@@ -17,4 +17,48 @@
             {% endif %}
         </span>
     </label>
+    {% if this.checked %}
+        {# The options the module offers for this cart, from the core's
+           MODULE_PAYMENT_GET_OPTIONS event: a group that takes exactly one option is a
+           set of radios, any other a set of boxes. Each answer is kept in the session
+           before the order button is clicked; see PaymentOptionChoiceStore. #}
+        {% for group in this.module.optionGroups|default([]) %}
+            {% set single = group.maximumSelectedOptions|default(0) == 1 and group.minimumSelectedOptions|default(0) >= 1 %}
+            <fieldset class="PaymentCard-options">
+                <legend class="PaymentCard-options-title">{{ group.title }}</legend>
+                {% if group.description|default %}
+                    <p class="PaymentCard-desc">{{ group.description }}</p>
+                {% endif %}
+                {% for option in group.options|default([])|filter(o => o.valid is not defined or o.valid) %}
+                    {% set inputId = 'payment-option-' ~ this.module.id ~ '-' ~ group.code ~ '-' ~ option.code %}
+                    {% set picked = this.isOptionPicked(group.code, option.code) %}
+                    {{ component('Fields:Checkbox:Base', {
+                        label: option.title,
+                        type: single ? 'radio' : 'checkbox',
+                        'input:id': inputId,
+                        'input:name': 'payment-option-' ~ this.module.id ~ '-' ~ group.code,
+                        'input:value': option.code,
+                        'input:checked': picked,
+                        'input:data-action': 'change->live#action',
+                        'input:data-live-action-param': 'choosePaymentOption',
+                        'input:data-live-group-param': group.code,
+                        'input:data-live-option-param': option.code,
+                        'input:data-live-chosen-param': single or not picked ? 'true' : 'false',
+                    }|merge(option.description|default ? {'input:aria-describedby': inputId ~ '-description'} : {})) }}
+                    {% if option.description|default %}
+                        <small id="{{ inputId }}-description" class="PaymentCard-desc">{{ option.description }}</small>
+                    {% endif %}
+                {% endfor %}
+            </fieldset>
+        {% endfor %}
+
+        {# What a module shows under its card once it is chosen: a saved card, a notice.
+           Rendered inside a live component, so a <script> here does not run on a
+           re-render: a module loads its script from layout.head.<view> instead. #}
+        {{ theme_hook('checkout.payment.extra', {
+            module: this.module.id,
+            code: this.module.code,
+            optionChoices: this.optionChoices,
+        }) }}
+    {% endif %}
 </div>

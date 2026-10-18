@@ -30,3 +30,17 @@
     align-self: baseline;
   }
 }
+
+.PaymentCard-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+  padding-left: 1.5rem;
+}
+
+.PaymentCard-options-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-black);
+  margin-bottom: 0.25rem;
+}
