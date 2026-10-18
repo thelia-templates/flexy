@@ -121,6 +121,10 @@ public function productIds(string $term, string $locale, int $limit): array; // 
 
 The engine only says which products match. The theme keeps the rest: it drops the products a visitor may not see, paginates, and reads the page through the product API. With no sort chosen the results follow the engine's order; a sort chosen in the selector applies to the matches. An engine returning `[]` means no result: the theme does not fall back on its own search.
 
+### Adding a field to the sign-up and account forms
+
+The sign-up form (`flexybundle_form_customer_register_form`) and the account form (`flexybundle_form_customer_update_form`) render every field they hold, a module's included, inside the form and above the submit button. A module adds its field when the form is built, by listening to `TheliaEvents::FORM_AFTER_BUILD.'.'.<form name>` and calling `$event->getForm()->getFormBuilder()->add(...)`. The theme's controllers only read their own fields: the module reads its value on the event the account is saved through, `TheliaEvents::CREATE_CUSTOMER_MINIMAL` for the sign-up and `TheliaEvents::CUSTOMER_UPDATEPROFILE` for the account form.
+
 ### Front events
 
 The cart dispatches the `addPseToCart` and `removePseFromCart` DOM events, `{pse, quantity}`, that a module's script can listen to on `window`; they are part of the theme's public surface like the hook points. Which action sends which event, and what `quantity` counts, is described in [docs/stimulus-and-assets.md](docs/stimulus-and-assets.md#7-the-dom-events-the-cart-components-dispatch).
