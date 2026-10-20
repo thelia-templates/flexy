@@ -92,6 +92,7 @@ The points are part of the theme's public surface: their names and parameters ar
 | `cart.item.bottom` | Each cart line | `cartItem` |
 | `checkout.top`, `checkout.bottom` | Every checkout step | — |
 | `checkout.payment.extra` | Under the payment method the buyer chose, after its options | `module` (id), `code`, `optionChoices` |
+| `checkout.summary.bottom` | Order summary of the cart and checkout steps, under the total, in a live component: for a module paying part of the order another way (gift card form, amount paid, amount left to pay) | `summary` (the figures the summary shows) |
 | `checkout-identify.form.bottom` | Identification step | `next_step_url` |
 | `order-placed.top`, `order-placed.bottom` | Order confirmation | — |
 | `login.form.top`, `login.form.bottom`, `register.form.top`, `register.form.bottom` | Login and registration forms | — |

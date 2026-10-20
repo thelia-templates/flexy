@@ -117,6 +117,10 @@
                     {{ 'VAT number %number% is not verified: the order is not exempted from VAT.'|trans({'%number%': summary.invoice_vat_number}) }}
                 </div>
             {% endif %}
+            {# Under the total, once every discount is taken off: a module paying part of the order
+               another way (a gift card, a store credit) adds its form here, and the lines that
+               say what it pays and what is left to pay. #}
+            {{ theme_hook('checkout.summary.bottom', {summary: summary}) }}
         </div>
     </div>
 </div>
