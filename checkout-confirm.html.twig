@@ -14,6 +14,7 @@
                 <span class="block">{{ 'Your payment has been confirmed'|trans }}</span>
             {% else %}
                 <span class="block">{{ 'Your order has been placed'|trans }}</span>
+                <span class="block">{{ 'It is waiting for its payment.'|trans }}</span>
             {% endif %}
             <span>{{ "We'll do everything we can to send your order as quickly as possible!"|trans }}</span>
         </p>
@@ -21,6 +22,63 @@
            which bank account to transfer to. Each module answers for its own orders. #}
         {% if placed_order|default(null) %}
             {{ theme_hook('order-placed.additional-payment-info', {order: placed_order}) }}
+        {% endif %}
+        {# What was bought and where it goes, read off the order itself: the buyer leaves this
+           page with the reference to quote and the amount they owe, whatever the payment. #}
+        {% if placed_order_view|default(null) %}
+            {% set recap = placed_order_view %}
+            <section class="w-full max-w-3xl mb-8 text-start" data-testid="order-recap">
+                <h2 class="h4 mb-2">{{ 'Order N°'|trans }} <span dir="ltr" data-testid="order-recap-ref">{{ recap.ref }}</span></h2>
+                <p class="paragraph-3 mb-6">
+                    <bdi>{{ recap.createdAt|format_date() }}</bdi>
+                    &middot;
+                    {{ 'Total (including VAT)'|trans }}
+                    <strong><span dir="ltr" data-testid="order-recap-total">{{ recap.totalAmount|format_currency(recap.currencyCode, locale: lang_code) }}</span></strong>
+                </p>
+
+                <div class="flex flex-col gap-2">
+                    <twig:Layouts:OrderProducts:Base
+                        :orderProducts="recap.orderProducts"
+                        :order="recap"
+                        currencyCode="{{ recap.currencyCode }}"
+                    />
+                    <twig:Organisms:Summary:Order :order="recap" currencyCode="{{ recap.currencyCode }}" />
+                </div>
+
+                <h3 class="h4 mt-8 mb-4">{{ 'Delivery & payment'|trans }}</h3>
+                {% if recap.deliveryModuleTitle or recap.paymentModuleTitle %}
+                    <ul class="paragraph-3 mb-4">
+                        {% if recap.deliveryModuleTitle %}
+                            <li data-testid="order-recap-delivery">{{ 'Delivery'|trans }}: <strong>{{ recap.deliveryModuleTitle }}</strong></li>
+                        {% endif %}
+                        {% if recap.paymentModuleTitle %}
+                            <li data-testid="order-recap-payment">{{ 'Payment'|trans }}: <strong>{{ recap.paymentModuleTitle }}</strong></li>
+                        {% endif %}
+                    </ul>
+                {% endif %}
+                <div class="flex flex-col gap-2">
+                    <twig:Organisms:AddressCard:Base
+                        :addressId="recap.deliveryOrderAddress.id"
+                        title="{{ 'Delivery address'|trans }}"
+                        :inOrder="true"
+                    />
+                    <twig:Organisms:AddressCard:Base
+                        :addressId="recap.invoiceOrderAddress.id"
+                        title="{{ 'Billing address'|trans }}"
+                        :inOrder="true"
+                    />
+                </div>
+
+                {# A guest has the tracking link below; an account holder finds the order in theirs. #}
+                {% if not guest_order_token|default(null) %}
+                    <twig:Molecules:Button:Base
+                        text="{{ 'See my order'|trans }}"
+                        href="{{ path('account_order', {orderId: recap.id}) }}"
+                        color="secondary"
+                        class="mt-6"
+                    />
+                {% endif %}
+            </section>
         {% endif %}
         {# An order placed without an account: the only way back to it is the link, which
            the buyer also receives by email. Offered here while it is still on screen. #}

@@ -4,7 +4,8 @@
    default; a page reached without an account passes its own, which is guarded by whatever
    let the visitor in — the account route would answer nothing to them. #}
 {# @prop downloadRouteParams array Whatever that route needs besides the line id #}
-{% props orderProducts = [], order = null, downloadRoute = 'account_order_download', downloadRouteParams = {} %}
+{# @prop currencyCode string The currency the order was placed in #}
+{% props orderProducts = [], order = null, downloadRoute = 'account_order_download', downloadRouteParams = {}, currencyCode = 'EUR' %}
 {% for line in this.lines %}
 	{{ theme_hook('account-order.item.top', {order: order, orderProduct: line.orderProduct}) }}
 	<twig:Organisms:ProductCard:Order
@@ -12,6 +13,7 @@
 		:product="line.product"
 		:pse="line.pse"
 		:imageId="line.imageId"
+		currencyCode="{{ currencyCode }}"
 	/>
 	{# A virtual line carries its file only once the order is paid for, and only when a
 	   document was attached to it: `virtual` alone says the product was sold as a file,

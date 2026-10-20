@@ -26,6 +26,9 @@ class Order
     /** @var array<string, mixed> */
     public array $order = [];
 
+    /** The currency the order was placed in; the pages that do not say keep euros. */
+    public string $currencyCode = 'EUR';
+
     public function getItemCount(): int
     {
         $count = 0;

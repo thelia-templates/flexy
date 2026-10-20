@@ -21,6 +21,7 @@ use FlexyBundle\Service\CheckoutStockRefusal;
 use FlexyBundle\Service\CheckoutTrail;
 use FlexyBundle\Service\GuestCheckoutGate;
 use FlexyBundle\Service\GuestOrderTracking;
+use FlexyBundle\Service\GuestOrderView;
 use FlexyBundle\Service\PlacedOrderMemory;
 use FlexyBundle\Service\PrefetchRequest;
 use Propel\Runtime\Exception\PropelException;
@@ -44,6 +45,7 @@ use Thelia\Domain\Checkout\Exception\MissingAddressException;
 use Thelia\Domain\Checkout\Exception\MissingConsentException;
 use Thelia\Domain\Checkout\Service\CheckoutProgressionService;
 use Thelia\Domain\Customer\Service\AuthenticationReturnUrl;
+use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Domain\Order\Exception\StockShortageException;
 use Thelia\Model\Cart;
 use Thelia\Model\CheckoutStep;
@@ -377,6 +379,8 @@ class CheckoutController extends FlexyController
         GuestOrderTracking $guestOrderTracking,
         PlacedOrderMemory $placedOrderMemory,
         CheckoutTrail $trail,
+        GuestOrderView $orderView,
+        LangService $langService,
     ): Response {
         // The core retires a guest from the session the moment their order exists, so by
         // the time a payment module sends them back here there is no customer left to
@@ -405,11 +409,16 @@ class CheckoutController extends FlexyController
             $session->clearSessionCart($dispatcher);
         }
 
+        $placedOrder = $this->orderPlacedBy($session, $placedOrderMemory);
+
         return $this->render('checkout-confirm', [
             'current' => CheckoutStep::CODE_CONFIRMATION,
             'steps' => $steps,
             'guest_order_token' => $guestOrderToken,
-            'placed_order' => $this->orderPlacedBy($session, $placedOrderMemory),
+            'placed_order' => $placedOrder,
+            // The recap is read off the same figures as the order pages, so the amounts
+            // here are the ones the buyer will find there.
+            'placed_order_view' => null === $placedOrder ? null : $this->recapOf($placedOrder, $orderView, (string) $langService->getLocale()),
         ]);
     }
 
@@ -545,6 +554,31 @@ class CheckoutController extends FlexyController
      *
      * @throws PropelException
      */
+    /**
+     * The order in the shape the order components read, with what the confirmation adds to
+     * it: the currency it was placed in, and the names of its carrier and payment module in
+     * the language of the page (the module may be gone since: the order then keeps the name).
+     *
+     * @return array<string, mixed>
+     */
+    private function recapOf(Order $order, GuestOrderView $orderView, string $locale): array
+    {
+        $titleOf = static function (?object $module, ?string $keptTitle) use ($locale): ?string {
+            if (null === $module) {
+                return $keptTitle;
+            }
+
+            return $module->setLocale($locale)->getTitle() ?: $keptTitle;
+        };
+
+        return [
+            ...$orderView->build($order),
+            'currencyCode' => $order->getCurrency()?->getCode(),
+            'paymentModuleTitle' => $titleOf($order->getModuleRelatedByPaymentModuleId(), $order->getPaymentModuleTitle()),
+            'deliveryModuleTitle' => $titleOf($order->getModuleRelatedByDeliveryModuleId(), $order->getDeliveryModuleTitle()),
+        ];
+    }
+
     private function orderPlacedBy(Session $session, PlacedOrderMemory $placedOrderMemory): ?Order
     {
         $orderId = $placedOrderMemory->placedOrderId();

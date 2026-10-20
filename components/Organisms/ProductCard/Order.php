@@ -27,6 +27,9 @@ class Order extends AbstractProductCard
     public OrderProductDTO $orderProduct;
     private ?array $pse = null;
 
+    /** The currency the order was placed in; the pages that do not say keep euros. */
+    public string $currencyCode = 'EUR';
+
     public function __construct(
         DataAccessService $dataAccessService,
         ProductImageResolver $productImageResolver,

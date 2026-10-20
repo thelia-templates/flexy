@@ -80,6 +80,8 @@ final class ConfirmationPageTest extends TestCase
         ]), ['strict_variables' => true]);
 
         $twig->addFilter(new TwigFilter('trans', static fn (string $text): string => $text));
+        $twig->addFilter(new TwigFilter('format_currency', static fn (mixed $amount, ?string $currency = null, ?string $locale = null): string => (string) $amount));
+        $twig->addFilter(new TwigFilter('format_date', static fn (mixed $date): string => (string) $date));
         $twig->addFunction(new TwigFunction('ux_icon', static fn (): string => '', ['is_safe' => ['html']]));
         $twig->addFunction(new TwigFunction('path', static fn (): string => '/'));
         $twig->addFunction(new TwigFunction(

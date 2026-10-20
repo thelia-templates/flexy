@@ -22,11 +22,13 @@
         {% block form %}{% endblock %}
 
         {% block infos %}
+            {# An address of an order has no label: it is frozen as it was typed. #}
+            {% set addressLabel = address.label ?? null %}
             {% if title %}
                 {% set cardTitle = title %}
-                {% set name = address.label ?: (address.firstname ~ ' ' ~ address.lastname) %}
+                {% set name = addressLabel ?: (address.firstname ~ ' ' ~ address.lastname) %}
             {% else %}
-                {% set cardTitle = address.label %}
+                {% set cardTitle = addressLabel %}
                 {% set name = address.firstname ~ ' ' ~ address.lastname %}
             {% endif %}
             <span>

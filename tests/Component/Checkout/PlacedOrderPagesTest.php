@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Model\Customer;
+use Thelia\Model\Lang;
 use Thelia\Model\Order;
 use Thelia\Model\OrderQuery;
 use Thelia\Model\OrderStatus;
@@ -81,6 +82,71 @@ final class PlacedOrderPagesTest extends IntegrationTestCase
         $this->placedOrderMemory()->remember($order);
 
         self::assertNull($this->orderPlacedBy($this->customer()));
+    }
+
+    public function testTheConfirmationOfAnUnpaidOrderShowsItsRecapAndWaitsForThePayment(): void
+    {
+        $customer = $this->customer();
+        $order = $this->unpaidOrder($customer);
+        $fixtures = $this->createFixtureFactory();
+        $product = $fixtures->product($fixtures->category(), $fixtures->taxRule(), $fixtures->currency(), ['title' => 'Recap line', 'locale' => Lang::getDefaultLanguage()->getLocale()]);
+        $fixtures->orderProduct($order, [
+            'quantity' => 2,
+            'price' => '12.500000',
+            'promoPrice' => '12.500000',
+            'title' => 'Recap line',
+            'productSaleElementsId' => $product->getDefaultSaleElements()->getId(),
+        ]);
+        $this->placedOrderMemory()->remember($order);
+
+        $html = $this->confirmationPage($customer);
+
+        self::assertStringContainsString($order->getRef(), $html);
+        self::assertStringContainsString('data-testid="order-recap-total"', $html);
+        self::assertMatchesRegularExpression('#data-testid="order-recap-total">[^<]*25#', $html);
+        self::assertStringContainsString('Recap line', $html);
+        self::assertStringContainsString('data-testid="order-recap-payment"', $html);
+        self::assertStringContainsString('/account/order/'.$order->getId(), $html);
+        self::assertStringContainsString('Your order has been placed', $html);
+        self::assertStringContainsString('It is waiting for its payment.', $html);
+        self::assertStringNotContainsString('Your payment has been confirmed', $html);
+    }
+
+    public function testTheConfirmationOfAPaidOrderSaysThePaymentIsConfirmed(): void
+    {
+        $customer = $this->customer();
+        $order = $this->createFixtureFactory()->order($customer, ['statusCode' => OrderStatus::CODE_PAID, 'paymentModuleCode' => 'Cheque']);
+        $this->placedOrderMemory()->remember($order);
+
+        $html = $this->confirmationPage($customer);
+
+        self::assertStringContainsString($order->getRef(), $html);
+        self::assertStringContainsString('Your payment has been confirmed', $html);
+        self::assertStringNotContainsString('It is waiting for its payment.', $html);
+    }
+
+    public function testTheConfirmationPageNeverShowsTheRecapOfAnotherCustomersOrder(): void
+    {
+        $order = $this->unpaidOrder($this->customer());
+        $this->placedOrderMemory()->remember($order);
+
+        $html = $this->confirmationPage($this->customer());
+
+        self::assertStringNotContainsString($order->getRef(), $html);
+        self::assertStringNotContainsString('data-testid="order-recap"', $html);
+    }
+
+    private function confirmationPage(Customer $customer): string
+    {
+        $session = $this->session();
+        $session->setCustomerUser($customer);
+        $request = Request::create('/checkout/confirm');
+        $request->setSession($session);
+
+        $response = static::$kernel->handle($request, HttpKernelInterface::SUB_REQUEST);
+        self::assertSame(200, $response->getStatusCode());
+
+        return (string) $response->getContent();
     }
 
     private function failurePage(Order $order, Customer $customer): void
