@@ -27,6 +27,9 @@ class Base
 {
     public const ITEMS_PER_PAGE = 6;
 
+    /** The ceiling the core ships for the front API: asking for more would make the pager count wrong. */
+    public const MAX_ITEMS_PER_PAGE = 100;
+
     /** @var array<int, array<string, mixed>> */
     public array $orders = [];
 
@@ -39,7 +42,7 @@ class Base
     ) {
     }
 
-    public function mount(int $page = 1): void
+    public function mount(int $page = 1, int $itemsPerPage = self::ITEMS_PER_PAGE): void
     {
         $customer = $this->customerFacade->getCurrentCustomer();
 
@@ -48,21 +51,22 @@ class Base
         }
 
         $page = max(1, $page);
-        $response = $this->fetchPage($customer->getId(), $page);
+        $itemsPerPage = min(max(1, $itemsPerPage), self::MAX_ITEMS_PER_PAGE);
+        $response = $this->fetchPage($customer->getId(), $page, $itemsPerPage);
         $totalItems = (int) ($response['hydra:totalItems'] ?? 0);
-        $lastPage = max(1, (int) ceil($totalItems / self::ITEMS_PER_PAGE));
+        $lastPage = max(1, (int) ceil($totalItems / $itemsPerPage));
 
         // Out of range the API serves the last page anyway; realigning the page number
         // keeps the pager honest instead of offering a "next" that leads nowhere.
         if ($page > $lastPage) {
             $page = $lastPage;
-            $response = $this->fetchPage($customer->getId(), $page);
+            $response = $this->fetchPage($customer->getId(), $page, $itemsPerPage);
         }
 
         $this->orders = $response['hydra:member'] ?? [];
         $this->pagination = [
             'totalItems' => $totalItems,
-            'itemsPerPage' => self::ITEMS_PER_PAGE,
+            'itemsPerPage' => $itemsPerPage,
             'currentPage' => $page,
         ];
     }
@@ -70,12 +74,12 @@ class Base
     /**
      * @return array<string, mixed>
      */
-    private function fetchPage(int $customerId, int $page): array
+    private function fetchPage(int $customerId, int $page, int $itemsPerPage): array
     {
         $response = $this->dataAccessService->resources('/api/front/account/orders', [
             'customer.id' => $customerId,
             'order[createdAt]' => 'desc',
-            'itemsPerPage' => self::ITEMS_PER_PAGE,
+            'itemsPerPage' => $itemsPerPage,
             'page' => $page,
         ], 'jsonld');
 
