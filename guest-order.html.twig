@@ -34,11 +34,12 @@
             <twig:Layouts:OrderProducts:Base
                 :orderProducts="order.orderProducts"
                 :order="order"
+                currencyCode="{{ order.currencyCode }}"
                 downloadRoute="guest_order_download"
                 :downloadRouteParams="{token: token}"
             />
 
-            <twig:Organisms:Summary:Order :order="order" />
+            <twig:Organisms:Summary:Order :order="order" currencyCode="{{ order.currencyCode }}" />
         </div>
 
         <hr class="my-10" />

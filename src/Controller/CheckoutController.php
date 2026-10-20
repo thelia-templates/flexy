@@ -556,7 +556,7 @@ class CheckoutController extends FlexyController
      */
     /**
      * The order in the shape the order components read, with what the confirmation adds to
-     * it: the currency it was placed in, and the names of its carrier and payment module in
+     * it: the names of its carrier and payment module in
      * the language of the page (the module may be gone since: the order then keeps the name).
      *
      * @return array<string, mixed>
@@ -573,7 +573,6 @@ class CheckoutController extends FlexyController
 
         return [
             ...$orderView->build($order),
-            'currencyCode' => $order->getCurrency()?->getCode(),
             'paymentModuleTitle' => $titleOf($order->getModuleRelatedByPaymentModuleId(), $order->getPaymentModuleTitle()),
             'deliveryModuleTitle' => $titleOf($order->getModuleRelatedByDeliveryModuleId(), $order->getDeliveryModuleTitle()),
         ];

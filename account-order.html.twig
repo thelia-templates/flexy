@@ -73,9 +73,9 @@
         <h2 class="h4 mt-10 mb-6">{{ (isQuotation ? 'Quote details' : 'Order details')|trans }}</h2>
 
         <div class="flex flex-col gap-2">
-            <twig:Layouts:OrderProducts:Base :orderProducts="order.orderProducts" :order="order" />
+            <twig:Layouts:OrderProducts:Base :orderProducts="order.orderProducts" :order="order" currencyCode="{{ currencyCode }}" />
 
-            <twig:Organisms:Summary:Order :order="order" />
+            <twig:Organisms:Summary:Order :order="order" currencyCode="{{ currencyCode }}" />
         </div>
 
         {# What the buyer wrote for whoever receives the parcel, read back off the order.

@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Tests\Component\Checkout;
 
 use FlexyBundle\Controller\CheckoutController;
+use FlexyBundle\Service\GuestOrderView;
 use FlexyBundle\Service\PlacedOrderMemory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -134,6 +135,27 @@ final class PlacedOrderPagesTest extends IntegrationTestCase
 
         self::assertStringNotContainsString($order->getRef(), $html);
         self::assertStringNotContainsString('data-testid="order-recap"', $html);
+    }
+
+    public function testTheAccountOrderPageAndTheTrackingViewKeepTheCurrencyOfTheOrder(): void
+    {
+        $customer = $this->customer();
+        $fixtures = $this->createFixtureFactory();
+        $order = $this->unpaidOrder($customer);
+        $order->setCurrencyId($fixtures->currency(['code' => 'USD', 'symbol' => '$'])->getId())->save();
+        $fixtures->orderProduct($order, ['title' => 'Dollar line', 'price' => '12.500000', 'promoPrice' => '12.500000', 'productSaleElementsId' => 999999999]);
+
+        self::assertSame('USD', (new GuestOrderView())->build($order)['currencyCode']);
+
+        $session = $this->session();
+        $session->setCustomerUser($customer);
+        $request = Request::create('/account/order/'.$order->getId());
+        $request->setSession($session);
+        $response = static::$kernel->handle($request, HttpKernelInterface::SUB_REQUEST);
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertStringContainsString('$', (string) $response->getContent());
+        self::assertStringNotContainsString('€', (string) $response->getContent());
     }
 
     private function confirmationPage(Customer $customer): string

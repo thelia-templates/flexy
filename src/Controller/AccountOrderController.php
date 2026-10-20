@@ -79,7 +79,11 @@ class AccountOrderController extends FlexyController
             throw new NotFoundHttpException();
         }
 
-        return $this->render('account-order', ['orderId' => $orderId]);
+        return $this->render('account-order', [
+            'orderId' => $orderId,
+            // Read off the order itself: the API payload does not publish the code of its currency.
+            'currencyCode' => $order->getCurrency()?->getCode() ?: 'EUR',
+        ]);
     }
 
     #[Route('/order/pdf/delivery/{orderId}', name: 'order_pdf_delivery', requirements: ['orderId' => '\d+'])]

@@ -50,6 +50,7 @@ final readonly class GuestOrderView
         return [
             'id' => $order->getId(),
             'ref' => $order->getRef(),
+            'currencyCode' => $order->getCurrency()?->getCode() ?: 'EUR',
             'createdAt' => $order->getCreatedAt(),
             'deliveryRef' => $order->getDeliveryRef(),
             'deliveryTrackingUrl' => $this->trackingUrlResolver?->resolve($order),
