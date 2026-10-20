@@ -165,7 +165,7 @@
                         </td>
                         <td data-label="{{ 'Unit price'|trans }}" class="QuickOrderTable-price">
                             {% if line and line.taxedUnitPrice is not null %}
-                                {{ line.taxedUnitPrice|format_currency('EUR', locale: lang_code) }}
+                                {{ line.taxedUnitPrice|format_currency(current_currency_code(), locale: lang_code) }}
                             {% endif %}
                         </td>
                         <td data-label="{{ 'Status'|trans }}">

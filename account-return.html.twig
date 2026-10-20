@@ -76,7 +76,7 @@
                     </div>
                     <div class="flex flex-col gap-1 text-end">
                         <span><bdi>{{ 'Quantity'|trans }}{{ 'label_colon'|trans }} {{ line.quantity }}</bdi></span>
-                        <span class="paragraph-3"><span dir="ltr">{{ line.refund|format_currency('EUR', locale: lang_code) }}</span></span>
+                        <span class="paragraph-3"><span dir="ltr">{{ line.refund|format_currency(currencyCode, locale: lang_code) }}</span></span>
                     </div>
                 </li>
             {% endfor %}
@@ -95,7 +95,7 @@
             </div>
             <div>
                 <dt class="paragraph-3">{{ 'Refundable amount'|trans }}</dt>
-                <dd class="m-0"><span dir="ltr">{{ orderReturn.refundAmount|default(0)|format_currency('EUR', locale: lang_code) }}</span></dd>
+                <dd class="m-0"><span dir="ltr">{{ orderReturn.refundAmount|default(0)|format_currency(currencyCode, locale: lang_code) }}</span></dd>
             </div>
             {% if orderReturn.customerComment|default('') is not empty %}
                 <div class="sm:col-span-2">

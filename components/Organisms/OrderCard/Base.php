@@ -17,6 +17,7 @@ namespace FlexyBundle\Components\Organisms\OrderCard;
 use FlexyBundle\Service\OrderProductResolver;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Api\Service\DataAccess\DataAccessService;
+use Thelia\Model\OrderQuery;
 use Thelia\Model\OrderStatus;
 
 #[AsTwigComponent]
@@ -51,6 +52,18 @@ class Base
     public function getOrder(): array
     {
         return $this->order;
+    }
+
+    /**
+     * The currency the order was placed in: the API payload does not publish its code.
+     */
+    public function getCurrencyCode(): string
+    {
+        if ([] === $this->order) {
+            return 'EUR';
+        }
+
+        return OrderQuery::create()->findPk($this->orderId)?->getCurrency()?->getCode() ?: 'EUR';
     }
 
     public function getItemCount(): int

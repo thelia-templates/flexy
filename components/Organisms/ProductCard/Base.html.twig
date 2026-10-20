@@ -81,13 +81,13 @@
 				   figure to the left of a right-to-left card while the title stays on the right. #}
 				{% if this.showsInitialPrice %}
 					<div class="ProductCard-footerRight">
-						<div class="ProductCard-price"><span dir="ltr">{{ this.promoTaxedPrice|format_currency('EUR', locale: lang_code) }}</span></div>
-						<div class="ProductCard-originalPrice"><span dir="ltr">{{ this.taxedPrice|format_currency('EUR', locale: lang_code) }}</span></div>
+						<div class="ProductCard-price"><span dir="ltr">{{ this.promoTaxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
+						<div class="ProductCard-originalPrice"><span dir="ltr">{{ this.taxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
 					</div>
 				{% elseif this.isPromo %}
-					<div class="ProductCard-price"><span dir="ltr">{{ this.promoTaxedPrice|format_currency('EUR', locale: lang_code) }}</span></div>
+					<div class="ProductCard-price"><span dir="ltr">{{ this.promoTaxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
 				{% else %}
-					<div class="ProductCard-price"><span dir="ltr">{{ this.taxedPrice|format_currency('EUR', locale: lang_code) }}</span></div>
+					<div class="ProductCard-price"><span dir="ltr">{{ this.taxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
 				{% endif %}
 			</div>
 			{% if this.runningSaleTag and this.runningSaleTag.shouldDisplayCountdown and this.runningSaleTag.countdownRemainingSeconds is not null %}

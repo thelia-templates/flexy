@@ -233,6 +233,7 @@ class AccountOrderController extends FlexyController
         return $this->render('account-return', [
             'returnId' => $returnId,
             'orderId' => (int) $return->getOrderId(),
+            'currencyCode' => $return->getOrder()?->getCurrency()?->getCode() ?: 'EUR',
             'lines' => $this->returnLines($return),
             'documentAvailable' => $this->returnDocumentAvailable($return),
         ]);
