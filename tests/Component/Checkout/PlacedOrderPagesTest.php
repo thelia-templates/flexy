@@ -164,8 +164,9 @@ final class PlacedOrderPagesTest extends IntegrationTestCase
         $response = static::$kernel->handle($request, HttpKernelInterface::SUB_REQUEST);
 
         self::assertSame(200, $response->getStatusCode());
-        self::assertStringContainsString('$', (string) $response->getContent());
-        self::assertStringNotContainsString('€', (string) $response->getContent());
+        // The header may offer the euro among the currencies to browse in: the amounts are what is looked at.
+        self::assertMatchesRegularExpression('/\$\s?12\.50/', (string) $response->getContent());
+        self::assertDoesNotMatchRegularExpression('/€\s?12\.50/', (string) $response->getContent());
     }
 
     private function confirmationPage(Customer $customer): string

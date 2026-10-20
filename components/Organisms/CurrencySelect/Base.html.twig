@@ -1,0 +1,76 @@
+{# Same markup and styles as LangSelect: it is the same kind of header choice. Must match the
+   controller identifier declared in Layouts/Header/Base.html.twig. #}
+{% set headerController = 'Layouts--Header--base' %}
+
+{% set currentCurrency = this.currentCurrency %}
+{% if currentCurrency %}
+    {% set currencies = this.currencies %}
+    {% set switchUrls = this.switchUrls %}
+
+    <div
+        class="{{ ('LangSelect CurrencySelect ' ~ attributes.render('class'))|tailwind_merge }}"
+        {{ attributes.defaults({...stimulus_controller('Organisms--LangSelect--base')}).without('class') }}
+    >
+        <button
+            type="button"
+            class="LangSelect-current"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="CurrencySelect-list"
+            aria-label="{{ 'Currency'|trans }}"
+            {{ stimulus_action('Organisms--LangSelect--base', 'toggle', 'click') }}
+            {{ stimulus_target('Organisms--LangSelect--base', 'toggler') }}
+        >
+            <span dir="ltr">{{ currentCurrency.symbol }} {{ currentCurrency.code }}</span>
+            {{ ux_icon('chevron-small-down', { class: 'w-6 h-6' }) }}
+        </button>
+        <ul class="LangSelect-list" id="CurrencySelect-list">
+            {% for currency in currencies %}
+                <li>
+                    <a
+                        href="{{ switchUrls[currency.code] ?? '' }}"
+                        class="LangSelect-lang{% if currentCurrency.code == currency.code %} active{% endif %}"
+                    >
+                        <span dir="ltr">{{ currency.symbol }} {{ currency.code }}</span>
+                        {% if currentCurrency.code == currency.code %}
+                            {{ ux_icon('checkmark', { class: 'LangSelect-check' }) }}
+                        {% endif %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <twig:Molecules:HeaderButton:Base
+        color="light"
+        small="true"
+        text="{{ currentCurrency.symbol ~ ' ' ~ currentCurrency.code }}"
+        class="LangSelect-mobileToggle md:hidden"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-controls="currency-panel"
+        {{...stimulus_action(headerController, 'togglePanel', 'click', {panel: 'currency'})}}
+    />
+
+    <div class="MobilePanel" id="currency-panel" {{ stimulus_target(headerController, 'panel') }} data-header-panel-id="currency">
+        <button type="button" aria-label="{{ 'Close'|trans }}" {{ stimulus_action(headerController, 'close') }}>
+            {{ ux_icon('close') }}
+        </button>
+        <p class="h3 mb-7">{{ 'Currency'|trans }}</p>
+        <ul class="LangSelect-mobileList">
+            {% for currency in currencies %}
+                <li>
+                    <a
+                        href="{{ switchUrls[currency.code] ?? '' }}"
+                        class="LangSelect-mobileItem{% if currentCurrency.code == currency.code %} active{% endif %}"
+                    >
+                        <span dir="ltr">{{ currency.symbol }} {{ currency.code }}</span>
+                        {% if currentCurrency.code == currency.code %}
+                            {{ ux_icon('checkmark', { class: 'LangSelect-check' }) }}
+                        {% endif %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
