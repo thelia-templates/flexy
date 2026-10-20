@@ -21,8 +21,8 @@
             {{ ...stimulus_action('Molecules--Modal--open', 'open', 'click') }}
         />
 
-        <twig:Molecules:Modal:Base id="{{ id }}">
-            <div class="h4">{{ 'Save as a purchase list'|trans }}</div>
+        <twig:Molecules:Modal:Base id="{{ id }}" labelledby="{{ id }}-heading">
+            <h2 id="{{ id }}-heading" class="h4">{{ 'Save as a purchase list'|trans }}</h2>
             <form class="SaveToPurchaseList-form" method="post" action="{{ action }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('purchase_list_action') }}">
                 <twig:Fields:Select:Base

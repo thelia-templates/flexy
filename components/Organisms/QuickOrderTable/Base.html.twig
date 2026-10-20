@@ -243,8 +243,8 @@
         {% set saveChoices = [{value: constant('FlexyBundle\\Service\\PurchaseListChoices::NEW_LIST'), label: 'A new list'|trans}]|merge(this.writableLists) %}
         {# Refused, the dialog stays open over the messages of the table: it says so itself. #}
         {% set saveError = error in ['nothing_to_save', 'list_refused', 'invalid_lines'] ? errorMessages[error] : null %}
-        <twig:Molecules:Modal:Base id="quick-order-save-list">
-            <div class="h4">{{ 'Save as a purchase list'|trans }}</div>
+        <twig:Molecules:Modal:Base id="quick-order-save-list" labelledby="quick-order-save-list-title">
+            <h2 id="quick-order-save-list-title" class="h4">{{ 'Save as a purchase list'|trans }}</h2>
             <div class="QuickOrderTable-saveList">
                 {% if saveError %}
                     <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ saveError }}" />

@@ -48,8 +48,8 @@
                                 {{ ...stimulus_controller('Molecules--Modal--open', {id: 'confirmDeleteList' ~ list.id}) }}
                                 {{ ...stimulus_action('Molecules--Modal--open', 'open', 'click') }}
                             />
-                            <twig:Molecules:Modal:Base id="confirmDeleteList{{ list.id }}">
-                                <div class="h4">{{ 'Delete the list « %title% »?'|trans({'%title%': list.title}) }}</div>
+                            <twig:Molecules:Modal:Base id="confirmDeleteList{{ list.id }}" labelledby="confirmDeleteList{{ list.id }}Title">
+                                <h2 id="confirmDeleteList{{ list.id }}Title" class="h4">{{ 'Delete the list « %title% »?'|trans({'%title%': list.title}) }}</h2>
                                 <form method="post" action="{{ path('account_purchase_list_delete', {listId: list.id}) }}">
                                     <input type="hidden" name="_token" value="{{ token }}">
                                     <div class="grid md:grid-cols-2 gap-4 mt-8">
