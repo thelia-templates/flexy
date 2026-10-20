@@ -23,7 +23,7 @@
 					{% endfor %}
 				{% endif %}
 				{% if this.orderProduct.quantity %}
-					<span><bdi>{{ 'Quantity:'|trans }} {{ this.orderProduct.quantity }}</bdi></span>
+					<span><bdi>{{ 'Quantity'|trans }}{{ 'label_colon'|trans }} {{ this.orderProduct.quantity }}</bdi></span>
 				{% endif %}
 			</div>
 			{# dir="ltr" on the inline span, never on the block: a block re-resolves its own
