@@ -5,7 +5,7 @@
 			img_id: this.imageId,
 			filters: 'order_card_detail',
 			limit: 1,
-			alt: this.product.title,
+			alt: this.title,
 			wrapper: 'figure',
 			wrapper_attrs: {class: 'ProductCard-img'},
 			img_attrs: {
@@ -14,9 +14,9 @@
 			placeholder: asset('images/placeholder2.webp'),
 		})|raw }}
 		<div class="ProductCard-desc">
-			<a href="{{ this.productUrl|default('#') }}" class="ProductCard-title">{{ this.product.title }}</a>
+			<a href="{{ this.productUrl|default('#') }}" class="ProductCard-title">{{ this.title }}</a>
 			<div class="ProductCard-orderInfos">
-				<span class="ProductCard-secondaryTitle basis-full">{{ this.product.chapo|raw }}</span>
+				<span class="ProductCard-secondaryTitle basis-full">{{ this.product ? this.product.chapo|raw : "" }}</span>
 				{% if this.pse %}
 					{% for combination in this.pse.attributeCombinations|default([]) %}
 						<span class="ProductCard-secondarySize"><bdi>{{ combination.attribute.i18ns.title }}: {{ combination.attributeAv.i18ns.title }}</bdi></span>

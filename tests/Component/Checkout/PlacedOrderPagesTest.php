@@ -137,6 +137,16 @@ final class PlacedOrderPagesTest extends IntegrationTestCase
         self::assertStringNotContainsString('data-testid="order-recap"', $html);
     }
 
+    public function testALineWhoseProductIsGoneKeepsItsFrozenTitle(): void
+    {
+        $customer = $this->customer();
+        $order = $this->unpaidOrder($customer);
+        $this->createFixtureFactory()->orderProduct($order, ['title' => 'Gone line', 'productSaleElementsId' => 999999999]);
+        $this->placedOrderMemory()->remember($order);
+
+        self::assertStringContainsString('Gone line', $this->confirmationPage($customer));
+    }
+
     public function testTheAccountOrderPageAndTheTrackingViewKeepTheCurrencyOfTheOrder(): void
     {
         $customer = $this->customer();

@@ -67,6 +67,15 @@ class Order extends AbstractProductCard
         );
     }
 
+    /**
+     * The product as the shop sells it today, or the title the line froze when the product is
+     * gone: an order outlives the catalog.
+     */
+    public function getTitle(): string
+    {
+        return $this->product?->title ?? $this->orderProduct->title;
+    }
+
     public function getProductUrl(): ?string
     {
         return $this->orderProductResolver->buildProductUrl(
