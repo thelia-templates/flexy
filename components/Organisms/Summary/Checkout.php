@@ -69,6 +69,7 @@ class Checkout
             'total_taxed_price' => $this->attributeAccessService->attributeCart('total_taxed_price'),
             'total_tax_amount' => $this->attributeAccessService->attributeCart('total_tax_amount'),
             'taxed_postage' => $this->attributeAccessService->attributeCart('taxed_postage'),
+            'delivery_module_id' => $this->attributeAccessService->attributeCart('delivery_module_id'),
             'taxed_discount' => $this->attributeAccessService->attributeCart('taxed_discount'),
             'discount' => $this->attributeAccessService->attributeCart('discount'),
             'gift_wrapping_title' => $this->attributeAccessService->attributeCart('gift_wrapping_title'),

@@ -22,16 +22,19 @@
                     <span dir="ltr">{{ summary.raw_taxed_total_price|format_currency('EUR', locale: lang_code) }}</span>
                 </div>
             </div>
-            <div class="Summary-line">
-                <div>{{ 'Delivery'|trans }}</div>
-                <div>
-                    {% if summary.taxed_postage %}
-                        <span dir="ltr">{{ summary.taxed_postage|format_currency('EUR', locale: lang_code) }}</span>
-                    {% else %}
-                        {{ 'Free delivery'|trans }}
-                    {% endif %}
+            {# No postage to show until a carrier is chosen: 0 is only a free delivery once one is. #}
+            {% if summary.delivery_module_id %}
+                <div class="Summary-line">
+                    <div>{{ 'Delivery'|trans }}</div>
+                    <div>
+                        {% if summary.taxed_postage %}
+                            <span dir="ltr">{{ summary.taxed_postage|format_currency('EUR', locale: lang_code) }}</span>
+                        {% else %}
+                            {{ 'Free delivery'|trans }}
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
+            {% endif %}
             {% if summary.delivery_date %}
                 <div class="Summary-line" data-testid="summary-delivery-date">
                     <div>{{ 'Delivery date'|trans }}</div>
