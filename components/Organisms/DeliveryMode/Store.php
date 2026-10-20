@@ -27,6 +27,8 @@ class Store
     public string $title = '';
     public string $description = '';
     public string $price = '';
+    public ?string $earliestDelivery = null;
+    public ?string $latestDelivery = null;
 
     public function __construct(
         private readonly AttributeAccessService $attributeAccessService,

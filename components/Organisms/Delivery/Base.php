@@ -187,6 +187,12 @@ class Base
 
             foreach ($options as $option) {
                 $code = $option->getCode();
+                // A module may write its two dates the wrong way round: the earlier one opens
+                // the interval all the same.
+                $days = [self::calendarDay($option->getMinimumDeliveryDate()), self::calendarDay($option->getMaximumDeliveryDate())];
+                if (null !== $days[0] && null !== $days[1]) {
+                    sort($days);
+                }
                 $deliveryOptions[$code] = [
                     'code' => $code,
                     'title' => $title,
@@ -196,6 +202,8 @@ class Base
                     // What the module tells the buyer about the option: the pickup hours of a
                     // store, the delay of a carrier. Plain text, escaped where it is printed.
                     'description' => self::descriptionOf($option),
+                    'earliestDelivery' => $days[0],
+                    'latestDelivery' => $days[1],
                     // What the buyer picks with this carrier: none, a day, or a slot. A core
                     // that predates delivery dates answers nothing, which is none.
                     'deliveryDateChoice' => method_exists($module, 'getDeliveryDateChoice') ? $module->getDeliveryDateChoice() : 'none',
@@ -218,6 +226,17 @@ class Base
         } catch (\Error) {
             return '';
         }
+    }
+
+    /**
+     * A delivery module may write anything in the two dates of its option: only a Y-m-d day is
+     * shown, anything else is no date rather than a page that cannot be drawn.
+     */
+    private static function calendarDay(?string $day): ?string
+    {
+        $parsed = null === $day ? false : \DateTimeImmutable::createFromFormat('!Y-m-d', $day);
+
+        return false !== $parsed && $parsed->format('Y-m-d') === $day ? $day : null;
     }
 
     #[LiveListener(CheckoutEvents::SET_DELIVERY_MODULE_OPTION)]

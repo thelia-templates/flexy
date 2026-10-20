@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Layouts\ProductDetails;
 
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\DeliveryEstimateResolver;
 use FlexyBundle\Service\RunningSaleResolver;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -130,6 +131,16 @@ class Base
     public ?array $runningSaleTag = null;
 
     /**
+     * The delivery the page announces, counted once in mount() and kept as a LiveProp for the
+     * same reason as runningSaleTag: it depends on the destination of the visitor and on
+     * today, not on the combination a re-render follows.
+     *
+     * @var array{earliest: string, latest: string, country: string}|null
+     */
+    #[LiveProp]
+    public ?array $deliveryEstimate = null;
+
+    /**
      * Set when the cart refused the last add: a module rule (an InvalidCartException thrown by a
      * CART_ADDITEM listener) or the stock that ran out since the page was rendered. A plain
      * property, not a LiveProp: it belongs to the response of the action that failed, and the next
@@ -154,6 +165,7 @@ class Base
         private readonly RequestStack $requestStack,
         private readonly RunningSaleResolver $runningSaleResolver,
         private readonly AltTextResolver $altTextResolver,
+        private readonly DeliveryEstimateResolver $deliveryEstimateResolver,
     ) {
     }
 
@@ -170,6 +182,7 @@ class Base
         // Keyed by attribute id upstream; re-indexed so the LiveProp round-trips as a list.
         $this->productAttrs = array_values($this->pseAccessService->attrAvByProduct($this->productId));
         $this->runningSaleTag = $this->runningSaleResolver->forProduct($this->productId);
+        $this->deliveryEstimate = $this->deliveryEstimateResolver->forProduct($this->productId);
 
         $this->setInitialCurrentPse();
         $this->setMedia();
@@ -207,6 +220,19 @@ class Base
         }
 
         return ConfigQuery::checkAvailableStock();
+    }
+
+    /**
+     * Nothing is promised about a delivery for a combination that is missing, not chosen, or
+     * out of a stock the shop manages.
+     */
+    public function canBeBought(): bool
+    {
+        if ($this->noAvailablePse || null === $this->currentPse) {
+            return false;
+        }
+
+        return !$this->isStockManaged() || (int) ($this->currentPse['quantity'] ?? 0) > 0;
     }
 
     public function getRemainingStock(): int

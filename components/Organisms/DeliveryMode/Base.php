@@ -25,5 +25,7 @@ class Base
     public string $title = '';
     public string $description = '';
     public string $price = '';
+    public ?string $earliestDelivery = null;
+    public ?string $latestDelivery = null;
     public bool $checked = false;
 }

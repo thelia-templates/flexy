@@ -16,6 +16,7 @@ namespace FlexyBundle\Tests\Unit;
 
 use FlexyBundle\Components\Layouts\ProductDetails\Base as ProductDetails;
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\DeliveryEstimateResolver;
 use FlexyBundle\Service\RunningSaleResolver;
 use PHPUnit\Framework\TestCase;
 use Propel\Runtime\Collection\ObjectCollection;
@@ -225,6 +226,7 @@ final class ProductDetailsCartRefusalTest extends TestCase
             new RequestStack(),
             new RunningSaleResolver(self::createStub(DataAccessService::class)),
             new AltTextResolver(),
+            self::createStub(DeliveryEstimateResolver::class),
         );
         $component->setLiveResponder($responder);
         // Virtual: the stock is not checked, which would read the shop configuration.

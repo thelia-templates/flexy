@@ -26,6 +26,7 @@ Delete: Löschen
 Update: Aktualisieren
 Choose this relay point: Diese Abholstelle wählen
 Estimated delivery on: Voraussichtliche Lieferung am
+'Estimated delivery on %date%': 'Voraussichtliche Lieferung am %date%'
 Close: Schließen
 Open: Öffnen
 currently: derzeit

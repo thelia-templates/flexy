@@ -1,0 +1,13 @@
+{# @prop estimate array|null {earliest, latest, country}, counted by the product details #}
+{% if this.estimate %}
+    <p class="{{ ('DeliveryEstimate mt-5 ' ~ attributes.render('class'))|tailwind_merge }}" data-testid="product-delivery-estimate" {{ attributes.without('class') }}>
+        {{ ux_icon('reinsurance-delivery', {'aria-hidden': 'true', class: 'DeliveryEstimate-icon'}) }}
+        <span>
+            {% if this.estimate.earliest == this.estimate.latest %}
+                {{ 'Estimated delivery on %date% (%country%)'|trans({'%country%': this.estimate.country, '%date%': this.estimate.earliest|format_date(pattern: 'EEEE d MMMM')}) }}
+            {% else %}
+                {{ 'Estimated delivery between %min% and %max% (%country%)'|trans({'%country%': this.estimate.country, '%min%': this.estimate.earliest|format_date(pattern: 'EEEE d MMMM'), '%max%': this.estimate.latest|format_date(pattern: 'EEEE d MMMM')}) }}
+            {% endif %}
+        </span>
+    </p>
+{% endif %}

@@ -63,6 +63,9 @@ final class ComponentStatus
             // feature it renders.
             'Organisms/DeliveryDatePicker' => self::READY,
 
+            // The delivery a product page announces, shipped with the core estimate it renders.
+            'Organisms/DeliveryEstimate' => self::READY,
+
             // The guide waits on the one thing the theme cannot do for a project: being read,
             // then removed. Deleting `components/Toolkit/getting-started.html.twig` retires the
             // page; remove this arm and its SECTIONS entry by hand — nothing here does it for you.

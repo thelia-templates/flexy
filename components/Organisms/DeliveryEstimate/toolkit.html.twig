@@ -1,0 +1,20 @@
+{# The estimate reads the carriers and the delays of the shop, so it has nothing to show in
+   the toolkit. Its markup is drawn here statically: an interval, then a single day. #}
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">Base (product page, under the combination selector)</h4>
+        <p class="Story-label">Rendered when a carrier delivering to the visitor announces delays; the country says where the estimate holds.</p>
+        <div class="Story-stage">
+            <p class="DeliveryEstimate">
+                {{ ux_icon('reinsurance-delivery', {'aria-hidden': 'true', class: 'DeliveryEstimate-icon'}) }}
+                <span>Estimated delivery between Thursday 3 September and Monday 7 September (France)</span>
+            </p>
+        </div>
+        <div class="Story-stage">
+            <p class="DeliveryEstimate">
+                {{ ux_icon('reinsurance-delivery', {'aria-hidden': 'true', class: 'DeliveryEstimate-icon'}) }}
+                <span>Estimated delivery on Thursday 3 September (France)</span>
+            </p>
+        </div>
+    </div>
+</div>

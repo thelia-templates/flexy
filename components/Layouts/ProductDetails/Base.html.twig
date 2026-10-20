@@ -63,12 +63,16 @@
             :cartRefusalReason="this.cartRefusalReason"
         />
 
-        <twig:Molecules:Reinsurance:Base
-            class="mt-7.5"
-            :items="[
-                {icon: 'reinsurance-delivery', strongText: 'Free delivery'|trans, text: 'from 50€'|trans},
-                {icon: 'reinsurance-shipping', strongText: 'Shipping'|trans, text: 'within 24 hours'|trans},
-            ]"
-        />
+        {% if this.canBeBought() and this.deliveryEstimate %}
+            <twig:Organisms:DeliveryEstimate:Base :estimate="this.deliveryEstimate" />
+        {% endif %}
+
+        {# The theme's own shipping promise gives way to the dates the shop announces, whichever
+           combination is shown: it would contradict them on one that cannot be bought too. #}
+        {% set reinsuranceItems = [{icon: 'reinsurance-delivery', strongText: 'Free delivery'|trans, text: 'from 50€'|trans}] %}
+        {% if not this.deliveryEstimate %}
+            {% set reinsuranceItems = reinsuranceItems|merge([{icon: 'reinsurance-shipping', strongText: 'Shipping'|trans, text: 'within 24 hours'|trans}]) %}
+        {% endif %}
+        <twig:Molecules:Reinsurance:Base class="mt-7.5" :items="reinsuranceItems" />
     </section>
 </div>

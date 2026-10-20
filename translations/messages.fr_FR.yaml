@@ -260,7 +260,7 @@ No products found: Aucun produit trouvé
 Previous Step: Étape précédente
 Checkout: Tunnel d'achat
 Choose a carrier: Choisir un transporteur
-delivery_estimation: Livraison prévue entre le %min% et le %max%
+delivery_estimation: Livraison estimée entre le %min% et le %max%
 No available carrier for your current address.: Aucun de nos transporteurs ne pourra effectuer la livraison à cette adresse. Veuilliez en selectionner une autre.
 Choose a payment method: Choisissez un mode de paiement
 Your cart is curently empty: Votre panier est vide.
@@ -618,3 +618,6 @@ Being prepared: En préparation
 Download the delivery note: Télécharger le bon de livraison
 Still to be shipped: Reste à expédier
 These items will leave in a later shipment.: Ces articles partiront dans un prochain envoi.
+'Estimated delivery on %date%': 'Livraison estimée le %date%'
+'Estimated delivery on %date% (%country%)': 'Livraison estimée le %date% (%country%)'
+'Estimated delivery between %min% and %max% (%country%)': 'Livraison estimée entre le %min% et le %max% (%country%)'

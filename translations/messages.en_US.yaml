@@ -274,7 +274,7 @@ No products found: No products found
 Previous Step: Previous Step
 Checkout: Checkout
 Choose a carrier: Choose a carrier
-delivery_estimation: Delivery scheduled between %min% and %max%
+delivery_estimation: Estimated delivery between %min% and %max%
 No available carrier for your current address.: No available carrier for your current address. Please choose an another one.
 Choose a payment method: Choose a payment method
 Your cart is curently empty: Your cart is curently empty
@@ -609,3 +609,6 @@ Being prepared: Being prepared
 Download the delivery note: Download the delivery note
 Still to be shipped: Still to be shipped
 These items will leave in a later shipment.: These items will leave in a later shipment.
+'Estimated delivery on %date%': 'Estimated delivery on %date%'
+'Estimated delivery on %date% (%country%)': 'Estimated delivery on %date% (%country%)'
+'Estimated delivery between %min% and %max% (%country%)': 'Estimated delivery between %min% and %max% (%country%)'
