@@ -46,7 +46,7 @@
                     <twig:Molecules:Accordion:Base id="product-details" multiple>
                         {% if product.i18ns.description|default('') %}
                             <twig:Molecules:Accordion:Item value="description" open>
-                                <twig:Molecules:Accordion:Trigger iconClosed="plus" iconOpen="minus">
+                                <twig:Molecules:Accordion:Trigger iconClosed="plus" iconOpen="minus" level="2">
                                     {{ 'Description'|trans }}
                                 </twig:Molecules:Accordion:Trigger>
                                 <twig:Molecules:Accordion:Content>
@@ -69,7 +69,7 @@
 
                         {% if features is not empty %}
                             <twig:Molecules:Accordion:Item value="features">
-                                <twig:Molecules:Accordion:Trigger iconClosed="plus" iconOpen="minus">
+                                <twig:Molecules:Accordion:Trigger iconClosed="plus" iconOpen="minus" level="2">
                                     {{ 'Features'|trans }}
                                 </twig:Molecules:Accordion:Trigger>
                                 <twig:Molecules:Accordion:Content>
