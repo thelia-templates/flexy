@@ -25,7 +25,9 @@
    Symfony's default theme. #}
 {% form_theme form with flexy_form_themes only %}
 
-{% set outOfStock = stockManaged and currentPse.quantity == 0 %}
+{# A product with no sale element at all has no currentPse: it is shown as not purchasable. #}
+{% set noPurchasablePse = noAvailablePse or currentPse is null %}
+{% set outOfStock = stockManaged and currentPse is not null and currentPse.quantity == 0 %}
 {# No upper bound when stock is not enforced: the attribute is dropped rather than passed as
    null, which the component rejects outright. #}
 {% set quantityBounds = stockManaged ? {'input:max': remainingStock} : {} %}
@@ -119,7 +121,7 @@
         />
     {% endif %}
 
-    {% if noAvailablePse %}
+    {% if noPurchasablePse %}
         <twig:Molecules:SnackBar:Base
             variant="warning"
             withIcon
@@ -173,7 +175,7 @@
 
     {# Alerts a shopper can leave on the selected variant (back in stock, price drop): a module
        answers here. Outside the cart form on purpose, since the block carries its own form. #}
-    {% if not noAvailablePse %}
+    {% if not noPurchasablePse %}
         {{ theme_hook('product.pse.alerts', {
             pseId: currentPse.id,
             outOfStock: outOfStock,
