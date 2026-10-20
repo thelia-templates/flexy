@@ -15,11 +15,15 @@ declare(strict_types=1);
 namespace FlexyBundle\Service;
 
 use Symfony\Contracts\Service\ResetInterface;
-use Thelia\Api\Service\DataAccess\DataAccessService;
+use TheliaLibrary\Service\ImageService;
 
 /**
  * The product payload carries no image, so every card would fetch its own. Listings
  * call preload() once with the whole page, turning N calls into one.
+ *
+ * The images are read through the library's own service, translations included, and
+ * kept there: the getImages() each card then makes with the id found here is answered
+ * from that read instead of costing a query per card.
  *
  * Deliberately not readonly: the resolved map is the point of this service. Under
  * php-fpm Symfony builds it per request, so the map never outlives one page render;
@@ -27,18 +31,13 @@ use Thelia\Api\Service\DataAccess\DataAccessService;
  */
 final class ProductImageResolver implements ResetInterface
 {
-    /**
-     * Page size is derived from the number of products rather than fixed, so a large
-     * listing cannot silently drop rows past a hard ceiling. Rows come back ordered by
-     * position across the whole set, so the low positions this map needs come first.
-     */
-    private const IMAGE_ROWS_PER_PRODUCT = 30;
+    private const SOURCE_TYPE = 'product';
 
     /** @var array<int, int|null> */
     private array $imageIdByProduct = [];
 
     public function __construct(
-        private readonly DataAccessService $dataAccessService,
+        private readonly ImageService $imageService,
     ) {
     }
 
@@ -56,28 +55,17 @@ final class ProductImageResolver implements ResetInterface
             return;
         }
 
-        // Seed every requested id so a product without image is not re-queried.
+        $this->imageService->preloadSourceImages(self::SOURCE_TYPE, $missing);
+
         foreach ($missing as $productId) {
-            $this->imageIdByProduct[$productId] = null;
-        }
+            // Visible images only, by position: the one getImages() renders for a card.
+            $images = $this->imageService->getImageDataWithType([
+                'source_type' => self::SOURCE_TYPE,
+                'source_id' => $productId,
+                'limit' => 1,
+            ]);
 
-        // `visible` is not implicit on the front API, and getImages() renders visible
-        // images only: without this the first row could be a hidden image, which would
-        // win the slot here and then render as the placeholder.
-        $rows = $this->dataAccessService->resources('/api/front/product_images', [
-            'product.id' => $missing,
-            'visible' => true,
-            'order[position]' => 'asc',
-            'itemsPerPage' => \count($missing) * self::IMAGE_ROWS_PER_PRODUCT,
-        ]) ?? [];
-
-        foreach ($rows as $row) {
-            $productId = self::extractId($row['product'] ?? null);
-
-            // Ordered by position, so the first row seen for a product is the right one.
-            if (null !== $productId && null === ($this->imageIdByProduct[$productId] ?? null)) {
-                $this->imageIdByProduct[$productId] = (int) $row['id'];
-            }
+            $this->imageIdByProduct[$productId] = isset($images[0]['id']) ? (int) $images[0]['id'] : null;
         }
     }
 
@@ -93,21 +81,5 @@ final class ProductImageResolver implements ResetInterface
     public function reset(): void
     {
         $this->imageIdByProduct = [];
-    }
-
-    /**
-     * The relation comes back either embedded or as an IRI, depending on the group.
-     */
-    private static function extractId(mixed $relation): ?int
-    {
-        if (\is_array($relation)) {
-            return isset($relation['id']) ? (int) $relation['id'] : null;
-        }
-
-        if (\is_string($relation) && preg_match('#/(\d+)$#', $relation, $matches)) {
-            return (int) $matches[1];
-        }
-
-        return null;
     }
 }
