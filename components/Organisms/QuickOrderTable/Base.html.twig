@@ -23,12 +23,12 @@
     list_refused: 'The list could not be saved: its name is empty or longer than 255 characters, or the account already keeps 100 lists.'|trans,
     cart_refused: 'None of these lines could be added to your cart.'|trans,
 } %}
+{% set maxQuantity = constant('Thelia\\Domain\\Catalog\\DTO\\ReferenceQuantityLines::MAX_QUANTITY')|format_number %}
 {% set rejectReasons = {
     columns: 'expected a reference and a quantity'|trans,
     quantity: 'the quantity is not a whole number from 1 to %max%'|trans({'%max%': maxQuantity}),
     reference: 'the reference is longer than 255 characters'|trans,
 } %}
-{% set maxQuantity = constant('Thelia\\Domain\\Catalog\\DTO\\ReferenceQuantityLines::MAX_QUANTITY')|format_number %}
 {% set readyCount = this.readyCount %}
 {% set ambiguousCount = this.ambiguousCount %}
 
