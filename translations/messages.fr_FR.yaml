@@ -129,7 +129,6 @@ In stock: En stock
 Size: Taille
 Free delivery: Livraison offerte
 Free: Offert
-from 50€: à partir de 50€
 Shipping: Expédition
 within 24 hours: sous 24 heures
 Site under maintenance: Site en maintenance
@@ -150,7 +149,6 @@ Price descending: Prix décroissant
 New arrivals: Nouveautés
 Previous: Précédent
 Next: Suivant
-For any order over €100: Pour toute commande supérieure à 100€
 See conditions: Voir les conditions
 Secure payment: Paiement sécurisé
 Credit card, Paypal: Carte bancaire, Paypal
@@ -620,3 +618,4 @@ Still to be shipped: Reste à expédier
 These items will leave in a later shipment.: Ces articles partiront dans un prochain envoi.
 'No carrier can ship: %products%. Remove it from your cart to complete your order.': "Aucun transporteur ne peut acheminer : %products%. Retirez-le de votre panier pour terminer votre commande."
 'No carrier can ship: %products%. Remove them from your cart to complete your order.': "Aucun transporteur ne peut acheminer : %products%. Retirez-les de votre panier pour terminer votre commande."
+On eligible orders: Sur les commandes éligibles

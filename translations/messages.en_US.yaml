@@ -128,7 +128,6 @@ Size: Size
 Color: Color
 Free delivery: Free delivery
 Free: Free
-from 50€: from 50€
 Shipping: Shipping
 within 24 hours: within 24 hours
 Site under maintenance: Site under maintenance
@@ -149,7 +148,6 @@ Price descending: Price descending
 New arrivals: New arrivals
 Previous: Previous
 Next: Next
-For any order over €100: For any order over €100
 See conditions: See conditions
 Secure payment: Secure payment
 Credit card, Paypal: Credit card, Paypal
@@ -611,3 +609,4 @@ Still to be shipped: Still to be shipped
 These items will leave in a later shipment.: These items will leave in a later shipment.
 'No carrier can ship: %products%. Remove it from your cart to complete your order.': "No carrier can ship: %products%. Remove it from your cart to complete your order."
 'No carrier can ship: %products%. Remove them from your cart to complete your order.': "No carrier can ship: %products%. Remove them from your cart to complete your order."
+On eligible orders: On eligible orders

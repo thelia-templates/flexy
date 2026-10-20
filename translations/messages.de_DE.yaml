@@ -128,7 +128,6 @@ Size: Größe
 Color: Farbe
 Free delivery: Kostenlose Lieferung
 Free: Kostenlos
-from 50€: ab 50 €
 Shipping: Versand
 within 24 hours: innerhalb von 24 Stunden
 Site under maintenance: Website in Wartung
@@ -149,7 +148,6 @@ Price descending: Preis absteigend
 New arrivals: Neuheiten
 Previous: Zurück
 Next: Weiter
-For any order over €100: Für Bestellungen über 100 €
 See conditions: Bedingungen ansehen
 Secure payment: Sichere Zahlung
 Credit card, Paypal: Kreditkarte, PayPal
@@ -589,3 +587,4 @@ VAT exempted (reverse charge), buyer VAT number %number%: 'Steuerfrei (Reverse-C
 '(opens in a new tab)': "(öffnet in einem neuen Tab)"
 'No carrier can ship: %products%. Remove it from your cart to complete your order.': "Kein Versanddienstleister kann liefern: %products%. Entfernen Sie diesen Artikel aus Ihrem Warenkorb, um Ihre Bestellung abzuschließen."
 'No carrier can ship: %products%. Remove them from your cart to complete your order.': "Kein Versanddienstleister kann liefern: %products%. Entfernen Sie diese Artikel aus Ihrem Warenkorb, um Ihre Bestellung abzuschließen."
+On eligible orders: Für berechtigte Bestellungen
