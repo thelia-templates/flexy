@@ -41,7 +41,15 @@ class Category extends AbstractHeaderMenuItem
         $this->id = $id;
         $this->menuKey = $this->buildMenuKey($id);
 
-        [$this->title, $this->href] = $this->resolveTitleAndHref('/api/front/categories', $id, $title, $href);
+        $titleAndHref = $this->resolveTitleAndHref('/api/front/categories', $id, $title, $href);
+
+        if (null === $titleAndHref) {
+            $this->served = false;
+
+            return;
+        }
+
+        [$this->title, $this->href] = $titleAndHref;
 
         if ($id === null) {
             return;

@@ -43,7 +43,15 @@ class Folder extends AbstractHeaderMenuItem
         $this->menuKey = $this->buildMenuKey($id);
         $this->includeContents = $includeContents;
 
-        [$this->title, $this->href] = $this->resolveTitleAndHref('/api/front/folders', $id, $title, $href);
+        $titleAndHref = $this->resolveTitleAndHref('/api/front/folders', $id, $title, $href);
+
+        if (null === $titleAndHref) {
+            $this->served = false;
+
+            return;
+        }
+
+        [$this->title, $this->href] = $titleAndHref;
 
         if ($id === null) {
             return;

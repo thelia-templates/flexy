@@ -1,9 +1,11 @@
-<twig:Organisms:HeaderMenuItem:Base
-    id="{{ id }}"
-    menuKey="{{ menuKey }}"
-    title="{{ title }}"
-    href="{{ href }}"
-    columns="{{ columns }}"
-    leafLinks="{{ leafLinks }}"
-    showSeeMore="{{ showSeeMore }}"
-/>
+{% if served %}
+    <twig:Organisms:HeaderMenuItem:Base
+        id="{{ id }}"
+        menuKey="{{ menuKey }}"
+        title="{{ title }}"
+        href="{{ href }}"
+        columns="{{ columns }}"
+        leafLinks="{{ leafLinks }}"
+        showSeeMore="{{ showSeeMore }}"
+    />
+{% endif %}

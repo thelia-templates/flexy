@@ -38,8 +38,18 @@
             og_type:     block('og_type') is defined ? block('og_type')|trim : null,
         }) }}
 
-        {# Empty by default: pages that must not be indexed (internal search) fill it in #}
-        {% block robots %}{% endblock %}
+        {# A preview of a content or a folder (the core's /preview route marks the request with
+           `_publication_preview`) shows a page that is not online as it is: it is never indexed,
+           whatever the page itself asks, so its tag replaces the one a page would set. The core
+           also answers it with X-Robots-Tag; the tag is for whoever reads the HTML only. A shop
+           whose core has no preview never sets the attribute, and nothing changes. #}
+        {% set publicationPreview = app.request.attributes.get('_publication_preview') %}
+        {% if publicationPreview %}
+            <meta name="robots" content="noindex, nofollow">
+        {% else %}
+            {# Empty by default: pages that must not be indexed (internal search) fill it in #}
+            {% block robots %}{% endblock %}
+        {% endif %}
 
         {# Empty by default: pages whose own URL is a secret (a password reset link) use it
            to keep that URL out of the Referer header sent to whatever they link to #}
@@ -91,6 +101,16 @@
 
     <body class="no-js {% block body_class %}{% endblock %}">
         {{ theme_hook('layout.body.top') }}
+        {% if publicationPreview %}
+            <div class="container-l py-3" data-testid="publication-preview-banner">
+                <twig:Molecules:SnackBar:Base
+                    variant="warning"
+                    :withIcon="true"
+                    role="status"
+                    text="{{ 'Preview: this page is not online as shown.'|trans }}"
+                />
+            </div>
+        {% endif %}
         {% block header %}
             <twig:Layouts:Header:Base />
         {% endblock %}
