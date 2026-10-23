@@ -14,56 +14,39 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Layouts\FolderContents;
 
+use FlexyBundle\Service\CollectionPaginator;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
-use Thelia\Api\Service\DataAccess\DataAccessService;
 
 #[AsTwigComponent]
 class Base
 {
     private const ITEMS_PER_PAGE = 12;
 
+    /** @var list<array<string, mixed>> */
     public array $contents = [];
+
+    /** @var array<string, int> */
     public array $pagination = [];
 
     public function __construct(
-        private readonly DataAccessService $dataAccessService,
+        private readonly CollectionPaginator $paginator,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
-    public function mount(int $folderId, int $page = 1): void
-    {
-        $page = max(1, $page);
-        $response = $this->fetchPage($folderId, $page);
-        $totalItems = (int) ($response['hydra:totalItems'] ?? 0);
-        $lastPage = max(1, (int) ceil($totalItems / self::ITEMS_PER_PAGE));
-
-        // Out of range the API serves the last page anyway; realigning keeps the pager from
-        // offering a "next" that leads nowhere.
-        if ($page > $lastPage) {
-            $page = $lastPage;
-            $response = $this->fetchPage($folderId, $page);
-        }
-
-        $this->contents = $response['hydra:member'] ?? [];
-        $this->pagination = [
-            'totalItems' => $totalItems,
-            'itemsPerPage' => self::ITEMS_PER_PAGE,
-            'currentPage' => $page,
-        ];
-    }
-
     /**
-     * @return array<string, mixed>
+     * Without a page given, the one of the query string, read raw: CollectionPaginator
+     * makes sense of whatever it holds.
      */
-    private function fetchPage(int $folderId, int $page): array
+    public function mount(int $folderId, mixed $page = null): void
     {
-        $response = $this->dataAccessService->resources('/api/front/contents', [
+        $contents = $this->paginator->page('/api/front/contents', [
             'contentFolders.folder.id' => $folderId,
             'visible' => true,
-            'itemsPerPage' => self::ITEMS_PER_PAGE,
-            'page' => $page,
-        ], 'jsonld');
+        ], $page ?? CollectionPaginator::requestedPage($this->requestStack->getCurrentRequest()), self::ITEMS_PER_PAGE);
 
-        return \is_array($response) ? $response : [];
+        $this->contents = $contents->members;
+        $this->pagination = $contents->pagination();
     }
 }

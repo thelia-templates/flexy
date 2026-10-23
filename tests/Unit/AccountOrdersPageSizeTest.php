@@ -15,8 +15,10 @@ declare(strict_types=1);
 namespace FlexyBundle\Tests\Unit;
 
 use FlexyBundle\Components\Layouts\AccountOrders\Base as AccountOrders;
+use FlexyBundle\Service\CollectionPaginator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 use Thelia\Domain\Customer\CustomerFacade;
 use Thelia\Model\Customer;
@@ -52,6 +54,17 @@ final class AccountOrdersPageSizeTest extends TestCase
 
         self::assertSame([9, 6], array_column($this->requests, 'page'));
         self::assertSame(6, $orders->pagination['currentPage']);
+    }
+
+    /**
+     * Read in-process, the collection meets no customer extension of the core: this filter is
+     * the only thing keeping the list to the signed-in customer.
+     */
+    public function testTheListIsLimitedToTheSignedInCustomer(): void
+    {
+        $this->mountedList(totalItems: 3);
+
+        self::assertSame([42], array_column($this->requests, 'customer.id'));
     }
 
     #[DataProvider('sizesAtAndPastTheBounds')]
@@ -92,7 +105,7 @@ final class AccountOrdersPageSizeTest extends TestCase
             },
         );
 
-        $orders = new AccountOrders($dataAccess, $customerFacade);
+        $orders = new AccountOrders(new CollectionPaginator($dataAccess), $customerFacade, new RequestStack());
 
         if (null === $itemsPerPage) {
             $orders->mount($page);

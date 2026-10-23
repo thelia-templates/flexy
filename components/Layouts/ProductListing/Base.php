@@ -16,6 +16,7 @@ namespace FlexyBundle\Components\Layouts\ProductListing;
 
 use FlexyBundle\DTO\ProductDTO;
 use FlexyBundle\Form\Type\FieldsetType;
+use FlexyBundle\Service\CollectionPaginator;
 use FlexyBundle\Service\FormService;
 use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\ProductSearch;
@@ -130,7 +131,10 @@ class Base extends AbstractController
         // Pagination links reload the page, so the page number is read back from the query
         // string. `tfilters`/`sort` don't need the same treatment here: they're url-bound
         // LiveProps (see #[PostMount] below for why that matters).
-        $this->page = max(1, (int) ($this->requestStack->getCurrentRequest()?->query->get('page') ?? 1));
+        $this->page = CollectionPaginator::boundedPage(
+            CollectionPaginator::requestedPage($this->requestStack->getCurrentRequest()),
+            self::ITEMS_PER_PAGE,
+        );
     }
 
     /**
