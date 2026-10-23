@@ -1,0 +1,9 @@
+# Precompression is a production concern: in dev, assets are served from their sources and
+# compressing them would only lengthen `asset-map:compile`. `formats` and `extensions` are left
+# unset on purpose: the formats the server can produce (brotli, zstandard, gzip) are detected,
+# and a project that wants none, or fewer, overrides this in its own config/packages.
+when@prod:
+    framework:
+        asset_mapper:
+            precompress:
+                enabled: true

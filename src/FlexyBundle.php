@@ -15,14 +15,18 @@ declare(strict_types=1);
 namespace FlexyBundle;
 
 use FlexyBundle\DependencyInjection\Compiler\TwigComponentDebugDirectoryPass;
+use FlexyBundle\EventListener\TailwindMinifiedBuildListener;
 use FlexyBundle\Template\FrontTemplateChain;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
+use Symfony\Component\AssetMapper\Event\PreAssetsCompileEvent;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\UX\Icons\Registry\LocalSvgIconRegistry;
 
+use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service_closure;
 
 class FlexyBundle extends AbstractBundle
 {
@@ -44,6 +48,7 @@ class FlexyBundle extends AbstractBundle
     {
         $this->importServices($container);
         $this->registerTemplateChainIcons($container, $builder);
+        $this->registerTailwindMinifiedBuildListener($container, $builder);
     }
 
 
@@ -60,6 +65,23 @@ class FlexyBundle extends AbstractBundle
         $this->prependConfigPackages($container);
     }
 
+
+    private function registerTailwindMinifiedBuildListener(ContainerConfigurator $container, ContainerBuilder $builder): void
+    {
+        // A child template may run without the Tailwind bundle: nothing to build then. The
+        // extension cannot be asked: loadExtension() runs in a temporary container that holds
+        // this bundle's extension alone, so the bundles of the kernel are read instead.
+        $bundles = $builder->hasParameter('kernel.bundles') ? $builder->getParameter('kernel.bundles') : [];
+
+        if (!\in_array('Symfonycasts\\TailwindBundle\\SymfonycastsTailwindBundle', $bundles, true) || !$this->isAssetMapperAvailable($builder)) {
+            return;
+        }
+
+        $container->services()
+            ->set(TailwindMinifiedBuildListener::class)
+            ->args([service_closure('tailwind.builder'), param('kernel.debug')])
+            ->tag('kernel.event_listener', ['event' => PreAssetsCompileEvent::class]);
+    }
 
     private function importServices(ContainerConfigurator $containerConfigurator): void
     {

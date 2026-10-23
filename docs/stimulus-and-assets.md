@@ -201,3 +201,29 @@ Live Components dispatch browser events after the DOM has been morphed, on the r
 `bubbles: true`: a listener on `document` receives them, and reads the refreshed DOM. The names are the ones the
 `GoogleTagManager` module listens to (`addToCart.js`). A change of nothing (a quantity put back to itself) dispatches
 nothing.
+
+---
+
+## 8. Production build
+
+In production, `asset-map:compile` does three things for this theme:
+
+- It rebuilds Sass, then rebuilds the Tailwind stylesheet minified. `tailwind:build` alone writes a readable file and the Tailwind bundle has no setting to change that, so `TailwindMinifiedBuildListener` runs the build with `--minify` just before AssetMapper compiles. With the kernel in debug it does nothing.
+- It writes the compiled assets to `public/assets/`.
+- It writes a precompressed sibling next to each compressible file (`.br`, `.zst`, `.gz`), for the formats the server can produce. Gzip is always available. Brotli and Zstandard need their command line tool or their PHP extension; a missing one is skipped with a warning in the compile output, and the other formats are still written.
+
+Precompression is enabled by `config/packages/asset_mapper.yaml`, in the `prod` environment only. In dev the assets are served from their sources and compressing them would only make the compile slower. The theme sets neither `formats` nor `extensions`, so the formats are detected and the default list of file extensions applies.
+
+The siblings only help if the web server sends them. Serving `app.css.br` instead of compressing `app.css` on every request needs a few lines of configuration, see the Thelia documentation for [Nginx](https://doc.thelia.net/docs/getting-started/nginx-configuration) and [Apache](https://doc.thelia.net/docs/getting-started/apache-configuration). Without them the files are written and never used.
+
+A project turns precompression off, or restricts it, in its own `config/packages`, which wins over the theme:
+
+```yaml
+# config/packages/asset_mapper.yaml
+framework:
+    asset_mapper:
+        precompress:
+            enabled: false
+```
+
+To keep gzip only, leave it enabled and set `formats: ['gzip']`.

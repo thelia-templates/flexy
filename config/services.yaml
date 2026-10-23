@@ -16,8 +16,11 @@ services:
 
     FlexyBundle\:
         resource: '../src/'
-        # Compiler passes are registered by the bundle, not services.
-        exclude: '../src/DependencyInjection/'
+        # Compiler passes are registered by the bundle, not services. The Tailwind listener needs
+        # an optional bundle: FlexyBundle registers it only when that bundle is installed.
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/EventListener/TailwindMinifiedBuildListener.php'
 
     FlexyBundle\Components\:
         resource: '../components/'
