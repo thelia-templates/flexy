@@ -19,6 +19,7 @@ use FlexyBundle\Service\DeliveryAddressCopy;
 use FlexyBundle\Service\DeliveryDateBridge;
 use FlexyBundle\Service\DeliveryOptionChoice;
 use FlexyBundle\Service\GuestCheckoutGate;
+use FlexyBundle\Service\GuestDeliveryAddress;
 use Propel\Runtime\Exception\PropelException;
 use Psr\Log\LoggerInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -103,6 +104,7 @@ class Base
         private readonly GuestCheckoutGate $guestCheckoutGate,
         private readonly DeliveryDateBridge $deliveryDates,
         private readonly DeliveryAddressCopy $deliveryAddressCopy,
+        private readonly GuestDeliveryAddress $guestDeliveryAddress,
     ) {
     }
 
@@ -326,12 +328,62 @@ class Base
         $this->deliveryModuleOptionCode = $optionCode;
 
         if (strtolower($optionCode) === 'localpickup') {
-            $this->shippingFacade->setCustomerDefaultDeliveryAddress($this->cartFacade->getOrCreateFromSession());
+            $this->putTheBuyersAddressOnAPickup($moduleId);
         }
 
         $this->emit(CheckoutEvents::DELIVERY_MODULE_OPTION_SAVED);
         $this->emit('syncSummary');
         $this->emit('updateNextButton');
+    }
+
+    /**
+     * A pickup still puts an address on the cart, which the order is built from. A customer
+     * with an account gets the default address of the account. A guest gets an address of
+     * their own identification (GuestDeliveryAddress), never the default one of the guest
+     * row, which may be another buyer's. The carrier was priced on the address the cart had:
+     * once it changed, the carrier is chosen again to price it on the new one, as choosing
+     * an address does, and goes when it cannot quote it.
+     */
+    private function putTheBuyersAddressOnAPickup(int $moduleId): void
+    {
+        $cart = $this->cartFacade->getOrCreateFromSession();
+        // Read before the address changes, as selectDeliveryAddress() does: the notice of a
+        // carrier gone speaks of the delivery day it took away.
+        $hadADeliveryDay = null !== $this->deliveryDates->chosenOn($cart, null);
+
+        if (true === $cart->getCustomer()?->isGuest()) {
+            $changed = $this->guestDeliveryAddress->keepAnAddressOfTheGuest($cart);
+        } else {
+            $copyBefore = [$cart->getAddressDeliveryId(), $cart->getCartAddressRelatedByAddressDeliveryId()?->getAddressId()];
+            // A core that tells whether the place of the copy changed answers a boolean. An
+            // older one answers nothing, and the copy is compared: one rewritten in place keeps
+            // its id, its source tells. Called by name: the static analysis of either core
+            // would otherwise rule one branch out.
+            $moved = \call_user_func([$this->shippingFacade, 'setCustomerDefaultDeliveryAddress'], $cart);
+            $changed = \is_bool($moved)
+                ? $moved
+                : $copyBefore !== [$cart->getAddressDeliveryId(), $cart->getCartAddressRelatedByAddressDeliveryId()?->getAddressId()];
+        }
+
+        if (!$changed) {
+            return;
+        }
+
+        $this->cartFacade->setDeliveryModule(new CheckoutDTO(cart: $cart, deliveryModuleId: $moduleId));
+        $this->deliveryAddressId = $this->cartFacade->getDeliveryAddressId();
+        $this->deliveryModuleId = $cart->getDeliveryModuleId();
+
+        if (null === $this->deliveryModuleId) {
+            // The pickup could not quote the address it now carries: it went, as a carrier
+            // goes when the buyer picks an address it does not serve. The notice speaks of the
+            // delivery day cleared with it: said only when there was one.
+            $this->deliveryModuleOptionCode = null;
+            $this->session->remove('deliveryModuleOption');
+
+            if ($hadADeliveryDay) {
+                $this->deliveryDateNotice = 'carrier_gone';
+            }
+        }
     }
 
     #[LiveListener(CheckoutEvents::SET_DELIVERY_ORDER_ADDRESS_ID)]

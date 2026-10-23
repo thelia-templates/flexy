@@ -20,6 +20,7 @@ use FlexyBundle\Service\CheckoutStepRouteResolver;
 use FlexyBundle\Service\CheckoutStockRefusal;
 use FlexyBundle\Service\CheckoutTrail;
 use FlexyBundle\Service\GuestCheckoutGate;
+use FlexyBundle\Service\GuestDeliveryAddress;
 use FlexyBundle\Service\GuestOrderTracking;
 use FlexyBundle\Service\GuestOrderView;
 use FlexyBundle\Service\PlacedOrderMemory;
@@ -84,6 +85,7 @@ class CheckoutController extends FlexyController
         CheckoutProgressionService $progression,
         CheckoutStepRouteResolver $routes,
         CheckoutTrail $trail,
+        GuestDeliveryAddress $guestDeliveryAddress,
     ): Response {
         $cart = $cartFacade->getOrCreateFromSession();
 
@@ -93,7 +95,7 @@ class CheckoutController extends FlexyController
         $identifiesNext = !$guestCheckoutGate->mayEnterCheckout() && $guestCheckoutGate->isOfferedForCurrentCart();
 
         if ($routes->isOnePage()) {
-            return $this->renderTheWholeTunnel($cart, $cartGuard, $checkoutFacade, $routes);
+            return $this->renderTheWholeTunnel($cart, $cartGuard, $checkoutFacade, $routes, $guestDeliveryAddress);
         }
 
         // A page fetched ahead of a click (hovering "Previous step" on the payment step) is not a visit to the
@@ -162,6 +164,7 @@ class CheckoutController extends FlexyController
         CheckoutProgressionService $progression,
         CheckoutStepRouteResolver $routes,
         CheckoutTrail $trail,
+        GuestDeliveryAddress $guestDeliveryAddress,
     ): Response {
         $this->checkCheckoutAccess($guestCheckoutGate);
 
@@ -171,6 +174,8 @@ class CheckoutController extends FlexyController
             return $this->generateRedirect($routes->pathOfTheFirstIncompleteStep($cart));
         }
 
+        // A guest's own address first: the core would put the default one of the guest row.
+        $guestDeliveryAddress->beforeAVirtualDelivery($cart);
         $checkoutFacade->settleVirtualDeliveryIfNeeded($cart);
 
         // Deliberately not guarded on the legal identifiers here: the billing address form
@@ -270,6 +275,7 @@ class CheckoutController extends FlexyController
         CheckoutStockRefusal $stockRefusal,
         GuestCheckoutGate $guestCheckoutGate,
         CheckoutStepRouteResolver $routes,
+        GuestDeliveryAddress $guestDeliveryAddress,
     ): Response {
         $cart = $cartFacade->getCartFromSession();
 
@@ -285,6 +291,7 @@ class CheckoutController extends FlexyController
             // sections above were settled, and the delivery step it was asked about is
             // gone by the time the order is placed. The carrier the order is refused
             // without is nobody else's job from here on.
+            $guestDeliveryAddress->beforeAVirtualDelivery($cart);
             $checkoutFacade->settleVirtualDeliveryIfNeeded($cart);
 
             $checkoutFacade->validateForOrder($cart);
@@ -468,7 +475,9 @@ class CheckoutController extends FlexyController
         CartGuard $cartGuard,
         CheckoutFacade $checkoutFacade,
         CheckoutStepRouteResolver $routes,
+        GuestDeliveryAddress $guestDeliveryAddress,
     ): Response {
+        $guestDeliveryAddress->beforeAVirtualDelivery($cart);
         $checkoutFacade->settleVirtualDeliveryIfNeeded($cart);
 
         $emptyCart = false;

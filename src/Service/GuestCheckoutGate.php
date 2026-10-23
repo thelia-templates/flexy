@@ -243,6 +243,34 @@ final readonly class GuestCheckoutGate
     }
 
     /**
+     * An address of this identification to put on the cart when the guest names none, as a
+     * pickup does: the default one among theirs, else the first. Null when they have none.
+     *
+     * Never the default address of the customer row: the row is reused by whoever types the
+     * same e-mail address, and each identification makes its own address the default one,
+     * so that address may be another buyer's.
+     *
+     * @throws PropelException
+     */
+    public function ownAddressId(): ?int
+    {
+        $firstId = null;
+
+        // Read once: the default address and the first one alike.
+        foreach ($this->visibleAddresses() as $address) {
+            $id = (int) $address['id'];
+
+            if ((bool) $address['isDefault']) {
+                return $id;
+            }
+
+            $firstId ??= $id;
+        }
+
+        return $firstId;
+    }
+
+    /**
      * The guard the checkout puts in front of an address id that came in with a request.
      *
      * Every action of the delivery and billing steps takes the address to work on as a
