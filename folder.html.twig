@@ -47,6 +47,6 @@
             </ul>
         {% endif %}
 
-        <twig:Layouts:FolderContents:Base folderId="{{ attr('folder', 'id') }}" page="{{ app.request.query.getInt('page', 1) }}" />
+        <twig:Layouts:FolderContents:Base folderId="{{ attr('folder', 'id') }}" />
     </div>
 {% endblock %}
