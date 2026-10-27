@@ -20,6 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Contracts\Service\ResetInterface;
 use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
+use Thelia\Domain\Customer\Service\CustomerGroupPaymentPolicy;
 use Thelia\Domain\Payment\DTO\PaymentComposition;
 use Thelia\Domain\Payment\Exception\PaymentCompositionRefusedException;
 use Thelia\Domain\Payment\OrderPaymentComposer;
@@ -59,6 +60,7 @@ final class InstantPaymentParts implements ResetInterface
         private readonly OrderPaymentComposer $composer,
         private readonly ContainerInterface $container,
         private readonly CartFacade $cartFacade,
+        private readonly CustomerGroupPaymentPolicy $customerGroupPaymentPolicy,
     ) {
     }
 
@@ -71,7 +73,10 @@ final class InstantPaymentParts implements ResetInterface
         $active = false;
 
         foreach ($this->modules() as $moduleId => ['module' => $module, 'instance' => $instance]) {
-            if (!$instance instanceof InstantPaymentModuleInterface) {
+            // A means the group of the buyer may not pay with is neither listed nor asked: the core
+            // leaves it out of the composition and refuses to settle it all the same.
+            if (!$instance instanceof InstantPaymentModuleInterface
+                || !$this->customerGroupPaymentPolicy->isAllowedForCart($moduleId, $cart)) {
                 continue;
             }
 

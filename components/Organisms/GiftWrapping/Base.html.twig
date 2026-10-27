@@ -28,7 +28,7 @@
                 <li>
                     {{ component('Fields:Checkbox:Base', {
                         type: 'radio',
-                        label: wrapping.title ~ ' — ' ~ (wrapping.free ? 'Free'|trans : wrapping.taxed_price|format_currency(current_currency_code(), locale: lang_code)),
+                        label: wrapping.title ~ ' — ' ~ (wrapping.free ? 'Free'|trans : wrapping.price.amount|format_currency(current_currency_code(), locale: lang_code) ~ ' ' ~ wrapping.price|tax_mention),
                         'input:id': 'gift-wrapping-' ~ wrapping.id,
                         'input:name': 'gift-wrapping',
                         'input:checked': wrapping.chosen,

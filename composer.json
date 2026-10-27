@@ -36,6 +36,9 @@
         "twig/intl-extra": "^3.24",
         "twig/string-extra": "^3.24"
     },
+    "require-dev": {
+        "nikic/php-parser": "^5.0"
+    },
     "conflict": {
         "thelia/thelia-skeleton": "<3.2"
     },

@@ -18,6 +18,7 @@ use FlexyBundle\Components\Organisms\Cart\Base as Cart;
 use FlexyBundle\Components\Organisms\CartItem\Base as CartItem;
 use FlexyBundle\DTO\CartItemDto;
 use FlexyBundle\Service\CartStockService;
+use FlexyBundle\Service\PriceDisplay;
 use FlexyBundle\Service\ProductSaleElementsService;
 use Thelia\Api\Service\DataAccess\AttributeAccessService;
 use Thelia\Core\Form\FormServiceInterface;
@@ -149,6 +150,7 @@ final class CartLineTitleLocaleTest extends IntegrationTestCase
             $this->langService($locale),
             new CartStockService(),
             $this->getService('translator'),
+            $this->getService(PriceDisplay::class),
         );
     }
 

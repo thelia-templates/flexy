@@ -22,13 +22,15 @@
         <span class="ProductCard-title">{{ this.product.title }}</span>
         {# .ProductCard-desc is a stretching flex column here, so these spans are blockified:
            dir="ltr" goes on an inner inline span, never on the flex item itself. #}
-        {% if this.isPromo %}
-            <span class="ProductCard-price"><span dir="ltr">{{ this.promoTaxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></span>
-            {% if this.showsInitialPrice %}
-                <span class="ProductCard-originalPrice"><span dir="ltr">{{ this.taxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></span>
+        {% if this.displayedPrice %}
+            {% if this.isPromo %}
+                <span class="ProductCard-price"><span dir="ltr">{{ this.displayedPromoPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.displayedPromoPrice.display" /></span>
+                {% if this.showsInitialPrice %}
+                    <span class="ProductCard-originalPrice"><span dir="ltr">{{ this.displayedPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span></span>
+                {% endif %}
+            {% else %}
+                <span class="ProductCard-price"><span dir="ltr">{{ this.displayedPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.displayedPrice.display" /></span>
             {% endif %}
-        {% else %}
-            <span class="ProductCard-price"><span dir="ltr">{{ this.taxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></span>
         {% endif %}
     </span>
 </a>

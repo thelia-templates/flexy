@@ -18,7 +18,6 @@ use FlexyBundle\Components\Organisms\CurrencySelect\Base as CurrencySelect;
 use FlexyBundle\Twig\CurrencyExtension;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
@@ -26,20 +25,33 @@ use Symfony\UX\TwigComponent\ComponentRendererInterface;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Model\Currency;
+use Thelia\Test\FixtureFactory;
+use Thelia\Test\IntegrationTestCase;
 
 /**
  * Prices follow the currency the visitor browses in: the amounts the API converts are written
  * with the sign of that currency, not with a euro sign, and the header offers the choice
  * only when there is one.
  */
-final class CurrencyOfTheSessionRenderTest extends KernelTestCase
+final class CurrencyOfTheSessionRenderTest extends IntegrationTestCase
 {
     private Session $session;
 
+    /** A product the tax engine can find: a card prices its taxes off the product itself. */
+    private int $productId;
+
     protected function setUp(): void
     {
+        parent::setUp();
+
+        $fixtures = new FixtureFactory($this->getPropelConnection());
+        $this->productId = $fixtures->product($fixtures->category(), $fixtures->taxRule(), $fixtures->currency())->getId();
+
         /** @var RequestStack $requestStack */
         $requestStack = self::getContainer()->get('request_stack');
+        // The base class leaves a bare request on the stack, which would be the main one: this test is about the request pushed below.
+        while (null !== $requestStack->pop()) {
+        }
         $request = Request::create('https://localhost/sofas.html?page=2');
         $this->session = new Session(new MockArraySessionStorage());
         $request->setSession($this->session);
@@ -120,8 +132,8 @@ final class CurrencyOfTheSessionRenderTest extends KernelTestCase
         $renderer = self::getContainer()->get('ux.twig_component.component_renderer');
 
         return $renderer->createAndRender('Organisms:ProductCard:Base', ['product' => [
-            'id' => 99999,
-            'ref' => 'REF-99999',
+            'id' => $this->productId,
+            'ref' => 'REF-'.$this->productId,
             'visible' => true,
             'position' => 1,
             'virtual' => false,
@@ -134,7 +146,7 @@ final class CurrencyOfTheSessionRenderTest extends KernelTestCase
                 'isDefault' => true,
                 'promo' => false,
                 'newness' => false,
-                'productPrices' => [['price' => 25.0, 'promoPrice' => 20.0, 'currency' => 'USD']],
+                'productPrices' => [['price' => 25.0, 'promoPrice' => 20.0, 'taxedPrice' => 30.0, 'taxedPromoPrice' => 24.0, 'currency' => 'USD']],
                 'attributeCombinations' => [],
             ]],
         ]]);

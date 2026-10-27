@@ -150,7 +150,7 @@ class Base
         $this->unavailablePromotionMessages = $this->readUnavailablePromotions();
         $locale = $this->langService->getLocale();
         $cartLines = $this->readCartLinesAttribute();
-        $offeredDiscounts = $this->readOfferedLineDiscounts($cartLines);
+        $linePrices = $this->readLinePrices($cartLines);
         $bundleComponents = $this->readBundleComponents($cartLines);
         $unorderableBundles = $this->readUnorderableBundles($cartLines);
 
@@ -192,7 +192,7 @@ class Base
                 // The product read with the combination is handed to the line, so that the rule of the core
                 // (CartItem::getProduct: the default language for a product not translated) runs without a query.
                 'title' => $cartItemModel->setProduct($pse->getProduct())->getProduct(null, $locale)->getTitle(),
-                'offeredTaxedDiscount' => $offeredDiscounts[(int) $item['id']] ?? 0.0,
+                ...($linePrices[(int) $item['id']] ?? []),
             ]);
 
             $this->items[] = $cartItem;
@@ -281,7 +281,7 @@ class Base
 
     /**
      * The lines of the cart as the core describes them beyond their columns (`attr('cart', 'cart_items')`),
-     * read once for the two figures below. A core that predates what it carries answers nothing usable,
+     * read once for the figures below. A core that predates what it carries answers nothing usable,
      * so the shape is checked rather than assumed.
      *
      * @return array<int, array<string, mixed>> by line id
@@ -312,31 +312,41 @@ class Base
     }
 
     /**
-     * What each offered line costs the shop, taxes included, indexed by the id of the
-     * line — the figure the cart page strikes the gift's price with.
+     * What the core publishes about the price of each line besides its columns, indexed by the
+     * id of the line: the discount the promotion owning an offered line takes off (the figure
+     * the cart page strikes the gift's price with), what the line is worth, and what it is worth
+     * once that discount is taken off, each with and without its taxes. The theme prints them
+     * and works none of them out.
      *
-     * The lines come from the model above, which only carries columns; this one is not a
-     * column, it is what the promotion owning the line takes off the cart, and only the
-     * core can price it. A core that predates automatic promotions publishes nothing here
-     * and every line reads as undiscounted, which is what the template falls back to.
+     * The lines come from the model above, which only carries columns; these are not columns,
+     * and only the core can price them.
      *
      * @param array<int, array<string, mixed>> $cartLines
      *
-     * @return array<int, float>
+     * @return array<int, array<string, float>> by line id, the figures under the keys of CartItemDto::fromArray()
      */
-    private function readOfferedLineDiscounts(array $cartLines): array
+    private function readLinePrices(array $cartLines): array
     {
-        $discounts = [];
+        $linePrices = [];
 
         foreach ($cartLines as $id => $item) {
-            $discount = $item['offered_taxed_discount'] ?? $item['offeredTaxedDiscount'] ?? null;
+            $effectiveTaxed = $item['offered_effective_taxed'] ?? null;
 
-            if (is_numeric($discount)) {
-                $discounts[$id] = (float) $discount;
+            if (!is_numeric($effectiveTaxed)) {
+                continue;
             }
+
+            $linePrices[$id] = [
+                'offeredEffectiveTaxed' => (float) $effectiveTaxed,
+                'offeredEffectiveUntaxed' => (float) ($item['offered_effective_untaxed'] ?? 0.0),
+                'lineTotalTaxed' => (float) ($item['line_total_taxed'] ?? 0.0),
+                'lineTotalUntaxed' => (float) ($item['line_total_untaxed'] ?? 0.0),
+                'lineTotalAfterDiscountTaxed' => (float) ($item['line_total_after_discount_taxed'] ?? 0.0),
+                'lineTotalAfterDiscountUntaxed' => (float) ($item['line_total_after_discount_untaxed'] ?? 0.0),
+            ];
         }
 
-        return $discounts;
+        return $linePrices;
     }
 
     /**

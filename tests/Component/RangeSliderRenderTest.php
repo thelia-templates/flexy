@@ -47,6 +47,24 @@ final class RangeSliderRenderTest extends KernelTestCase
         self::assertSame(['30 €', '90 €'], $this->amounts($slider));
     }
 
+    public function testASliderOfAmountsSaysWhetherTheyCarryTheTaxes(): void
+    {
+        $slider = $this->render(['min' => 12, 'max' => 120, 'currency' => 'EUR', 'locale' => 'en', 'taxDisplay' => 'untaxed']);
+
+        self::assertSame('excl. tax', trim($slider->filter('.RangeSlider-values .TaxMention')->text()));
+        self::assertSame('untaxed', $slider->filter('.RangeSlider-values .TaxMention')->attr('data-tax-display'));
+        self::assertSame('€12 excl. tax', $this->spaced((string) $slider->filter('input')->eq(0)->attr('aria-valuetext')));
+        // The amounts the controller rewrites stay the only text of their spans.
+        self::assertSame(['€12', '€120'], $this->amounts($slider));
+    }
+
+    public function testASliderWithoutAnAnnouncedDisplayWritesNoMention(): void
+    {
+        $slider = $this->render(['min' => 12, 'max' => 120, 'currency' => 'EUR', 'locale' => 'en']);
+
+        self::assertCount(0, $slider->filter('.TaxMention'));
+    }
+
     public function testASliderWithoutCurrencyShowsNoAmount(): void
     {
         $slider = $this->render(['min' => 100, 'max' => 300]);
@@ -71,6 +89,8 @@ final class RangeSliderRenderTest extends KernelTestCase
         $formService->renderFieldFromFieldType(['type' => 'feature', 'id' => 7, 'title' => 'Weight', 'fieldType' => 'delta', 'values' => $bounds], $builder, []);
 
         self::assertArrayHasKey('data-currency', $builder->get('price')->get('price')->getOption('attr'));
+        // A visitor nobody knows is shown the default group's prices, with their taxes.
+        self::assertSame('taxed', $builder->get('price')->get('price')->getOption('attr')['data-tax-display']);
         self::assertSame([], $builder->get('feature')->get('7')->getOption('attr'));
     }
 

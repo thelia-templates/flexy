@@ -78,10 +78,15 @@ Promo Code: Promo Code
 No Promo Code: No Promo Code
 Gift Card: Gift Card
 No Gift Card: No Gift Card
-Total (including VAT): Total (including VAT)
 Total: Total
 Taxes of: Taxes of
 included: included
+# Mention written beside a price (Atoms/TaxMention): with or without the taxes
+incl. tax: incl. tax
+excl. tax: excl. tax
+Total excl. tax: Total excl. tax
+VAT: VAT
+Total incl. tax to pay: Total incl. tax to pay
 Before placing your order: Before placing your order
 Read: Read
 Read %consent%: 'Read: %consent%'
@@ -261,7 +266,6 @@ Get our last news and promo: Get our last news and promo
 Register to our newsletter: Register to our newsletter
 
 Quote N°: Quote N°
-Subtotal without taxes: Subtotal without taxes
 Your login: Your login
 Your informations: Your informations
 Quantity: Quantity
@@ -668,3 +672,5 @@ Skip to content: Skip to content
 'This composition cannot be sold as chosen, the default one is shown.': 'This composition cannot be sold as chosen, the default one is shown.'
 'The pack %ref can no longer be ordered as it is in your cart. Please remove it and add it again.': 'The pack %ref can no longer be ordered as it is in your cart. Please remove it and add it again.'
 'Another order took the same products at the same moment. Please try again.': 'Another order took the same products at the same moment. Please try again.'
+# Checkout: the core refused the payment because a price moved since the cart was read
+The prices of your cart have changed. Check your cart before paying.: The prices of your cart have changed. Check your cart before paying.

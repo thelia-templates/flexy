@@ -5,7 +5,9 @@
         Takes the lines of a real order and resolves them in one pass, which is the point of the
         component: a card left to itself costs four calls, paid once per line. With no order to
         pass it renders nothing, so the story shows the empty state. It serves the order pages of
-        the account as well as the page opened from the link in a confirmation mail.
+        the account as well as the page opened from the link in a confirmation mail. Each line is
+        priced in the display frozen on the order when it was placed, with or without its taxes,
+        and the card of the line is shown in both under Organisms/ProductCard.
     </p>
     <div class="Story-stage Story-stage--roomy">
         <twig:Layouts:OrderProducts:Base :orderProducts="[]" />

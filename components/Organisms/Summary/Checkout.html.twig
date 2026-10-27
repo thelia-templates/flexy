@@ -1,4 +1,6 @@
 <div {{ attributes.defaults(stimulus_controller('live-refresh-on-focus')) }}>
+    {# A buyer whose VAT is exempted (reverse charge) pays no tax: a figure is not said to be with or without it, the notice below says why. #}
+    {% set vatExempted = this.isVatExempted %}
     {% set summary = this.summary %}
     {% set coupons = summary.coupons ?? [] %}
     {% set discounts = summary.discounts %}
@@ -19,7 +21,7 @@
                     </span>
                 </div>
                 <div>
-                    <span dir="ltr">{{ summary.raw_taxed_total_price|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                    <span dir="ltr">{{ summary.subtotal.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>{% if not vatExempted %}<twig:Atoms:TaxMention:Base :display="summary.subtotal.display" />{% endif %}
                 </div>
             </div>
             {# No postage to show until a carrier is chosen: 0 is only a free delivery once one is. #}
@@ -27,8 +29,8 @@
                 <div class="Summary-line">
                     <div>{{ 'Delivery'|trans }}</div>
                     <div>
-                        {% if summary.taxed_postage %}
-                            <span dir="ltr">{{ summary.taxed_postage|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                        {% if summary.postage.amount %}
+                            <span dir="ltr">{{ summary.postage.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>{% if not vatExempted %}<twig:Atoms:TaxMention:Base :display="summary.postage.display" />{% endif %}
                         {% else %}
                             {{ 'Free delivery'|trans }}
                         {% endif %}
@@ -52,7 +54,11 @@
                 <div class="Summary-line" data-summary-gift-wrapping>
                     <div>{{ summary.gift_wrapping_title }}</div>
                     <div>
-                        {{ summary.taxed_gift_wrapping ? summary.taxed_gift_wrapping|format_currency(current_currency_code(), locale: lang_code) : 'Free'|trans }}
+                        {% if summary.gift_wrapping_price.amount %}
+                            <span dir="ltr">{{ summary.gift_wrapping_price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>{% if not vatExempted %}<twig:Atoms:TaxMention:Base :display="summary.gift_wrapping_price.display" />{% endif %}
+                        {% else %}
+                            {{ 'Free'|trans }}
+                        {% endif %}
                     </div>
                 </div>
             {% endif %}
@@ -77,31 +83,51 @@
                 {% for discount in discounts %}
                     <div class="Summary-line Summary-discountLine" data-summary-discount-label="{{ discount.label }}">
                         <div>{{ discount.label ?: 'Discount'|trans }}</div>
-                        <div><span dir="ltr">&minus;{{ discount.taxed_amount|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
+                        <div><span dir="ltr">&minus;{{ discount.displayed.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>{% if not vatExempted %}<twig:Atoms:TaxMention:Base :display="discount.displayed.display" />{% endif %}</div>
                     </div>
                 {% endfor %}
             {% elseif this.hasDiscount %}
                 <div class="Summary-line">
                     <div>{{ 'Discount'|trans }}</div>
-                    <div><span dir="ltr">&minus;{{ summary.taxed_discount|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
+                    <div><span dir="ltr">&minus;{{ summary.discount_price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>{% if not vatExempted %}<twig:Atoms:TaxMention:Base :display="summary.discount_price.display" />{% endif %}</div>
+                </div>
+            {% endif %}
+            {# Read untaxed, the cart states what it comes to before its taxes, the taxes, then what is paid. #}
+            {% if not summary.display.isTaxed %}
+                <div class="Summary-line" data-summary-total-without-taxes>
+                    <div>{{ 'Total excl. tax'|trans }}</div>
+                    <div><span dir="ltr">{{ summary.total_without_taxes.amount|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
+                </div>
+                <div class="Summary-line" data-summary-tax-amount>
+                    <div>{{ 'VAT'|trans }}</div>
+                    <div><span dir="ltr">{{ summary.total_tax_amount|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
                 </div>
             {% endif %}
         </div>
 
         <div class="Summary-footer">
             <div class="Summary-total">
-                <div>
-                    {{ (this.hasTax ? 'Total (including VAT)' : 'Total')|trans }}
-                </div>
-                <div>
-                    <span dir="ltr">{{ summary.total_taxed_price|format_currency(current_currency_code(), locale: lang_code) }}</span>
-                </div>
+                {% if summary.display.isTaxed %}
+                    <div>
+                        {{ 'Total'|trans }}
+                    </div>
+                    <div>
+                        <span dir="ltr">{{ summary.total.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>{% if not vatExempted %}<twig:Atoms:TaxMention:Base :display="summary.total.display" />{% endif %}
+                    </div>
+                {% else %}
+                    <div>
+                        {{ 'Total incl. tax to pay'|trans }}
+                    </div>
+                    <div>
+                        <span dir="ltr">{{ summary.total_to_pay.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                    </div>
+                {% endif %}
             </div>
-            {% if this.isVatExempted %}
+            {% if vatExempted %}
                 <div class="italic">
                     {{ 'VAT exempted (reverse charge), buyer VAT number %number%'|trans({'%number%': summary.invoice_vat_number}) }}
                 </div>
-            {% elseif this.hasTax %}
+            {% elseif summary.display.isTaxed and this.hasTax %}
                 <div class="italic">
                     {{ 'Taxes of'|trans }}
                     <span dir="ltr">{{ summary.total_tax_amount|format_currency(current_currency_code(), locale: lang_code) }}</span>

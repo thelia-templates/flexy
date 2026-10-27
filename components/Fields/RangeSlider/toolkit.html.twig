@@ -26,6 +26,16 @@
                 <twig:Fields:RangeSlider:Base nameMin="toolkit-d-min" nameMax="toolkit-d-max" :min="12" :max="120" :valueMin="20" :valueMax="80" currency="EUR" />
             </div>
 
+            <div class="Story-col">
+                <span class="Story-label">amounts with the taxes (group shown prices with taxes)</span>
+                <twig:Fields:RangeSlider:Base nameMin="toolkit-e-min" nameMax="toolkit-e-max" :min="12" :max="120" :valueMin="20" :valueMax="80" currency="EUR" taxDisplay="taxed" />
+            </div>
+
+            <div class="Story-col">
+                <span class="Story-label">amounts without the taxes (group shown prices without taxes)</span>
+                <twig:Fields:RangeSlider:Base nameMin="toolkit-f-min" nameMax="toolkit-f-max" :min="12" :max="120" :valueMin="20" :valueMax="80" currency="EUR" taxDisplay="untaxed" />
+            </div>
+
         </div>
     </div>
 </div>
