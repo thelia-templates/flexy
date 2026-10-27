@@ -100,6 +100,7 @@ final class NextButtonModuleStepCheckTest extends KernelTestCase
             $container->get(ConsentGuard::class),
             $container->get(CartGuard::class),
             $container->get(DeliveryDateBridge::class),
+            $container,
             [$provider],
         );
         $button->mount('phone', '/checkout/confirmation');

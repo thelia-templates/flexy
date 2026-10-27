@@ -11,6 +11,7 @@ import { Controller } from "@hotwired/stimulus";
 // slot and follows that state, the others wait here. The slot is ignored by the re-renders,
 // which leaves the button in place; when the buyer picks another payment method and the
 // slot goes, the button comes back here.
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
   static targets = ["content"];
 
