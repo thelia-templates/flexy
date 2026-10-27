@@ -139,7 +139,11 @@ class Base
             $module = null === $moduleId ? null : ModuleQuery::create()->findPk($moduleId);
             $instance = $module?->getPaymentModuleInstance($this->container);
 
-            return null !== $instance && !CheckoutPaymentOffer::canBePaidAtCheckout($instance)
+            // A wallet the shop no longer shows in the checkout leaves the order button in
+            // place: its own button would never come to fill the slot.
+            return null !== $instance
+                && !CheckoutPaymentOffer::canBePaidAtCheckout($instance)
+                && CheckoutPaymentOffer::isOfferedAtCheckout($instance)
                 ? (string) $module->getCode()
                 : null;
         } catch (PropelException) {
