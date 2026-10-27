@@ -16,7 +16,6 @@ namespace FlexyBundle\Components\Layouts\CrossSelling;
 
 use FlexyBundle\DTO\ProductDTO;
 use FlexyBundle\Service\ProductImageResolver;
-use FlexyBundle\Service\ProductTaxationResolver;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 
@@ -69,7 +68,6 @@ class Base
     public function __construct(
         private readonly DataAccessService $dataAccessService,
         private readonly ProductImageResolver $productImageResolver,
-        private readonly ProductTaxationResolver $productTaxationResolver,
     ) {
     }
 
@@ -186,7 +184,6 @@ class Base
     {
         $productIds = array_map(static fn (ProductDTO $product): int => $product->id, $products);
         $this->productImageResolver->preload($productIds);
-        $this->productTaxationResolver->preload($productIds);
     }
 
     /**

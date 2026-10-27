@@ -1,6 +1,6 @@
 <div class="{{ ('CheckoutSteps-mobile text-end ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class').defaults(stimulus_controller('live-refresh-on-focus')) }}>
     <div class="paragraph-4 font-semibold">
-        <span dir="ltr">{{ this.summary.total_taxed_price|format_currency(current_currency_code(), locale: lang_code) }}</span>
+        <span dir="ltr">{{ this.summary.total.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.summary.total.display" />
     </div>
     <div class="paragraph-6">
         <bdi>{{ this.summary.item_count }} {{ (this.summary.item_count > 1 ? 'items' : 'item')|trans }}</bdi>

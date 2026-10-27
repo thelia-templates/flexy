@@ -1,0 +1,20 @@
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">Taxed price (the group of the buyer is shown prices with the taxes)</h4>
+        <div class="Story-row Story-row--tight">
+            <span dir="ltr">24,00&nbsp;&euro;<twig:Atoms:TaxMention:Base :display="enum('FlexyBundle\\Service\\TaxDisplay').Taxed" /></span>
+        </div>
+    </div>
+    <div class="Story-section">
+        <h4 class="Story-title">Untaxed price (the group of the buyer is shown prices without the taxes)</h4>
+        <div class="Story-row Story-row--tight">
+            <span dir="ltr">20,00&nbsp;&euro;<twig:Atoms:TaxMention:Base :display="enum('FlexyBundle\\Service\\TaxDisplay').Untaxed" /></span>
+        </div>
+    </div>
+    <div class="Story-section">
+        <h4 class="Story-title">Beside a price card</h4>
+        <div class="Story-row Story-row--tight">
+            <span class="ProductCard-price"><span dir="ltr">20,00&nbsp;&euro;</span><twig:Atoms:TaxMention:Base :display="enum('FlexyBundle\\Service\\TaxDisplay').Untaxed" /></span>
+        </div>
+    </div>
+</div>

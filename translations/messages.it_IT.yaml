@@ -215,3 +215,11 @@ Skip to content: Vai al contenuto
 'This item is part of a bundle and cannot be returned on its own.': 'Questo articolo fa parte di un pack e non può essere reso singolarmente.'
 'The pack %ref can no longer be ordered as it is in your cart. Please remove it and add it again.': 'Il pack %ref non può più essere ordinato così com''è nel carrello. Rimuovilo e aggiungilo di nuovo.'
 'Another order took the same products at the same moment. Please try again.': 'Un altro ordine ha preso gli stessi prodotti nello stesso momento. Riprova.'
+# Mention written beside a price (Atoms/TaxMention): with or without the taxes
+incl. tax: IVA incl.
+excl. tax: IVA escl.
+Total excl. tax: Totale IVA esclusa
+VAT: IVA
+Total incl. tax to pay: Totale IVA inclusa da pagare
+# Checkout: the core refused the payment because a price moved since the cart was read
+The prices of your cart have changed. Check your cart before paying.: I prezzi del tuo carrello sono cambiati. Controlla il carrello prima di pagare.

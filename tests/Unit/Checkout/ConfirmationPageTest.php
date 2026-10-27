@@ -83,6 +83,8 @@ final class ConfirmationPageTest extends TestCase
         $twig->addFilter(new TwigFilter('format_currency', static fn (mixed $amount, ?string $currency = null, ?string $locale = null): string => (string) $amount));
         $twig->addFilter(new TwigFilter('format_date', static fn (mixed $date): string => (string) $date));
         $twig->addFunction(new TwigFunction('ux_icon', static fn (): string => '', ['is_safe' => ['html']]));
+        // Only the recap reads it, and no test here reaches the recap.
+        $twig->addFunction(new TwigFunction('order_total', static fn (): never => throw new \LogicException('The recap is not rendered by this test.')));
         $twig->addFunction(new TwigFunction('path', static fn (): string => '/'));
         $twig->addFunction(new TwigFunction(
             'theme_hook',

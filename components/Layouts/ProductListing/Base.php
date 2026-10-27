@@ -21,7 +21,6 @@ use FlexyBundle\Service\FormService;
 use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\ProductSearch;
 use FlexyBundle\Service\ProductSort;
-use FlexyBundle\Service\ProductTaxationResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -109,7 +108,6 @@ class Base extends AbstractController
         private readonly RequestStack $requestStack,
         private readonly FormService $formService,
         private readonly ProductImageResolver $productImageResolver,
-        private readonly ProductTaxationResolver $productTaxationResolver,
         private readonly ProductSearch $productSearch,
         private readonly ProductSort $productSort,
     ) {
@@ -278,7 +276,6 @@ class Base extends AbstractController
         // One call for the whole grid instead of one per card.
         $productIds = array_map(static fn (ProductDTO $product): int => $product->id, $this->products);
         $this->productImageResolver->preload($productIds);
-        $this->productTaxationResolver->preload($productIds);
         $this->pagination = [
             'totalItems' => $totalItems,
             'itemsPerPage' => self::ITEMS_PER_PAGE,

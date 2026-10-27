@@ -1,0 +1,25 @@
+<div class="Story">
+<div class="Story-section">
+    <h4 class="Story-title">Store (a carrier offered on the delivery step, with its postage)</h4>
+    <p class="Story-label">
+        The postage is the one the step chose for the display of the group of the buyer: with its
+        taxes or without them, and the mention beside it says which. A carrier quoting nothing is free.
+    </p>
+    <div class="Story-stage Story-stage--roomy">
+        <twig:Organisms:DeliveryMode:Store title="Collect in store" description="Ready in two hours" price="2.5" optionCode="toolkit-store" :moduleId="1" icon="reinsurance-store" />
+        <twig:Organisms:DeliveryMode:Store title="Free collection" price="" optionCode="toolkit-free" :moduleId="2" icon="reinsurance-store" />
+    </div>
+</div>
+
+<div class="Story-section">
+    <h4 class="Story-title">Home and Pickup (the other two modes of the delivery step)</h4>
+    <p class="Story-label">
+        Their card reads the same description as the one of the store, which the checkout does not hand over
+        to them: they print none, and the price is written the same way.
+    </p>
+    <div class="Story-stage Story-stage--roomy">
+        <twig:Organisms:DeliveryMode:Home title="Home delivery" price="6" optionCode="toolkit-home" :moduleId="3" icon="reinsurance-homedelivery" />
+        <twig:Organisms:DeliveryMode:Pickup title="Pickup point" price="4.5" optionCode="toolkit-pickup" :moduleId="4" icon="reinsurance-pickup" />
+    </div>
+</div>
+</div>

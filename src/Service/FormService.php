@@ -50,6 +50,8 @@ final readonly class FormService
         // Optional so that a caller building the service by hand keeps working; without it the
         // price slider shows no amounts.
         private ?RequestStack $requestStack = null,
+        // Same: without it the price slider does not say whether its amounts carry the taxes.
+        private ?PriceDisplay $priceDisplay = null,
     ) {
     }
 
@@ -173,7 +175,7 @@ final readonly class FormService
                 'label' => $filter['title'],
                 'mapped' => true,
                 // Read back by the range_group_row block, which hands it to Fields/RangeSlider.
-                'attr' => $filter['type'] === self::PRICE_FILTER_TYPE ? ['data-currency' => $this->currencyCode()] : [],
+                'attr' => $filter['type'] === self::PRICE_FILTER_TYPE ? $this->priceAttributes() : [],
             ]
         ));
 
@@ -239,6 +241,21 @@ final readonly class FormService
     /**
      * The currency the shop is browsed in, the one the core prices the facet in.
      */
+    /**
+     * The bounds of the price facet are the prices the cards show, in the currency of the visitor
+     * and, as the core draws them, with the taxes unless the group of the visitor is shown prices
+     * without: the slider says which.
+     *
+     * @return array<string, string|null>
+     */
+    private function priceAttributes(): array
+    {
+        return [
+            'data-currency' => $this->currencyCode(),
+            'data-tax-display' => $this->priceDisplay?->forVisitor()->value,
+        ];
+    }
+
     private function currencyCode(): ?string
     {
         $request = $this->requestStack?->getCurrentRequest();
