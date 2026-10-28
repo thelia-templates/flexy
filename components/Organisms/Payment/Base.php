@@ -288,10 +288,35 @@ class Base
         return [] === $methods ? null : (int) $methods[0]['customerPaymentMethodId'];
     }
 
+    /**
+     * Lets the parts name the payment module of the cart, which may change it: an instant
+     * means that now covers the order takes the place of the provider, and one that no
+     * longer does gives it up. The options picked belong to the module they were picked
+     * for, so they do not follow the change.
+     *
+     * The module is read off the cart before and after, not off paymentModuleId: on mount
+     * that property is still empty, and on a live call it holds what the browser last saw.
+     */
     private function settleTheModuleOfTheParts(): void
     {
+        $previousModuleId = $this->cartFacade->getPaymentModuleId();
+
         $this->instantPaymentParts->settleThePaymentModuleOfTheCart($this->cartFacade->getOrCreateFromSession());
         $this->partsView = null;
+
+        if ($previousModuleId !== $this->cartFacade->getPaymentModuleId()) {
+            $this->forgetThePaymentOptionChoices();
+        }
+    }
+
+    /**
+     * The options picked belong to the module they were picked for: when the module changes,
+     * the session and the display state both let them go.
+     */
+    private function forgetThePaymentOptionChoices(): void
+    {
+        $this->paymentOptionChoiceStore->replace([]);
+        $this->paymentOptionChoices = [];
     }
 
     private function refillFromTheCart(): void
@@ -447,10 +472,8 @@ class Base
         $this->partsView = null;
         $this->refillFromTheCart();
 
-        // The options picked belong to the module they were picked for.
         if ($previousModuleId !== $this->paymentModuleId) {
-            $this->paymentOptionChoiceStore->replace([]);
-            $this->paymentOptionChoices = [];
+            $this->forgetThePaymentOptionChoices();
         }
 
         $this->emit('updateNextButton');
