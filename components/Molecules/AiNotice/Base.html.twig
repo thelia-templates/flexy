@@ -1,0 +1,30 @@
+{#
+    The notice "you are talking with an AI" (article 50(1) of the EU AI Act), for the interface of a
+    module that lets a customer or a visitor talk with an AI (a chat, an assistant).
+
+    Include it once, ABOVE the first message:
+
+        <twig:Molecules:AiNotice:Base usage="mymodule.chat" />
+
+    @prop usage  string       Identifier of the usage the module declared with #[AsAiUsage] (transparency: interactive)
+    @prop locale string|null  Language of the notice; defaults to the one of the request, then of the shop
+
+    The theme holds no compliance logic and no setting: whether a notice is due, and its text in the
+    current language, come from the Thelia core (ai_transparency_notice). It renders nothing when the usage
+    is not interactive, is inactive, or when the merchant turned its notice off. An identifier the core does
+    not know throws, so a typo is not a silent missing notice. Extra attributes (class, id) go on the
+    notice; it is a polite live region, so a screen reader announces it when it is inserted.
+#}
+{% props usage, locale = null %}
+
+{% set notice = ai_transparency_notice(usage, locale) %}
+
+{% if notice is not empty %}
+    {# The core escapes at output; the SnackBar prints its text raw, so the text is escaped here. #}
+    {{ component('Molecules:SnackBar:Base', {
+        variant: 'informative',
+        withIcon: true,
+        text: notice|e,
+        role: 'status',
+    }|merge(attributes.all)) }}
+{% endif %}
