@@ -146,3 +146,11 @@ Currency: Moneda
 Close: Cerrar
 'You seem to be in %country%.': 'Parece que estás en %country%.'
 'See prices for %country%': 'Ver precios para %country%'
+# Mention written beside a price (Atoms/TaxMention): with or without the taxes
+incl. tax: IVA incl.
+excl. tax: sin IVA
+Total excl. tax: Total sin IVA
+VAT: IVA
+Total incl. tax to pay: Total con IVA a pagar
+# Checkout: the core refused the payment because a price moved since the cart was read
+The prices of your cart have changed. Check your cart before paying.: Los precios de su carrito han cambiado. Revise su carrito antes de pagar.

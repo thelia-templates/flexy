@@ -6,7 +6,7 @@
     icon="{{ isFilled ? 'cart-badge' : 'cart' }}"
     color="dark"
     text="{{ isFilled ? summary.itemCount ~ ' ' ~ (summary.itemCount > 1 ? 'items' : 'item')|trans : 'Cart'|trans }}"
-    subText="{{ isFilled ? '(' ~ summary.total|format_currency(current_currency_code(), locale: this.locale) ~ ')' : '' }}"
+    subText="{{ isFilled ? '(' ~ summary.total.amount|format_currency(current_currency_code(), locale: this.locale) ~ ' ' ~ summary.total|tax_mention ~ ')' : '' }}"
     class="{{ ('HeaderNav-btn ' ~ attributes.render('class'))|tailwind_merge }}"
     {{ ...attributes.without('class').defaults(stimulus_controller('live-refresh-on-focus')) }}
 />

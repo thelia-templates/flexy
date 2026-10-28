@@ -27,12 +27,20 @@ class CartItemDto
     /** The line was put in the cart by a promotion: the shop owns it, not the customer. */
     public bool $isOffered = false;
     /**
-     * What the promotion owning this line takes off the cart because of it, taxes
-     * included. Zero on every line the shopper put there, and on an offered line the
-     * core has not priced — a gift given at a percentage off carries less than the
-     * line is worth, one given outright carries all of it.
+     * What the promotion owning this line takes off the cart because of it, bounded by what
+     * the line is worth (a discount larger than the line takes the line), taxes included and
+     * excluded. Zero on every line the shopper put there, and on an offered line the core has
+     * not priced: a gift given at a percentage off carries less than the line is worth, one
+     * given outright carries all of it. The core publishes these figures: the theme prints them.
      */
-    public float $offeredTaxedDiscount = 0.0;
+    public float $offeredEffectiveTaxed = 0.0;
+    public float $offeredEffectiveUntaxed = 0.0;
+    /** What the line is worth for its whole quantity at the price it is charged. */
+    public float $lineTotalTaxed = 0.0;
+    public float $lineTotalUntaxed = 0.0;
+    /** The same once the effective discount is taken off: what the buyer pays for the line. */
+    public float $lineTotalAfterDiscountTaxed = 0.0;
+    public float $lineTotalAfterDiscountUntaxed = 0.0;
     public ?ProductDTO $product = null;
     public int $stock = 0;
     public bool $stockManaged = true;
@@ -53,9 +61,14 @@ class CartItemDto
         // TINYINT column: the model hands it over as an int, and a core that predates
         // offered lines hands over nothing at all.
         $cartItem->isOffered = (bool) ($data['isOffered'] ?? false);
-        // Not a column: the core publishes it alongside the line, in whichever spelling
-        // its data access layer uses, and a core that predates it publishes nothing.
-        $cartItem->offeredTaxedDiscount = (float) ($data['offeredTaxedDiscount'] ?? $data['offered_taxed_discount'] ?? 0.0);
+        // Not columns: the core publishes them alongside the line, in whichever spelling its
+        // data access layer uses, and a core that predates them publishes nothing.
+        $cartItem->offeredEffectiveTaxed = self::amount($data, 'offeredEffectiveTaxed', 'offered_effective_taxed');
+        $cartItem->offeredEffectiveUntaxed = self::amount($data, 'offeredEffectiveUntaxed', 'offered_effective_untaxed');
+        $cartItem->lineTotalTaxed = self::amount($data, 'lineTotalTaxed', 'line_total_taxed');
+        $cartItem->lineTotalUntaxed = self::amount($data, 'lineTotalUntaxed', 'line_total_untaxed');
+        $cartItem->lineTotalAfterDiscountTaxed = self::amount($data, 'lineTotalAfterDiscountTaxed', 'line_total_after_discount_taxed');
+        $cartItem->lineTotalAfterDiscountUntaxed = self::amount($data, 'lineTotalAfterDiscountUntaxed', 'line_total_after_discount_untaxed');
         $cartItem->stock = isset($data['stock']) ? (int) $data['stock'] : 0;
         $cartItem->stockManaged = isset($data['stockManaged']) ? (bool) $data['stockManaged'] : true;
         $cartItem->title = $data['title'] ?? '';
@@ -68,5 +81,13 @@ class CartItemDto
         }
 
         return $cartItem;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private static function amount(array $data, string $camelKey, string $snakeKey): float
+    {
+        return (float) ($data[$camelKey] ?? $data[$snakeKey] ?? 0.0);
     }
 }

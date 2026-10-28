@@ -19,7 +19,6 @@ use FlexyBundle\Service\FormService;
 use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\ProductSearch;
 use FlexyBundle\Service\ProductSort;
-use FlexyBundle\Service\ProductTaxationResolver;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Form\Extension\Csrf\CsrfExtension;
@@ -78,7 +77,6 @@ final class ProductListingFilterTokenTest extends TestCase
             new RequestStack(),
             $this->withoutConstructor(FormService::class),
             $this->withoutConstructor(ProductImageResolver::class),
-            $this->withoutConstructor(ProductTaxationResolver::class),
             $this->withoutConstructor(ProductSearch::class),
             $this->withoutConstructor(ProductSort::class),
         );

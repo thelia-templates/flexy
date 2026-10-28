@@ -131,15 +131,24 @@
     {% elseif outOfStock %}
         {{ form_widget(form.quantity, {type: 'hidden'}) }}
     {% else %}
+        {# Both amounts of each price come from the core, which has priced the group and the
+           discounts of the visitor into them: the display of the group only picks one. #}
+        {% set display = visitor_tax_display() %}
+        {% set catalogPrice = displayed_price(display, currentPse.untaxedPrice|default(null), currentPse.price|default(null)) %}
+        {% set chargedPrice = currentPse.isPromo
+            ? displayed_price(display, currentPse.promoUntaxedPrice|default(null), currentPse.promoPrice|default(null))
+            : catalogPrice %}
         {# Flex items are blockified: dir="ltr" goes on an inner inline span, so the box keeps
            resolving its own alignment against the page. #}
         <div class="PseSelector-price">
-            <strong class="h4">
-                <span dir="ltr">{{ (currentPse.isPromo ? currentPse.promoPrice : currentPse.price)|format_currency(current_currency_code(), locale: lang_code) }}</span>
-            </strong>
-            {% if currentPse.isPromo and currentPse.displayInitialPrice|default(true) %}
+            {% if chargedPrice %}
+                <strong class="h4">
+                    <span dir="ltr">{{ chargedPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="chargedPrice.display" />
+                </strong>
+            {% endif %}
+            {% if catalogPrice and currentPse.isPromo and currentPse.displayInitialPrice|default(true) %}
                 <span class="PseSelector-originalPrice paragraph-4">
-                    <span dir="ltr">{{ currentPse.price|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                    <span dir="ltr">{{ catalogPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>
                 </span>
             {% endif %}
         </div>

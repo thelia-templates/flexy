@@ -14,11 +14,13 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\ProductCard;
 
+use FlexyBundle\DTO\DisplayedPrice;
 use FlexyBundle\DTO\ProductDTO;
 use FlexyBundle\DTO\ProductSaleElementDTO;
+use FlexyBundle\Service\PriceDisplay;
 use FlexyBundle\Service\ProductImageResolver;
-use FlexyBundle\Service\ProductTaxationResolver;
 use FlexyBundle\Service\RunningSaleResolver;
+use FlexyBundle\Service\TaxDisplay;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Symfony\UX\TwigComponent\Attribute\PreMount;
 use Thelia\Api\Service\DataAccess\DataAccessService;
@@ -27,10 +29,16 @@ use Thelia\Api\Service\DataAccess\DataAccessService;
 class Base extends AbstractProductCard
 {
     public ?int $productId = null;
+
+    /**
+     * The display the price is drawn in. The visitor's own when not given: it is the group of the
+     * customer that decides, and a caller only names one to show the other (the toolkit, a mail).
+     */
+    public ?TaxDisplay $display = null;
     private ?float $price = null;
-    private ?float $taxedPrice = null;
     private ?float $promoPrice = null;
-    private ?float $promoTaxedPrice = null;
+    private ?DisplayedPrice $displayedPrice = null;
+    private ?DisplayedPrice $displayedPromoPrice = null;
     private bool $isPromo = false;
     private bool $displayInitialPrice = true;
     private bool $isNew = false;
@@ -41,7 +49,7 @@ class Base extends AbstractProductCard
     public function __construct(
         DataAccessService $dataAccessService,
         ProductImageResolver $productImageResolver,
-        private readonly ProductTaxationResolver $productTaxationResolver,
+        private readonly PriceDisplay $priceDisplay,
         private readonly RunningSaleResolver $runningSaleResolver,
     ) {
         parent::__construct($dataAccessService, $productImageResolver);
@@ -69,11 +77,15 @@ class Base extends AbstractProductCard
         $defaultPse = $this->findDefaultPse($this->product->productSaleElements);
 
         if ($defaultPse instanceof ProductSaleElementDTO) {
-            //TODO: temporary fix taxed prices — the front API exposes untaxed prices only
-            $this->price = $defaultPse->productPrices[0]->price;
-            $this->taxedPrice = $this->productTaxationResolver->taxedPrice($this->product->id, $this->price);
-            $this->promoPrice = $defaultPse->productPrices[0]->promoPrice;
-            $this->promoTaxedPrice = $this->productTaxationResolver->taxedPrice($this->product->id, $this->promoPrice);
+            // The front API publishes the price of the visitor with and without its taxes, discounts
+            // of the group and of the customer included: the display of the group decides which
+            // figure is printed, the product page reads the same two.
+            $display = $this->display ?? $this->priceDisplay->forVisitor();
+            $prices = $defaultPse->productPrices[0];
+            $this->price = $prices->price;
+            $this->promoPrice = $prices->promoPrice;
+            $this->displayedPrice = $this->priceDisplay->ofProduct($display, $prices->price, $prices->taxedPrice);
+            $this->displayedPromoPrice = $this->priceDisplay->ofProduct($display, $prices->promoPrice, $prices->taxedPromoPrice) ?? $this->displayedPrice;
             $this->isPromo = $defaultPse->promo;
             $this->displayInitialPrice = $defaultPse->displayInitialPrice;
             $this->isNew = $defaultPse->newness;
@@ -105,14 +117,17 @@ class Base extends AbstractProductCard
         return $this->promoPrice;
     }
 
-    public function getTaxedPrice()
+    /**
+     * The catalog price of the product, as the visitor reads it: with or without the taxes.
+     */
+    public function getDisplayedPrice(): ?DisplayedPrice
     {
-        return $this->taxedPrice;
+        return $this->displayedPrice;
     }
 
-    public function getPromoTaxedPrice()
+    public function getDisplayedPromoPrice(): ?DisplayedPrice
     {
-        return $this->promoTaxedPrice;
+        return $this->displayedPromoPrice;
     }
 
     public function getIsPromo()

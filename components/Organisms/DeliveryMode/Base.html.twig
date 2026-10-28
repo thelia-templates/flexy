@@ -30,7 +30,7 @@
             <span class="flex items-center mt-6">
                 <span class="DeliveryMode-price">
                     {% if this.price %}
-                        <span dir="ltr">{{ this.price|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                        <span dir="ltr">{{ this.price|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="visitor_tax_display()" />
                     {% else %}
                         {{ 'Free'|trans }}
                     {% endif %}

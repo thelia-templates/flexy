@@ -17,7 +17,6 @@ namespace FlexyBundle\Components\Organisms\SearchBar;
 use FlexyBundle\DTO\ProductDTO;
 use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\ProductSearch;
-use FlexyBundle\Service\ProductTaxationResolver;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
@@ -45,7 +44,6 @@ class Base
         private readonly ProductSearch $productSearch,
         private readonly DataAccessService $dataAccessService,
         private readonly ProductImageResolver $productImageResolver,
-        private readonly ProductTaxationResolver $productTaxationResolver,
     ) {
     }
 
@@ -80,7 +78,6 @@ class Base
         // One lookup for the whole panel rather than one per tile
         $productIds = array_map(static fn (ProductDTO $product): int => $product->id, $this->result['products']);
         $this->productImageResolver->preload($productIds);
-        $this->productTaxationResolver->preload($productIds);
 
         return $this->result;
     }

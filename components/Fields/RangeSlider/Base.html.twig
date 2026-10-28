@@ -7,12 +7,14 @@
 {# @prop step number Step increment. Defaults to 1 #}
 {# @prop currency string|null ISO code of the currency the values are amounts in. When given, the two values are shown under the slider, as amounts #}
 {# @prop locale string|null Locale the amounts are written in. Defaults to the language of the page #}
-{% props nameMin, nameMax, min, max, valueMin = null, valueMax = null, step = 1, currency = null, locale = null %}
+{# @prop taxDisplay string|null `taxed` or `untaxed`: whether the amounts carry the taxes. When given with a currency, the mention is written after the two values #}
+{% props nameMin, nameMax, min, max, valueMin = null, valueMax = null, step = 1, currency = null, locale = null, taxDisplay = null %}
 
 {% if currency and locale is null %}
     {% set locale = lang_code is defined ? lang_code : app.request.locale %}
 {% endif %}
 {% set amountOptions = {fraction_digit: 0} %}
+{% set taxMention = taxDisplay ? enum('FlexyBundle\\Service\\TaxDisplay').from(taxDisplay) : null %}
 
 <div
     class="{{ ('RangeSlider ' ~ attributes.render('class'))|tailwind_merge }}"
@@ -26,7 +28,7 @@
         step="{{ step }}"
         value="{{ valueMin ?? min }}"
         aria-label="{{ 'Minimum'|trans }}"
-        {% if currency %}aria-valuetext="{{ (valueMin ?? min)|format_currency(currency, amountOptions, locale) }}"{% endif %}
+        {% if currency %}aria-valuetext="{{ (valueMin ?? min)|format_currency(currency, amountOptions, locale) }}{{ taxMention ? ' ' ~ taxMention|tax_mention : '' }}"{% endif %}
         {{ stimulus_target('Fields--RangeSlider--base', 'min') }}
         {{ stimulus_action('Fields--RangeSlider--base', 'updateInput', 'input') }}
     />
@@ -38,7 +40,7 @@
         step="{{ step }}"
         value="{{ valueMax ?? max }}"
         aria-label="{{ 'Maximum'|trans }}"
-        {% if currency %}aria-valuetext="{{ (valueMax ?? max)|format_currency(currency, amountOptions, locale) }}"{% endif %}
+        {% if currency %}aria-valuetext="{{ (valueMax ?? max)|format_currency(currency, amountOptions, locale) }}{{ taxMention ? ' ' ~ taxMention|tax_mention : '' }}"{% endif %}
         {{ stimulus_target('Fields--RangeSlider--base', 'max') }}
         {{ stimulus_action('Fields--RangeSlider--base', 'updateInput', 'input') }}
     />
@@ -50,7 +52,13 @@
            writes the two amounts in ascending order, as the bar draws them. #}
         <div class="RangeSlider-values" aria-hidden="true">
             <span dir="ltr" {{ stimulus_target('Fields--RangeSlider--base', 'low') }}>{{ min(valueMin ?? min, valueMax ?? max)|format_currency(currency, amountOptions, locale) }}</span>
-            <span dir="ltr" {{ stimulus_target('Fields--RangeSlider--base', 'high') }}>{{ max(valueMin ?? min, valueMax ?? max)|format_currency(currency, amountOptions, locale) }}</span>
+            {# The mention follows the upper amount, in a wrapper of its own: the controller rewrites the text of the amount spans. #}
+            <div>
+                <span dir="ltr" {{ stimulus_target('Fields--RangeSlider--base', 'high') }}>{{ max(valueMin ?? min, valueMax ?? max)|format_currency(currency, amountOptions, locale) }}</span>
+                {% if taxMention %}
+                    <twig:Atoms:TaxMention:Base :display="taxMention" />
+                {% endif %}
+            </div>
         </div>
     {% endif %}
 </div>

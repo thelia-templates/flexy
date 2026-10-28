@@ -15,6 +15,8 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Layouts\OrderProducts;
 
 use FlexyBundle\Service\OrderProductResolver;
+use FlexyBundle\Service\PriceDisplay;
+use FlexyBundle\Service\TaxDisplay;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 /**
@@ -29,7 +31,20 @@ class Base
 
     public function __construct(
         private readonly OrderProductResolver $orderProductResolver,
+        private readonly PriceDisplay $priceDisplay,
     ) {
+    }
+
+    /**
+     * How the lines are read: the display the buyer of the order had when it was placed. A
+     * page that does not hand the order over reads them taxed, as the orders placed before
+     * the groups existed were.
+     *
+     * @param array<string, mixed>|null $order
+     */
+    public function displayFor(?array $order): TaxDisplay
+    {
+        return $this->priceDisplay->forOrder($order ?? []);
     }
 
     /**

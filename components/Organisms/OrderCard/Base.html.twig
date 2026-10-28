@@ -12,7 +12,7 @@
                 <bdi>{{ this.itemCount }} {{ (this.itemCount > 1 ? 'items' : 'item')|trans }}</bdi>
             </div>
             <div class="paragraph-1 font-semibold text-black">
-                <span dir="ltr">{{ order.totalAmount|format_currency(this.currencyCode, locale: lang_code) }}</span>
+                <span dir="ltr">{{ this.total.amount|format_currency(this.currencyCode, locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.total.display" />
             </div>
         </div>
     </div>

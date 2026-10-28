@@ -16,6 +16,7 @@ namespace FlexyBundle\Tests\Component;
 
 use FlexyBundle\Components\Organisms\OrderCard\Base as OrderCard;
 use FlexyBundle\Service\OrderProductResolver;
+use FlexyBundle\Service\PriceDisplay;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Thelia\Api\Service\DataAccess\DataAccessService;
@@ -59,7 +60,7 @@ final class OrderCardTrackingUrlTest extends KernelTestCase
         $dataAccess = $this->createMock(DataAccessService::class);
         $dataAccess->method('resources')->willReturn($order);
 
-        $card = new OrderCard($dataAccess, self::getContainer()->get(OrderProductResolver::class));
+        $card = new OrderCard($dataAccess, self::getContainer()->get(OrderProductResolver::class), self::getContainer()->get(PriceDisplay::class));
         $card->mount(1);
 
         return $card;

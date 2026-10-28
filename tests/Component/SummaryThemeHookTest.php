@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Tests\Component;
 
+use FlexyBundle\DTO\DisplayedPrice;
+use FlexyBundle\Service\TaxDisplay;
 use PHPUnit\Framework\TestCase;
 use Twig\Environment;
 use Twig\Extra\Intl\IntlExtension;
@@ -51,7 +53,16 @@ final class SummaryThemeHookTest extends TestCase
             ['is_safe' => ['html']],
         ));
 
+        $fifty = new DisplayedPrice(50.0, TaxDisplay::Taxed);
+        $nothing = new DisplayedPrice(0.0, TaxDisplay::Taxed);
+
         $summary = [
+            'display' => TaxDisplay::Taxed,
+            'subtotal' => $fifty,
+            'postage' => $nothing,
+            'gift_wrapping_price' => $nothing,
+            'discount_price' => $nothing,
+            'total' => $fifty,
             'item_count' => 1,
             'raw_taxed_total_price' => 50.0,
             'total_taxed_price' => 50.0,

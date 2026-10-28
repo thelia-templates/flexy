@@ -24,7 +24,8 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\CacheItem;
 use Thelia\Action\Image;
 use Thelia\Core\Template\ParserInterface;
-use Thelia\Domain\Sale\ReservedSaleVisibility;
+use Thelia\Domain\Catalog\Category\CategoryVisibility;
+use Thelia\Domain\Catalog\Product\ProductVisibility;
 use Thelia\Model\CategoryQuery;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\LangQuery;
@@ -48,7 +49,10 @@ use Thelia\Tools\URL;
  * the pages agree. Without the module, or with a single language, one entry per element in the
  * default language, as before.
  *
- * Generic base implementation: it lists visible categories and products only.
+ * Generic base implementation: it lists visible categories and products only. A sitemap is
+ * cached once for everyone and crawled anonymously, so it is the one of a visitor nobody knows:
+ * in the default customer group, whoever happened to trigger the generation. The categories
+ * closed to that group, and the products that have no other category, are left out.
  * Site-specific sections (curated CMS pages, editorial folders, …) are meant to
  * be added by the overriding theme.
  *
@@ -85,7 +89,8 @@ final readonly class SitemapGenerator
     public function __construct(
         private readonly AdapterInterface $cache,
         private readonly CacheManager $cacheManager,
-        private readonly ReservedSaleVisibility $reservedSaleVisibility,
+        private readonly ProductVisibility $productVisibility,
+        private readonly CategoryVisibility $categoryVisibility,
     ) {
     }
 
@@ -153,8 +158,16 @@ final readonly class SitemapGenerator
         $categories = CategoryQuery::create()
             ->filterByVisible(1)
             ->filterByParent(0)
-            ->orderByPosition()
-            ->find();
+            ->orderByPosition();
+
+        // Null: nobody is known, which the core reads as the default group.
+        $closedCategoryIds = $this->categoryVisibility->closedCategoryIdsFor(null);
+
+        if ([] !== $closedCategoryIds) {
+            $categories->filterById($closedCategoryIds, Criteria::NOT_IN);
+        }
+
+        $categories = $categories->find();
 
         $langs = $this->getAlternateLangs();
         $this->preloadUrls('category', $langs, array_map(static fn ($category): int => $category->getId(), iterator_to_array($categories)));
@@ -201,7 +214,7 @@ final readonly class SitemapGenerator
         // itself, so a hidden-drop's products must be excluded here explicitly —
         // a sitemap is crawled anonymously, and must show no more than an anonymous
         // visitor's own catalog does.
-        $this->reservedSaleVisibility->applyTo($products, ProductTableMap::COL_ID);
+        $this->hideTheProductsTheDefaultVisitorCannotSee($products);
 
         $products = $products->find();
         $langs = $this->getAlternateLangs();
@@ -254,7 +267,7 @@ final readonly class SitemapGenerator
 
         // Same rule as getProductUrls(): this is a raw Propel query, so the hidden
         // products of a reserved drop are excluded by hand.
-        $this->reservedSaleVisibility->applyTo($products, ProductTableMap::COL_ID);
+        $this->hideTheProductsTheDefaultVisitorCannotSee($products);
 
         $entries = [];
         foreach ($products->find() as $product) {
@@ -290,6 +303,21 @@ final readonly class SitemapGenerator
         }
 
         return $entries;
+    }
+
+    /**
+     * Leaves out the products a visitor of the default group cannot reach: the private drops, the
+     * categories of the default group and the rules of the modules, asked for no customer in
+     * particular. The file is shared and crawled anonymously: the rules of the member who happens
+     * to regenerate it (the categories of a restricted group) must not shape it.
+     */
+    private function hideTheProductsTheDefaultVisitorCannotSee(ProductQuery $products): void
+    {
+        $clause = $this->productVisibility->visibleProductClauseForDefaultVisitor(ProductTableMap::COL_ID);
+
+        if (null !== $clause) {
+            $products->where($clause);
+        }
     }
 
     /**

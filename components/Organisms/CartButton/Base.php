@@ -14,7 +14,9 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\CartButton;
 
+use FlexyBundle\DTO\DisplayedPrice;
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\PriceDisplay;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
@@ -26,17 +28,18 @@ class Base
 {
     use DefaultActionTrait;
 
-    /** @var array{itemCount: int, total: float}|null */
+    /** @var array{itemCount: int, total: DisplayedPrice}|null */
     private ?array $summary = null;
 
     public function __construct(
         private readonly AttributeAccessService $attributeAccessService,
         private readonly LangService $langService,
+        private readonly PriceDisplay $priceDisplay,
     ) {
     }
 
     /**
-     * @return array{itemCount: int, total: float}
+     * @return array{itemCount: int, total: DisplayedPrice}
      */
     #[LiveListener(CheckoutEvents::ADD_ITEM_EVENT)]
     #[LiveListener(CheckoutEvents::DELETE_ITEM_EVENT)]
@@ -48,8 +51,12 @@ class Base
         // twice per live action and each read walks the cart to compute taxes.
         return $this->summary ??= [
             'itemCount' => (int) $this->attributeAccessService->attributeCart('item_count'),
-            // Taxed, discounted, without postage: no delivery method is known outside the checkout.
-            'total' => (float) $this->attributeAccessService->attributeCart('total_taxed_price_without_postage'),
+            // Discounted, without postage: no delivery method is known outside the checkout.
+            'total' => $this->priceDisplay->pick(
+                $this->priceDisplay->forVisitor(),
+                (float) $this->attributeAccessService->attributeCart('total_price_without_postage'),
+                (float) $this->attributeAccessService->attributeCart('total_taxed_price_without_postage'),
+            ),
         ];
     }
 

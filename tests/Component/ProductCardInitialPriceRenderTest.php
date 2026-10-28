@@ -15,24 +15,36 @@ declare(strict_types=1);
 namespace FlexyBundle\Tests\Component;
 
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\UX\TwigComponent\ComponentRendererInterface;
 use Thelia\Core\HttpFoundation\Session\Session;
+use Thelia\Test\FixtureFactory;
+use Thelia\Test\IntegrationTestCase;
 
 /**
  * A card strikes the catalog price through, and tags the discount, only when the front API
  * lets it: a sale element priced by a rule or an operation that asks to hide the catalog price
  * shows the price charged alone.
  */
-final class ProductCardInitialPriceRenderTest extends KernelTestCase
+final class ProductCardInitialPriceRenderTest extends IntegrationTestCase
 {
+    /** A product the tax engine can find: a card prices its taxes off the product itself. */
+    private int $productId;
+
     protected function setUp(): void
     {
+        parent::setUp();
+
+        $fixtures = new FixtureFactory($this->getPropelConnection());
+        $this->productId = $fixtures->product($fixtures->category(), $fixtures->taxRule(), $fixtures->currency())->getId();
+
         /** @var RequestStack $requestStack */
         $requestStack = self::getContainer()->get('request_stack');
+        // The base class leaves a bare request on the stack, which would be the main one: this test is about the request pushed below.
+        while (null !== $requestStack->pop()) {
+        }
         $request = Request::create('https://localhost/');
         $request->setSession(new Session(new MockArraySessionStorage()));
         $requestStack->push($request);
@@ -49,8 +61,8 @@ final class ProductCardInitialPriceRenderTest extends KernelTestCase
         $renderer = self::getContainer()->get('ux.twig_component.component_renderer');
 
         return $renderer->createAndRender($component, ['product' => [
-            'id' => 99999,
-            'ref' => 'REF-99999',
+            'id' => $this->productId,
+            'ref' => 'REF-'.$this->productId,
             'visible' => true,
             'position' => 1,
             'virtual' => false,
@@ -63,7 +75,7 @@ final class ProductCardInitialPriceRenderTest extends KernelTestCase
                 'isDefault' => true,
                 'promo' => true,
                 'newness' => false,
-                'productPrices' => [['price' => 25.0, 'promoPrice' => 20.0, 'currency' => 'EUR']],
+                'productPrices' => [['price' => 25.0, 'promoPrice' => 20.0, 'taxedPrice' => 30.0, 'taxedPromoPrice' => 24.0, 'currency' => 'EUR']],
                 'attributeCombinations' => [],
             ] + $pseExtra],
         ]]);

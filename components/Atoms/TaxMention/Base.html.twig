@@ -1,0 +1,3 @@
+{# @prop display TaxDisplay Which of the two amounts the figure beside it is: with or without the taxes #}
+{# Not a style written in the page: every price of the theme carries its mention through here, so the wording, the weight and the screen reader text change in one place. The no-break space is the gap between the amount and the mention: it belongs to the text, so a reader, a screen reader or a script extracting the text of the price finds the two apart. #}
+&nbsp;<small class="{{ ('TaxMention ' ~ attributes.render('class'))|tailwind_merge }}" data-tax-display="{{ this.display.value }}" {{ attributes.without('class') }}>{{ this.display|tax_mention }}</small>

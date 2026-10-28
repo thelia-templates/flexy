@@ -70,7 +70,7 @@
                 {% if option.deliveryMode == enum('Thelia\\Domain\\Checkout\\Enum\\DeliveryMode').DELIVERY.value %}
                     <twig:Organisms:DeliveryMode:Home
                         title="{{ option.title }}"
-                        price="{{ option.postage ?? '0' }}"
+                        price="{{ option.price ?? '0' }}"
                         optionCode="{{ option.code }}"
                         :moduleId="option.moduleId"
                         :deliveryAddressId="this.deliveryAddressId"
@@ -81,7 +81,7 @@
                     <twig:Organisms:DeliveryMode:Store
                         title="{{ option.title }}"
                         description="{{ option.description ?? '' }}"
-                        price="{{ option.postage ?? '' }}"
+                        price="{{ option.price ?? '' }}"
                         optionCode="{{ option.code }}"
                         :moduleId="option.moduleId"
                         icon="reinsurance-store"
@@ -89,7 +89,7 @@
                 {% elseif option.deliveryMode == enum('Thelia\\Domain\\Checkout\\Enum\\DeliveryMode').PICKUP.value %}
                     <twig:Organisms:DeliveryMode:Pickup
                         title="{{ option.title }}"
-                        price="{{ option.postage ?? '' }}"
+                        price="{{ option.price ?? '' }}"
                         optionCode="{{ option.code }}"
                         :moduleId="option.moduleId"
                         icon="reinsurance-pickup"

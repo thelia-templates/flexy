@@ -16,6 +16,8 @@ namespace FlexyBundle\Components\Forms\OrderReturn;
 
 use FlexyBundle\Service\OrderProductResolver;
 use FlexyBundle\Service\OrderReturnRequestService;
+use FlexyBundle\Service\PriceDisplay;
+use FlexyBundle\Service\TaxDisplay;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 use Thelia\Model\OrderReturn as OrderReturnModel;
@@ -50,11 +52,15 @@ class Request
     /** @var list<string> */
     public array $resolutions = OrderReturnModel::RESOLUTIONS;
 
+    /** How the order is read: the display its buyer had when it was placed. */
+    public TaxDisplay $display = TaxDisplay::Taxed;
+
     public int $maxCommentLength = OrderReturnRequestService::MAX_COMMENT_LENGTH;
 
     public function __construct(
         private readonly DataAccessService $dataAccessService,
         private readonly OrderProductResolver $orderProductResolver,
+        private readonly PriceDisplay $priceDisplay,
     ) {
     }
 
@@ -68,6 +74,7 @@ class Request
 
         $order = $this->dataAccessService->resources('/api/front/account/orders/'.$orderId);
         $orderProducts = \is_array($order) ? ($order['orderProducts'] ?? []) : [];
+        $this->display = $this->priceDisplay->forOrder(\is_array($order) ? $order : []);
 
         // Only the lines the server says are still returnable ever reach the form. A line
         // left out here is a line the browser cannot name back, and one it names anyway is

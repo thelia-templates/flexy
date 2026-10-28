@@ -39,6 +39,9 @@ class Home
     #[LiveProp(updateFromParent: true)]
     public string $title = '';
 
+    /** Read by the template of the base card: the checkout does not hand one over to this mode. */
+    public string $description = '';
+
     #[LiveProp(updateFromParent: true)]
     public string $price = '';
 

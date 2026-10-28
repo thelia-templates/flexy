@@ -79,10 +79,15 @@ Promo Code: Code promo
 No Promo Code: Pas de code promo
 Gift Card: Carte cadeau
 No Gift Card: Pas de carte cadeau
-Total (including VAT): Total (TVA incluse)
 Total: Total
 Taxes of: Taxes de
 included: incluses
+# Mention written beside a price (Atoms/TaxMention): with or without the taxes
+incl. tax: TTC
+excl. tax: HT
+Total excl. tax: Total HT
+VAT: TVA
+Total incl. tax to pay: Total TTC à payer
 Before placing your order: Avant de passer commande
 Read: Lire
 Read %consent%: 'Lire : %consent%'
@@ -311,7 +316,6 @@ Get our last news and promo: Suivez nos dernières actualités & promotions
 Register to our newsletter: Incrivez vous à notre newsletter
 
 Quote N°: Devis N°
-Subtotal without taxes: Sous-total HT
 Your login: Vos identifiants
 Your informations: Vos informations
 Schedules: Horaires
@@ -656,3 +660,5 @@ Too many payments with a saved payment method in a short time. Please try again 
 'You seem to be in %country%.': 'Pays détecté : %country%.'
 'See prices for %country%': 'Voir les prix (%country%)'
 'Preview: this page is not online as shown.': "Prévisualisation : cette page n'est pas en ligne telle quelle."
+# Checkout: the core refused the payment because a price moved since the cart was read
+The prices of your cart have changed. Check your cart before paying.: Les prix de votre panier ont changé. Vérifiez votre panier avant de payer.

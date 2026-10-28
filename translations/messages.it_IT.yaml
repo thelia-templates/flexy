@@ -146,3 +146,11 @@ Currency: Valuta
 Close: Chiudi
 'You seem to be in %country%.': 'Sembra che tu sia in %country%.'
 'See prices for %country%': 'Vedi i prezzi per %country%'
+# Mention written beside a price (Atoms/TaxMention): with or without the taxes
+incl. tax: IVA incl.
+excl. tax: IVA escl.
+Total excl. tax: Totale IVA esclusa
+VAT: IVA
+Total incl. tax to pay: Totale IVA inclusa da pagare
+# Checkout: the core refused the payment because a price moved since the cart was read
+The prices of your cart have changed. Check your cart before paying.: I prezzi del tuo carrello sono cambiati. Controlla il carrello prima di pagare.

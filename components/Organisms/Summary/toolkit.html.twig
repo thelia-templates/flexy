@@ -1,8 +1,44 @@
+{# Orders as the front API publishes them, the amounts in both forms: the goods before the discount
+   untaxed, the goods after it, the delivery, the discount and the total, with and without their taxes. #}
+{% set sold = {
+    totalAmountWithoutTaxes: 100.0, totalAmountWithoutTaxesAfterDiscount: 100.0, totalAmountWithTaxesAfterDiscount: 120.0,
+    totalShippingWithTaxes: 6.0, totalShippingWithoutTaxes: 5.0, postageTax: 1.0,
+    amountDiscountWithTaxes: 0.0, amountDiscountWithoutTaxes: 0.0, totalTaxAmount: 21.0, totalAmount: 126.0, vatExempted: false, orderProducts: [],
+} %}
+{% set untaxedOrder = sold|merge({customerGroupDisplayTaxedPrice: false}) %}
+{% set discountedOrder = sold|merge({
+    amountDiscountWithTaxes: 12.0, amountDiscountWithoutTaxes: 10.0,
+    totalAmountWithoutTaxesAfterDiscount: 90.0, totalAmountWithTaxesAfterDiscount: 108.0, totalTaxAmount: 19.0, totalAmount: 114.0,
+}) %}
+{% set discountedUntaxedOrder = discountedOrder|merge({customerGroupDisplayTaxedPrice: false}) %}
+
 <div class="Story">
 <div class="Story-section">
     <h4 class="Story-title">Mini (LiveComponent — total and item count of the session cart, shown in the checkout steps bar)</h4>
     <div class="Story-stage Story-stage--narrow">
         <twig:Organisms:Summary:Mini />
+    </div>
+</div>
+
+<div class="Story-section">
+    <h4 class="Story-title">Order (totals of a placed order, read the way the order was sold)</h4>
+    <div class="Story-grid Story-grid--2">
+        <div class="Story-col">
+            <span class="Story-label">sold with the taxes</span>
+            <twig:Organisms:Summary:Order :order="sold" />
+        </div>
+        <div class="Story-col">
+            <span class="Story-label">sold without the taxes</span>
+            <twig:Organisms:Summary:Order :order="untaxedOrder" />
+        </div>
+        <div class="Story-col">
+            <span class="Story-label">sold with the taxes, with a discount</span>
+            <twig:Organisms:Summary:Order :order="discountedOrder" />
+        </div>
+        <div class="Story-col">
+            <span class="Story-label">sold without the taxes, with a discount: the total without taxes, the taxes, then the total to pay</span>
+            <twig:Organisms:Summary:Order :order="discountedUntaxedOrder" />
+        </div>
     </div>
 </div>
 </div>

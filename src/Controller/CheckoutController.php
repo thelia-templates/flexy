@@ -33,6 +33,7 @@ use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\HttpKernel\Exception\RedirectException;
 use Thelia\Domain\Cart\CartFacade;
+use Thelia\Domain\Cart\Exception\CartPricesChangedException;
 use Thelia\Domain\Cart\Service\CartGuard;
 use Thelia\Domain\Checkout\CheckoutFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
@@ -389,6 +390,15 @@ class CheckoutController extends FlexyController
             $this->addFlash('error', $e->getMessage());
 
             throw new RedirectException($routes->pathOfTheFirstIncompleteStep($cart), Response::HTTP_FOUND, $e->getMessage());
+        } catch (CartPricesChangedException) {
+            // The price of a line moved between the cart the buyer read and the payment (their
+            // group changed, a price rule or an operation started or ended). The core priced the
+            // lines again before refusing and wrote no order: the cart shows the new prices, and
+            // the buyer decides on those. Before the generic refusal below, which it is a case of,
+            // and with a wording of the theme rather than the core's.
+            $this->addFlash('error', $this->translator->trans('The prices of your cart have changed. Check your cart before paying.'));
+
+            throw new RedirectException($routes->pathFor(CheckoutStep::CODE_CART), Response::HTTP_FOUND);
         } catch (CheckoutException $e) {
             // A refusal the theme knows nothing about: the step of a module (a minimum
             // order amount, an age check) refusing the cart at placement. Answered as the

@@ -43,6 +43,8 @@
 
 /* Other components are put on components layer : sublayers can be defined inside to allow further customization */
 @layer components {
+  @import "../../components/Atoms/TaxMention/Base.css";
+
   @import "../../components/Fields/Input/Base.css";
   @import "../../components/Fields/Input/Password.css";
   @import "../../components/Fields/Checkbox/Base.css";

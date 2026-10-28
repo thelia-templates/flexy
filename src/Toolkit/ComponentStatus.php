@@ -56,6 +56,19 @@ final class ComponentStatus
             // Components that will never be integrated, and whose story is dropped:
             // 'Organisms/Example' => self::HIDDEN,
 
+            // The mention beside every price (with or without the taxes), and the components whose
+            // price follows the customer group of the buyer.
+            'Atoms/TaxMention' => self::READY,
+            'Organisms/ProductCard' => self::READY,
+            'Fields/RangeSlider' => self::READY,
+            'Organisms/Summary' => self::READY,
+            'Organisms/QuickOrderTable' => self::READY,
+            'Organisms/DeliveryMode' => self::READY,
+            'Organisms/CartButton' => self::READY,
+            // The lines of a placed order, read in the display frozen on it: they pass it to the card of each line.
+            'Layouts/OrderProducts' => self::READY,
+            'Forms/OrderReturn' => self::READY,
+
             // The gift block of the checkout, shipped with the core feature it renders.
             'Organisms/GiftWrapping' => self::READY,
 

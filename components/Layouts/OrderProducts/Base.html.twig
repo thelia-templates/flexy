@@ -1,5 +1,5 @@
 {# @prop orderProducts array Order lines, resolved in one batch and handed to each card #}
-{# @prop order array|null The owning order, carried only to feed the per-line hook points #}
+{# @prop order array|null The owning order: it feeds the per-line hook points, and the display frozen on it (with or without the taxes) is the one every line is read in. Without it the lines are read taxed, as the orders placed before the customer groups were #}
 {# @prop downloadRoute string The route serving a virtual line's file. The account one by
    default; a page reached without an account passes its own, which is guarded by whatever
    let the visitor in — the account route would answer nothing to them. #}
@@ -14,6 +14,7 @@
 		:pse="line.pse"
 		:imageId="line.imageId"
 		currencyCode="{{ currencyCode }}"
+		:display="this.displayFor(order)"
 	/>
 	{# A virtual line carries its file only once the order is paid for, and only when a
 	   document was attached to it: `virtual` alone says the product was sold as a file,

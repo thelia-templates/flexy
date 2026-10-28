@@ -77,10 +77,15 @@ Promo Code: Gutscheincode
 No Promo Code: Kein Gutscheincode
 Gift Card: Geschenkkarte
 No Gift Card: Keine Geschenkkarte
-Total (including VAT): Gesamtsumme (inkl. MwSt.)
 Total: Gesamtsumme
 Taxes of: inkl.
 included: MwSt.
+# Mention written beside a price (Atoms/TaxMention): with or without the taxes
+incl. tax: inkl. MwSt.
+excl. tax: exkl. MwSt.
+Total excl. tax: Gesamtsumme netto
+VAT: MwSt.
+Total incl. tax to pay: Zu zahlende Gesamtsumme (brutto)
 Before placing your order: Bevor Sie Ihre Bestellung aufgeben
 Read: Lesen
 Read %consent%: 'Lesen: %consent%'
@@ -260,7 +265,6 @@ Get our last news and promo: Erhalten Sie unsere neuesten Nachrichten und Angebo
 Register to our newsletter: Melden Sie sich für unseren Newsletter an
 
 Quote N°: Angebot Nr.
-Subtotal without taxes: Zwischensumme netto
 Your login: Ihre Zugangsdaten
 Your informations: Ihre Angaben
 Quantity: Menge
@@ -623,3 +627,5 @@ Too many payments with a saved payment method in a short time. Please try again 
 'Expired (valid until %date%)': 'Abgelaufen (gültig bis %date%)'
 'You seem to be in %country%.': 'Sie scheinen sich in %country% zu befinden.'
 'See prices for %country%': 'Preise für %country% anzeigen'
+# Checkout: the core refused the payment because a price moved since the cart was read
+The prices of your cart have changed. Check your cart before paying.: Die Preise in Ihrem Warenkorb haben sich geändert. Prüfen Sie Ihren Warenkorb, bevor Sie bezahlen.

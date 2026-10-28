@@ -19,6 +19,7 @@ use FlexyBundle\Service\DeliveryAddressCopy;
 use FlexyBundle\Service\DeliveryDateBridge;
 use FlexyBundle\Service\DeliveryOptionChoice;
 use FlexyBundle\Service\GuestCheckoutGate;
+use FlexyBundle\Service\PriceDisplay;
 use Propel\Runtime\Exception\PropelException;
 use Psr\Log\LoggerInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -103,6 +104,7 @@ class Base
         private readonly GuestCheckoutGate $guestCheckoutGate,
         private readonly DeliveryDateBridge $deliveryDates,
         private readonly DeliveryAddressCopy $deliveryAddressCopy,
+        private readonly PriceDisplay $priceDisplay,
     ) {
     }
 
@@ -206,6 +208,7 @@ class Base
         $deliveryModulesWithOption = $this->shippingFacade->listValidMethods($cart);
         $locale = $this->langService->getLocale();
         $deliveryOptions = [];
+        $display = $this->priceDisplay->forVisitor();
 
         foreach ($deliveryModulesWithOption as $deliveryModuleWithOptionDTO) {
             $options = $deliveryModuleWithOptionDTO->getDeliveryModuleOption();
@@ -231,6 +234,8 @@ class Base
                     'moduleId' => $module->getId(),
                     'deliveryMode' => $module->getDeliveryMode(),
                     'postage' => $option->getPostage(),
+                    // What the buyer reads: the postage the carrier quoted, with or without its taxes.
+                    'price' => $this->priceDisplay->ofDeliveryOption($display, $option)?->amount,
                     // What the module tells the buyer about the option: the pickup hours of a
                     // store, the delay of a carrier. Plain text, escaped where it is printed.
                     'description' => self::descriptionOf($option),

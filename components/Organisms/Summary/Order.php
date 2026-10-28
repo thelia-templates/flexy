@@ -14,6 +14,9 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\Summary;
 
+use FlexyBundle\DTO\DisplayedPrice;
+use FlexyBundle\Service\PriceDisplay;
+use FlexyBundle\Service\TaxDisplay;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 /**
@@ -29,6 +32,43 @@ class Order
     /** The currency the order was placed in; the pages that do not say keep euros. */
     public string $currencyCode = 'EUR';
 
+    public function __construct(
+        private readonly PriceDisplay $priceDisplay,
+    ) {
+    }
+
+    /**
+     * How this order is read: the display its buyer's group had when it was placed, not the
+     * one the buyer has now.
+     */
+    public function getDisplay(): TaxDisplay
+    {
+        return $this->priceDisplay->forOrder($this->order);
+    }
+
+    public function getShipping(): DisplayedPrice
+    {
+        return $this->priceDisplay->orderShipping($this->getDisplay(), $this->order);
+    }
+
+    public function getDiscount(): DisplayedPrice
+    {
+        return $this->priceDisplay->orderDiscount($this->getDisplay(), $this->order);
+    }
+
+    public function getTotal(): DisplayedPrice
+    {
+        return $this->priceDisplay->orderTotal($this->getDisplay(), $this->order);
+    }
+
+    /**
+     * The goods before the discount, which the core publishes untaxed only.
+     */
+    public function getSubtotal(): DisplayedPrice
+    {
+        return $this->priceDisplay->untaxed($this->getGoodsUntaxedTotal());
+    }
+
     public function getItemCount(): int
     {
         $count = 0;
@@ -42,13 +82,13 @@ class Order
 
     /**
      * The services the shop invoiced beside the goods — a gift wrapping — each with what
-     * the buyer paid for it, tax included.
+     * the buyer paid for it, in the display the order is read in.
      *
      * Their wording is the one frozen on the order, not the one the shop shows today: a
      * merchant who has renamed or deleted the service since must not change what a placed
      * order reads.
      *
-     * @return list<array{title: string, taxed_total: float}>
+     * @return list<array{title: string, price: DisplayedPrice}>
      */
     public function getServices(): array
     {
@@ -61,10 +101,7 @@ class Order
 
             $services[] = [
                 'title' => (string) ($orderProduct['title'] ?? ''),
-                'taxed_total' => round(
-                    (float) ($orderProduct['unitTaxedPrice'] ?? 0) * (float) ($orderProduct['quantity'] ?? 1),
-                    2,
-                ),
+                'price' => $this->priceDisplay->orderServiceLine($this->getDisplay(), $orderProduct),
             ];
         }
 
@@ -75,23 +112,13 @@ class Order
      * The subtotal of the goods alone.
      *
      * The order totals count a service line exactly like a product line — which is the
-     * point of invoicing it as one — so the untaxed price of the services has to come back
-     * out here, or the summary would state them twice: once in the subtotal and once on
+     * point of invoicing it as one — so the summary reads the total the core publishes
+     * without the services, or it would state them twice: once in the subtotal and once on
      * their own line.
      */
     public function getGoodsUntaxedTotal(): float
     {
-        $servicesUntaxed = 0.0;
-
-        foreach ($this->order['orderProducts'] ?? [] as $orderProduct) {
-            if (!$this->isServiceLine($orderProduct)) {
-                continue;
-            }
-
-            $servicesUntaxed += (float) ($orderProduct['price'] ?? 0) * (float) ($orderProduct['quantity'] ?? 1);
-        }
-
-        return round((float) ($this->order['totalAmountWithoutTaxes'] ?? 0) - $servicesUntaxed, 2);
+        return (float) ($this->order['totalGoodsWithoutTaxes'] ?? 0);
     }
 
     /**
@@ -116,22 +143,35 @@ class Order
         return 'service' === ($orderProduct['lineType'] ?? 'product');
     }
 
+    /**
+     * What the taxes of the order come to, the postage included, so that the untaxed total
+     * and this amount add up to the total to pay.
+     */
     public function getTaxAmount(): float
     {
-        // totalAmount carries the shipping while totalAmountWithoutTaxes is the bare
-        // item subtotal: strip the shipping before reading the taxes out of the
-        // difference, or the postage shows up as an included tax.
-        return round(
-            (float) ($this->order['totalAmount'] ?? 0)
-            - (float) ($this->order['totalShippingWithTaxes'] ?? 0)
-            - (float) ($this->order['totalAmountWithoutTaxes'] ?? 0),
-            2,
-        );
+        return $this->priceDisplay->orderTaxAmount($this->order);
+    }
+
+    /**
+     * The order without its taxes, whatever the display it is read in: the figure of the
+     * summary of a buyer shown the prices untaxed.
+     */
+    public function getTotalWithoutTaxes(): DisplayedPrice
+    {
+        return $this->priceDisplay->orderTotal(TaxDisplay::Untaxed, $this->order);
+    }
+
+    /**
+     * What the buyer of an order read untaxed has to pay, with its taxes.
+     */
+    public function getTotalToPay(): DisplayedPrice
+    {
+        return $this->priceDisplay->orderTotal(TaxDisplay::Taxed, $this->order);
     }
 
     public function hasTax(): bool
     {
-        return 0.0 !== $this->getTaxAmount();
+        return $this->getDisplay()->isTaxed() && 0.0 !== $this->getTaxAmount();
     }
 
     public function hasDiscount(): bool

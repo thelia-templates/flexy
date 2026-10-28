@@ -167,8 +167,9 @@
                             {% endif %}
                         </td>
                         <td data-label="{{ 'Unit price'|trans }}" class="QuickOrderTable-price">
-                            {% if line and line.taxedUnitPrice is not null %}
-                                {{ line.taxedUnitPrice|format_currency(current_currency_code(), locale: lang_code) }}
+                            {% set unitPrice = line ? displayed_price(visitor_tax_display(), line.untaxedUnitPrice|default(null), line.taxedUnitPrice|default(null)) : null %}
+                            {% if unitPrice %}
+                                {{ unitPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}<twig:Atoms:TaxMention:Base :display="unitPrice.display" />
                             {% endif %}
                         </td>
                         <td data-label="{{ 'Status'|trans }}">

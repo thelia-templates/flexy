@@ -79,15 +79,19 @@
 				{# A price keeps its own order, so it carries dir="ltr" — on the inline span only.
 				   On the block it would re-resolve the block's own text-align: start and pin the
 				   figure to the left of a right-to-left card while the title stays on the right. #}
-				{% if this.showsInitialPrice %}
-					<div class="ProductCard-footerRight">
-						<div class="ProductCard-price"><span dir="ltr">{{ this.promoTaxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
-						<div class="ProductCard-originalPrice"><span dir="ltr">{{ this.taxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
-					</div>
-				{% elseif this.isPromo %}
-					<div class="ProductCard-price"><span dir="ltr">{{ this.promoTaxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
-				{% else %}
-					<div class="ProductCard-price"><span dir="ltr">{{ this.taxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
+				{# The mention follows every figure: the price a buyer reads is with or without the taxes
+				   according to its group, and the card says which. #}
+				{% if this.displayedPrice %}
+					{% if this.showsInitialPrice %}
+						<div class="ProductCard-footerRight">
+							<div class="ProductCard-price"><span dir="ltr">{{ this.displayedPromoPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.displayedPromoPrice.display" /></div>
+							<div class="ProductCard-originalPrice"><span dir="ltr">{{ this.displayedPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
+						</div>
+					{% elseif this.isPromo %}
+						<div class="ProductCard-price"><span dir="ltr">{{ this.displayedPromoPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.displayedPromoPrice.display" /></div>
+					{% else %}
+						<div class="ProductCard-price"><span dir="ltr">{{ this.displayedPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.displayedPrice.display" /></div>
+					{% endif %}
 				{% endif %}
 			</div>
 			{% if this.runningSaleTag and this.runningSaleTag.shouldDisplayCountdown and this.runningSaleTag.countdownRemainingSeconds is not null %}

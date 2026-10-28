@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\GiftWrapping;
 
+use FlexyBundle\DTO\DisplayedPrice;
+use FlexyBundle\Service\PriceDisplay;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -87,6 +89,7 @@ class Base
         // the theme catalogue; TranslatorInterface autowires to Thelia's own Translator.
         #[Autowire(service: 'translator')]
         private readonly TranslatorInterface $translator,
+        private readonly PriceDisplay $priceDisplay,
     ) {
     }
 
@@ -124,7 +127,7 @@ class Base
      * The wording comes out as plain text and is printed escaped, for the reason the
      * consent wording is: it is written in the back office and shown on the payment page.
      *
-     * @return list<array{id: int, title: string, description: string, taxed_price: float, free: bool, chosen: bool}>
+     * @return list<array{id: int, title: string, description: string, price: DisplayedPrice, free: bool, chosen: bool}>
      */
     public function getWrappings(): array
     {
@@ -133,15 +136,18 @@ class Base
         $state = $this->taxEngine->getDeliveryState();
 
         $wrappings = [];
+        $display = $this->priceDisplay->forVisitor();
 
         foreach ($this->giftWrappingProvider->activeGiftWrappings() as $giftWrapping) {
             $id = (int) $giftWrapping->getId();
+            $taxedPrice = $this->giftWrappingProvider->taxedPrice($giftWrapping, $country, $state);
 
             $wrappings[] = [
                 'id' => $id,
                 'title' => $this->giftWrappingProvider->title($giftWrapping, $locale),
                 'description' => $this->giftWrappingProvider->description($giftWrapping, $locale),
-                'taxed_price' => $this->giftWrappingProvider->taxedPrice($giftWrapping, $country, $state),
+                // What the buyer reads: the price of the service as the merchant set it, or with its taxes.
+                'price' => $this->priceDisplay->pick($display, $this->giftWrappingProvider->untaxedPrice($giftWrapping), $taxedPrice),
                 'free' => $giftWrapping->isFree(),
                 'chosen' => $id === $this->giftWrappingId,
             ];

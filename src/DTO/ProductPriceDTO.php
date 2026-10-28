@@ -19,6 +19,12 @@ class ProductPriceDTO
     public string $currency = '';
     public float $price = 0.0;
     public ?float $promoPrice = null;
+    /**
+     * The same two prices with their taxes, as the front API publishes them for the sale
+     * element of a visitor: null where the API does not (a core that predates them).
+     */
+    public ?float $taxedPrice = null;
+    public ?float $taxedPromoPrice = null;
 
     public static function fromArray(array $data): self
     {
@@ -32,6 +38,9 @@ class ProductPriceDTO
 
         $dto->price = isset($data['price']) ? (float) $data['price'] : 0.0;
         $dto->promoPrice = array_key_exists('promoPrice', $data) ? (float) $data['promoPrice'] : null;
+
+        $dto->taxedPrice = isset($data['taxedPrice']) ? (float) $data['taxedPrice'] : null;
+        $dto->taxedPromoPrice = isset($data['taxedPromoPrice']) ? (float) $data['taxedPromoPrice'] : null;
 
         return $dto;
     }

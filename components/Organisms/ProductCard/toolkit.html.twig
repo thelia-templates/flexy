@@ -1,3 +1,7 @@
+{# The stories that carry their own product data carry the untaxed prices only (the core publishes the
+   taxed ones beside them, `taxedPrice` and `taxedPromoPrice`), so they are drawn untaxed: the figure is the
+   one of the data. The stories of a real product (productId) read the display of the visitor. #}
+{% set untaxed = enum('FlexyBundle\\Service\\TaxDisplay').Untaxed %}
 {% set pse        = {id: 1, isDefault: true, promo: false, newness: false, productPrices: [{price: 25.00, promoPrice: 20.00, currency: 'EUR'}], attributeCombinations: []} %}
 {% set psePromo   = {id: 1, isDefault: true, promo: true,  newness: false, productPrices: [{price: 25.00, promoPrice: 18.50, currency: 'EUR'}], attributeCombinations: []} %}
 {% set pseNew     = {id: 1, isDefault: true, promo: false, newness: true,  productPrices: [{price: 25.00, promoPrice: 20.00, currency: 'EUR'}], attributeCombinations: []} %}
@@ -26,47 +30,71 @@
 
             <div class="Story-col">
                 <span class="Story-label">New tag</span>
-                <twig:Organisms:ProductCard:Base :product="base|merge({productSaleElements: [pseNew]})" />
+                <twig:Organisms:ProductCard:Base :product="base|merge({productSaleElements: [pseNew]})" :display="untaxed" />
             </div>
 
             <div class="Story-col">
                 <span class="Story-label">with discount</span>
-                <twig:Organisms:ProductCard:Base :product="base|merge({productSaleElements: [psePromo]})" />
+                <twig:Organisms:ProductCard:Base :product="base|merge({productSaleElements: [psePromo]})" :display="untaxed" />
             </div>
 
             <div class="Story-col">
                 <span class="Story-label">New + discount</span>
-                <twig:Organisms:ProductCard:Base :product="base|merge({productSaleElements: [pseNewPromo]})" />
+                <twig:Organisms:ProductCard:Base :product="base|merge({productSaleElements: [pseNewPromo]})" :display="untaxed" />
             </div>
 
             <div class="Story-col">
                 <span class="Story-label">color variants</span>
-                <twig:Organisms:ProductCard:Base :product="withColors" />
+                <twig:Organisms:ProductCard:Base :product="withColors" :display="untaxed" />
             </div>
 
             <div class="Story-col">
                 <span class="Story-label">rated (4.5, 12 reviews)</span>
-                <twig:Organisms:ProductCard:Base :product="rated" />
+                <twig:Organisms:ProductCard:Base :product="rated" :display="untaxed" />
             </div>
 
             <div class="Story-col">
                 <span class="Story-label">not rated: no stars, no zero</span>
-                <twig:Organisms:ProductCard:Base :product="base" />
+                <twig:Organisms:ProductCard:Base :product="base" :display="untaxed" />
             </div>
 
             <div class="Story-col">
                 <span class="Story-label">rated, with colors and a discount</span>
-                <twig:Organisms:ProductCard:Base :product="rated|merge({ProductColor: withColors.ProductColor, productSaleElements: [psePromo]})" />
+                <twig:Organisms:ProductCard:Base :product="rated|merge({ProductColor: withColors.ProductColor, productSaleElements: [psePromo]})" :display="untaxed" />
             </div>
 
             <div class="Story-col">
                 <span class="Story-label">wishlist (not added)</span>
-                <twig:Organisms:ProductCard:Base :product="base" wishButton />
+                <twig:Organisms:ProductCard:Base :product="base" :display="untaxed" wishButton />
             </div>
 
             <div class="Story-col">
                 <span class="Story-label">wishlist (added)</span>
-                <twig:Organisms:ProductCard:Base :product="base" wishButton inWishlist />
+                <twig:Organisms:ProductCard:Base :product="base" :display="untaxed" wishButton inWishlist />
+            </div>
+
+        </div>
+    </div>
+
+    {# ── Display of the prices ──────────────────────────────────────────── #}
+
+    <div class="Story-section">
+        <h4 class="Story-title">Prices by customer group</h4>
+        <div class="Story-grid Story-grid--4 Story-stage">
+
+            <div class="Story-col">
+                <span class="Story-label">group shown prices without taxes</span>
+                <twig:Organisms:ProductCard:Base :product="base" :display="untaxed" />
+            </div>
+
+            <div class="Story-col">
+                <span class="Story-label">group shown prices without taxes, with discount</span>
+                <twig:Organisms:ProductCard:Base :product="base|merge({productSaleElements: [psePromo]})" :display="untaxed" />
+            </div>
+
+            <div class="Story-col">
+                <span class="Story-label">group shown prices with taxes (real data, the taxes of the shop)</span>
+                <twig:Organisms:ProductCard:Base productId="1" :display="enum('FlexyBundle\\Service\\TaxDisplay').Taxed" />
             </div>
 
         </div>
@@ -86,14 +114,15 @@
                     productSaleElementsRef: 'REF-001',
                     quantity: 2,
                     wasInPromo: false,
-                    price: 25.99
+                    price: 25.99,
+                    unitTaxedPrice: 31.19
                 }" />
             </div>
 
             <div class="Story-col">
                 <span class="Story-label">without discount</span>
                 <twig:Organisms:ProductCard:Order
-                    :orderProduct="{productId: 99999, productSaleElementsId: 99999, productSaleElementsRef: 'REF-001', quantity: 2, wasInPromo: false, price: 25.99}"
+                    :orderProduct="{productId: 99999, productSaleElementsId: 99999, productSaleElementsRef: 'REF-001', quantity: 2, wasInPromo: false, price: 25.99, unitTaxedPrice: 31.19}"
                     :product="orderProduct"
                     :pse="orderPse"
                 />
@@ -102,7 +131,17 @@
             <div class="Story-col">
                 <span class="Story-label">with discount</span>
                 <twig:Organisms:ProductCard:Order
-                    :orderProduct="{productId: 99999, productSaleElementsId: 99999, productSaleElementsRef: 'REF-001', quantity: 1, wasInPromo: true, price: 49.00, promoPrice: 29.99}"
+                    :orderProduct="{productId: 99999, productSaleElementsId: 99999, productSaleElementsRef: 'REF-001', quantity: 1, wasInPromo: true, price: 49.00, promoPrice: 29.99, unitTaxedPrice: 35.99, unitTaxedPriceBeforePromotion: 58.80}"
+                    :product="orderProduct"
+                    :pse="orderPse"
+                />
+            </div>
+
+            <div class="Story-col">
+                <span class="Story-label">with discount, order read untaxed</span>
+                <twig:Organisms:ProductCard:Order
+                    :orderProduct="{productId: 99999, productSaleElementsId: 99999, productSaleElementsRef: 'REF-001', quantity: 1, wasInPromo: true, price: 49.00, promoPrice: 29.99, unitTaxedPrice: 35.99, unitTaxedPriceBeforePromotion: 58.80}"
+                    :display="enum('FlexyBundle\\Service\\TaxDisplay').Untaxed"
                     :product="orderProduct"
                     :pse="orderPse"
                 />
@@ -111,7 +150,7 @@
             <div class="Story-col">
                 <span class="Story-label">without quantity</span>
                 <twig:Organisms:ProductCard:Order
-                    :orderProduct="{productId: 99999, productSaleElementsId: 99999, productSaleElementsRef: 'REF-001', quantity: 0, wasInPromo: false, price: 12.50}"
+                    :orderProduct="{productId: 99999, productSaleElementsId: 99999, productSaleElementsRef: 'REF-001', quantity: 0, wasInPromo: false, price: 12.50, unitTaxedPrice: 15.00}"
                     :product="orderProduct"
                     :pse="orderPse"
                 />
@@ -133,17 +172,17 @@
 
             <div class="Story-col">
                 <span class="Story-label">without discount</span>
-                <twig:Organisms:ProductCard:Search :product="base" />
+                <twig:Organisms:ProductCard:Search :product="base" :display="untaxed" />
             </div>
 
             <div class="Story-col">
                 <span class="Story-label">with discount</span>
-                <twig:Organisms:ProductCard:Search :product="base|merge({productSaleElements: [psePromo]})" />
+                <twig:Organisms:ProductCard:Search :product="base|merge({productSaleElements: [psePromo]})" :display="untaxed" />
             </div>
 
             <div class="Story-col">
                 <span class="Story-label">long name, truncated by its column</span>
-                <twig:Organisms:ProductCard:Search :product="base|merge({i18ns: {title: 'Organic cotton t-shirt with a deliberately very long product name'}})" />
+                <twig:Organisms:ProductCard:Search :product="base|merge({i18ns: {title: 'Organic cotton t-shirt with a deliberately very long product name'}})" :display="untaxed" />
             </div>
 
         </div>

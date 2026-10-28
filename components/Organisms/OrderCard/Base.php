@@ -14,7 +14,9 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\OrderCard;
 
+use FlexyBundle\DTO\DisplayedPrice;
 use FlexyBundle\Service\OrderProductResolver;
+use FlexyBundle\Service\PriceDisplay;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 use Thelia\Model\OrderQuery;
@@ -37,6 +39,7 @@ class Base
     public function __construct(
         private readonly DataAccessService $dataAccessService,
         private readonly OrderProductResolver $orderProductResolver,
+        private readonly PriceDisplay $priceDisplay,
     ) {
     }
 
@@ -52,6 +55,14 @@ class Base
     public function getOrder(): array
     {
         return $this->order;
+    }
+
+    /**
+     * What the order cost, in the display its buyer had when it was placed.
+     */
+    public function getTotal(): DisplayedPrice
+    {
+        return $this->priceDisplay->orderTotal($this->priceDisplay->forOrder($this->order), $this->order);
     }
 
     /**

@@ -15,7 +15,9 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Organisms\CartItem;
 
 use FlexyBundle\DTO\CartItemDto;
+use FlexyBundle\DTO\DisplayedPrice;
 use FlexyBundle\Service\CartStockService;
+use FlexyBundle\Service\PriceDisplay;
 use FlexyBundle\Service\ProductSaleElementsService;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Domain\Localization\Service\LangService;
@@ -35,6 +37,12 @@ class Base
     /** The promotion owning this line takes something off the cart because of it. */
     public bool $offeredIsDiscounted = false;
     public ?int $pseImageId = null;
+    /**
+     * The prices of the line, each as the buyer reads it: `price` and `promoPrice` per unit,
+     * `offered` and `offeredEffective` for the whole line of a gift.
+     *
+     * @var array<string, DisplayedPrice>
+     */
     public array $prices = [];
     public string $title = '';
     public ?string $desc = '';
@@ -46,6 +54,7 @@ class Base
         private readonly TaxEngine $taxEngine,
         private readonly LangService $langService,
         private readonly CartStockService $cartStockService,
+        private readonly PriceDisplay $priceDisplay,
     ) {
     }
 
@@ -60,8 +69,8 @@ class Base
         if ($this->isOffered) {
             // Set before anything is priced: the early return below still leaves a line
             // that renders as offered, and it must not print a figure that is not there.
-            $this->prices['offeredTaxedPrice'] = 0.0;
-            $this->prices['offeredEffectiveTaxedPrice'] = 0.0;
+            $this->prices['offered'] = new DisplayedPrice(0.0, $this->priceDisplay->forVisitor());
+            $this->prices['offeredEffective'] = $this->prices['offered'];
         }
 
         $cartItemModel = CartItemQuery::create()->findPk($cartItem->id);
@@ -80,25 +89,30 @@ class Base
         $this->desc = $product->getChapo();
         $taxCountry = $this->taxEngine->getDeliveryCountry();
 
+        $display = $this->priceDisplay->forVisitor();
+
         $this->prices = [
-            'taxedPrice' => $cartItemModel->getTaxedPrice($taxCountry),
-            'promoTaxedPrice' => $cartItemModel->getTaxedPromoPrice($taxCountry),
+            'price' => $this->priceDisplay->pick($display, (float) $cartItemModel->getPrice(), $cartItemModel->getTaxedPrice($taxCountry)),
+            'promoPrice' => $this->priceDisplay->pick($display, (float) $cartItemModel->getPromoPrice(), $cartItemModel->getTaxedPromoPrice($taxCountry)),
         ];
 
         if ($this->isOffered) {
             // The whole line, not one unit: the promotion prices what it gives away by the
-            // line, and a gift given by twos is struck and charged as one figure.
-            $offeredTotal = $cartItemModel->getTotalRealTaxedPrice($taxCountry);
-            // A discount worth more than the line is a discount worth the line: the shopper
-            // is never shown a negative price, whatever the promotion was configured with.
-            $offeredDiscount = min(max($cartItem->offeredTaxedDiscount, 0.0), $offeredTotal);
+            // line, and a gift given by twos is struck and charged as one figure. Every figure
+            // is the core's, bounded by what the line is worth: the shopper is never shown a
+            // negative price, whatever the promotion was configured with.
+            $discount = $display->isTaxed() ? $cartItem->offeredEffectiveTaxed : $cartItem->offeredEffectiveUntaxed;
 
             // Half a cent: below it the two figures print the same, and striking a price to
             // show the same price again says nothing.
-            $this->offeredIsDiscounted = $offeredDiscount >= 0.005;
+            $this->offeredIsDiscounted = $discount >= 0.005;
 
-            $this->prices['offeredTaxedPrice'] = $offeredTotal;
-            $this->prices['offeredEffectiveTaxedPrice'] = $offeredTotal - $offeredDiscount;
+            $this->prices['offered'] = $this->priceDisplay->pick($display, $cartItem->lineTotalUntaxed, $cartItem->lineTotalTaxed);
+            $this->prices['offeredEffective'] = $this->priceDisplay->pick(
+                $display,
+                $cartItem->lineTotalAfterDiscountUntaxed,
+                $cartItem->lineTotalAfterDiscountTaxed,
+            );
         }
 
         $this->promo = (bool) $cartItemModel->getPromo();

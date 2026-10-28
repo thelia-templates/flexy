@@ -14,8 +14,11 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\Summary;
 
+use FlexyBundle\DTO\DisplayedPrice;
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Service\DeliveryDateBridge;
+use FlexyBundle\Service\PriceDisplay;
+use FlexyBundle\Service\TaxDisplay;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
@@ -49,6 +52,7 @@ class Checkout
         private readonly DeliveryDateBridge $deliveryDates,
         private readonly CartFacade $cartFacade,
         private readonly LangService $langService,
+        private readonly PriceDisplay $priceDisplay,
     ) {
     }
 
@@ -63,7 +67,21 @@ class Checkout
     {
         $this->coupon->reconcileWithVatExemption();
 
+        $display = $this->priceDisplay->forVisitor();
+
         return [
+            // What the buyer reads: each figure is the one of the display of the group, the
+            // others stay as they are for the modules that read the summary through the hook.
+            'display' => $display,
+            'subtotal' => $this->pickFromCart($display, 'raw_total_price', 'raw_taxed_total_price'),
+            'postage' => $this->pickFromCart($display, 'untaxed_postage', 'taxed_postage'),
+            'gift_wrapping_price' => $this->pickFromCart($display, 'untaxed_gift_wrapping', 'taxed_gift_wrapping'),
+            'discount_price' => $this->pickFromCart($display, 'discount', 'taxed_discount'),
+            'total' => $this->pickFromCart($display, 'total_price', 'total_taxed_price'),
+            // What a buyer shown the prices untaxed reads at the foot of the summary: the cart
+            // before its taxes, the taxes (total_tax_amount, below), and what is to pay.
+            'total_without_taxes' => $this->pickFromCart(TaxDisplay::Untaxed, 'total_price', 'total_taxed_price'),
+            'total_to_pay' => $this->pickFromCart(TaxDisplay::Taxed, 'total_price', 'total_taxed_price'),
             'item_count' => $this->attributeAccessService->attributeCart('item_count'),
             'raw_taxed_total_price' => $this->attributeAccessService->attributeCart('raw_taxed_total_price'),
             'total_taxed_price' => $this->attributeAccessService->attributeCart('total_taxed_price'),
@@ -75,7 +93,7 @@ class Checkout
             'gift_wrapping_title' => $this->attributeAccessService->attributeCart('gift_wrapping_title'),
             'delivery_date' => $this->deliveryDates->chosenOn($this->cartFacade->getOrCreateFromSession(), $this->langService->getLocale()),
             'taxed_gift_wrapping' => $this->attributeAccessService->attributeCart('taxed_gift_wrapping'),
-            'discounts' => $this->readDiscounts(),
+            'discounts' => $this->readDiscounts($display),
             'coupons' => $this->attributeAccessService->attributeCoupon('coupon_list'),
             'invoice_vat_number' => $this->attributeAccessService->attributeCart('invoice_vat_number'),
             'vat_exemption_state' => $this->attributeAccessService->attributeCart('vat_exemption_state'),
@@ -94,9 +112,9 @@ class Checkout
      * A promotion taking nothing off — free shipping, a gift that ran out — carries no
      * figure and gets no line.
      *
-     * @return list<array{label: string, taxed_amount: float}>
+     * @return list<array{label: string, taxed_amount: float, amount: float, displayed: DisplayedPrice}>
      */
-    private function readDiscounts(): array
+    private function readDiscounts(TaxDisplay $display): array
     {
         $discounts = $this->attributeAccessService->attributeCart('discounts');
 
@@ -105,10 +123,9 @@ class Checkout
         }
 
         $lines = [];
-        $namedTotal = 0.0;
 
         foreach ($discounts as $discount) {
-            if (!\is_array($discount) || !isset($discount['taxed_amount'])) {
+            if (!\is_array($discount) || !isset($discount['taxed_amount'], $discount['amount'])) {
                 continue;
             }
 
@@ -118,28 +135,33 @@ class Checkout
                 continue;
             }
 
-            $namedTotal += $taxedAmount;
+            $displayed = $this->priceDisplay->pick($display, (float) $discount['amount'], $taxedAmount);
 
             $lines[] = [
                 'label' => trim((string) ($discount['label'] ?? '')),
                 'taxed_amount' => $taxedAmount,
+                'amount' => (float) $discount['amount'],
+                'displayed' => $displayed,
             ];
         }
 
-        if ([] === $lines) {
-            return [];
-        }
-
-        // Belt: the core prorates these amounts onto the discount the cart actually charges,
-        // so they add up. If they ever stop adding up, the summary shows the one global line
-        // rather than a set of figures that contradicts the total the shopper pays.
-        $taxedDiscount = (float) $this->attributeAccessService->attributeCart('taxed_discount');
-
-        if (abs($namedTotal - $taxedDiscount) > 0.01) {
-            return [];
-        }
-
+        // The core prorates these amounts onto the discount the cart actually charges (the last
+        // line takes the remainder), taxed and untaxed alike, so they add up to the discount line
+        // of the summary: the theme prints them and does not check the core's sum.
         return $lines;
+    }
+
+    /**
+     * One figure of the cart, in the display of the buyer: the core publishes the cart totals
+     * both with and without the taxes, the display only picks.
+     */
+    private function pickFromCart(TaxDisplay $display, string $untaxedAttribute, string $taxedAttribute): DisplayedPrice
+    {
+        return $this->priceDisplay->pick(
+            $display,
+            (float) $this->attributeAccessService->attributeCart($untaxedAttribute),
+            (float) $this->attributeAccessService->attributeCart($taxedAttribute),
+        );
     }
 
     /**

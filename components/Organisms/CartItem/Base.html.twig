@@ -96,30 +96,30 @@
                             {% if this.offeredIsDiscounted %}
                                 <div class="CartItem-price">
                                     <span class="sr-only">{{ 'This product is offered by a promotion, the discount is deducted in the order summary.'|trans }}</span>
-                                    <span dir="ltr">{{ this.prices.offeredEffectiveTaxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                                    <span dir="ltr">{{ this.prices.offeredEffective.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.prices.offeredEffective.display" />
                                 </div>
                                 <div class="CartItem-originalPrice">
-                                    <span dir="ltr">{{ this.prices.offeredTaxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                                    <span dir="ltr">{{ this.prices.offered.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>
                                 </div>
                             {% else %}
                                 <div class="CartItem-price">
                                     <span class="sr-only">{{ 'This product was added to your cart by a promotion.'|trans }}</span>
-                                    <span dir="ltr">{{ this.prices.offeredTaxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                                    <span dir="ltr">{{ this.prices.offered.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.prices.offered.display" />
                                 </div>
                             {% endif %}
                         </div>
                     {% elseif this.promo %}
                         <div class="CartItem-footerRight">
                             <div class="CartItem-price">
-                                <span dir="ltr">{{ this.prices.promoTaxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                                <span dir="ltr">{{ this.prices.promoPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.prices.promoPrice.display" />
                             </div>
                             <div class="CartItem-originalPrice">
-                                <span dir="ltr">{{ this.prices.taxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                                <span dir="ltr">{{ this.prices.price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>
                             </div>
                         </div>
                     {% else %}
                         <div class="CartItem-price">
-                            <span dir="ltr">{{ this.prices.taxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                            <span dir="ltr">{{ this.prices.price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.prices.price.display" />
                         </div>
                     {% endif %}
 

@@ -21,12 +21,15 @@
         {{ theme_hook('register.form.top') }}
 
         {{ form_start(form, {attr: {
-            action: returnUrl|default(false) ? path('customer_register_create', {redirect: returnUrl}) : path('customer_register_create'),
+            action: registrationToken|default(false)
+                ? (returnUrl|default(false) ? path('customer_group_register_create', {token: registrationToken, redirect: returnUrl}) : path('customer_group_register_create', {token: registrationToken}))
+                : (returnUrl|default(false) ? path('customer_register_create', {redirect: returnUrl}) : path('customer_register_create')),
             method: 'POST',
             class: 'flex flex-col gap-6 mb-3',
         }}) }}
         {{ form_row(form.success_url, {value: path('customer_informations')}) }}
-        {{ form_row(form.error_url, {value: path('customer_register')}) }}
+        {# Through a registration link the failure goes back to the link by the controller: the token is read from the URL only, never from a field. #}
+        {{ form_row(form.error_url, {value: registrationToken|default(false) ? '' : path('customer_register')}) }}
         {{ form_row(form.firstname) }}
         {{ form_row(form.lastname) }}
         {{ form_row(form.email) }}

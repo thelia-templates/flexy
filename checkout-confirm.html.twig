@@ -32,8 +32,9 @@
                 <p class="paragraph-3 mb-6">
                     <bdi>{{ recap.createdAt|format_date() }}</bdi>
                     &middot;
-                    {{ 'Total (including VAT)'|trans }}
-                    <strong><span dir="ltr" data-testid="order-recap-total">{{ recap.totalAmount|format_currency(recap.currencyCode, locale: lang_code) }}</span></strong>
+                    {% set recapTotal = order_total(recap) %}
+                    {{ 'Total'|trans }}
+                    <strong><span dir="ltr" data-testid="order-recap-total">{{ recapTotal.amount|format_currency(recap.currencyCode, locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="recapTotal.display" /></strong>
                 </p>
 
                 <div class="flex flex-col gap-2">

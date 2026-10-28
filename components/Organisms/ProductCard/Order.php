@@ -14,10 +14,13 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\ProductCard;
 
+use FlexyBundle\DTO\DisplayedPrice;
 use FlexyBundle\DTO\OrderProductDTO;
 use FlexyBundle\DTO\ProductDTO;
 use FlexyBundle\Service\OrderProductResolver;
+use FlexyBundle\Service\PriceDisplay;
 use FlexyBundle\Service\ProductImageResolver;
+use FlexyBundle\Service\TaxDisplay;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 
@@ -25,7 +28,15 @@ use Thelia\Api\Service\DataAccess\DataAccessService;
 class Order extends AbstractProductCard
 {
     public OrderProductDTO $orderProduct;
+    /** @var array<string, mixed> the line as the order publishes it */
+    private array $line = [];
     private ?array $pse = null;
+
+    /**
+     * How the order is read, the one frozen on it when it was placed: a line alone knows
+     * nothing of it, and an order placed before the groups existed was taxed.
+     */
+    public TaxDisplay $display = TaxDisplay::Taxed;
 
     /** The currency the order was placed in; the pages that do not say keep euros. */
     public string $currencyCode = 'EUR';
@@ -34,6 +45,7 @@ class Order extends AbstractProductCard
         DataAccessService $dataAccessService,
         ProductImageResolver $productImageResolver,
         private readonly OrderProductResolver $orderProductResolver,
+        private readonly PriceDisplay $priceDisplay,
     ) {
         parent::__construct($dataAccessService, $productImageResolver);
     }
@@ -49,6 +61,7 @@ class Order extends AbstractProductCard
         ?array $pse = null,
         ?int $imageId = null,
     ): void {
+        $this->line = $orderProduct;
         $this->orderProduct = OrderProductDTO::fromArray($orderProduct);
         $saleElementId = $this->orderProduct->productSaleElementsId;
 
@@ -65,6 +78,22 @@ class Order extends AbstractProductCard
         $this->pse = $pse ?? $this->dataAccessService->resources(
             '/api/front/product_sale_elements/' . $saleElementId
         );
+    }
+
+    /**
+     * What one unit of the line was charged, as the order froze it.
+     */
+    public function getDisplayedPrice(): DisplayedPrice
+    {
+        return $this->priceDisplay->orderLineUnit($this->display, $this->line);
+    }
+
+    /**
+     * What one unit of a line bought on promotion cost before it, struck beside the price paid.
+     */
+    public function getDisplayedOriginalPrice(): DisplayedPrice
+    {
+        return $this->priceDisplay->orderLineOriginalUnit($this->display, $this->line);
     }
 
     /**
