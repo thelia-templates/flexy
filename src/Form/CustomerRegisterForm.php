@@ -22,8 +22,10 @@ use Symfony\Component\Validator\Constraints;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\PasswordStrength;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Thelia\Core\Translation\Translator;
+use Thelia\Domain\Customer\Service\CustomerRegistrationLimiter;
 use Thelia\Form\BaseForm;
 use Thelia\Model\Base\CustomerQuery;
 
@@ -33,6 +35,18 @@ class CustomerRegisterForm extends BaseForm
         #[Autowire(service: 'translator')]
         protected readonly TranslatorInterface $translation,
     ) {
+    }
+
+    private ?CustomerRegistrationLimiter $registrationLimiter = null;
+
+    // A setter, not a constructor argument: the update form extends this one and calls the
+    // parent constructor, and it has no registration to count. Only the container calls it:
+    // a form built any other way (new, by the form factory's fallback) has no limiter, and
+    // verifyExistingEmail() refuses to validate rather than let attempts through uncounted.
+    #[Required]
+    public function setRegistrationLimiter(CustomerRegistrationLimiter $registrationLimiter): void
+    {
+        $this->registrationLimiter = $registrationLimiter;
     }
 
     protected function buildForm(): void
@@ -89,6 +103,24 @@ class CustomerRegisterForm extends BaseForm
 
     public function verifyExistingEmail($value, ExecutionContextInterface $context): void
     {
+        // An empty address names no account: nothing to probe, nothing to spend.
+        if (null === $value || '' === trim((string) $value)) {
+            return;
+        }
+
+        // Spent before the address is looked up, whether or not it names an account, and
+        // answered without a word about the address: a caller over budget must not be
+        // able to read from this form which addresses are registered.
+        if (null === $this->registrationLimiter) {
+            throw new \LogicException(\sprintf('%s needs its registration limiter to validate an address: build the form through the container, not with "new".', static::class));
+        }
+
+        if (!$this->registrationLimiter->allows((string) $value)) {
+            $context->addViolation($this->translation->trans('Too many attempts. Please try again later.'));
+
+            return;
+        }
+
         $customer = CustomerQuery::create()->findOneByEmail($value);
         if ($customer) {
             $context->addViolation($this->translation->trans('This email is already used'));
