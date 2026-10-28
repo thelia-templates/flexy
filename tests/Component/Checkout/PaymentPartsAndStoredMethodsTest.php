@@ -22,6 +22,7 @@ use Thelia\Core\Event\Payment\IsValidPaymentEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Domain\Checkout\Service\ConsentProvider;
 use Thelia\Domain\Payment\StoredPaymentMethodPayment;
+use FlexyBundle\Tests\Support\NonBalanceChargingTestPaymentModule;
 use Thelia\Model\Cart;
 use Thelia\Model\CartQuery;
 use Thelia\Model\ConsentQuery;
@@ -34,6 +35,8 @@ use Thelia\Model\ModuleQuery;
 use Thelia\Model\Order;
 use Thelia\Model\OrderPaymentPartQuery;
 use Thelia\Model\OrderQuery;
+use Thelia\Module\BalanceChargingPaymentModuleInterface;
+use Thelia\Module\BaseModule;
 use Thelia\Test\FixtureFactory;
 use Thelia\Test\WebIntegrationTestCase;
 use Thelia\Tests\Support\Flexy\CustomerSessionInjector;
@@ -68,6 +71,9 @@ final class PaymentPartsAndStoredMethodsTest extends WebIntegrationTestCase
 
     /** @var list<int> */
     private array $exhaustedCustomerIds = [];
+
+    /** @var list<int> */
+    private array $deactivatedModuleIds = [];
 
     protected function setUp(): void
     {
@@ -106,6 +112,7 @@ final class PaymentPartsAndStoredMethodsTest extends WebIntegrationTestCase
 
         $this->exhaustedCustomerIds = [];
 
+        $this->reactivateTheModules();
         $this->uninstallThePaymentModules(static::getContainer());
         $this->uninstallTheStoredMethodsPaymentModule(static::getContainer());
 
@@ -225,12 +232,14 @@ final class PaymentPartsAndStoredMethodsTest extends WebIntegrationTestCase
 
     public function testAPartThatNoProviderCanChargeTheBalanceOfIsToldToTheBuyer(): void
     {
+        $this->deactivateTheModulesThatChargeTheBalance();
         $this->installPaymentModule(InstantTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
+        $provider = $this->installPaymentModule(NonBalanceChargingTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
         InstantTestPaymentModule::$appliedAmount = '1.00';
         $this->readyCart(null);
-        // No module that can charge a balance is active: the shop's own ones cannot.
+        // No module that can charge a balance is active: the only provider left cannot.
         $balanceCapable = $this->getService(\FlexyBundle\Service\InstantPaymentParts::class);
-        self::assertFalse($balanceCapable->chargesTheBalance($this->moduleNamed('Cheque')), 'The scenario needs a provider that cannot charge a balance.');
+        self::assertFalse($balanceCapable->chargesTheBalance((int) $provider->getId()), 'The scenario needs a provider that cannot charge a balance.');
 
         $crawler = $this->requestThePaymentStep();
 
@@ -260,8 +269,9 @@ final class PaymentPartsAndStoredMethodsTest extends WebIntegrationTestCase
     {
         $this->installPaymentModule(InstantTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
         $this->installPaymentModule(BalanceChargingTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
+        $provider = $this->installPaymentModule(NonBalanceChargingTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
         InstantTestPaymentModule::$appliedAmount = '1.00';
-        $this->readyCart($this->moduleNamed('Cheque'));
+        $this->readyCart((int) $provider->getId());
 
         $crawler = $this->requestThePaymentStep();
 
@@ -333,7 +343,9 @@ final class PaymentPartsAndStoredMethodsTest extends WebIntegrationTestCase
 
     public function testAPartialPartLeavesTheBalanceToAProviderThatCanChargeIt(): void
     {
+        $this->deactivateTheModulesThatChargeTheBalance();
         $this->installPaymentModule(InstantTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
+        $this->installPaymentModule(NonBalanceChargingTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
         $balanceModule = $this->installPaymentModule(BalanceChargingTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
         InstantTestPaymentModule::$appliedAmount = '1.00';
         $cart = $this->readyCart((int) $balanceModule->getId());
@@ -356,9 +368,11 @@ final class PaymentPartsAndStoredMethodsTest extends WebIntegrationTestCase
 
     public function testAProviderThatCannotChargeABalanceIsRefusedBackToThePaymentStepWithAMessage(): void
     {
+        $this->deactivateTheModulesThatChargeTheBalance();
         $this->installPaymentModule(InstantTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
+        $provider = $this->installPaymentModule(NonBalanceChargingTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
         InstantTestPaymentModule::$appliedAmount = '1.00';
-        $cart = $this->readyCart($this->moduleNamed('Cheque'));
+        $cart = $this->readyCart((int) $provider->getId());
 
         $crawler = $this->requestThePaymentStep();
 
@@ -596,6 +610,46 @@ final class PaymentPartsAndStoredMethodsTest extends WebIntegrationTestCase
         $this->injector->setCart($cart);
 
         return $cart;
+    }
+
+    /**
+     * Takes out of the shop, for the length of the test, every active payment module that can
+     * charge a balance (the shop's own ones may, from one release to the next): what a scenario
+     * says about "no provider can charge it" must not depend on them. Put back by tearDown.
+     */
+    private function deactivateTheModulesThatChargeTheBalance(): void
+    {
+        $connection = $this->getPropelConnection();
+        $parts = $this->getService(\FlexyBundle\Service\InstantPaymentParts::class);
+
+        $rows = ModuleQuery::create()
+            ->filterByActivate(BaseModule::IS_ACTIVATED)
+            ->filterByType(BaseModule::PAYMENT_MODULE_TYPE)
+            ->find($connection);
+
+        foreach ($rows as $row) {
+            try {
+                $instance = $row->getPaymentModuleInstance(static::getContainer());
+            } catch (\InvalidArgumentException) {
+                continue;
+            }
+
+            if ($instance instanceof BalanceChargingPaymentModuleInterface) {
+                $row->setActivate(BaseModule::IS_NOT_ACTIVATED)->save($connection);
+                $this->deactivatedModuleIds[] = (int) $row->getId();
+            }
+        }
+
+        $parts->reset();
+    }
+
+    private function reactivateTheModules(): void
+    {
+        foreach ($this->deactivatedModuleIds as $moduleId) {
+            ModuleQuery::create()->findPk($moduleId, $this->getPropelConnection())?->setActivate(BaseModule::IS_ACTIVATED)->save($this->getPropelConnection());
+        }
+
+        $this->deactivatedModuleIds = [];
     }
 
     private function moduleNamed(string $code): int
