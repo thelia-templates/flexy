@@ -17,6 +17,9 @@ namespace FlexyBundle\Tests\Component\Checkout;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
+use FlexyBundle\Service\PaymentOptionChoiceStore;
 use Thelia\Core\Event\Order\OrderPaymentEvent;
 use Thelia\Core\Event\Payment\IsValidPaymentEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -61,6 +64,9 @@ final class PaymentPartsAndStoredMethodsTest extends WebIntegrationTestCase
     use UsesStoredMethodsPaymentModule;
 
     private const string COMPONENT = 'Organisms:Payment:Base';
+
+    /** @var list<array{group: string, values: list<string>}> */
+    private const array PICKED = [['group' => 'instalments', 'values' => ['three']]];
 
     private FixtureFactory $factory;
 
@@ -228,6 +234,54 @@ final class PaymentPartsAndStoredMethodsTest extends WebIntegrationTestCase
         $cart = $this->reread($cart);
         self::assertSame((int) $instant->getId(), $cart->getPaymentModuleId(), 'The means that pays the order is its module.');
         self::assertNull($cart->getCustomerPaymentMethodId(), 'The method stored through the provider does not follow.');
+    }
+
+    public function testTheOptionsPickedForAProviderAreLetGoWhenThePartsCoverTheOrderAtTheNextDraw(): void
+    {
+        [, , $storedModule] = $this->cartWithStoredMethods();
+        $this->installPaymentModule(InstantTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
+
+        $this->chooseTheModule($storedModule);
+        $this->seedThePaymentOptionChoices();
+        $this->requestThePaymentStep();
+        self::assertSame(self::PICKED, $this->paymentOptionChoicesOfTheSession(), 'The scenario needs the options in the session.');
+
+        InstantTestPaymentModule::$appliedAmount = '99999';
+        $this->requestThePaymentStep();
+
+        self::assertSame([], $this->paymentOptionChoicesOfTheSession(), 'The instant means took the place of the provider the options were picked for.');
+    }
+
+    public function testTheOptionsPickedForAProviderAreLetGoWhenThePartsChangeTheModule(): void
+    {
+        [, , $storedModule] = $this->cartWithStoredMethods();
+        $this->installPaymentModule(InstantTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
+
+        $this->chooseTheModule($storedModule);
+        $this->seedThePaymentOptionChoices();
+        $before = $this->requestThePaymentStep();
+        self::assertSame(self::PICKED, $this->paymentOptionChoicesOfTheSession(), 'The scenario needs the options in the session.');
+
+        InstantTestPaymentModule::$appliedAmount = '99999';
+        $component = $before->filter(\sprintf('[data-live-url-value][data-live-name-value="%s"]', self::COMPONENT))->first();
+        $this->liveStepOf($component, 'readThePartsAgain', []);
+
+        self::assertSame([], $this->paymentOptionChoicesOfTheSession());
+    }
+
+    public function testTheOptionsPickedAreKeptWhenThePartsLeaveTheModuleAlone(): void
+    {
+        [, , $storedModule] = $this->cartWithStoredMethods();
+        $this->installPaymentModule(InstantTestPaymentModule::class, static::getContainer(), $this->getPropelConnection());
+
+        $this->chooseTheModule($storedModule);
+        $this->seedThePaymentOptionChoices();
+        $before = $this->requestThePaymentStep();
+
+        $component = $before->filter(\sprintf('[data-live-url-value][data-live-name-value="%s"]', self::COMPONENT))->first();
+        $this->liveStepOf($component, 'readThePartsAgain', []);
+
+        self::assertSame(self::PICKED, $this->paymentOptionChoicesOfTheSession());
     }
 
     public function testAPartThatNoProviderCanChargeTheBalanceOfIsToldToTheBuyer(): void
@@ -553,6 +607,33 @@ final class PaymentPartsAndStoredMethodsTest extends WebIntegrationTestCase
             'input[data-live-action-param="chooseStoredMethod"][data-live-customer-payment-method-id-param="%d"]',
             (int) $methodId,
         ));
+    }
+
+    /**
+     * Puts options in the session of the buyer on the next request, as the options of the provider
+     * would be after a click: the options are written by a live action that needs a provider offering
+     * option groups, which the test modules do not.
+     */
+    private function seedThePaymentOptionChoices(): void
+    {
+        $seeded = false;
+
+        $this->listen(KernelEvents::REQUEST, static function (RequestEvent $event) use (&$seeded): void {
+            if ($seeded || !$event->isMainRequest() || !$event->getRequest()->hasSession()) {
+                return;
+            }
+
+            $seeded = true;
+            $event->getRequest()->getSession()->set(PaymentOptionChoiceStore::SESSION_KEY, self::PICKED);
+        }, -10);
+    }
+
+    /**
+     * @return list<array{group: string, values: list<string>}>
+     */
+    private function paymentOptionChoicesOfTheSession(): array
+    {
+        return $this->client->getRequest()->getSession()->get(PaymentOptionChoiceStore::SESSION_KEY, []);
     }
 
     private function requestThePaymentStep(): Crawler
