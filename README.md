@@ -168,6 +168,16 @@ window.addEventListener('addPseToCart', (event) => {
 });
 ```
 
+### Telling the customer they are talking with an AI
+
+A module whose interface lets a visitor or a customer talk with an AI (a chat, an assistant) shows the notice that article 50(1) of the EU AI Act asks for, above the first message:
+
+```twig
+<twig:Molecules:AiNotice:Base usage="mymodule.chat" />
+```
+
+`usage` is the identifier the module declared with `#[AsAiUsage]` (`transparency: AiTransparency::Interactive`, audience `public` or `customer`). The theme holds no compliance logic and no setting of its own: the Thelia core decides whether a notice is due and supplies its text in the current language (`locale="en_US"` forces another). Nothing is rendered when the usage is not interactive, is inactive, or when the merchant turned the notice off for it. An identifier the core does not know throws, so a typo is not a silent missing notice. The notice is a polite live region (`role="status"`) in the design system's informative message style; a `class` or `id` passed on the component lands on it.
+
 ### Listing a module's component in the toolkit
 
 The toolkit (`/toolkit`, served only while the kernel runs in debug) walks the `components/` directories of the template chain and nothing else. A module lists its own components by implementing `FlexyBundle\Toolkit\StoryProviderInterface`; autoconfiguration tags it, and the tag priority sets the order in the sidebar. Each story names the template the toolkit renders and the file "Show the code" reads:
