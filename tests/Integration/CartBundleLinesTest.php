@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Tests\Integration;
 
 use FlexyBundle\Components\Organisms\Cart\Base as Cart;
+use FlexyBundle\DTO\CartItemDto;
 use FlexyBundle\Service\CartStockService;
 use FlexyBundle\Tests\Support\BuildsBundles;
 use Propel\Runtime\Propel;
@@ -192,6 +193,86 @@ final class CartBundleLinesTest extends IntegrationTestCase
         preg_match('#data-testid="bundle-included".*?</ul>#s', $html, $list);
         self::assertStringNotContainsString('€', $list[0] ?? '');
         self::assertStringNotContainsString('$', $list[0] ?? '');
+    }
+
+    public function testABundleTheCatalogueStillHoldsIsOrderableAndKeepsItsPrice(): void
+    {
+        $this->cartWithABundle();
+        $item = $this->cart()->items[0];
+
+        self::assertTrue($item->bundleOrderable);
+
+        $html = $this->renderLine($item);
+
+        self::assertStringNotContainsString('data-cart-item-unorderable', $html);
+        self::assertStringContainsString('CartItem-price', $html);
+        self::assertStringContainsString('648.00', $html);
+        self::assertStringContainsString('data-testid="bundle-included"', $html);
+    }
+
+    public function testABundleTheCatalogueNoLongerHoldsIsToldOnItsLineWithNoPriceAndNoList(): void
+    {
+        [$example] = $this->cartWithABundle();
+        // A required component is deleted after the pack went into the cart: the stored price is the one of a pack that is gone.
+        $example['helmetProduct']->delete();
+
+        $item = $this->cart()->items[0];
+
+        self::assertFalse($item->bundleOrderable);
+
+        $html = $this->renderLine($item);
+
+        self::assertStringContainsString('data-cart-item-unorderable="true"', $html);
+        self::assertStringContainsString(\sprintf('The pack %s can no longer be ordered as it is in your cart. Please remove it and add it again.', $example['bundle']->getRef()), $html);
+        self::assertStringNotContainsString('CartItem-price', $html, 'No price is shown as valid.');
+        self::assertStringNotContainsString('648.00', $html);
+        self::assertStringNotContainsString('data-testid="bundle-included"', $html, 'The list of what is left is not the pack the shopper bought.');
+        self::assertStringNotContainsString('data-live-action-param="plus"', $html, 'The quantity of a pack that cannot be ordered is not changed.');
+        self::assertStringContainsString('Delete', $html, 'The way out is still there.');
+    }
+
+    public function testTheLineSaysTheRefusalTheCoreWordsAndFallsBackOnTheThemeSentence(): void
+    {
+        [$example] = $this->cartWithABundle();
+        $item = $this->cart()->items[0];
+        $item->bundleOrderable = false;
+
+        $item->bundleRefusal = 'Core wording of the refusal.';
+        $withCoreWording = $this->renderLine($item);
+
+        self::assertStringContainsString('Core wording of the refusal.', $withCoreWording);
+        self::assertStringNotContainsString('can no longer be ordered as it is in your cart', $withCoreWording);
+
+        $item->bundleRefusal = '';
+        $withoutCoreWording = $this->renderLine($item);
+
+        self::assertStringContainsString(\sprintf('The pack %s can no longer be ordered as it is in your cart.', $example['bundle']->getRef()), $withoutCoreWording);
+    }
+
+    public function testTheRefusalOfTheCoreTravelsFromTheCartToTheLine(): void
+    {
+        [$example] = $this->cartWithABundle();
+        $example['helmetProduct']->delete();
+
+        $item = $this->cart()->items[0];
+
+        self::assertFalse($item->bundleOrderable);
+        self::assertStringContainsString((string) $example['bundle']->getRef(), $item->bundleRefusal);
+    }
+
+    public function testACoreThatPredatesTheVerdictLeavesEveryLineOrderable(): void
+    {
+        self::assertTrue(CartItemDto::fromArray(['id' => 1])->bundleOrderable);
+        self::assertFalse(CartItemDto::fromArray(['id' => 1, 'bundleOrderable' => false])->bundleOrderable);
+    }
+
+    private function renderLine(CartItemDto $item): string
+    {
+        static::getContainer()->get('twig')->addGlobal('lang_code', 'en');
+        $renderer = static::getContainer()->get('ux.twig_component.component_renderer');
+        \assert($renderer instanceof ComponentRendererInterface);
+
+        return $renderer->createAndRender('Organisms:CartItem:Base', ['cartItem' => $item, 'index' => 0]);
     }
 
     /**

@@ -9,6 +9,17 @@
     {{ attributes.without('class') }}
     data-loading="addClass(opacity-50 pointer-events-none)"
 >
+    {# A pack the catalogue changed under: nothing of what the line stored is true any more, so no price and no
+       list of components are shown for it, only what to do. #}
+    {% if this.unorderableMessage != '' %}
+        <div class="flex paragraph-4 mb-2.5" role="alert" data-cart-item-unorderable="true">
+            <span class="w-5 h-5 me-1">
+                {{ ux_icon('error') }}
+            </span>
+            <span>{{ this.unorderableMessage }}</span>
+        </div>
+    {% endif %}
+
     {% if this.outOfStock or this.insufficientStock %}
         <div class="flex paragraph-4 mb-2.5">
             <span class="w-5 h-5 me-1">
@@ -83,7 +94,7 @@
 
                 {# The components of a bundle line, for one bundle: no price and no control, the price of the
                    pack is the one of the line. Nothing for any other line. #}
-                {% if this.cartItem.bundleComponents is not empty %}
+                {% if this.cartItem.bundleComponents is not empty and this.unorderableMessage == '' %}
                     <twig:Molecules:BundleIncluded:Base :components="this.cartItem.bundleComponents" class="my-2" />
                 {% endif %}
 
@@ -97,7 +108,9 @@
                        takes off covers the whole line. Given outright the line falls to zero,
                        given at a discount it keeps what is left to pay — the price the gift
                        would have cost is struck beside it either way. #}
-                    {% if this.isOffered %}
+                    {% if this.unorderableMessage != '' %}
+                        {# No price: the one stored with the line is the one of a pack that no longer exists. #}
+                    {% elseif this.isOffered %}
                         <div class="CartItem-footerRight">
                             {% if this.offeredIsDiscounted %}
                                 <div class="CartItem-price">
@@ -133,7 +146,7 @@
                         <div class="CartItem-unavailable">
                             {{ 'Unavailable'|trans }}
                         </div>
-                    {% elseif not readOnly %}
+                    {% elseif this.unorderableMessage == '' and not readOnly %}
                         <div class="CartItem-quantity" {{ stimulus_controller('Organisms--CartItem--quantity') }}>
                             <button
                                 type="button"

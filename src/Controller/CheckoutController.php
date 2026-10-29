@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Controller;
 
+use FlexyBundle\Service\BundleLines;
 use FlexyBundle\Service\CartStockService;
 use FlexyBundle\Service\CheckoutModuleStepScreen;
 use FlexyBundle\Service\CheckoutStepRouteResolver;
@@ -36,6 +37,8 @@ use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Cart\Service\CartGuard;
 use Thelia\Domain\Checkout\CheckoutFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
+use Thelia\Domain\Checkout\DTO\CheckoutViolation;
+use Thelia\Domain\Checkout\Enum\CheckoutViolationCode;
 use Thelia\Domain\Checkout\Exception\CheckoutException;
 use Thelia\Domain\Checkout\Exception\EmptyCartException;
 use Thelia\Domain\Checkout\Exception\GuestCheckoutNotAllowedException;
@@ -145,7 +148,7 @@ class CheckoutController extends FlexyController
         // On a one-page checkout the delivery is a section of the cart page, so this
         // route has no screen of its own left to serve.
         if ($routes->isOnePage() || !$progression->isReachable($cart, CheckoutStep::CODE_DELIVERY)) {
-            return $this->generateRedirect($routes->pathOfTheFirstIncompleteStep($cart));
+            return $this->redirectToTheFirstIncompleteStep($cart, $progression, $routes);
         }
 
         return $this->render('checkout-delivery', [
@@ -173,7 +176,7 @@ class CheckoutController extends FlexyController
         $cart = $cartFacade->getOrCreateFromSession();
 
         if ($routes->isOnePage()) {
-            return $this->generateRedirect($routes->pathOfTheFirstIncompleteStep($cart));
+            return $this->redirectToTheFirstIncompleteStep($cart, $progression, $routes);
         }
 
         $checkoutFacade->settleVirtualDeliveryIfNeeded($cart);
@@ -185,7 +188,7 @@ class CheckoutController extends FlexyController
         // own. The rule is enforced on leaving the step instead, by
         // CheckoutValidationService, and surfaced early by the NextButton.
         if (!$progression->isReachable($cart, CheckoutStep::CODE_PAYMENT)) {
-            return $this->generateRedirect($routes->pathOfTheFirstIncompleteStep($cart));
+            return $this->redirectToTheFirstIncompleteStep($cart, $progression, $routes);
         }
 
         return $this->render('checkout-payment', [
@@ -194,6 +197,36 @@ class CheckoutController extends FlexyController
             'next_step_url' => $routes->pathAfter($cart, CheckoutStep::CODE_PAYMENT),
             'previous_step_url' => $routes->pathBefore($cart, CheckoutStep::CODE_PAYMENT),
         ]);
+    }
+
+    /**
+     * Back to the step that still has something to do, saying why when it is the cart that refuses.
+     *
+     * A redirect carries no wording of its own: the buyer who clicks "Order" and lands on the cart again, with a
+     * pack the catalogue changed under, would be left with a button that does nothing. The refusal of the cart
+     * step is flashed here, the one place the delivery, payment and module step screens send the buyer back
+     * from. An empty cart says so on the cart page itself, and the refusals of the later steps are the screens
+     * that settle them.
+     *
+     * @throws PropelException
+     */
+    private function redirectToTheFirstIncompleteStep(Cart $cart, CheckoutProgressionService $progression, CheckoutStepRouteResolver $routes): Response
+    {
+        $violation = BundleLines::firstViolationOf($progression, $cart);
+
+        if (null !== $violation && CheckoutStep::CODE_CART === $violation->stepCode && !$this->isEmptyCartViolation($violation)) {
+            // The code is compared as written: a core that predates the bundles has no case of that name to read it from.
+            $this->addFlash('error', 'bundle-line-not-orderable' === $violation->code
+                ? BundleLines::notOrderableMessage($this->translator, (string) ($violation->details['productReference'] ?? ''))
+                : $violation->message);
+        }
+
+        return $this->generateRedirect($routes->pathOfTheFirstIncompleteStep($cart));
+    }
+
+    private function isEmptyCartViolation(CheckoutViolation $violation): bool
+    {
+        return CheckoutViolationCode::CartEmpty->value === $violation->code;
     }
 
     /**
@@ -229,7 +262,7 @@ class CheckoutController extends FlexyController
         }
 
         if ($routes->isOnePage() || null === $component || '' === $component || !$progression->isReachable($cart, $code)) {
-            return $this->generateRedirect($routes->pathOfTheFirstIncompleteStep($cart));
+            return $this->redirectToTheFirstIncompleteStep($cart, $progression, $routes);
         }
 
         return $this->render('checkout-step', [
@@ -363,10 +396,7 @@ class CheckoutController extends FlexyController
             // puts it together again from the cart, which is where this goes. The core words it in the shop's own catalogue,
             // which this theme does not feed: the sentence is read from the theme's, with the reference of the pack.
             // (A core that predates the bundles never raises it: a catch of a class that does not exist is inert.)
-            $message = $this->translator->trans(
-                'The pack %ref can no longer be ordered as it is in your cart. Please remove it and add it again.',
-                ['%ref' => $e->productReference],
-            );
+            $message = BundleLines::notOrderableMessage($this->translator, $e->productReference);
             $this->addFlash('error', $message);
 
             throw new RedirectException($routes->pathFor(CheckoutStep::CODE_CART), Response::HTTP_FOUND, $message);
