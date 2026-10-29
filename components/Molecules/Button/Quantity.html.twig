@@ -34,15 +34,16 @@
 <div class="{{ buttonQuantity.apply({color}|filter(value => value is not null), attributes.render('class')) }} "  {{ attributes.defaults(stimulus_controller('Molecules--Button--quantity', controllerValues)).without('class', 'button:color') }} >
     <twig:Molecules:Button:Base {{...attributes.nested('button')}} aria-label="{{ 'Decrease quantity'|trans }}" disabled="{{ disabled }}" {{...stimulus_action('Molecules--Button--quantity', 'decrement')}}>-</twig:Molecules:Button:Base>
     <input
-        {% if byMeasure %}type="text" inputmode="decimal" autocomplete="off"{% else %}type="number" inputmode="numeric" step="{{ step }}"{% endif %}
+        {% if byMeasure %}type="text" inputmode="decimal" autocomplete="off" size="4"{% else %}type="number" inputmode="numeric" step="{{ step }}"{% endif %}
         class="{{ buttonInputQuantity.apply({color}|filter(value => value is not null), attributes.nested('input').render('class')) }} "
         {% if disabled %} disabled {% endif %}
         {% if unitId %} aria-describedby="{{ unitId }}" {% endif %}
         {{ (byMeasure ? attributes.nested('input').without('min', 'max', 'step') : attributes.nested('input').without('step')).defaults({'aria-label': 'Quantity'|trans}) }}
         {{stimulus_target('Molecules--Button--quantity', 'input')}}
     >
-    <twig:Molecules:Button:Base {{...attributes.nested('button')}} aria-label="{{ 'Increase quantity'|trans }}" disabled="{{ disabled }}" {{...stimulus_action('Molecules--Button--quantity', 'increment')}}>+</twig:Molecules:Button:Base>
+    {# Inside the field, between the value and the "+", in the field's own colours. #}
     {% if unit %}
-        <span id="{{ unitId }}" class="ButtonQuantity__unit">{{ unit }}</span>
+        <span id="{{ unitId }}" class="{{ buttonInputQuantity.apply({color}|filter(value => value is not null)) }} ButtonQuantity__unit">{{ unit }}</span>
     {% endif %}
+    <twig:Molecules:Button:Base {{...attributes.nested('button')}} aria-label="{{ 'Increase quantity'|trans }}" disabled="{{ disabled }}" {{...stimulus_action('Molecules--Button--quantity', 'increment')}}>+</twig:Molecules:Button:Base>
 </div>
