@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\Shipment;
 
+use FlexyBundle\Service\OrderLineType;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 /**
@@ -96,6 +97,13 @@ class Base
             }
 
             $orderProduct = \is_array($item['orderProduct'] ?? null) ? $item['orderProduct'] : [];
+
+            // A parcel never carries the line of a bundle: its components are what ships. A line the
+            // payload does not type is a product, which ships.
+            if (!OrderLineType::isShippable($orderProduct)) {
+                continue;
+            }
+
             $lines[] = [
                 'title' => (string) ($orderProduct['title'] ?? ''),
                 'ref' => (string) ($orderProduct['productRef'] ?? ''),

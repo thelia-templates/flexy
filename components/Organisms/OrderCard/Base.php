@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\OrderCard;
 
+use FlexyBundle\Service\OrderLineType;
 use FlexyBundle\Service\OrderProductResolver;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Api\Service\DataAccess\DataAccessService;
@@ -68,7 +69,7 @@ class Base
 
     public function getItemCount(): int
     {
-        return \count($this->order['orderProducts'] ?? []);
+        return \count($this->visibleLines());
     }
 
     /**
@@ -80,9 +81,24 @@ class Base
     public function getThumbnails(): array
     {
         return $this->thumbnails ??= $this->orderProductResolver->resolveThumbnails(
-            $this->order['orderProducts'] ?? [],
+            $this->visibleLines(),
             self::RESOLVED_THUMBNAILS,
         );
+    }
+
+    /**
+     * The lines the card counts and shows: the components of a bundle are left out, the bundle
+     * line stands for them (a card that counted both would say twice the articles bought, and
+     * show the same product twice among the thumbnails).
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function visibleLines(): array
+    {
+        return array_values(array_filter(
+            $this->order['orderProducts'] ?? [],
+            static fn (array $orderProduct): bool => !OrderLineType::isBundleComponent($orderProduct),
+        ));
     }
 
     /**

@@ -1,0 +1,18 @@
+{# @prop components array What the bundle holds, for one bundle: [{title, quantity}]. A list with nothing in it renders nothing. #}
+{# @prop heading string|null The sentence above the list; "Included in the bundle" when not given #}
+{% props components = [], heading = null %}
+{% if components is not empty %}
+    <div class="{{ ('BundleIncluded ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }} data-testid="bundle-included">
+        <p class="BundleIncluded-heading">{{ heading ?? 'Included in the bundle'|trans }}</p>
+        {# No price and no control on purpose: a component is part of what the pack costs, it is not sold
+           on its own line. Merchant wording, printed escaped. #}
+        <ul class="BundleIncluded-list">
+            {% for component in components %}
+                <li class="BundleIncluded-item" data-testid="bundle-included-item">
+                    <span class="BundleIncluded-quantity" dir="ltr">{{ component.quantity }} &times;</span>
+                    <span><bdi>{{ component.title }}</bdi></span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

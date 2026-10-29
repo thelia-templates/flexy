@@ -1,0 +1,22 @@
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">The components of a bundle, under its line</h4>
+        <p class="Story-note">
+            Printed under the line of a bundle in the cart and under its card on an order: a title and a
+            quantity for one bundle, no price and no control, since the price of the pack is the one of the
+            line above. The quantity of the line itself is printed by the line.
+        </p>
+        <div class="Story-stage Story-stage--roomy">
+            <twig:Molecules:BundleIncluded:Base :components="[
+                {title: 'Mountain bike', quantity: '1'},
+                {title: 'Helmet', quantity: '2'},
+                {title: 'Chain lock', quantity: '1'},
+            ]" />
+        </div>
+    </div>
+    <div class="Story-section">
+        <h4 class="Story-title">No component: nothing at all</h4>
+        <p class="Story-note">A line that is not a bundle carries no list, and the molecule leaves no empty heading behind.</p>
+        <div class="Story-stage"><twig:Molecules:BundleIncluded:Base :components="[]" /></div>
+    </div>
+</div>

@@ -81,6 +81,12 @@
                     {% endif %}
                 </div>
 
+                {# The components of a bundle line, for one bundle: no price and no control, the price of the
+                   pack is the one of the line. Nothing for any other line. #}
+                {% if this.cartItem.bundleComponents is not empty %}
+                    <twig:Molecules:BundleIncluded:Base :components="this.cartItem.bundleComponents" class="my-2" />
+                {% endif %}
+
                 {# What a module attached to this line: paid options, engraving, anything
                    that describes the line without owning its price. Mirrors the point the
                    account order lines already declare in Layouts/OrderProducts. #}

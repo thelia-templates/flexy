@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Forms\OrderReturn;
 
+use FlexyBundle\Service\OrderLineType;
 use FlexyBundle\Service\OrderProductResolver;
 use FlexyBundle\Service\OrderReturnRequestService;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
@@ -71,10 +72,13 @@ class Request
 
         // Only the lines the server says are still returnable ever reach the form. A line
         // left out here is a line the browser cannot name back, and one it names anyway is
-        // refused on submit by the same eligibility service that filled this list.
+        // refused on submit by the same eligibility service that filled this list. A component
+        // of a bundle is never offered on its own, whatever list it was handed: the bundle is
+        // what a customer returns, and the core restocks the components with it.
         $returnable = array_filter(
             \is_array($orderProducts) ? $orderProducts : [],
-            fn (array $orderProduct): bool => isset($this->returnableQuantities[(int) ($orderProduct['id'] ?? 0)]),
+            fn (array $orderProduct): bool => isset($this->returnableQuantities[(int) ($orderProduct['id'] ?? 0)])
+                && !OrderLineType::isBundleComponent($orderProduct),
         );
 
         $this->lines = $this->orderProductResolver->resolveLines(array_values($returnable));
