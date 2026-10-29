@@ -14,11 +14,13 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Layouts\ProductDetails;
 
+use FlexyBundle\DTO\QuantityRuleDTO;
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Service\BundleProductReader;
 use FlexyBundle\Service\BundleSelectionService;
 use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\RunningSaleResolver;
+use FlexyBundle\Service\SaleElementQuantityRules;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -213,6 +215,8 @@ class Base
         private readonly ?BundleProductReader $bundleReader = null,
         private readonly ?BundleSelectionService $bundleSelectionService = null,
         private readonly ?ProductImageResolver $productImageResolver = null,
+        // Optional for the same reason: a unit test builds this component by hand, and the sheet then sells one at a time.
+        private readonly ?SaleElementQuantityRules $quantityRules = null,
     ) {
     }
 
@@ -680,14 +684,38 @@ class Base
     }
 
     /**
+     * The quantities the selected sale element is sold in: its minimum, its step, its decimals
+     * and its unit. Read off currentPse, which carries them from getPses().
+     */
+    public function getQuantityRule(): QuantityRuleDTO
+    {
+        return QuantityRuleDTO::fromArray($this->currentPse ?? []);
+    }
+
+    /**
+     * Each sale element carries its quantity rule under the keys of the front API, so that the
+     * rule travels with currentPse and needs no read of its own on a re-render. A key the core
+     * payload already has is left as the core gave it.
+     *
      * @return array<int, array<string, mixed>>
      */
     private function getPses(): array
     {
-        return $this->pses ??= json_decode(
+        if (null !== $this->pses) {
+            return $this->pses;
+        }
+
+        $pses = json_decode(
             $this->pseAccessService->psesByProduct($this->productId) ?: '[]',
             true,
         ) ?? [];
+        $rules = $this->quantityRules?->ofProduct($this->productId) ?? [];
+
+        foreach ($pses as $index => $pse) {
+            $pses[$index] += $rules[(int) ($pse['id'] ?? 0)] ?? [];
+        }
+
+        return $this->pses = $pses;
     }
 
     private function selectPse(?array $pse): void
