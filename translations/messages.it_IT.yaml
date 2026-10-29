@@ -224,3 +224,4 @@ Total incl. tax to pay: Totale IVA inclusa da pagare
 # Checkout: the core refused the payment because a price moved since the cart was read
 The prices of your cart have changed. Check your cart before paying.: I prezzi del tuo carrello sono cambiati. Controlla il carrello prima di pagare.
 This order is now in your customer account. Please sign in to see it.: Questo ordine è ora nel tuo account cliente. Accedi per vederlo.
+'The quantity of %product% in your cart was adjusted.': 'La quantità di %product% nel carrello è stata adeguata.'

@@ -686,3 +686,4 @@ Skip to content: Aller au contenu
 'Another order took the same products at the same moment. Please try again.': 'Une autre commande a pris les mêmes produits au même moment. Veuillez réessayer.'
 # Checkout: the core refused the payment because a price moved since the cart was read
 The prices of your cart have changed. Check your cart before paying.: Les prix de votre panier ont changé. Vérifiez votre panier avant de payer.
+'The quantity of %product% in your cart was adjusted.': 'La quantité de %product% dans votre panier a été ajustée.'

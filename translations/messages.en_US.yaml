@@ -677,3 +677,4 @@ Skip to content: Skip to content
 'Another order took the same products at the same moment. Please try again.': 'Another order took the same products at the same moment. Please try again.'
 # Checkout: the core refused the payment because a price moved since the cart was read
 The prices of your cart have changed. Check your cart before paying.: The prices of your cart have changed. Check your cart before paying.
+'The quantity of %product% in your cart was adjusted.': 'The quantity of %product% in your cart was adjusted.'
