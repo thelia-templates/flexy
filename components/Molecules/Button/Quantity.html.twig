@@ -1,4 +1,7 @@
-{% props disabled = false, name = null, value = null, color = null %}
+{# @prop step int|float|string What one press of a button adds or takes away: 6 for a lot of six, 0.25 for a quarter of a kilogram #}
+{# @prop decimals int The decimals the quantity accepts: 0 sells by the piece, more sells by measure and lets the shopper type "1,25" #}
+{# @prop unit string|null The unit the quantity is counted in ("kg"), shown after the field and read with it #}
+{% props disabled = false, name = null, value = null, color = null, step = 1, decimals = 0, unit = null %}
 
 {% set buttonQuantity = html_cva(
     base: 'ButtonQuantity ',
@@ -17,14 +20,29 @@
     },
 ) %}
 
-<div class="{{ buttonQuantity.apply({color}|filter(value => value is not null), attributes.render('class')) }} "  {{ attributes.defaults(stimulus_controller('Molecules--Button--quantity')).without('class', 'button:color') }} >
+{# A quantity sold by measure is typed in a text field: a number field reads "1,25" only when the
+   browser's own language writes decimals with a comma, and empties it otherwise. The keyboard
+   still opens on digits (inputmode), and the controller reads both separators. Its bounds then
+   travel as controller values, min and max being no attributes of a text field. #}
+{% set byMeasure = decimals > 0 %}
+{% set bounds = attributes.nested('input').all %}
+{# A step given the older way, as an attribute of the field, still counts. #}
+{% set step = bounds.step ?? step %}
+{% set unitId = unit ? ((bounds.name ?? name ?? 'quantity')|replace({'[': '-', ']': ''}) ~ '-unit') : null %}
+{% set controllerValues = {step: step, decimals: decimals, min: bounds.min ?? '', max: bounds.max ?? ''} %}
+
+<div class="{{ buttonQuantity.apply({color}|filter(value => value is not null), attributes.render('class')) }} "  {{ attributes.defaults(stimulus_controller('Molecules--Button--quantity', controllerValues)).without('class', 'button:color') }} >
     <twig:Molecules:Button:Base {{...attributes.nested('button')}} aria-label="{{ 'Decrease quantity'|trans }}" disabled="{{ disabled }}" {{...stimulus_action('Molecules--Button--quantity', 'decrement')}}>-</twig:Molecules:Button:Base>
     <input
-        type="number"
+        {% if byMeasure %}type="text" inputmode="decimal" autocomplete="off"{% else %}type="number" inputmode="numeric" step="{{ step }}"{% endif %}
         class="{{ buttonInputQuantity.apply({color}|filter(value => value is not null), attributes.nested('input').render('class')) }} "
         {% if disabled %} disabled {% endif %}
-        {{ attributes.nested('input').defaults({'aria-label': 'Quantity'|trans}) }}
+        {% if unitId %} aria-describedby="{{ unitId }}" {% endif %}
+        {{ (byMeasure ? attributes.nested('input').without('min', 'max', 'step') : attributes.nested('input').without('step')).defaults({'aria-label': 'Quantity'|trans}) }}
         {{stimulus_target('Molecules--Button--quantity', 'input')}}
     >
     <twig:Molecules:Button:Base {{...attributes.nested('button')}} aria-label="{{ 'Increase quantity'|trans }}" disabled="{{ disabled }}" {{...stimulus_action('Molecules--Button--quantity', 'increment')}}>+</twig:Molecules:Button:Base>
+    {% if unit %}
+        <span id="{{ unitId }}" class="ButtonQuantity__unit">{{ unit }}</span>
+    {% endif %}
 </div>
