@@ -89,6 +89,8 @@
             <span class="Story-note">
                 Two buttons around a number field. The buttons take every Button prop through
                 <code>button:</code>, the field its attributes through <code>input:</code>.
+                <code>step</code> is what a press adds; with <code>decimals</code> the field takes
+                "1,25" as well as "1.25", and <code>unit</code> is shown after it.
             </span>
         </div>
         <div class="Story-grid Story-grid--3">
@@ -116,6 +118,14 @@
             <div class="Story-col justify-items-start">
                 <span class="Story-label">disabled</span>
                 <twig:Molecules:Button:Quantity disabled input:value="1" input:min="1" input:max="10" />
+            </div>
+            <div class="Story-col justify-items-start">
+                <span class="Story-label">by six (step)</span>
+                <twig:Molecules:Button:Quantity step="6" input:value="6" input:min="6" input:max="36" />
+            </div>
+            <div class="Story-col justify-items-start">
+                <span class="Story-label">by measure (decimals, unit)</span>
+                <twig:Molecules:Button:Quantity step="0.25" :decimals="2" unit="kg" input:value="1.25" input:min="0.25" input:max="10" />
             </div>
         </div>
     </div>
