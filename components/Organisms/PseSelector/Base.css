@@ -229,7 +229,8 @@
 }
 
 .PseSelector-addToCart > .ButtonQuantity button,
-.PseSelector-addToCart > .ButtonQuantity input {
+.PseSelector-addToCart > .ButtonQuantity input,
+.PseSelector-addToCart > .ButtonQuantity .ButtonQuantity__unit {
   @variant max-md {
     background: transparent;
     color: var(--color-black);

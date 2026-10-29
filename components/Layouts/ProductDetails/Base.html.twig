@@ -72,6 +72,8 @@
             :stockManaged="this.isStockManaged()"
             :remainingStock="this.getRemainingStock()"
             :maxQuantityReached="this.isMaxQuantityReached()"
+            :quantityRule="this.quantityRule"
+            :quantityChoices="quantityChoices"
             :cartRefused="this.cartRefused"
             :cartRefusalReason="this.cartRefusalReason"
             :bundlePricing="bundle ? bundle.pricing : null"

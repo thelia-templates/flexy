@@ -51,7 +51,8 @@ final class QuantityStepperRenderTest extends KernelTestCase
         self::assertMatchesRegularExpression('/data-[\w-]*quantity-decimals-value="2"/i', $html);
         self::assertMatchesRegularExpression('/data-[\w-]*quantity-min-value="0.25"/i', $html);
         self::assertStringContainsString('aria-describedby="cart_add-quantity-unit"', $input);
-        self::assertMatchesRegularExpression('/<span id="cart_add-quantity-unit" class="ButtonQuantity__unit">kg<\/span>/', $html);
+        self::assertMatchesRegularExpression('/<span id="cart_add-quantity-unit" class="[^"]*\bButtonQuantity__unit">kg<\/span>/', $html);
+        self::assertMatchesRegularExpression('/ButtonQuantity__unit">kg<\/span>\s*<button/', $html, 'the unit sits in the field, before the "+"');
     }
 
     public function testAStepGivenAsAnAttributeOfTheFieldStillCounts(): void
