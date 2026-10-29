@@ -47,6 +47,16 @@ class CartItemDto
      * @var array<int, array<string, string>>
      */
     public array $bundleComponents = [];
+    /**
+     * False when the core says the order can no longer take this pack as it stands (the catalogue moved under
+     * its composition). True for every other line, and for a core that predates the verdict.
+     */
+    public bool $bundleOrderable = true;
+    /**
+     * The reason the core gives for it, already translated; empty for an orderable line and for a core that
+     * words none.
+     */
+    public string $bundleRefusal = '';
 
     public static function fromArray(array $data): self
     {
@@ -71,6 +81,8 @@ class CartItemDto
         $cartItem->desc = $data['desc'] ?? '';
         // Not a column the theme can count on: a core that predates the bundles publishes none.
         $cartItem->bundleComponents = BundleLines::fromCartComponents($data['bundleComponents'] ?? []);
+        $cartItem->bundleOrderable = (bool) ($data['bundleOrderable'] ?? true);
+        $cartItem->bundleRefusal = (string) ($data['bundleRefusal'] ?? '');
 
         if (isset($data['product'])) {
             $cartItem->product = $data['product'] instanceof ProductDTO

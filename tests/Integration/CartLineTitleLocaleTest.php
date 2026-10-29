@@ -148,6 +148,7 @@ final class CartLineTitleLocaleTest extends IntegrationTestCase
             $this->getService(TaxEngine::class),
             $this->langService($locale),
             new CartStockService(),
+            $this->getService('translator'),
         );
     }
 

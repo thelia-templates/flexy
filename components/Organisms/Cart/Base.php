@@ -152,6 +152,7 @@ class Base
         $cartLines = $this->readCartLinesAttribute();
         $offeredDiscounts = $this->readOfferedLineDiscounts($cartLines);
         $bundleComponents = $this->readBundleComponents($cartLines);
+        $unorderableBundles = $this->readUnorderableBundles($cartLines);
 
         // TYPE_CAMELNAME, so `is_offered` reaches the DTO as `isOffered` along with every
         // other column of the line.
@@ -186,6 +187,8 @@ class Base
                 'stock' => $stock,
                 'stockManaged' => $stockManaged,
                 'bundleComponents' => $bundleComponents[(int) $item['id']] ?? [],
+                'bundleOrderable' => !isset($unorderableBundles[(int) $item['id']]),
+                'bundleRefusal' => $unorderableBundles[(int) $item['id']] ?? '',
                 // The product read with the combination is handed to the line, so that the rule of the core
                 // (CartItem::getProduct: the default language for a product not translated) runs without a query.
                 'title' => $cartItemModel->setProduct($pse->getProduct())->getProduct(null, $locale)->getTitle(),
@@ -358,6 +361,29 @@ class Base
         }
 
         return $components;
+    }
+
+    /**
+     * The pack lines the core says the order can no longer take (`bundle_orderable` false under
+     * `attr('cart', 'cart_items')`), by line id, with the reason the core words (`bundle_refusal`, already
+     * translated; empty when the core publishes none). A core that predates the verdict publishes none, and every
+     * line then reads as orderable.
+     *
+     * @param array<int, array<string, mixed>> $cartLines
+     *
+     * @return array<int, string>
+     */
+    private function readUnorderableBundles(array $cartLines): array
+    {
+        $unorderable = [];
+
+        foreach ($cartLines as $id => $item) {
+            if (false === ($item['bundle_orderable'] ?? $item['bundleOrderable'] ?? null)) {
+                $unorderable[$id] = (string) ($item['bundle_refusal'] ?? $item['bundleRefusal'] ?? '');
+            }
+        }
+
+        return $unorderable;
     }
 
     public function getTotalItems(): int

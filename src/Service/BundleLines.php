@@ -14,6 +14,9 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Service;
 
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Thelia\Domain\Checkout\DTO\CheckoutViolation;
+
 /**
  * The words a page uses to say what a bundle holds: a title and a quantity per component, nothing
  * else. A cart line and an order line both end up as the same list, so the one molecule that prints
@@ -38,6 +41,29 @@ final class BundleLines
         $composition = $cartLine->getBundleComposition();
 
         return \is_string($composition) && '' !== $composition ? $composition : null;
+    }
+
+    /**
+     * The first refusal of the checkout for the cart, read from the progression. A core that predates the verdict
+     * has no `firstViolation()` (nor does `thelia/thelia@main` before it lands): the answer is then null, and the
+     * redirection stays silent, as it was.
+     */
+    public static function firstViolationOf(object $progression, object $cart): ?CheckoutViolation
+    {
+        return method_exists($progression, 'firstViolation') ? $progression->firstViolation($cart) : null;
+    }
+
+    /**
+     * What the shopper reads about a pack the order can no longer take as it stands, on the cart line and when
+     * the checkout sends them back to the cart. One sentence, so that the two places say the same thing; the core
+     * words it in a catalogue this theme does not feed, hence read from the theme's.
+     */
+    public static function notOrderableMessage(TranslatorInterface $translator, string $productReference): string
+    {
+        return $translator->trans(
+            'The pack %ref can no longer be ordered as it is in your cart. Please remove it and add it again.',
+            ['%ref' => $productReference],
+        );
     }
 
     /**
