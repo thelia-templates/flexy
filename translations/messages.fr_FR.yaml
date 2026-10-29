@@ -696,3 +696,4 @@ Pre-order: Précommande
 "Too many attempts to hold your products. Please try again in %delay%.": "Trop de tentatives pour réserver vos produits. Veuillez réessayer dans %delay%."
 "%count% second|%count% seconds": "%count% seconde|%count% secondes"
 "%count% minute|%count% minutes": "%count% minute|%count% minutes"
+'The quantity of %product% in your cart was adjusted.': 'La quantité de %product% dans votre panier a été ajustée.'

@@ -40,6 +40,12 @@
     {% set checkoutSummary = block('checkoutSummary') is defined ? block('checkoutSummary') : '' %}
     {% set checkoutNextButton = block('checkoutNextButton') is defined ? block('checkoutNextButton') : '' %}
     {% set checkoutBackButton = block('checkoutBackButton') is defined ? block('checkoutBackButton') : '' %}
+    {# Lines the core brought back to the rules of their product while reading the cart: read
+       after the content, which may be what read the cart. #}
+    {% set checkoutFlashes %}
+        {{ checkoutFlashes }}
+        <twig:Organisms:QuantityAdjustments:Base />
+    {% endset %}
     {% set useSidebar = checkoutSummary|trim != '' %}
 
     {{ theme_hook('checkout.top') }}
