@@ -16,6 +16,7 @@ namespace FlexyBundle\Components\Organisms\Cart;
 
 use FlexyBundle\DTO\CartItemDto;
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\BundleLines;
 use FlexyBundle\Service\CartStockService;
 use Propel\Runtime\Map\TableMap;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -34,6 +35,7 @@ use Thelia\Domain\Cart\DTO\CartItemDeleteDTO;
 use Thelia\Domain\Cart\DTO\CartItemUpdateQuantityDTO;
 use Thelia\Domain\Cart\Exception\InvalidCartException;
 use Thelia\Domain\Cart\Exception\NotEnoughStockException;
+use Thelia\Domain\Catalog\Bundle\BundleComposition;
 use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Form\Definition\FrontForm;
 use Thelia\Model\CartItem;
@@ -64,7 +66,7 @@ class Base
      * The line just removed, kept for the "undo" offer. A LiveProp so that it comes back signed with the next
      * request: the undo can only put back what this component removed, in the quantity it removed.
      *
-     * @var array{title: string, productId: int, pseId: int, quantity: int|float, imageId: int|null}|null
+     * @var array{title: string, productId: int, pseId: int, quantity: int|float, imageId: int|null, bundleComposition?: string|null}|null
      */
     #[LiveProp]
     public ?array $pendingDelete = null;
@@ -147,12 +149,23 @@ class Base
 
         $this->unavailablePromotionMessages = $this->readUnavailablePromotions();
         $locale = $this->langService->getLocale();
-        $offeredDiscounts = $this->readOfferedLineDiscounts();
+        $cartLines = $this->readCartLinesAttribute();
+        $offeredDiscounts = $this->readOfferedLineDiscounts($cartLines);
+        $bundleComponents = $this->readBundleComponents($cartLines);
 
         // TYPE_CAMELNAME, so `is_offered` reaches the DTO as `isOffered` along with every
         // other column of the line.
         $lines = $cart->getCartItems();
         $combinations = $this->readCombinations($lines, $locale);
+
+        // The sale element of a bundle never holds its stock: its components do, read for every line at once (CartStockService).
+        $stockedLines = [];
+        foreach ($lines as $cartItemModel) {
+            if (null !== ($pse = $combinations[(int) $cartItemModel->getProductSaleElementsId()] ?? null)) {
+                $stockedLines[(int) $cartItemModel->getId()] = [$cartItemModel, $pse];
+            }
+        }
+        $stocks = $this->cartStockService->stocksOf($stockedLines);
 
         foreach ($lines as $cartItemModel) {
             $item = $cartItemModel->toArray(TableMap::TYPE_CAMELNAME, true, [], true);
@@ -162,7 +175,7 @@ class Base
                 continue;
             }
 
-            $stockManaged = $this->cartStockService->isStockManaged($pse);
+            ['stock' => $stock, 'managed' => $stockManaged] = $stocks[(int) $item['id']];
 
             $cartItem = CartItemDto::fromArray([
                 ...$item,
@@ -170,8 +183,9 @@ class Base
                 // line, and a dumped product does not survive LiveComponent dehydration.
                 // This path never carried one: the line is priced by its own columns.
                 'product' => null,
-                'stock' => (int) $pse->getQuantity(),
+                'stock' => $stock,
                 'stockManaged' => $stockManaged,
+                'bundleComponents' => $bundleComponents[(int) $item['id']] ?? [],
                 // The product read with the combination is handed to the line, so that the rule of the core
                 // (CartItem::getProduct: the default language for a product not translated) runs without a query.
                 'title' => $cartItemModel->setProduct($pse->getProduct())->getProduct(null, $locale)->getTitle(),
@@ -263,6 +277,38 @@ class Base
     }
 
     /**
+     * The lines of the cart as the core describes them beyond their columns (`attr('cart', 'cart_items')`),
+     * read once for the two figures below. A core that predates what it carries answers nothing usable,
+     * so the shape is checked rather than assumed.
+     *
+     * @return array<int, array<string, mixed>> by line id
+     */
+    private function readCartLinesAttribute(): array
+    {
+        $items = $this->attributeAccessService->attributeCart('cart_items');
+
+        if (!\is_array($items)) {
+            return [];
+        }
+
+        $lines = [];
+
+        foreach ($items as $item) {
+            if (!\is_array($item)) {
+                continue;
+            }
+
+            $id = (int) ($item['id'] ?? $item['ID'] ?? 0);
+
+            if (0 !== $id) {
+                $lines[$id] = $item;
+            }
+        }
+
+        return $lines;
+    }
+
+    /**
      * What each offered line costs the shop, taxes included, indexed by the id of the
      * line — the figure the cart page strikes the gift's price with.
      *
@@ -271,34 +317,47 @@ class Base
      * core can price it. A core that predates automatic promotions publishes nothing here
      * and every line reads as undiscounted, which is what the template falls back to.
      *
+     * @param array<int, array<string, mixed>> $cartLines
+     *
      * @return array<int, float>
      */
-    private function readOfferedLineDiscounts(): array
+    private function readOfferedLineDiscounts(array $cartLines): array
     {
-        $items = $this->attributeAccessService->attributeCart('cart_items');
-
-        if (!\is_array($items)) {
-            return [];
-        }
-
         $discounts = [];
 
-        foreach ($items as $item) {
-            if (!\is_array($item)) {
-                continue;
-            }
-
-            $id = (int) ($item['id'] ?? $item['ID'] ?? 0);
+        foreach ($cartLines as $id => $item) {
             $discount = $item['offered_taxed_discount'] ?? $item['offeredTaxedDiscount'] ?? null;
 
-            if (0 === $id || !is_numeric($discount)) {
-                continue;
+            if (is_numeric($discount)) {
+                $discounts[$id] = (float) $discount;
             }
-
-            $discounts[$id] = (float) $discount;
         }
 
         return $discounts;
+    }
+
+    /**
+     * What each bundle line holds, for one bundle, indexed by the id of the line: a title and a
+     * quantity per component, in the language of the page. A line that is not a bundle is not in the
+     * answer, and a core that predates the bundles publishes nothing.
+     *
+     * @param array<int, array<string, mixed>> $cartLines
+     *
+     * @return array<int, list<array{title: string, quantity: string}>>
+     */
+    private function readBundleComponents(array $cartLines): array
+    {
+        $components = [];
+
+        foreach ($cartLines as $id => $item) {
+            $lines = BundleLines::fromCartComponents($item['bundle_components'] ?? $item['bundleComponents'] ?? null);
+
+            if ([] !== $lines) {
+                $components[$id] = $lines;
+            }
+        }
+
+        return $components;
     }
 
     public function getTotalItems(): int
@@ -451,6 +510,9 @@ class Base
             'pseId' => $line->getProductSaleElementsId(),
             'quantity' => (int) $line->getQuantity(),
             'imageId' => $this->resolveImageId($line->getProductId(), $line->getProductSaleElementsId()),
+            // Read from the stored line, like the declination and the quantity: the composition a removed
+            // bundle comes back with is the one it had, never a browser's word. Null for any other line.
+            'bundleComposition' => BundleLines::storedComposition($line),
         ];
 
         $this->cartFacade->removeItem(new CartItemDeleteDTO(
@@ -475,7 +537,9 @@ class Base
 
         // The cart form is replayed below for its side effects only (its CSRF token cannot be given from a live
         // action), so the stock rule it holds is applied here: a line is not put back above what is left.
-        if ($this->isShortOfStock($pseId, $quantity)) {
+        $composition = $this->pendingDeleteComposition();
+
+        if (false === $composition || $this->isShortOfStock($pseId, $quantity, $composition)) {
             $this->pendingDelete = null;
 
             return;
@@ -496,12 +560,14 @@ class Base
         ]);
 
         try {
-            $this->cartFacade->addItem(new CartItemAddDTO(
-                cart: $cart,
-                productId: $productId,
-                productSaleElementId: $pseId,
-                quantity: $quantity,
-            ));
+            $this->cartFacade->addItem(new CartItemAddDTO(...[
+                'cart' => $cart,
+                'productId' => $productId,
+                'productSaleElementId' => $pseId,
+                'quantity' => $quantity,
+                // A bundle comes back with the composition it was removed with, not the default one.
+                ...(null === $composition ? [] : ['bundleComposition' => $composition]),
+            ]));
         } catch (InvalidCartException|NotEnoughStockException $exception) {
             // pendingDelete is kept (a signed LiveProp): the undo tile stays, and the message tells the
             // shopper the line was not put back.
@@ -532,7 +598,7 @@ class Base
         );
     }
 
-    private function isShortOfStock(int $pseId, int $quantity): bool
+    private function isShortOfStock(int $pseId, int $quantity, ?BundleComposition $composition = null): bool
     {
         if (!ConfigQuery::checkAvailableStock()) {
             return false;
@@ -540,8 +606,37 @@ class Base
 
         $productSaleElements = ProductSaleElementsQuery::create()->findPk($pseId);
 
-        return null === $productSaleElements
-            || (0 === $productSaleElements->getProduct()->getVirtual() && $productSaleElements->getQuantity() < $quantity);
+        if (null === $productSaleElements) {
+            return true;
+        }
+
+        if (null !== $composition) {
+            // A bundle is supplied by its components: the stock of its own sale element is never the answer.
+            ['stock' => $stock, 'managed' => $managed] = $this->cartStockService->stockFor($productSaleElements, $composition);
+
+            return $managed && $stock < $quantity;
+        }
+
+        return 0 === $productSaleElements->getProduct()->getVirtual() && $productSaleElements->getQuantity() < $quantity;
+    }
+
+    /**
+     * The composition of the line this component removed, read from its own signed state: null for a
+     * line that is not a bundle, false for a composition that cannot be read (the line is not put back).
+     */
+    private function pendingDeleteComposition(): BundleComposition|false|null
+    {
+        $json = $this->pendingDelete['bundleComposition'] ?? null;
+
+        if (!\is_string($json) || '' === $json) {
+            return null;
+        }
+
+        try {
+            return BundleComposition::fromJson($json);
+        } catch (InvalidCartException) {
+            return false;
+        }
     }
 
     /**

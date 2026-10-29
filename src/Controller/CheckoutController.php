@@ -47,6 +47,8 @@ use Thelia\Domain\Checkout\Exception\MissingConsentException;
 use Thelia\Domain\Checkout\Service\CheckoutProgressionService;
 use Thelia\Domain\Customer\Service\AuthenticationReturnUrl;
 use Thelia\Domain\Localization\Service\LangService;
+use Thelia\Domain\Order\Exception\BundleLineNotOrderableException;
+use Thelia\Domain\Order\Exception\OrderPlacementConflictException;
 use Thelia\Domain\Order\Exception\StockShortageException;
 use Thelia\Domain\Payment\Exception\StoredMethodPaymentRateLimitedException;
 use Thelia\Log\Tlog;
@@ -356,6 +358,18 @@ class CheckoutController extends FlexyController
         } catch (StockShortageException $e) {
             // The pre-check above covers the stock read before the placement; this one is the stock lost during it.
             throw $stockRefusal->answer($e, $routes->pathFor(CheckoutStep::CODE_CART), $this->getRequest()->getSession());
+        } catch (BundleLineNotOrderableException $e) {
+            // A pack of the cart the catalogue changed under it (a component taken offline, a bound that moved): the buyer
+            // puts it together again from the cart, which is where this goes. The core words it in the shop's own catalogue,
+            // which this theme does not feed: the sentence is read from the theme's, with the reference of the pack.
+            // (A core that predates the bundles never raises it: a catch of a class that does not exist is inert.)
+            $message = $this->translator->trans(
+                'The pack %ref can no longer be ordered as it is in your cart. Please remove it and add it again.',
+                ['%ref' => $e->productReference],
+            );
+            $this->addFlash('error', $message);
+
+            throw new RedirectException($routes->pathFor(CheckoutStep::CODE_CART), Response::HTTP_FOUND, $message);
         } catch (StoredMethodPaymentRateLimitedException) {
             // Paid with a saved method too often this hour: the core refused before any
             // order was written. The buyer goes back to the payment step, where a new
@@ -389,6 +403,14 @@ class CheckoutController extends FlexyController
             $this->addFlash('error', $e->getMessage());
 
             throw new RedirectException($routes->pathOfTheFirstIncompleteStep($cart), Response::HTTP_FOUND, $e->getMessage());
+        } catch (OrderPlacementConflictException) {
+            // Another order took the same stock at the same moment and the database broke the tie: nothing was
+            // written, and placing the order again is judged on the stock the other one left. The sentence is
+            // read from the theme's catalogue, as the core words it in a catalogue this theme does not feed.
+            $message = $this->translator->trans('Another order took the same products at the same moment. Please try again.');
+            $this->addFlash('error', $message);
+
+            throw new RedirectException($routes->pathOfTheFirstIncompleteStep($cart), Response::HTTP_FOUND, $message);
         } catch (CheckoutException $e) {
             // A refusal the theme knows nothing about: the step of a module (a minimum
             // order amount, an age check) refusing the cart at placement. Answered as the

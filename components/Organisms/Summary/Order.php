@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\Summary;
 
+use FlexyBundle\Service\OrderLineType;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 /**
@@ -95,13 +96,17 @@ class Order
     }
 
     /**
+     * The lines a shopper counts as articles: the goods, the line of a bundle for one article, and
+     * not the components that hang on it — they are what the bundle is made of, not more articles
+     * bought.
+     *
      * @return list<array<string, mixed>>
      */
     private function goodsLines(): array
     {
         return array_values(array_filter(
             $this->order['orderProducts'] ?? [],
-            fn (array $orderProduct): bool => !$this->isServiceLine($orderProduct),
+            fn (array $orderProduct): bool => !$this->isServiceLine($orderProduct) && !OrderLineType::isBundleComponent($orderProduct),
         ));
     }
 
@@ -113,7 +118,7 @@ class Order
      */
     private function isServiceLine(array $orderProduct): bool
     {
-        return 'service' === ($orderProduct['lineType'] ?? 'product');
+        return OrderLineType::isService($orderProduct);
     }
 
     public function getTaxAmount(): float

@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\Shipment;
 
+use FlexyBundle\Service\OrderLineType;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 /**
@@ -33,7 +34,6 @@ class Remaining
     private const float TOLERANCE = 0.0001;
 
     private const string STATUS_CANCELLED = 'cancelled';
-    private const string LINE_TYPE_SERVICE = 'service';
 
     /** @var array<string, mixed> */
     public array $order = [];
@@ -113,7 +113,9 @@ class Remaining
      */
     private function ships(array $orderProduct): bool
     {
+        // The predicate of the core: a service is not shipped, nor is the line of a bundle (what it
+        // stands for leaves through its components, which are lines of their own).
         return !($orderProduct['virtual'] ?? false)
-            && self::LINE_TYPE_SERVICE !== ($orderProduct['lineType'] ?? null);
+            && OrderLineType::isShippable($orderProduct);
     }
 }
