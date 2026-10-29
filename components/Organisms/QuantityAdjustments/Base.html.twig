@@ -1,0 +1,17 @@
+{# @prop adjustments array|null The lines to tell, [{product, message}]; null reads them from the flash bag #}
+{# A status, not an error: nothing was refused, the cart was set right. The product title and the
+   core's sentence are not the theme's: escaped here, SnackBar prints its text raw. #}
+{% set adjustmentsToTell = this.adjustmentsToTell %}
+{% if adjustmentsToTell is not empty %}
+    <div {{ attributes }}>
+        {% for adjustment in adjustmentsToTell %}
+            <twig:Molecules:SnackBar:Base
+                variant="informative"
+                withIcon
+                role="status"
+                class="mb-6"
+                text="{{ ('The quantity of %product% in your cart was adjusted.'|trans({'%product%': adjustment.product}) ~ ' ' ~ adjustment.message)|escape('html') }}"
+            />
+        {% endfor %}
+    </div>
+{% endif %}
