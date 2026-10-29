@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace FlexyBundle\DTO;
 
+use Thelia\Domain\Catalog\Quantity\UnitCode;
+
 /**
  * The quantities a sale element is sold in, as the theme reads them to draw its selector:
  * a minimum, a step the quantity moves by, the decimals it accepts, and the unit it is
@@ -139,6 +141,20 @@ final readonly class QuantityRuleDTO
         $step = $this->scaledStep();
 
         return $this->unscaled($smallest + intdiv($last - $smallest, $step) * $step);
+    }
+
+    /**
+     * The unit as it is written after a quantity ("kg", "m²"), by the core's UnitCode. A code
+     * the core does not know, or a core without units, shows no unit: the unit only says what
+     * the quantity counts, the cart never reads it.
+     */
+    public function unitSymbol(): ?string
+    {
+        if (null === $this->unitCode || !enum_exists(UnitCode::class)) {
+            return null;
+        }
+
+        return UnitCode::tryFrom($this->unitCode)?->symbol();
     }
 
     /**
