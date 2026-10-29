@@ -229,3 +229,10 @@
   --tw-ring-color: transparent;
   outline: 0;
 }
+
+/* The unit a quantity is counted in, after the stepper: same size as the unit of a field. */
+.ButtonQuantity__unit {
+  align-self: center;
+  padding-inline-start: 0.5rem;
+  font-size: var(--font-size-paragraph-4);
+}
