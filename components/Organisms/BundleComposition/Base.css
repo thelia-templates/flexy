@@ -1,0 +1,59 @@
+.BundleComposition {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.BundleComposition-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.BundleComposition-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  background-color: var(--color-lightest);
+}
+
+/* An optional component the shopper left out stays on the list, quieter. */
+.BundleComposition-item--left .BundleComposition-img,
+.BundleComposition-item--left .BundleComposition-desc {
+  opacity: 0.55;
+}
+
+.BundleComposition-img {
+  flex: none;
+  width: 4rem;
+  height: 4rem;
+  background-color: var(--color-white);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.BundleComposition-desc {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  min-width: 0;
+}
+
+.BundleComposition-name {
+  font-weight: 600;
+}
+
+.BundleComposition-control {
+  flex: none;
+}
+
+.BundleComposition-quantity {
+  white-space: nowrap;
+}

@@ -1,0 +1,21 @@
+{# @prop price float The price to pay, taxes included, in the currency being browsed #}
+{# @prop originalPrice float|null The price struck through beside it, taxes included; nothing when not given #}
+{# @prop saving float|null What the shopper saves against the struck price, taxes included; nothing when not given #}
+{% props price, originalPrice = null, saving = null %}
+{# A price keeps its own order, so it carries dir="ltr" — on the inline span only: on a flex item
+   the box would re-resolve its own alignment and pin the figure to the left of a right-to-left page. #}
+<div class="{{ ('Price ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    <strong class="h4">
+        <span dir="ltr">{{ price|format_currency(current_currency_code(), locale: lang_code) }}</span>
+    </strong>
+    {% if originalPrice is not null %}
+        <span class="Price-original paragraph-4">
+            <span dir="ltr">{{ originalPrice|format_currency(current_currency_code(), locale: lang_code) }}</span>
+        </span>
+    {% endif %}
+    {% if saving is not null and saving > 0 %}
+        <span class="Price-saving paragraph-4" data-testid="price-saving">
+            {{ 'You save %amount%'|trans({'%amount%': saving|format_currency(current_currency_code(), locale: lang_code)}) }}
+        </span>
+    {% endif %}
+</div>

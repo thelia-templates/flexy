@@ -1,0 +1,74 @@
+{# @prop components array The components, as Layouts/ProductDetails builds them: [{itemId, title, imageId, required, quantity, control: none|switch|quantity, included, minQuantity, maxQuantity}] #}
+{# @prop refused bool The choice of the shopper was refused by the shop: the default composition is shown instead #}
+{% props components = [], refused = false %}
+{% if components is not empty %}
+    <section class="{{ ('BundleComposition ' ~ attributes.render('class'))|tailwind_merge }}" aria-labelledby="bundle-composition-title" {{ attributes.without('class') }} data-testid="bundle-composition">
+        <h2 id="bundle-composition-title" class="BundleComposition-title h5">{{ 'Bundle composition'|trans }}</h2>
+
+        {% if refused %}
+            <twig:Molecules:SnackBar:Base
+                variant="warning"
+                withIcon
+                role="status"
+                text="{{ 'This composition cannot be sold as chosen, the default one is shown.'|trans }}"
+            />
+        {% endif %}
+
+        <ul class="BundleComposition-list">
+            {% for component in components %}
+                <li class="BundleComposition-item{{ component.included ? '' : ' BundleComposition-item--left' }}" data-testid="bundle-component" data-bundle-item="{{ component.itemId }}">
+                    {% if component.imageId %}
+                        {{ getImages({
+                            source_type: 'product',
+                            img_id: component.imageId,
+                            filters: 'add_to_cart',
+                            limit: 1,
+                            alt: component.title,
+                            wrapper: 'figure',
+                            wrapper_attrs: {class: 'BundleComposition-img'},
+                            img_attrs: {loading: 'lazy', width: '105', height: '112'},
+                            placeholder: asset('images/placeholder2.webp'),
+                        })|raw }}
+                    {% else %}
+                        <figure class="BundleComposition-img">
+                            <img src="{{ asset('images/placeholder2.webp') }}" alt="" width="105" height="112" loading="lazy">
+                        </figure>
+                    {% endif %}
+
+                    <div class="BundleComposition-desc">
+                        {# Merchant wording: printed escaped. #}
+                        <span class="BundleComposition-name"><bdi>{{ component.title }}</bdi></span>
+                        {% if not component.required %}
+                            <twig:Molecules:Tag:Base color="neutral" customText="{{ 'Optional'|trans }}" />
+                        {% endif %}
+                    </div>
+
+                    <div class="BundleComposition-control">
+                        {% if component.control == 'none' %}
+                            {# A required component the merchant fixed: listed, nothing to change. #}
+                            <span class="BundleComposition-quantity" dir="ltr">{{ component.quantity }} &times;</span>
+                        {% elseif component.control == 'switch' %}
+                            <twig:Fields:Checkbox:Base
+                                label="{{ 'Include %title% in the bundle'|trans({'%title%': component.title}) }}"
+                                input:id="bundle-item-{{ component.itemId }}"
+                                {{ ...(component.included ? {'input:checked': 'checked'} : {}) }}
+                                input:data-action="change->live#action"
+                                input:data-live-action-param="toggleBundleItem"
+                                input:data-live-item-param="{{ component.itemId }}"
+                            />
+                        {% else %}
+                            {# The quantity is bound to the model of the sheet: the price below answers each change once. #}
+                            <twig:Molecules:Button:Quantity
+                                input:value="{{ component.quantity }}"
+                                input:min="{{ component.minQuantity }}"
+                                input:max="{{ component.maxQuantity }}"
+                                input:data-model="on(change)|bundleSelection[{{ component.itemId }}]"
+                                input:aria-label="{{ 'Quantity of %title%'|trans({'%title%': component.title}) }}"
+                            />
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+{% endif %}

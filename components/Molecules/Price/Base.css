@@ -1,0 +1,15 @@
+.Price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  color: var(--color-black);
+}
+
+.Price-original {
+  text-decoration: line-through;
+}
+
+.Price-saving {
+  color: var(--color-error);
+}

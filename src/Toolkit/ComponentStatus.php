@@ -81,6 +81,13 @@ final class ComponentStatus
             'Toolkit/welcome' => self::READY,
 
             'Organisms/VideoPlayer' => self::READY,
+
+            // The product bundles: the composition of a bundle on its sheet, the list of its components
+            // under its line in the cart and on an order, and the price block they share — each shipped with
+            // the core feature it renders.
+            'Organisms/BundleComposition' => self::READY,
+            'Molecules/BundleIncluded' => self::READY,
+            'Molecules/Price' => self::READY,
             // Stories handled on our side and open to review:
             'Organisms/OrderNotes' => self::READY,
             // Waiting for the design of the lines of a parcel: listed as quantity and title

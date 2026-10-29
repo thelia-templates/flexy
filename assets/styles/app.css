@@ -56,6 +56,8 @@
   @import "../../components/Molecules/Pagination/Base.css";
   @import "../../components/Molecules/Score/Base.css";
   @import "../../components/Molecules/Rating/Base.css";
+  @import "../../components/Molecules/Price/Base.css";
+  @import "../../components/Molecules/BundleIncluded/Base.css";
   @import "../../components/Molecules/Countdown/Base.css";
   @import "../../components/Molecules/Tooltip/Base.css";
   @import "../../components/Molecules/Favorite/Base.css";
@@ -88,6 +90,7 @@
   @import "../../components/Organisms/ArticleCard/Base.css";
   @import "../../components/Organisms/AddressCard/Base.css";
   @import "../../components/Organisms/CartItem/Base.css";
+  @import "../../components/Organisms/BundleComposition/Base.css";
   @import "../../components/Organisms/CartItemDelete/Base.css";
   @import "../../components/Organisms/QuickOrderTable/Base.css";
   @import "../../components/Organisms/SaveToPurchaseList/Base.css";
