@@ -100,6 +100,8 @@
     </head>
 
     <body class="no-js {% block body_class %}{% endblock %}">
+        {# First tab stop of every page (RGAA 12.7): hidden until focused. #}
+        <a href="#main-content" class="SkipLink">{{ 'Skip to content'|trans }}</a>
         {{ theme_hook('layout.body.top') }}
         {# Offers the detected country on every page; it renders nothing in the checkout or once answered. #}
         <twig:Molecules:CountrySuggestion:Base />
@@ -118,7 +120,7 @@
         {% endblock %}
         {{ theme_hook('layout.header.bottom') }}
 
-        <main {% block stimulus_controller %}{% endblock %}>
+        <main id="main-content" tabindex="-1" {% block stimulus_controller %}{% endblock %}>
             {% block body %}{% endblock %}
         </main>
 

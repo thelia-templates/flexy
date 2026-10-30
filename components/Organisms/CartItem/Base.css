@@ -128,7 +128,8 @@
 }
 
 .CartItem-originalPrice {
-  color: var(--color-grey);
+  /* --color-grey reads at 4.2:1 on the checkout background, under the 4.5:1 of body text. */
+  color: var(--color-grey-dark);
   text-decoration: line-through;
 }
 

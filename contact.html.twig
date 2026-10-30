@@ -21,18 +21,20 @@
         {% form_theme form with flexy_form_themes only %}
 
         {% block contactFormTitle %}
-            <h2 class="mb-4 h2">{{ 'Contact Us'|trans }}</h2>
+            <h1 class="mb-4 h2">{{ 'Contact Us'|trans }}</h1>
         {% endblock %}
 
         {% block contactForm %}
             {{ form_start(form, {attr: {class: 'flex flex-col gap-4'}}) }}
 
+            {# RGAA 11.13: the purpose of the name field is declared for autofill. #}
+            {{ form_row(form.name, {attr: {autocomplete: 'name'}}) }}
             {{ form_rest(form) }}
 
             <twig:Molecules:Button:Base
                 text="{{ 'Send'|trans }}"
                 type="submit"
-                class="w-max mt-6"
+                class="w-max max-w-full mt-6"
             />
 
             {{ form_end(form) }}

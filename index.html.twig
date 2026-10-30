@@ -9,6 +9,8 @@
 {% block breadcrumb_json %}{% endblock %}
 
 {% block body %}
+    {# The home page has no visible title; its sections are h2 and need one above them (RGAA 9.1). #}
+    <h1 class="sr-only">{{ attr('config', 'store_name')|default('')|trim ?: 'Home'|trans }}</h1>
     {{ theme_hook('home.top') }}
 
     <twig:Layouts:CrossSelling:Base :filters="{'productSaleElements.newness': true}" title="{{ 'New products'|trans }}" />

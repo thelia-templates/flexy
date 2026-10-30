@@ -1,7 +1,7 @@
 {% props title = '' %}
 
 <div class="{{ ('container-l py-14 xl:py-20 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
-    <div class="pb-6 text-black h2">{{ title }}</div>
+    <h2 class="pb-6 text-black h2">{{ title }}</h2>
 
     <div class="flex flex-col gap-10 lg:grid lg:grid-cols-3">
         {% for category in this.categories %}

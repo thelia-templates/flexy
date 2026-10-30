@@ -1,5 +1,5 @@
 <header class="{{ ('HeaderCheckout ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
-    <a href="{{ path('index') }}" class="HeaderCheckout-logo">
+    <a href="{{ path('index') }}" class="HeaderCheckout-logo" aria-label="{{ attr('config', 'store_name')|default('')|trim ?: 'Home'|trans }}">
         {{ ux_icon('thelia') }}
     </a>
     <div class="HeaderCheckout-reassurance">
