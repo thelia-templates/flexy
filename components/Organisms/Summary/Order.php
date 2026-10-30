@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Organisms\Summary;
 
 use FlexyBundle\DTO\DisplayedPrice;
+use FlexyBundle\Service\CartItemCount;
 use FlexyBundle\Service\OrderLineType;
 use FlexyBundle\Service\PriceDisplay;
 use FlexyBundle\Service\TaxDisplay;
@@ -70,15 +71,19 @@ class Order
         return $this->priceDisplay->untaxed($this->getGoodsUntaxedTotal());
     }
 
+    /**
+     * The sum of the quantities, until a line was sold by measure: the lines are then counted
+     * (the decimals frozen on the line say so; an order placed before has none).
+     */
     public function getItemCount(): int
     {
-        $count = 0;
-
-        foreach ($this->goodsLines() as $orderProduct) {
-            $count += (int) ($orderProduct['quantity'] ?? 0);
-        }
-
-        return $count;
+        return CartItemCount::count(array_map(
+            static fn (array $orderProduct): array => [
+                'quantity' => (float) ($orderProduct['quantity'] ?? 0),
+                'decimals' => (int) ($orderProduct['quantityDecimals'] ?? 0),
+            ],
+            $this->goodsLines(),
+        ));
     }
 
     /**

@@ -43,7 +43,7 @@
     <ul class="Shipment-lines" data-testid="shipment-lines">
         {% for line in this.lines %}
             <li class="Shipment-line">
-                <span class="Shipment-quantity" dir="ltr">{{ line.quantity }} &times;</span>
+                <span class="Shipment-quantity" dir="ltr">{{ line.quantity|format_quantity(line.quantityDecimals ?? 0, line.unitCode ?? null) }} &times;</span>
                 <span>{{ line.title }}</span>
                 {% if line.ref %}<span class="Shipment-lineRef" dir="ltr">{{ line.ref }}</span>{% endif %}
             </li>

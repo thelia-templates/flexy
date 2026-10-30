@@ -30,7 +30,7 @@
                     {{ this.title }}
                     {{ 'is no longer available and cannot be ordered.'|trans }}
                 {% else %}
-                    {{ (this.cartItem.stock > 1 ? 'only_n_left_in_stock' : 'only_one_left_in_stock')|trans({'%title%': this.title, '%count%': this.cartItem.stock}) }}
+                    {{ (this.rule.soldByMeasure ? 'only_quantity_left_in_stock' : (this.cartItem.stock > 1 ? 'only_n_left_in_stock' : 'only_one_left_in_stock'))|trans({'%title%': this.title, '%count%': this.cartItem.stock|format_quantity(this.rule.decimals, this.rule.unitCode)}) }}
                 {% endif %}
             </span>
         </div>
@@ -97,7 +97,7 @@
                     {% endif %}
                     {% if this.cartItem.quantity %}
                         <span>
-                            <bdi>{{ 'Quantity'|trans }}{{ 'label_colon'|trans }} {{ this.cartItem.quantity }}</bdi>
+                            <bdi>{{ 'Quantity'|trans }}{{ 'label_colon'|trans }} {{ this.cartItem.quantity|format_quantity(this.rule.decimals, this.rule.unitCode) }}</bdi>
                         </span>
                     {% endif %}
                 </div>
