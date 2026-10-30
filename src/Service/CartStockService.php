@@ -107,15 +107,16 @@ final readonly class CartStockService
 
     /**
      * The same answer for a composition not on a line yet (a line being put back in the cart).
+     * The stock of a sale element sold by measure keeps its decimals (2.5 kg is not 2).
      *
-     * @return array{stock: int, managed: bool}
+     * @return array{stock: int|float, managed: bool}
      */
     public function stockFor(ProductSaleElements $pse, ?BundleComposition $composition): array
     {
         $managed = $this->isStockManaged($pse);
 
         if (null === $this->lineAvailability || null === $composition) {
-            return ['stock' => (int) $pse->getQuantity(), 'managed' => $managed];
+            return ['stock' => (float) $pse->getQuantity(), 'managed' => $managed];
         }
 
         return $this->answerFor($pse, $this->lineAvailability->forLine($pse, $composition));

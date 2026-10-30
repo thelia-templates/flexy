@@ -18,6 +18,7 @@ use FlexyBundle\DTO\QuantityRuleDTO;
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Service\BundleProductReader;
 use FlexyBundle\Service\BundleSelectionService;
+use FlexyBundle\Service\CartQuantity;
 use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\RunningSaleResolver;
 use FlexyBundle\Service\SaleElementQuantityRules;
@@ -641,7 +642,7 @@ class Base
         // under the stock, not to the stock itself: seven left of a lot of six is six, not a
         // seven the cart would refuse.
         $remainingStock = $this->getRemainingStock();
-        $requested = self::typedQuantity($this->formValues['quantity'] ?? 1);
+        $requested = CartQuantity::typed($this->formValues['quantity'] ?? 1);
 
         if ($remainingStock > 0 && null !== $requested && $requested > $remainingStock) {
             $rule = $this->getQuantityRule();
@@ -676,7 +677,7 @@ class Base
                     'cart' => $this->cartFacade->getOrCreateFromSession(),
                     'productId' => (int) $formData['product'],
                     'productSaleElementId' => (int) $formData['product_sale_elements_id'],
-                    'quantity' => self::cartQuantity((float) $formData['quantity']),
+                    'quantity' => CartQuantity::forTheCart((float) $formData['quantity']),
                     'append' => (bool) $formData['append'],
                     'newness' => (bool) $formData['newness'],
                     ...$bundleArguments,
@@ -698,7 +699,7 @@ class Base
         if (0.0 !== $difference) {
             $this->dispatchBrowserEvent(
                 $difference > 0 ? CheckoutEvents::BROWSER_ADD_PSE : CheckoutEvents::BROWSER_REMOVE_PSE,
-                ['pse' => (int) $formData['product_sale_elements_id'], 'quantity' => self::wholeWhenWhole(abs($difference))],
+                ['pse' => (int) $formData['product_sale_elements_id'], 'quantity' => CartQuantity::wholeWhenWhole(abs($difference))],
             );
         }
     }
@@ -834,53 +835,6 @@ class Base
         }
 
         return $quantity;
-    }
-
-    /**
-     * A quantity as the shopper typed it, "1,25" or "1.25": a quantity is never written with a
-     * thousands separator, so a single comma or point can only be the decimal one. Anything else
-     * is null, and left for the form to refuse.
-     */
-    private static function typedQuantity(mixed $value): ?float
-    {
-        if (\is_int($value) || \is_float($value)) {
-            return (float) $value;
-        }
-
-        if (!\is_string($value) || 1 !== preg_match('/^\s*(\d+)(?:[.,](\d+))?\s*$/', $value, $parts)) {
-            return null;
-        }
-
-        return (float) ($parts[1].'.'.($parts[2] ?? '0'));
-    }
-
-    /**
-     * The quantity the cart is handed: a whole number stays an int, which a core that counts in
-     * whole pieces takes as it always did, and a decimal one goes through only to a core that
-     * accepts it — an older one never sells by measure, and its form refuses no decimals.
-     */
-    private static function cartQuantity(float $quantity): int|float
-    {
-        $whole = self::wholeWhenWhole($quantity);
-
-        if (\is_int($whole) || self::cartTakesDecimalQuantities()) {
-            return $whole;
-        }
-
-        return (int) $quantity;
-    }
-
-    private static function cartTakesDecimalQuantities(): bool
-    {
-        static $takesDecimals = null;
-
-        return $takesDecimals ??= 'float' === (string) (new \ReflectionParameter([CartItemAddDTO::class, '__construct'], 'quantity'))->getType();
-    }
-
-    /** 3.0 is told as 3 to the page, which counts pieces in whole numbers. */
-    private static function wholeWhenWhole(float $quantity): int|float
-    {
-        return floor($quantity) === $quantity && abs($quantity) < \PHP_INT_MAX ? (int) $quantity : $quantity;
     }
 
     /**

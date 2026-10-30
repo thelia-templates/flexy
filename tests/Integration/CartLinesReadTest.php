@@ -73,7 +73,7 @@ final class CartLinesReadTest extends IntegrationTestCase
         $component = $this->component();
 
         self::assertSame(['Keep 1', 'Keep 2', 'Keep 3'], array_map(static fn ($item): string => $item->title, $component->items));
-        self::assertSame([1, 2, 3], array_map(static fn ($item): int => $item->stock, $component->items));
+        self::assertSame([1.0, 2.0, 3.0], array_map(static fn ($item): float => $item->stock, $component->items));
     }
 
     public function testTheTitleIsTheOneOfTheLanguageOfTheSession(): void
