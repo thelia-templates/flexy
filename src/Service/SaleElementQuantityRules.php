@@ -17,6 +17,7 @@ namespace FlexyBundle\Service;
 use FlexyBundle\DTO\QuantityRuleDTO;
 use Thelia\Domain\Catalog\Quantity\InvalidQuantityRuleException;
 use Thelia\Domain\Catalog\Quantity\QuantityRule;
+use Thelia\Model\ProductSaleElements;
 use Thelia\Model\ProductSaleElementsQuery;
 
 /**
@@ -42,24 +43,43 @@ final readonly class SaleElementQuantityRules
         $rules = [];
 
         foreach (ProductSaleElementsQuery::create()->filterByProductId($productId)->find() as $saleElement) {
-            try {
-                $rule = QuantityRule::fromProductSaleElements($saleElement);
-            } catch (InvalidQuantityRuleException) {
-                // A rule the back office would not let anyone save: the cart refuses its
-                // quantities anyway, and the selector falls back to the default.
-                continue;
-            }
+            $rule = $this->ofSaleElement($saleElement);
 
-            $rules[(int) $saleElement->getId()] = (new QuantityRuleDTO(
-                minQuantity: $rule->minQuantity,
-                step: $rule->step,
-                decimals: $rule->decimals,
-                unitQuantity: $rule->unitQuantity,
-                referenceUnitQuantity: $rule->referenceUnitQuantity,
-                unitCode: $rule->unitCode?->value,
-            ))->toArray();
+            if (null !== $rule) {
+                $rules[(int) $saleElement->getId()] = $rule;
+            }
         }
 
         return $rules;
+    }
+
+    /**
+     * The rule of one sale element already loaded (a line of the cart holds its own), without
+     * a query. Null on a core without quantity rules, and for a rule the back office would not
+     * let anyone save: the cart refuses its quantities anyway, and the selector falls back to
+     * the default.
+     *
+     * @return array{minQuantity: float, quantityStep: float, quantityDecimals: int, unitQuantity: float|null, referenceUnitQuantity: float|null, unitCode: string|null}|null
+     */
+    public function ofSaleElement(ProductSaleElements $saleElement): ?array
+    {
+        if (!class_exists(QuantityRule::class)) {
+            return null;
+        }
+
+        try {
+            $rule = QuantityRule::fromProductSaleElements($saleElement);
+        } catch (InvalidQuantityRuleException) {
+            return null;
+        }
+
+        return (new QuantityRuleDTO(
+            minQuantity: $rule->minQuantity,
+            step: $rule->step,
+            decimals: $rule->decimals,
+            unitQuantity: $rule->unitQuantity,
+            referenceUnitQuantity: $rule->referenceUnitQuantity,
+            unitCode: $rule->unitCode?->value,
+        ))->toArray();
     }
 }

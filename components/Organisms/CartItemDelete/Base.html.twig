@@ -1,7 +1,7 @@
 {# @prop title string Title of the removed product #}
 {# @prop productId int #}
 {# @prop pseId int Product sale element to restore #}
-{# @prop quantity int Quantity to restore #}
+{# @prop quantity int|float Quantity to restore, in the unit the line is sold in #}
 {# @prop imageId int|null Product image shown next to the message #}
 {% props title = '', productId = null, pseId = null, quantity = 1, imageId = null %}
 <div class="{{ ('CartItemDelete ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>

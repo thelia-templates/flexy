@@ -43,7 +43,7 @@ final readonly class CartStockService
     }
 
     /**
-     * @return array{stock: int, managed: bool, preorder: bool}
+     * @return array{stock: int|float, managed: bool, preorder: bool}
      */
     public function stockOf(CartItem $line, ProductSaleElements $pse): array
     {
@@ -63,7 +63,7 @@ final readonly class CartStockService
      * @param array<int|string, array{0: CartItem, 1: ProductSaleElements}> $lines the line and its sale element, by a key of the caller's
      * @param Cart|null                                                     $cart  the cart the lines belong to, whose own reservation is not held against it
      *
-     * @return array<int|string, array{stock: int, managed: bool, preorder: bool}> by the same keys
+     * @return array<int|string, array{stock: int|float, managed: bool, preorder: bool}> by the same keys
      */
     public function stocksOf(array $lines, ?Cart $cart = null): array
     {
@@ -98,7 +98,8 @@ final readonly class CartStockService
 
         if ([] !== $bundleLines) {
             foreach ($this->lineAvailability?->forBundleLines($bundleLines) ?? [] as $key => $available) {
-                $answers[$key] = $this->answerFor($available, false);
+                // A bundle is sold whole: the half of one its components could fill is none.
+                $answers[$key] = $this->answerFor(floor($available), false);
             }
         }
 
@@ -140,7 +141,7 @@ final readonly class CartStockService
      *
      * @param Cart|null $cart the cart asking, whose own reservation is not held against it
      *
-     * @return array{stock: int, managed: bool, preorder: bool}
+     * @return array{stock: int|float, managed: bool, preorder: bool}
      */
     public function stockFor(ProductSaleElements $pse, ?BundleComposition $composition, ?Cart $cart = null): array
     {
@@ -148,11 +149,14 @@ final readonly class CartStockService
             return $this->answerFor(CartLineAvailability::UNLIMITED, false);
         }
 
-        return $this->answerFor($this->lineAvailability->forLine($pse, $composition, $cart), false);
+        $available = $this->lineAvailability->forLine($pse, $composition, $cart);
+
+        // A bundle is sold whole; the stock of a sale element sold by measure keeps its decimals (2.5 kg is not 2).
+        return $this->answerFor(null === $composition ? $available : floor($available), false);
     }
 
     /**
-     * @return array{stock: int, managed: bool, preorder: bool}
+     * @return array{stock: int|float, managed: bool, preorder: bool}
      */
     private function answerFor(float $available, bool $preorder): array
     {
@@ -160,7 +164,11 @@ final readonly class CartStockService
             return ['stock' => \PHP_INT_MAX, 'managed' => false, 'preorder' => $preorder];
         }
 
-        return ['stock' => (int) floor($available), 'managed' => true, 'preorder' => $preorder];
+        // In the unit the line is sold in, rounded at the micro unit, the precision of the columns:
+        // a whole number when it is one, the decimals kept otherwise (2.5 kg is not 2).
+        $available = round($available, 6);
+
+        return ['stock' => floor($available) === $available ? (int) $available : $available, 'managed' => true, 'preorder' => $preorder];
     }
 
     /**

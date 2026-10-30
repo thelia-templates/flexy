@@ -144,6 +144,16 @@ final readonly class QuantityRuleDTO
     }
 
     /**
+     * The quantity one press of a button leads to: $steps steps up (positive) or down
+     * (negative) from $quantity, in whole numbers scaled by the decimals, so that 1.25 less
+     * a quarter lands on 1 and never on 0.99999.
+     */
+    public function moveBy(float $quantity, int $steps): float
+    {
+        return $this->unscaled((int) round($quantity * $this->scale()) + $steps * $this->scaledStep());
+    }
+
+    /**
      * The unit as it is written after a quantity ("kg", "m²"), by the core's UnitCode. A code
      * the core does not know, or a core without units, shows no unit: the unit only says what
      * the quantity counts, the cart never reads it.
@@ -172,6 +182,28 @@ final readonly class QuantityRuleDTO
     public function inputValue(float $quantity): string
     {
         return number_format($quantity, $this->decimals, '.', '');
+    }
+
+    /**
+     * The quantity written in a field the shopper reads and edits, in the language of the page
+     * and with the decimals of the rule: "0,50" on a French page, "0.50" on an English one, "6"
+     * for a count of pieces. The stepper's controller writes it the same way after each press,
+     * so the field never changes its own writing under the shopper's eyes.
+     */
+    public function fieldValue(float $quantity, ?string $locale = null): string
+    {
+        if (0 === $this->decimals || null === $locale || !class_exists(\NumberFormatter::class)) {
+            return $this->inputValue($quantity);
+        }
+
+        $formatter = new \NumberFormatter($locale, \NumberFormatter::DECIMAL);
+        $formatter->setAttribute(\NumberFormatter::GROUPING_USED, 0);
+        $formatter->setAttribute(\NumberFormatter::MIN_FRACTION_DIGITS, $this->decimals);
+        $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $this->decimals);
+
+        $written = $formatter->format($quantity);
+
+        return false === $written ? $this->inputValue($quantity) : $written;
     }
 
     private function scale(): int
