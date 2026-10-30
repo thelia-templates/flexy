@@ -235,3 +235,4 @@ Pre-order: Preordine
 "%count% second|%count% seconds": "%count% secondo|%count% secondi"
 "%count% minute|%count% minutes": "%count% minuto|%count% minuti"
 'The quantity of %product% in your cart was adjusted.': 'La quantità di %product% nel carrello è stata adeguata.'
+reference_unit_price: '%price% / %unit%'
