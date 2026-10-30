@@ -79,7 +79,7 @@
         {# POST + CSRF: this action deletes data, it must not be reachable by navigation #}
         <form method="post" {{ stimulus_target('Molecules--Modal--base', 'confirm') }}>
             <input type="hidden" name="_token" value="{{ csrf_token('address_action') }}">
-            <div class="grid md:grid-cols-2 gap-4 mt-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
                 <twig:Molecules:Button:Base
                     text="{{ 'Cancel'|trans }}"
                     color="secondary"
@@ -96,7 +96,7 @@
         {# POST + CSRF: this action deletes data, it must not be reachable by navigation #}
         <form method="post" {{ stimulus_target('Molecules--Modal--base', 'confirm') }}>
             <input type="hidden" name="_token" value="{{ csrf_token('address_action') }}">
-            <div class="grid md:grid-cols-2 gap-4 mt-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
                 <twig:Molecules:Button:Base
                     text="{{ 'Cancel'|trans }}"
                     color="secondary"

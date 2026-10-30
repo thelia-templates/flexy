@@ -52,7 +52,7 @@
                                 <h2 id="confirmDeleteList{{ list.id }}Title" class="h4">{{ 'Delete the list « %title% »?'|trans({'%title%': list.title}) }}</h2>
                                 <form method="post" action="{{ path('account_purchase_list_delete', {listId: list.id}) }}">
                                     <input type="hidden" name="_token" value="{{ token }}">
-                                    <div class="grid md:grid-cols-2 gap-4 mt-8">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
                                         <twig:Molecules:Button:Base
                                             text="{{ 'Cancel'|trans }}"
                                             color="secondary"

@@ -17,7 +17,7 @@
     />
 
     <div class="container-l pt-10 pb-15 lg:pb-30">
-        <div class="max-w-4xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-14">
+        <div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14">
             {% set notices = {
                 profile: 'Your information has been successfully modified'|trans,
                 password: 'Your password has been changed successfully'|trans,
@@ -53,7 +53,7 @@
                 {{ form_row(form.error_url, {value: path('account_index')}) }}
                 {{ form_rest(form) }}
 
-                <twig:Molecules:Button:Base text="{{ 'Update my password'|trans }}" type="submit" class="w-max" />
+                <twig:Molecules:Button:Base text="{{ 'Update my password'|trans }}" type="submit" class="w-max max-w-full" />
                 {{ form_end(form) }}
             </div>
 
@@ -77,7 +77,7 @@
                     <twig:Molecules:Button:Base
                         text="{{ 'Download my data'|trans }}"
                         type="submit"
-                        class="mt-1.5 w-max"
+                        class="mt-1.5 w-max max-w-full"
                     />
                 </form>
             </div>

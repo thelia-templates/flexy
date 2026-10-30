@@ -42,7 +42,7 @@
 
         <div class="flex flex-col gap-4 items-start">
             <twig:Molecules:Link:Base href="{{ path('password_forgotten') }}" customText="{{ 'Forgot password?'|trans }}" />
-            <twig:Molecules:Button:Base text="{{ 'Log in'|trans }}" type="submit" class="w-max" />
+            <twig:Molecules:Button:Base text="{{ 'Log in'|trans }}" type="submit" class="w-max max-w-full" />
         </div>
         {{ form_end(loginForm) }}
     </section>
