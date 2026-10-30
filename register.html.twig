@@ -2,6 +2,8 @@
 
 {% block title %}{{ 'Sign up'|trans }}{% endblock %}
 
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
 {% block body %}
     {% set form = getForm('flexybundle_form_customer_register_form') %}
     {% form_theme form with flexy_form_themes only %}

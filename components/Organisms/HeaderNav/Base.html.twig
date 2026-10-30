@@ -22,8 +22,11 @@
     {% if hasCustomerAccount() %}
         <twig:Organisms:HeaderProfile:Base />
     {% else %}
+        {# nofollow: the link carries the address of the page as its return address, so
+           every page has its own, and a crawler following them never runs out. #}
         <twig:Molecules:HeaderButton:Base
             href="{{ sign_in_path() }}"
+            rel="nofollow"
             icon="account"
             color="theme"
             class="HeaderNav-btn"
