@@ -166,11 +166,12 @@
                                 {% if byMeasure %}type="text" inputmode="decimal" autocomplete="off" size="4"{% else %}type="number" step="{{ rule.inputStep }}" min="0"{% endif %}
                                 aria-label="{{ 'Quantity'|trans }}"
                                 data-model="on(change)|items[{{ index }}].quantity"
-                                data-action="input->Organisms--CartItem--quantity#enforce keyup.enter->Organisms--CartItem--quantity#announce blur->Organisms--CartItem--quantity#announce change->Organisms--CartItem--quantity#normalize change->Organisms--CartItem--quantity#settle change->live#action"
+                                data-action="input->Organisms--CartItem--quantity#enforce keyup.enter->Organisms--CartItem--quantity#announce blur->Organisms--CartItem--quantity#announce change->Organisms--CartItem--quantity#normalize change->Organisms--CartItem--quantity#settle change->live#action blur->Organisms--CartItem--quantity#show"
                                 data-live-action-param="onQuantityChanged"
                                 data-live-index-param="{{ index }}"
                                 data-live-base-quantity-param="{{ rule.inputValue(this.cartItem.quantity) }}"
                                 value="{{ this.fieldQuantity }}"
+                                {% if byMeasure %}data-field-value="{{ this.fieldQuantity }}"{% endif %}
                                 {% if this.cartItem.stockManaged and not byMeasure %}max="{{ this.cartItem.stock }}"{% endif %}
                             >
 

@@ -190,7 +190,7 @@ class Base
                 // line, and a dumped product does not survive LiveComponent dehydration.
                 // This path never carried one: the line is priced by its own columns.
                 'product' => null,
-                'stock' => (float) $stock,
+                'stock' => $stock,
                 // The rule of the sale element moves the stepper of the line by its step.
                 'quantityRule' => ($this->quantityRules ?? new SaleElementQuantityRules())->ofSaleElement($pse) ?? [],
                 'stockManaged' => $stockManaged,

@@ -51,7 +51,7 @@ final readonly class CartStockService
      * (CartLineAvailability), from the composition the line holds. A bundle of virtual components only
      * has no limit to enforce.
      *
-     * @return array{stock: int, managed: bool}
+     * @return array{stock: int|float, managed: bool}
      */
     public function stockOf(CartItem $line, ProductSaleElements $pse): array
     {
@@ -64,7 +64,7 @@ final readonly class CartStockService
      *
      * @param array<int|string, array{0: CartItem, 1: ProductSaleElements}> $lines the line and its sale element, by a key of the caller's
      *
-     * @return array<int|string, array{stock: int, managed: bool}> by the same keys
+     * @return array<int|string, array{stock: int|float, managed: bool}> by the same keys
      */
     public function stocksOf(array $lines): array
     {
@@ -116,7 +116,10 @@ final readonly class CartStockService
         $managed = $this->isStockManaged($pse);
 
         if (null === $this->lineAvailability || null === $composition) {
-            return ['stock' => (float) $pse->getQuantity(), 'managed' => $managed];
+            // A whole number of units, except for a sale element whose rule allows decimals.
+            $decimals = (new SaleElementQuantityRules())->ofSaleElement($pse)['quantityDecimals'] ?? 0;
+
+            return ['stock' => $decimals > 0 ? (float) $pse->getQuantity() : (int) $pse->getQuantity(), 'managed' => $managed];
         }
 
         return $this->answerFor($pse, $this->lineAvailability->forLine($pse, $composition));

@@ -45,8 +45,12 @@ class CartItemDto
     public float $lineTotalAfterDiscountTaxed = 0.0;
     public float $lineTotalAfterDiscountUntaxed = 0.0;
     public ?ProductDTO $product = null;
-    /** The stock of the sale element, in the same unit as the quantity. */
-    public float $stock = 0.0;
+    /**
+     * The stock of the sale element, in the same unit as the quantity: a whole number for a quantity
+     * sold without decimals, a float otherwise. Left as `mixed` because the DTO travels in a LiveProp,
+     * which refuses a union type.
+     */
+    public mixed $stock = 0;
     public bool $stockManaged = true;
     public string $title = '';
     public string $desc = '';
@@ -98,7 +102,7 @@ class CartItemDto
         $cartItem->lineTotalUntaxed = self::amount($data, 'lineTotalUntaxed', 'line_total_untaxed');
         $cartItem->lineTotalAfterDiscountTaxed = self::amount($data, 'lineTotalAfterDiscountTaxed', 'line_total_after_discount_taxed');
         $cartItem->lineTotalAfterDiscountUntaxed = self::amount($data, 'lineTotalAfterDiscountUntaxed', 'line_total_after_discount_untaxed');
-        $cartItem->stock = isset($data['stock']) ? (float) $data['stock'] : 0.0;
+        $cartItem->stock = isset($data['stock']) ? (\is_float($data['stock']) ? $data['stock'] : (int) $data['stock']) : 0;
         $cartItem->stockManaged = isset($data['stockManaged']) ? (bool) $data['stockManaged'] : true;
         $cartItem->title = $data['title'] ?? '';
         $cartItem->desc = $data['desc'] ?? '';
