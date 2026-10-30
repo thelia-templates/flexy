@@ -385,6 +385,15 @@ class Base
     }
 
     /**
+     * The stock cannot fill even the smallest quantity sold while nothing of the sale element is
+     * in the cart yet: a shortage, which is not the maximum "already in the cart".
+     */
+    public function isStockBelowSmallestQuantity(): bool
+    {
+        return $this->isMaxQuantityReached() && 0.0 === $this->getCartQuantityForCurrentPse();
+    }
+
+    /**
      * The quantities a lot sold by a whole step above one can be bought in, up to the stock left:
      * the selector lists them rather than letting the shopper type one the cart would refuse.
      * Empty for a quantity that is typed.

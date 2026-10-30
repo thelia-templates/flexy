@@ -6,6 +6,7 @@
 {# @prop stockManaged bool Whether stock is enforced for this product #}
 {# @prop remainingStock float Stock left once what is already in the cart is deducted, in the unit the sale element is sold in #}
 {# @prop maxQuantityReached bool The stock left is below the smallest quantity the sale element is sold in #}
+{# @prop stockBelowSmallestQuantity bool With maxQuantityReached: nothing of it is in the cart, the stock is short of the smallest quantity #}
 {# @prop quantityRule QuantityRuleDTO|null Minimum, step, decimals and unit of the selected sale element; null sells one at a time #}
 {# @prop quantityValue string|null The quantity in the field, with the decimals of the rule in the language of the page; null shows the form's own value #}
 {# @prop quantityChoices array The quantities to list, [{value, label}], for a lot sold by a whole step above one; empty when the quantity is typed #}
@@ -22,6 +23,7 @@
     stockManaged = false,
     remainingStock = 0,
     maxQuantityReached = false,
+    stockBelowSmallestQuantity = false,
     cartRefused = false,
     cartRefusalReason = '',
     bundlePricing = null,
@@ -205,7 +207,7 @@
             <twig:Molecules:SnackBar:Base
                 variant="warning"
                 withIcon
-                text="{{ 'You already have the maximum available quantity of this product in your cart'|trans }}"
+                text="{{ (stockBelowSmallestQuantity ? 'Not enough stock for the smallest quantity this product is sold in' : 'You already have the maximum available quantity of this product in your cart')|trans }}"
             />
             {{ form_widget(form.quantity, {type: 'hidden'}) }}
         {% else %}

@@ -101,6 +101,18 @@ final class PseSelectorQuantityRenderTest extends KernelTestCase
         self::assertSame('20', $input->attr('max'));
     }
 
+    public function testAShortageOfStockForTheSmallestLotIsNotSaidToBeTheMaximumInTheCart(): void
+    {
+        $lot = QuantityRuleDTO::fromArray(['quantityStep' => 6]);
+
+        $shortage = $this->render(['quantityRule' => $lot, 'maxQuantityReached' => true, 'stockBelowSmallestQuantity' => true], quantity: '6')->filter('.SnackBar')->text();
+        $reached = $this->render(['quantityRule' => $lot, 'maxQuantityReached' => true], quantity: '6')->filter('.SnackBar')->text();
+
+        self::assertStringContainsString('Not enough stock for the smallest quantity', $shortage);
+        self::assertStringNotContainsString('maximum available quantity', $shortage);
+        self::assertStringContainsString('maximum available quantity', $reached);
+    }
+
     public function testTheSentenceOfTheCartRefusingAQuantityIsShownAsText(): void
     {
         $alert = $this->render(['quantityRule' => QuantityRuleDTO::fromArray(['quantityStep' => 6])], quantity: '7', error: 'Sold <b>by 6</b>: 6, 12, 18…')

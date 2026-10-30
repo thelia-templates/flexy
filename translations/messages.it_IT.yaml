@@ -227,3 +227,4 @@ This order is now in your customer account. Please sign in to see it.: Questo or
 'The quantity of %product% in your cart was adjusted.': 'La quantità di %product% nel carrello è stata adeguata.'
 reference_unit_price: '%price% / %unit%'
 only_quantity_left_in_stock: '%title%: ne restano solo %count% in magazzino.'
+Not enough stock for the smallest quantity this product is sold in: Scorte insufficienti per la quantità minima di vendita di questo prodotto
