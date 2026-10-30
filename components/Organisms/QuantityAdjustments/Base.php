@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Organisms\QuantityAdjustments;
 
 use FlexyBundle\EventListener\QuantityAdjustedFlashListener;
+use FlexyBundle\Service\PrefetchRequest;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
@@ -55,7 +56,9 @@ final class Base
     {
         $request = $this->requestStack->getMainRequest();
 
-        if (null === $request || !$request->hasSession()) {
+        // A page fetched ahead of a click is seen by nobody: reading the flash bag here would spend
+        // the message the page that is really opened has to show.
+        if (null === $request || PrefetchRequest::is($request) || !$request->hasSession()) {
             return [];
         }
 
