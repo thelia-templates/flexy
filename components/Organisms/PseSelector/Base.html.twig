@@ -69,16 +69,20 @@
                     {% set selectedValue = attr.values|default([])|filter(value => value.id == currentCombination[attr.id])|first %}
                     <li>
                         <div class="PseSelector-choice" {{ stimulus_controller(mobileDrawerController) }}>
-                            {# Below md the label collapses into a select-like trigger showing the
-                               selected value through data-selected-label (see Base.css). That value
-                               is rendered server-side: the parent re-renders on every combination
-                               change, so no controller has to keep it in sync. #}
-                            <div
+                            {# Below md the label is a select-like trigger showing the selected value
+                               through data-selected-label (see Base.css). That value is rendered
+                               server-side: the parent re-renders on every combination change, so no
+                               controller has to keep it in sync. From md the drawer is static and
+                               only the heading is shown: a trigger with nothing to open would stay a
+                               tab stop. #}
+                            <button
+                                type="button"
                                 class="PseSelector-choiceLabel"
-                                tabindex="0"
+                                aria-label="{{ selectedValue ? attr.label ~ ', ' ~ selectedValue.label : attr.label }}"
                                 data-selected-label="{{ selectedValue.label|default('') }}"
-                                {{ stimulus_action(mobileDrawerController, 'toggle', 'click')|stimulus_action(mobileDrawerController, 'toggle', 'keydown.enter')|stimulus_action(mobileDrawerController, 'toggle', 'keydown.space') }}
-                            >{{ attr.label }}</div>
+                                {{ stimulus_action(mobileDrawerController, 'toggle', 'click') }}
+                            >{{ attr.label }}</button>
+                            <p class="PseSelector-choiceHeading">{{ attr.label }}</p>
 
                             <twig:Molecules:MobileDrawer:Base>
                                 <p class="PseSelector-choiceTitle h4">{{ attr.label }}</p>

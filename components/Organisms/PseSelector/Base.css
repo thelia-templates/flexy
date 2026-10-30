@@ -33,8 +33,8 @@
   /*
    * Below md the label is the closed state of the drawer, so it shows the SELECTED value (via
    * data-selected-label) rather than the attribute name, with a chevron. From md the drawer is
-   * static (MobileDrawer turns inline at md) and the label goes back to being a plain heading —
-   * hence pointer-events: none, there is nothing left to open.
+   * static (MobileDrawer turns inline at md): the trigger is hidden, so it leaves the tab order,
+   * and .PseSelector-choiceHeading takes its place.
    */
   .PseSelector-choiceLabel {
     @apply paragraph-4;
@@ -46,9 +46,18 @@
     /* 13px + the 24px icon box + the 1px border = the 52px row height of the mockup */
     padding: 0.8125rem 0.875rem;
     border: 1px solid var(--color-grey-lighter);
+    width: 100%;
     font-size: 0;
+    text-align: start;
+    color: inherit;
+    background: none;
     cursor: pointer;
     outline: none;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-focus);
+      outline-offset: 2px;
+    }
 
     &::before {
       content: attr(data-selected-label);
@@ -67,19 +76,20 @@
     }
 
     @variant md {
+      display: none;
+    }
+  }
+
+  .PseSelector-choiceHeading {
+    display: none;
+
+    @variant md {
+      @apply paragraph-4;
+
       display: block;
-      padding: 0;
       margin-bottom: 0.5rem;
-      border: none;
-      font-size: var(--font-size-paragraph-4);
       font-weight: 600;
       color: var(--color-black);
-      pointer-events: none;
-
-      &::before,
-      &::after {
-        content: none;
-      }
     }
   }
 
