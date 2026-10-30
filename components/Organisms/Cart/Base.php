@@ -17,6 +17,7 @@ namespace FlexyBundle\Components\Organisms\Cart;
 use FlexyBundle\DTO\CartItemDto;
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Service\BundleLines;
+use FlexyBundle\Service\CartItemCount;
 use FlexyBundle\Service\CartQuantity;
 use FlexyBundle\Service\CartStockService;
 use FlexyBundle\Service\SaleElementQuantityRules;
@@ -409,17 +410,10 @@ class Base
      */
     public function getTotalItems(): int
     {
-        $quantities = 0.0;
-
-        foreach ($this->items as $item) {
-            if ($item->rule()->isSoldByMeasure() || floor($item->quantity) !== $item->quantity) {
-                return \count($this->items);
-            }
-
-            $quantities += $item->quantity;
-        }
-
-        return (int) $quantities;
+        return CartItemCount::count(array_map(
+            static fn (CartItemDto $item): array => ['quantity' => $item->quantity, 'decimals' => $item->rule()->decimals],
+            $this->items,
+        ));
     }
 
     /**

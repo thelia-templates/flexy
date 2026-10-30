@@ -85,7 +85,7 @@ class Base
      * The lines the parcel carries, each with the quantity it carries: what the
      * customer checks against the box.
      *
-     * @return list<array{title: string, ref: string, quantity: float}>
+     * @return list<array{title: string, ref: string, quantity: float, quantityDecimals: int, unitCode: string|null}>
      */
     public function getLines(): array
     {
@@ -108,6 +108,9 @@ class Base
                 'title' => (string) ($orderProduct['title'] ?? ''),
                 'ref' => (string) ($orderProduct['productRef'] ?? ''),
                 'quantity' => (float) ($item['quantity'] ?? 0),
+                // Frozen on the order line; absent from the payload of an older core.
+                'quantityDecimals' => (int) ($orderProduct['quantityDecimals'] ?? 0),
+                'unitCode' => \is_string($orderProduct['unitCode'] ?? null) ? $orderProduct['unitCode'] : null,
             ];
         }
 

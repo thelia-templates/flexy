@@ -72,6 +72,17 @@ final class ShipmentRenderTest extends KernelTestCase
         self::assertStringContainsString('href="/account/order/pdf/delivery/42/1"', $note[0]);
     }
 
+    public function testAParcelWritesAWeightWithItsDecimalsAndItsUnit(): void
+    {
+        $parcel = $this->shippedParcel();
+        $parcel['orderShipmentItems'][] = ['quantity' => 1.25, 'orderProduct' => ['title' => 'Lexie', 'productRef' => 'LEX-1', 'quantityDecimals' => 2, 'unitCode' => 'kg']];
+
+        $html = $this->render(['shipment' => $parcel, 'position' => 1, 'total' => 2]);
+
+        self::assertMatchesRegularExpression('#1\.25 kg &times;.*Lexie#s', $html);
+        self::assertMatchesRegularExpression('#2 &times;.*Mesh shoes#s', $html, 'a line sold by the piece is unchanged');
+    }
+
     public function testAParcelBeingPreparedHasNoLinkAndSaysSo(): void
     {
         $parcel = $this->shippedParcel();

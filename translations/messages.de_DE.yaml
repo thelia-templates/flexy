@@ -656,3 +656,4 @@ The prices of your cart have changed. Check your cart before paying.: Die Preise
 The message must be %max characters at most.: Die Nachricht darf höchstens %max Zeichen lang sein.
 'The quantity of %product% in your cart was adjusted.': 'Die Menge von %product% in Ihrem Warenkorb wurde angepasst.'
 reference_unit_price: '%price% / %unit%'
+only_quantity_left_in_stock: '%title%: nur noch %count% auf Lager.'
