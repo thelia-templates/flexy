@@ -237,3 +237,4 @@ Pre-order: Preventa
 'The quantity of %product% in your cart was adjusted.': 'Se ha ajustado la cantidad de %product% en su carrito.'
 reference_unit_price: '%price% / %unit%'
 only_quantity_left_in_stock: '%title%: solo quedan %count% en stock.'
+Not enough stock for the smallest quantity this product is sold in: No hay existencias suficientes para la cantidad mínima de venta de este producto
