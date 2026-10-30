@@ -26,7 +26,7 @@
 			text="{{ 'Download my file'|trans }}"
 			href="{{ path(downloadRoute, downloadRouteParams|merge({orderProductId: line.orderProduct.id})) }}"
 			icon_right="download"
-			class="mb-6 w-max"
+			class="mb-6 w-max max-w-full"
 		/>
 	{% endif %}
 	{{ theme_hook('account-order.item.bottom', {order: order, orderProduct: line.orderProduct}) }}
