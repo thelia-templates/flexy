@@ -47,6 +47,26 @@ final class QuantityAdjustmentsRenderTest extends KernelTestCase
         self::assertSame('', trim($this->render()), 'told once');
     }
 
+    public function testAPageFetchedAheadOfAClickLeavesTheMessageForThePageThatIsOpened(): void
+    {
+        $session = new Session(new MockArraySessionStorage());
+        $session->getFlashBag()->add(QuantityAdjustedFlashListener::FLASH_KEY, ['product' => 'Wine case', 'message' => 'The quantity was brought down to 6: sold by 6.']);
+        $requests = self::getContainer()->get('request_stack');
+        \assert($requests instanceof RequestStack);
+
+        $prefetch = new Request();
+        $prefetch->headers->set('X-Sec-Purpose', 'prefetch');
+        $prefetch->setSession($session);
+        $requests->push($prefetch);
+        self::assertSame('', trim($this->render()), 'nobody sees a prefetched page');
+        $requests->pop();
+
+        $visit = new Request();
+        $visit->setSession($session);
+        $requests->push($visit);
+        self::assertStringContainsString('Wine case', (new Crawler($this->render()))->filter('[role="status"]')->text());
+    }
+
     public function testNothingToTellRendersNothing(): void
     {
         self::assertSame('', trim($this->render()));
