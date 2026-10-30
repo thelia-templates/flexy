@@ -16,6 +16,7 @@ namespace FlexyBundle\Tests\Component;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\UX\TwigComponent\ComponentRendererInterface;
+use Thelia\Domain\Catalog\Quantity\QuantityFormatter;
 
 /** One parcel of an order shipped in several, as the order page shows it. */
 final class ShipmentRenderTest extends KernelTestCase
@@ -79,7 +80,8 @@ final class ShipmentRenderTest extends KernelTestCase
 
         $html = $this->render(['shipment' => $parcel, 'position' => 1, 'total' => 2]);
 
-        self::assertMatchesRegularExpression('#1\.25 kg &times;.*Lexie#s', $html);
+        // A core without quantity rules has no unit to write: the decimals still show.
+        self::assertMatchesRegularExpression(class_exists(QuantityFormatter::class) ? '#1\.25 kg &times;.*Lexie#s' : '#1\.25 &times;.*Lexie#s', $html);
         self::assertMatchesRegularExpression('#2 &times;.*Mesh shoes#s', $html, 'a line sold by the piece is unchanged');
     }
 
