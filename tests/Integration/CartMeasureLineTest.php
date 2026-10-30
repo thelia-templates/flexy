@@ -75,7 +75,8 @@ final class CartMeasureLineTest extends IntegrationTestCase
         self::assertStringContainsString('type="text" inputmode="decimal"', $input);
         self::assertStringContainsString('value="1,25"', $input, 'the line shows its quantity with its two decimals, in French');
         self::assertStringContainsString('data-live-base-quantity-param="1.25"', $input, 'the component reads it back with a point');
-        self::assertStringContainsString('change->Organisms--CartItem--quantity#normalize change->live#action', $input, 'the comma becomes a point before the component reads it');
+        self::assertStringContainsString('data-field-value="1,25"', $input, 'and shown again so once the component wrote its number back in the field');
+        self::assertStringContainsString('change->Organisms--CartItem--quantity#normalize change->Organisms--CartItem--quantity#settle change->live#action ', $input, 'the comma becomes a point before the component reads it');
     }
 
     public function testAShortStockIsToldAsAQuantityWithItsUnit(): void

@@ -184,6 +184,7 @@ class Base
 
             ['stock' => $stock, 'managed' => $stockManaged, 'preorder' => $isPreorder] = $stocks[(int) $item['id']];
             $restockDate = $isPreorder ? $pse->getRestockDate('Y-m-d') : null;
+            $quantityRule = ($this->quantityRules ?? new SaleElementQuantityRules())->ofSaleElement($pse) ?? [];
 
             $cartItem = CartItemDto::fromArray([
                 ...$item,
@@ -191,9 +192,10 @@ class Base
                 // line, and a dumped product does not survive LiveComponent dehydration.
                 // This path never carried one: the line is priced by its own columns.
                 'product' => null,
-                'stock' => (float) $stock,
+                // A whole number for a line sold without decimals, unless the stock holds a fraction of one; a float otherwise.
+                'stock' => $stockManaged && ($quantityRule['quantityDecimals'] ?? 0) > 0 ? (float) $stock : $stock,
                 // The rule of the sale element moves the stepper of the line by its step.
-                'quantityRule' => ($this->quantityRules ?? new SaleElementQuantityRules())->ofSaleElement($pse) ?? [],
+                'quantityRule' => $quantityRule,
                 'stockManaged' => $stockManaged,
                 'isPreorder' => $isPreorder,
                 'restockDate' => $restockDate,
