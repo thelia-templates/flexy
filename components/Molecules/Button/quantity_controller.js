@@ -9,17 +9,24 @@ class QuantityController extends Controller {
     // bind() is a different reference and removeEventListener() matched nothing, so the
     // handlers stacked up on every LiveComponent re-render.
     this.handlers = new WeakMap();
+    this.clamped = new WeakSet();
   }
 
   inputTargetConnected(element) {
     const handlers = {
       keyup: (event) => this.enforceMinMax(element, event),
       keypress: (event) => this.enforceNumberOnly(element, event),
+      keydown: (event) => event.key === "Enter" && this.announceClamp(element),
+      blur: () => this.announceClamp(element),
+      change: () => this.clamped.delete(element),
     };
 
     this.handlers.set(element, handlers);
     element.addEventListener("keyup", handlers.keyup);
     element.addEventListener("keypress", handlers.keypress);
+    element.addEventListener("keydown", handlers.keydown);
+    element.addEventListener("blur", handlers.blur);
+    element.addEventListener("change", handlers.change);
   }
 
   inputTargetDisconnected(element) {
@@ -31,6 +38,9 @@ class QuantityController extends Controller {
 
     element.removeEventListener("keyup", handlers.keyup);
     element.removeEventListener("keypress", handlers.keypress);
+    element.removeEventListener("keydown", handlers.keydown);
+    element.removeEventListener("blur", handlers.blur);
+    element.removeEventListener("change", handlers.change);
     this.handlers.delete(element);
   }
 
@@ -91,6 +101,8 @@ class QuantityController extends Controller {
 
   enforceMinMax(el, e) {
     if (el.value !== "") {
+      const typed = el.value;
+
       if (parseInt(el.value) < parseInt(el.min)) {
         el.value = el.min;
       }
@@ -99,7 +111,25 @@ class QuantityController extends Controller {
       } else {
         el.value = parseInt(el.value);
       }
+
+      if (el.value !== typed) {
+        this.clamped.add(el);
+      }
     }
+  }
+
+  /**
+   * A value the script put in the field is not a change of the user's for WebKit: leaving the
+   * field, or submitting its form with Enter, fires no `change`, and a model bound on change
+   * kept the quantity typed before. Announce it then, unless the browser fired its own
+   * `change` meanwhile.
+   */
+  announceClamp(el) {
+    if (!this.clamped.delete(el)) {
+      return;
+    }
+
+    el.dispatchEvent(new Event("change", { bubbles: true }));
   }
 }
 

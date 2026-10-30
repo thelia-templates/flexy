@@ -161,7 +161,7 @@
                                 type="number"
                                 aria-label="{{ 'Quantity'|trans }}"
                                 data-model="on(change)|items[{{ index }}].quantity"
-                                data-action="input->Organisms--CartItem--quantity#enforce change->live#action"
+                                data-action="input->Organisms--CartItem--quantity#enforce keyup.enter->Organisms--CartItem--quantity#announce blur->Organisms--CartItem--quantity#announce change->Organisms--CartItem--quantity#settle change->live#action"
                                 data-live-action-param="onQuantityChanged"
                                 data-live-index-param="{{ index }}"
                                 data-live-base-quantity-param="{{ this.cartItem.quantity }}"
