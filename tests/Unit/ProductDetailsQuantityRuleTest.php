@@ -112,6 +112,16 @@ final class ProductDetailsQuantityRuleTest extends TestCase
         self::assertSame([], $component->getQuantityChoices());
     }
 
+    public function testAStockBelowTheSmallestLotWithNothingInTheCartIsAShortageNotAMaximumReached(): void
+    {
+        $short = $this->component(['id' => 8, 'quantity' => 4] + self::LOT, stockManaged: true);
+        self::assertTrue($short->isStockBelowSmallestQuantity());
+
+        $used = $this->component(['id' => 8, 'quantity' => 10] + self::LOT, stockManaged: true, inCart: 6.0);
+        self::assertTrue($used->isMaxQuantityReached());
+        self::assertFalse($used->isStockBelowSmallestQuantity(), 'six are already in the cart: that is the maximum');
+    }
+
     public function testAStockLeftOfHalfAPieceIsTheMaximumOfASaleElementSoldByThePiece(): void
     {
         $component = $this->component(['id' => 7, 'quantity' => 7.5], stockManaged: true, inCart: 7.0);
