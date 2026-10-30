@@ -29,6 +29,7 @@
                 <li>
                     <a
                         href="{{ switchUrls[currency.code] ?? '' }}"
+                        rel="nofollow"
                         class="LangSelect-lang{% if currentCurrency.code == currency.code %} active{% endif %}"
                     >
                         <span dir="ltr">{{ currency.symbol }} {{ currency.code }}</span>
@@ -62,6 +63,7 @@
                 <li>
                     <a
                         href="{{ switchUrls[currency.code] ?? '' }}"
+                        rel="nofollow"
                         class="LangSelect-mobileItem{% if currentCurrency.code == currency.code %} active{% endif %}"
                     >
                         <span dir="ltr">{{ currency.symbol }} {{ currency.code }}</span>

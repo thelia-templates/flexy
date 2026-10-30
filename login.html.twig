@@ -2,6 +2,8 @@
 
 {% block title %}{{ 'Login'|trans }}{% endblock %}
 
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
 {% block body %}
     {% set form = getForm('thelia.front.customer.login') %}
     {% form_theme form with flexy_form_themes only %}
