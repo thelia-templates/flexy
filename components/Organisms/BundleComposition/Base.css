@@ -18,9 +18,9 @@
   background-color: var(--color-lightest);
 }
 
-/* An optional component the shopper left out stays on the list, quieter. */
-.BundleComposition-item--left .BundleComposition-img,
-.BundleComposition-item--left .BundleComposition-desc {
+/* An optional component the shopper left out stays on the list, quieter: the picture only, a faded text would
+   fall under the contrast the text needs. The switch beside it says whether it is in. */
+.BundleComposition-item--left .BundleComposition-img {
   opacity: 0.55;
 }
 
