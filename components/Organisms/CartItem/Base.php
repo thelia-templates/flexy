@@ -16,6 +16,7 @@ namespace FlexyBundle\Components\Organisms\CartItem;
 
 use FlexyBundle\DTO\CartItemDto;
 use FlexyBundle\DTO\DisplayedPrice;
+use FlexyBundle\DTO\QuantityRuleDTO;
 use FlexyBundle\Service\BundleLines;
 use FlexyBundle\Service\CartStockService;
 use FlexyBundle\Service\PriceDisplay;
@@ -64,6 +65,21 @@ class Base
         private readonly TranslatorInterface $translator,
         private readonly PriceDisplay $priceDisplay,
     ) {
+    }
+
+    /** The minimum, step and decimals the line moves by. */
+    public function getRule(): QuantityRuleDTO
+    {
+        return $this->cartItem->rule();
+    }
+
+    /**
+     * The quantity in the field, written with the decimals of the line in the language of the
+     * page: "1,25" for a kilogram and a quarter on a French page, "2" for two pieces.
+     */
+    public function getFieldQuantity(): string
+    {
+        return $this->cartItem->rule()->fieldValue($this->cartItem->quantity, $this->langService->getLocale());
     }
 
     public function mount(CartItemDto $cartItem): void

@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\AddToCartToast;
 
+use FlexyBundle\Service\CartQuantity;
 use FlexyBundle\Service\ProductSaleElementsService;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
@@ -31,8 +32,9 @@ class Base
 {
     use DefaultActionTrait;
 
+    /** In the unit the sale element is sold in: 1.25 for a kilogram and a quarter. */
     #[LiveProp]
-    public ?int $quantity = null;
+    public ?float $quantity = null;
 
     #[LiveProp]
     public ?int $pseId = null;
@@ -71,7 +73,9 @@ class Base
         $locale = $this->localizationFacade->getCurrentLocale();
         $product = $pse->getProduct()->setLocale($locale);
 
-        $this->quantity = max(1, (int) ($values['quantity'] ?? 1));
+        // As the shopper typed it, "1,25" or "1.25"; a quantity that reads as nothing shows as one.
+        $quantity = CartQuantity::typed($values['quantity'] ?? null) ?? 0.0;
+        $this->quantity = $quantity > 0.0 ? $quantity : 1.0;
         $this->pseId = $pse->getId();
         $this->title = $product->getTitle();
         $this->secondaryTitle = $product->getChapo();
