@@ -16,6 +16,7 @@ namespace FlexyBundle\Components\Organisms\CartButton;
 
 use FlexyBundle\DTO\DisplayedPrice;
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\CartItemCount;
 use FlexyBundle\Service\PriceDisplay;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
@@ -35,6 +36,9 @@ class Base
         private readonly AttributeAccessService $attributeAccessService,
         private readonly LangService $langService,
         private readonly PriceDisplay $priceDisplay,
+        // Optional so that a child theme calling this constructor keeps working: it then counts
+        // as the core does, the sum of the quantities.
+        private readonly ?CartItemCount $itemCount = null,
     ) {
     }
 
@@ -50,7 +54,8 @@ class Base
         // Memoised: this doubles as the listener and as the template getter, so it is called
         // twice per live action and each read walks the cart to compute taxes.
         return $this->summary ??= [
-            'itemCount' => (int) $this->attributeAccessService->attributeCart('item_count'),
+            // Lines rather than quantities once a line is sold by measure: no "3.25 items".
+            'itemCount' => $this->itemCount?->ofTheSessionCart() ?? (int) $this->attributeAccessService->attributeCart('item_count'),
             // Discounted, without postage: no delivery method is known outside the checkout.
             'total' => $this->priceDisplay->pick(
                 $this->priceDisplay->forVisitor(),

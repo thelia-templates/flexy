@@ -15,11 +15,14 @@ declare(strict_types=1);
 namespace FlexyBundle\Tests\Integration;
 
 use FlexyBundle\Components\Organisms\Cart\Base as Cart;
+use FlexyBundle\Service\CartItemCount;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Translation\LocaleAwareInterface;
 use Symfony\UX\LiveComponent\LiveResponder;
 use Symfony\UX\TwigComponent\ComponentFactory;
 use Symfony\UX\TwigComponent\ComponentRendererInterface;
 use Thelia\Core\HttpFoundation\Session\Session;
+use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Catalog\Quantity\QuantityRule;
 use Thelia\Domain\Catalog\Quantity\UnitCode;
 use Thelia\Model\Cart as CartModel;
@@ -75,6 +78,22 @@ final class CartMeasureLineTest extends IntegrationTestCase
         self::assertStringContainsString('change->Organisms--CartItem--quantity#normalize change->live#action', $input, 'the comma becomes a point before the component reads it');
     }
 
+    public function testAShortStockIsToldAsAQuantityWithItsUnit(): void
+    {
+        $this->putInSession($this->cartWithAWeight(1.25, 0.75));
+        $this->speak('fr_FR');
+        $translator = static::getContainer()->get('translator');
+        \assert($translator instanceof LocaleAwareInterface);
+        $previous = $translator->getLocale();
+        $translator->setLocale('fr_FR');
+
+        try {
+            self::assertStringContainsString('Lexie : il n&#039;en reste que 0,75 kg en stock.', $this->renderLine(), 'three quarters of a kilogram, not "0,75 exemplaires" nor "only one"');
+        } finally {
+            $translator->setLocale($previous);
+        }
+    }
+
     public function testAMinusFromTheSmallestQuantityTakesTheLineOut(): void
     {
         $cart = $this->cartWithAWeight(0.5);
@@ -88,7 +107,18 @@ final class CartMeasureLineTest extends IntegrationTestCase
         self::assertSame(0.5, $component->pendingDelete['quantity'] ?? null, 'and the undo puts back half a kilogram');
     }
 
-    private function cartWithAWeight(float $quantity): CartModel
+    public function testTheCartButtonCountsTheLinesOnceOneIsSoldByMeasure(): void
+    {
+        $cart = $this->cartWithAWeight(1.25);
+        $factory = $this->createFixtureFactory();
+        $factory->cartItem($cart, $factory->product($factory->category(), $factory->taxRule(), $factory->currency()), null, ['quantity' => 2.0]);
+        $count = new CartItemCount($this->getService(CartFacade::class));
+
+        self::assertSame(2, $count->of($cart), '1.25 kg and two pieces are two lines, not 3.25 items');
+        self::assertSame(0, $count->of(null));
+    }
+
+    private function cartWithAWeight(float $quantity, float $stock = 7.5): CartModel
     {
         $factory = $this->createFixtureFactory();
         $currency = $factory->currency();
@@ -96,7 +126,7 @@ final class CartMeasureLineTest extends IntegrationTestCase
         $saleElement = $product->getProductSaleElementss()->getFirst();
         \assert($saleElement instanceof ProductSaleElements);
         (new QuantityRule(minQuantity: 0.5, step: 0.25, decimals: 2, unitCode: UnitCode::KILOGRAM))->applyTo($saleElement);
-        $saleElement->setQuantity(7.5)->save();
+        $saleElement->setQuantity($stock)->save();
 
         $cart = $factory->cart(null, ['currency' => $currency]);
         $factory->cartItem($cart, $product, $saleElement, ['quantity' => $quantity]);

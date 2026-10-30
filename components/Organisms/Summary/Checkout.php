@@ -16,6 +16,7 @@ namespace FlexyBundle\Components\Organisms\Summary;
 
 use FlexyBundle\DTO\DisplayedPrice;
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\CartItemCount;
 use FlexyBundle\Service\DeliveryDateBridge;
 use FlexyBundle\Service\ExcludedPromotionsReader;
 use FlexyBundle\Service\PriceDisplay;
@@ -56,6 +57,9 @@ class Checkout
         private readonly LangService $langService,
         private readonly PriceDisplay $priceDisplay,
         private readonly ExcludedPromotionsReader $excludedPromotions,
+        // Optional so that a child theme calling this constructor keeps working: it then counts
+        // as the core does, the sum of the quantities.
+        private readonly ?CartItemCount $itemCount = null,
     ) {
     }
 
@@ -102,7 +106,8 @@ class Checkout
             // before its taxes, the taxes (total_tax_amount, below), and what is to pay.
             'total_without_taxes' => $this->pickFromCart(TaxDisplay::Untaxed, 'total_price', 'total_taxed_price'),
             'total_to_pay' => $this->pickFromCart(TaxDisplay::Taxed, 'total_price', 'total_taxed_price'),
-            'item_count' => $this->attributeAccessService->attributeCart('item_count'),
+            // Lines rather than quantities once a line is sold by measure: no "3.25 items".
+            'item_count' => $this->itemCount?->ofTheSessionCart() ?? $this->attributeAccessService->attributeCart('item_count'),
             'raw_taxed_total_price' => $this->attributeAccessService->attributeCart('raw_taxed_total_price'),
             'total_taxed_price' => $this->attributeAccessService->attributeCart('total_taxed_price'),
             'total_tax_amount' => $this->attributeAccessService->attributeCart('total_tax_amount'),

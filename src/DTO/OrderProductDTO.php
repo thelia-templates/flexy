@@ -20,7 +20,11 @@ class OrderProductDTO
     public int $productSaleElementsId = 0;
     public string $productSaleElementsRef = '';
     public string $title = '';
-    public int $quantity = 0;
+    /** In the unit the line was sold in: 1.25 for a kilogram and a quarter. */
+    public float $quantity = 0.0;
+    /** Frozen when the order was placed; 0 on a line sold by the piece and on an older core. */
+    public int $quantityDecimals = 0;
+    public ?string $unitCode = null;
     public bool $wasInPromo = false;
     public float $price = 0.0;
     public float $promoPrice = 0.0;
@@ -32,7 +36,9 @@ class OrderProductDTO
         $dto->productSaleElementsId = isset($data['productSaleElementsId']) ? (int) $data['productSaleElementsId'] : 0;
         $dto->productSaleElementsRef = $data['productSaleElementsRef'] ?? '';
         $dto->title = (string) ($data['title'] ?? '');
-        $dto->quantity = isset($data['quantity']) ? (int) $data['quantity'] : 0;
+        $dto->quantity = isset($data['quantity']) ? (float) $data['quantity'] : 0.0;
+        $dto->quantityDecimals = (int) ($data['quantityDecimals'] ?? 0);
+        $dto->unitCode = \is_string($data['unitCode'] ?? null) && '' !== $data['unitCode'] ? $data['unitCode'] : null;
         $dto->wasInPromo = isset($data['wasInPromo']) ? (bool) $data['wasInPromo'] : false;
         $dto->price = isset($data['price']) ? (float) $data['price'] : 0.0;
         $dto->promoPrice = isset($data['promoPrice']) ? (float) $data['promoPrice'] : 0.0;
