@@ -19,6 +19,7 @@ use FlexyBundle\Service\CheckoutStepRouteResolver;
 use FlexyBundle\Service\CheckoutTrail;
 use FlexyBundle\Service\GuestAddressCreator;
 use FlexyBundle\Service\GuestCheckoutGate;
+use FlexyBundle\Service\RestoredCartLines;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -62,6 +63,11 @@ class GuestCheckoutController extends FlexyController
         CheckoutTrail $trail,
     ): Response {
         $cart = $cartFacade->getCartFromSession();
+
+        // The lines are brought to the rules of their combination first: a line that can no
+        // longer be sold leaves the cart, which may leave nothing to identify oneself for.
+        // The shopper is told on the page this one leads to.
+        (new RestoredCartLines($cartGuard))->adjust($cart);
 
         // There is nothing to identify oneself for without a cart, and every way out of
         // this page leads to a step that would bounce straight back to the cart anyway.
