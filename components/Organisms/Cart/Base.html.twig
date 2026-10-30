@@ -49,6 +49,10 @@
             />
         {% endfor %}
 
+        {# The other steps open on their title. The design shows none above the lines, but
+           the page still needs one to start its outline (RGAA 9.1). #}
+        <{{ this.headingLevel }} class="sr-only">{{ 'Cart'|trans }}</{{ this.headingLevel }}>
+
         <div class="text-end mb-1 paragraph-6 hidden sm:block">
             <bdi>{{ this.totalItems }} {{ (this.totalItems <= 1 ? 'item' : 'items')|trans }}</bdi>
         </div>
