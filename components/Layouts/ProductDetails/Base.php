@@ -726,6 +726,24 @@ class Base
     }
 
     /**
+     * The quantity in the field, written with the decimals of the rule in the language of the
+     * page ("0,50" on a French page for half a kilogram): the stepper's controller writes it the
+     * same way after each press, where the form wrote "0,5" and the controller then "0,75".
+     * Something that is no quantity is shown as the shopper typed it, for the form to refuse.
+     */
+    public function getQuantityFieldValue(): string
+    {
+        $typed = $this->formValues['quantity'] ?? null;
+        $quantity = CartQuantity::typed($typed);
+
+        if (null === $quantity) {
+            return \is_scalar($typed) ? (string) $typed : '';
+        }
+
+        return $this->getQuantityRule()->fieldValue($quantity, $this->langService?->getLocale());
+    }
+
+    /**
      * Each sale element carries its quantity rule under the keys of the front API, so that the
      * rule travels with currentPse and needs no read of its own on a re-render. A key the core
      * payload already has is left as the core gave it.

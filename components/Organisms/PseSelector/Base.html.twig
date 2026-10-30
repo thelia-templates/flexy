@@ -7,6 +7,7 @@
 {# @prop remainingStock float Stock left once what is already in the cart is deducted, in the unit the sale element is sold in #}
 {# @prop maxQuantityReached bool The stock left is below the smallest quantity the sale element is sold in #}
 {# @prop quantityRule QuantityRuleDTO|null Minimum, step, decimals and unit of the selected sale element; null sells one at a time #}
+{# @prop quantityValue string|null The quantity in the field, with the decimals of the rule in the language of the page; null shows the form's own value #}
 {# @prop quantityChoices array The quantities to list, [{value, label}], for a lot sold by a whole step above one; empty when the quantity is typed #}
 {# @prop cartRefused bool The cart refused the last add (a module rule, the stock gone meanwhile) #}
 {# @prop cartRefusalReason string The reason a module gave with its refusal, printed escaped after the sentence #}
@@ -26,6 +27,7 @@
     bundlePricing = null,
     bundleUnavailable = false,
     quantityRule = null,
+    quantityValue = null,
     quantityChoices = []
 %}
 
@@ -199,7 +201,9 @@
             />
             {{ form_widget(form.quantity, {type: 'hidden'}) }}
         {% else %}
-            <div class="PseSelector-addToCart">
+            {# Sold by measure, the field holds a value and its unit: the add-to-cart goes under it,
+               full width, as it does on a phone. #}
+            <div class="PseSelector-addToCart{{ rule and rule.soldByMeasure ? ' PseSelector-addToCart--stacked' : '' }}">
                 {% if quantityChoices is not empty %}
                     {# A lot of six is bought in six, twelve, eighteen: listed, up to the stock left. #}
                     <twig:Fields:Select:Base
@@ -212,7 +216,7 @@
                 {% else %}
                     <twig:Molecules:Button:Quantity
                         input:name="{{ field_name(form.quantity) }}"
-                        input:value="{{ field_value(form.quantity) }}"
+                        input:value="{{ quantityValue ?? field_value(form.quantity) }}"
                         input:min="{{ smallestQuantity }}"
                         {{ ...quantityBounds }}
                         input:aria-label="{{ 'Quantity'|trans }}"

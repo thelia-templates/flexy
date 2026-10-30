@@ -171,16 +171,32 @@
     }
   }
 
-  /* Two stacked controls below md, a single merged pill from md — see the unlayered block below. */
+  /* Two stacked controls below md, a single merged pill from md — see the unlayered block below.
+     A quantity sold by measure keeps the stacked layout at every width: its field holds a value
+     and a unit ("1,25 kg"), which the merged pill squeezes the add-to-cart label against. */
   .PseSelector-addToCart {
     display: flex;
     flex-direction: column;
     gap: 1.375rem;
+  }
 
+  .PseSelector-addToCart:not(.PseSelector-addToCart--stacked) {
     @variant md {
       flex-direction: row;
       gap: 0;
     }
+  }
+}
+
+/* Where the stepper sits on its own line: below md, and at every width for a quantity sold by
+   measure (.PseSelector-addToCart--stacked). */
+@custom-variant pse-stacked {
+  @media not all and (width >= 48rem) {
+    @slot;
+  }
+
+  &:where(.PseSelector-addToCart--stacked, .PseSelector-addToCart--stacked *) {
+    @slot;
   }
 }
 
@@ -194,7 +210,7 @@
  */
 
 /* From md the two halves merge into one pill: inner corners squared off, hairline between them. */
-.PseSelector-addToCart > .ButtonQuantity button:last-of-type {
+.PseSelector-addToCart:not(.PseSelector-addToCart--stacked) > .ButtonQuantity button:last-of-type {
   @variant md {
     border-start-end-radius: 0;
     border-end-end-radius: 0;
@@ -202,7 +218,7 @@
   }
 }
 
-.PseSelector-addToCart > .button {
+.PseSelector-addToCart:not(.PseSelector-addToCart--stacked) > .button {
   @variant md {
     flex: 1;
     border-start-start-radius: 0;
@@ -217,7 +233,7 @@
  * borders that the merged version strips don't have to be rebuilt one edge at a time.
  */
 .PseSelector-addToCart > .ButtonQuantity {
-  @variant max-md {
+  @variant pse-stacked {
     width: 12rem;
     /* Matches the add-to-cart button below it, which is a `large` Button */
     min-height: 3.5rem;
@@ -231,7 +247,7 @@
 .PseSelector-addToCart > .ButtonQuantity button,
 .PseSelector-addToCart > .ButtonQuantity input,
 .PseSelector-addToCart > .ButtonQuantity .ButtonQuantity__unit {
-  @variant max-md {
+  @variant pse-stacked {
     background: transparent;
     color: var(--color-black);
     border: 0;

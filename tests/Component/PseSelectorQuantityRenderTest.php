@@ -62,6 +62,25 @@ final class PseSelectorQuantityRenderTest extends KernelTestCase
         self::assertSame('kg', $crawler->filter('.ButtonQuantity__unit')->text());
     }
 
+    public function testAWeightShowsTheQuantityTheComponentWroteWithTheDecimalsOfTheRule(): void
+    {
+        $input = $this->render(['quantityRule' => QuantityRuleDTO::fromArray(['minQuantity' => 0.5, 'quantityStep' => 0.25, 'quantityDecimals' => 2]), 'quantityValue' => '0,50'], quantity: '0,5')
+            ->filter('input[name="thelia_cart_add[quantity]"]');
+
+        self::assertSame('0,50', $input->attr('value'), 'written as the stepper writes it after a press, not as the form did');
+    }
+
+    public function testTheAddToCartOfAWeightGoesUnderTheField(): void
+    {
+        $weight = $this->render(['quantityRule' => QuantityRuleDTO::fromArray(['minQuantity' => 0.5, 'quantityStep' => 0.25, 'quantityDecimals' => 2, 'unitCode' => 'kg'])], quantity: '0.50');
+        $piece = $this->render([], quantity: '1');
+        $lot = $this->render(['quantityRule' => QuantityRuleDTO::fromArray(['quantityStep' => 6]), 'quantityChoices' => [['value' => '6', 'label' => '6']]], quantity: '6');
+
+        self::assertCount(1, $weight->filter('.PseSelector-addToCart.PseSelector-addToCart--stacked'));
+        self::assertCount(0, $piece->filter('.PseSelector-addToCart--stacked'), 'a sale element sold by the piece keeps the merged pill');
+        self::assertCount(0, $lot->filter('.PseSelector-addToCart--stacked'), 'and so does a lot');
+    }
+
     public function testTheHighestQuantityOfTheStepperIsTheLastOneTheStockLeftCanFill(): void
     {
         $crawler = $this->render(['quantityRule' => QuantityRuleDTO::fromArray(['quantityStep' => 0.25, 'quantityDecimals' => 2]), 'remainingStock' => 7.6], quantity: '1.00');

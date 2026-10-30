@@ -144,6 +144,18 @@ final class ProductDetailsQuantityRuleTest extends TestCase
         self::assertSame(1.25, $this->added?->toArray()['quantity']);
     }
 
+    public function testTheFieldShowsTheQuantityWithTheDecimalsOfTheRule(): void
+    {
+        $component = $this->component(['id' => 10, 'quantity' => 100] + self::WEIGHT);
+
+        // As the form's NumberType wrote it, and as the shopper may type it.
+        $component->formValues['quantity'] = '0,5';
+        self::assertSame('0.50', $component->getQuantityFieldValue(), 'two decimals, written with a point when no language is known');
+
+        $component->formValues['quantity'] = 'abc';
+        self::assertSame('abc', $component->getQuantityFieldValue(), 'what is no quantity is left for the form to refuse');
+    }
+
     public function testASaleElementSoldByThePieceStillAddsWholeQuantities(): void
     {
         $component = $this->component(['id' => 7, 'quantity' => 100]);
