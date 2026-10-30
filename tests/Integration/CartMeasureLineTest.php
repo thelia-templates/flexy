@@ -95,6 +95,24 @@ final class CartMeasureLineTest extends IntegrationTestCase
         }
     }
 
+    public function testAShortStockOfAWholeNumberOfKilogramsStillCarriesItsUnit(): void
+    {
+        $this->putInSession($this->cartWithAWeight(7.0, 6.0, new QuantityRule(unitCode: UnitCode::KILOGRAM)));
+        $this->speak('fr_FR');
+        $translator = static::getContainer()->get('translator');
+        \assert($translator instanceof LocaleAwareInterface);
+        $previous = $translator->getLocale();
+        $translator->setLocale('fr_FR');
+
+        try {
+            $line = $this->renderLine();
+            self::assertStringContainsString('Lexie : il n&#039;en reste que 6 kg en stock.', $line);
+            self::assertStringNotContainsString('exemplaires', $line, 'not "6 kg exemplaires"');
+        } finally {
+            $translator->setLocale($previous);
+        }
+    }
+
     public function testAMinusFromTheSmallestQuantityTakesTheLineOut(): void
     {
         $cart = $this->cartWithAWeight(0.5);
@@ -119,14 +137,14 @@ final class CartMeasureLineTest extends IntegrationTestCase
         self::assertSame(0, $count->of(null));
     }
 
-    private function cartWithAWeight(float $quantity, float $stock = 7.5): CartModel
+    private function cartWithAWeight(float $quantity, float $stock = 7.5, ?QuantityRule $rule = null): CartModel
     {
         $factory = $this->createFixtureFactory();
         $currency = $factory->currency();
         $product = $factory->product($factory->category(), $factory->taxRule(), $currency, ['ref' => 'WEIGHT-'.uniqid(), 'title' => 'Lexie', 'locale' => Lang::getDefaultLanguage()->getLocale(), 'basePrice' => 14.82, 'baseQuantity' => 10]);
         $saleElement = $product->getProductSaleElementss()->getFirst();
         \assert($saleElement instanceof ProductSaleElements);
-        (new QuantityRule(minQuantity: 0.5, step: 0.25, decimals: 2, unitCode: UnitCode::KILOGRAM))->applyTo($saleElement);
+        ($rule ?? new QuantityRule(minQuantity: 0.5, step: 0.25, decimals: 2, unitCode: UnitCode::KILOGRAM))->applyTo($saleElement);
         $saleElement->setQuantity($stock)->save();
 
         $cart = $factory->cart(null, ['currency' => $currency]);
