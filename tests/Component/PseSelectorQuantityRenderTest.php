@@ -22,6 +22,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\UX\TwigComponent\ComponentRendererInterface;
+use Thelia\Domain\Catalog\Quantity\UnitCode;
 
 /**
  * The selector offers only the quantities the sale element is sold in: a lot of six is a list of
@@ -59,7 +60,9 @@ final class PseSelectorQuantityRenderTest extends KernelTestCase
         self::assertSame('0.25', $stepper->attr('data-molecules--button--quantity-step-value'));
         self::assertSame('0.50', $stepper->attr('data-molecules--button--quantity-min-value'));
         self::assertSame('2', $stepper->attr('data-molecules--button--quantity-decimals-value'));
-        self::assertSame('kg', $crawler->filter('.ButtonQuantity__unit')->text());
+        // The symbol is the core's (UnitCode): a core without quantity rules has none to show.
+        $unit = $crawler->filter('.ButtonQuantity__unit');
+        self::assertSame(enum_exists(UnitCode::class) ? 'kg' : '', $unit->count() > 0 ? $unit->text() : '');
     }
 
     public function testAWeightShowsTheQuantityTheComponentWroteWithTheDecimalsOfTheRule(): void
