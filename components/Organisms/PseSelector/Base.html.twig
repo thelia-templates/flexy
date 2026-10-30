@@ -191,6 +191,14 @@
                     </span>
                 {% endif %}
             </div>
+            {# The price per litre, per kilogram: of the price shown above, promotion included, and only
+               for a sale element that says what one unit sold contains. #}
+            {% set referencePrice = chargedPrice ? reference_unit_price(chargedPrice.amount, rule) : null %}
+            {% if referencePrice %}
+                <p class="PseSelector-referencePrice paragraph-5 text-grey">
+                    {{ 'reference_unit_price'|trans({'%price%': referencePrice.price|format_currency(current_currency_code(), locale: lang_code), '%unit%': referencePrice.per}) }}
+                </p>
+            {% endif %}
         {% endif %}
 
         {% if maxQuantityReached %}
