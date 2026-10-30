@@ -163,6 +163,28 @@ main {
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
+
+  /* Focused by the skip link only, as a landing point: a ring around the whole page says nothing. */
+  &:focus {
+    outline: none;
+  }
+}
+
+.SkipLink {
+  position: absolute;
+  inset-inline-start: --spacing(4);
+  top: --spacing(4);
+  z-index: 100;
+  padding: --spacing(3) --spacing(4);
+  color: var(--color-white);
+  background: var(--color-black);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  transform: translateY(-200%);
+
+  &:focus {
+    transform: none;
+  }
 }
 
 /* Unlayered on purpose: must beat the Typography plugin's own max-width, which lives in @layer utilities. */
