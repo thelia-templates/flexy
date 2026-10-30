@@ -2,7 +2,7 @@
 
 {% if this.products is not empty %}
     <div class="{{ ('container-l pt-14 pb-17 xl:pt-17 xl:pb-26 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
-        <div class="pb-6 text-black h2">{{ title }}</div>
+        <h2 class="pb-6 text-black h2">{{ title }}</h2>
         <div class="CrossSelling" {{ stimulus_controller('simple-slider') }}>
             {% for product in this.products %}
                 <twig:Organisms:ProductCard:Base :product="product" />

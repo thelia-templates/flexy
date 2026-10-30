@@ -1,7 +1,7 @@
 {% props title = '', button = null %}
 
 <div class="{{ ('container-l py-14 xl:py-20 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
-    <div class="pb-6 text-black h4">{{ title }}</div>
+    <h2 class="pb-6 text-black h4">{{ title }}</h2>
     <div class="SimilarContents" {{ stimulus_controller('simple-slider') }}>
         {% for content in this.contents %}
             <twig:Organisms:SimilarContentCard:Base
