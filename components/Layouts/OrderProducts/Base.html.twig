@@ -15,6 +15,11 @@
 		:imageId="line.imageId"
 		currencyCode="{{ currencyCode }}"
 	/>
+	{# The components of a bundle hang under their bundle, with no price of their own: the
+	   price of the pack is the one of the card above. #}
+	{% if line.included is not empty %}
+		<twig:Molecules:BundleIncluded:Base :components="line.included" class="mb-6" />
+	{% endif %}
 	{# A virtual line carries its file only once the order is paid for, and only when a
 	   document was attached to it: `virtual` alone says the product was sold as a file,
 	   not that one is there to be served. The route answers 404 in every other case, so

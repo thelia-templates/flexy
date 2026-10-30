@@ -477,6 +477,7 @@ This order has not been paid yet and cannot be returned.: Diese Bestellung wurde
 Another request is being processed on this order, please try again.: Für diese Bestellung wird gerade eine andere Anfrage bearbeitet, bitte versuchen Sie es erneut.
 The return window for this order has closed.: Die Rücksendefrist für diese Bestellung ist abgelaufen.
 A virtual product cannot be returned.: Ein digitales Produkt kann nicht zurückgesendet werden.
+This item is part of a bundle and cannot be returned on its own.: Dieser Artikel gehört zu einem Bundle und kann nicht einzeln zurückgesendet werden.
 The returned quantity must be positive.: Die Rücksendemenge muss größer als null sein.
 The returned quantity exceeds the returnable quantity of this line.: Die Rücksendemenge übersteigt die für diese Position noch rücksendbare Menge.
 The order does not exist.: Diese Bestellung existiert nicht.
@@ -631,3 +632,14 @@ Too many payments with a saved payment method in a short time. Please try again 
 'Expired (valid until %date%)': 'Abgelaufen (gültig bis %date%)'
 'You seem to be in %country%.': 'Sie scheinen sich in %country% zu befinden.'
 'See prices for %country%': 'Preise für %country% anzeigen'
+# Product bundles
+'Included in the bundle': 'Im Bundle enthalten'
+'You save %amount%': 'Sie sparen %amount%'
+'Optional': 'Optional'
+'Bundle composition': 'Zusammensetzung des Bundles'
+'Include %title% in the bundle': '%title% zum Bundle hinzufügen'
+'Quantity of %title%': 'Menge von %title%'
+'This bundle is currently unavailable': 'Dieses Bundle ist derzeit nicht verfügbar'
+'This composition cannot be sold as chosen, the default one is shown.': 'Diese Zusammenstellung kann nicht wie gewählt verkauft werden, die Standardzusammenstellung wird angezeigt.'
+'The pack %ref can no longer be ordered as it is in your cart. Please remove it and add it again.': 'Das Bundle %ref kann nicht mehr so bestellt werden, wie es in Ihrem Warenkorb liegt. Bitte entfernen Sie es und fügen Sie es erneut hinzu.'
+'Another order took the same products at the same moment. Please try again.': 'Eine andere Bestellung hat zur selben Zeit dieselben Produkte erhalten. Bitte versuchen Sie es erneut.'

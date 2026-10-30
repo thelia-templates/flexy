@@ -15,6 +15,9 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Layouts\ProductDetails;
 
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\BundleProductReader;
+use FlexyBundle\Service\BundleSelectionService;
+use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\RunningSaleResolver;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -22,6 +25,7 @@ use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\Attribute\PreReRender;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
@@ -33,6 +37,7 @@ use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Cart\DTO\CartItemAddDTO;
 use Thelia\Domain\Cart\Exception\InvalidCartException;
 use Thelia\Domain\Cart\Exception\NotEnoughStockException;
+use Thelia\Domain\Catalog\Bundle\BundleDisplayedStock;
 use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Domain\Media\AltTextResolver;
 use Thelia\Domain\Shipping\DestinationRestriction\CartDestinations;
@@ -148,7 +153,50 @@ class Base
      */
     public string $cartRefusalReason = '';
 
+    /**
+     * The product is a bundle: a sellable product made of the sale elements of other products. Every
+     * other product keeps the sheet it always had, none of the bundle code below is reached.
+     */
+    #[LiveProp]
+    public bool $isBundle = false;
+
+    /**
+     * The components of the bundle, scalars only (see BundleProductReader). A LiveProp, signed and
+     * posted back with every action, for the reason the others are: the component re-renders in a
+     * process that never calls mount() again.
+     *
+     * @var list<array{itemId: int, productId: int, title: string, required: bool, quantity: string, min: string|null, max: string|null}>
+     */
+    #[LiveProp]
+    public array $bundleRows = [];
+
+    /**
+     * The quantity of the components the shopper can change, by bundle item id. One key per quantity
+     * field, set when the sheet is mounted, at the default quantity: the live controller of the browser
+     * writes a model that exists in the state it was rendered with and throws on any other, so a key
+     * added only when the shopper first touches the field would never be reached (the cart does the same
+     * with items[idx].quantity). The sheet is still the same for every visitor, and cacheable. A quantity
+     * equal to the default one changes nothing: only the others are a composition of the shopper's.
+     * Writable, so the quantity fields bind to it: the core validates whatever comes back, on every
+     * price shown and again on the add to the cart.
+     *
+     * @var array<int|string, string>
+     */
+    #[LiveProp(writable: true)]
+    public array $bundleSelection = [];
+
     private ?array $pses = null;
+
+    private ?array $bundleView = null;
+
+    private ?array $composed = null;
+
+    private ?string $composedFor = null;
+
+    /**
+     * The shop refused the choice of the shopper in the request being answered: told once, by this render.
+     */
+    private bool $selectionRefused = false;
 
     public function __construct(
         private readonly DataAccessService $dataAccessService,
@@ -162,6 +210,10 @@ class Base
         private readonly ?ProductDestinationRestrictionReader $destinationRestrictionReader = null,
         private readonly ?DestinationRestrictionChecker $destinationRestrictionChecker = null,
         private readonly ?LangService $langService = null,
+        // Optional for the same reason: a core without the bundles has neither, and a bundle is then not met.
+        private readonly ?BundleProductReader $bundleReader = null,
+        private readonly ?BundleSelectionService $bundleSelectionService = null,
+        private readonly ?ProductImageResolver $productImageResolver = null,
     ) {
     }
 
@@ -178,6 +230,10 @@ class Base
         // Keyed by attribute id upstream; re-indexed so the LiveProp round-trips as a list.
         $this->productAttrs = array_values($this->pseAccessService->attrAvByProduct($this->productId));
         $this->runningSaleTag = $this->runningSaleResolver->forProduct($this->productId);
+        // Read defensively: a core that predates the bundles publishes no such field.
+        $this->isBundle = (bool) ($product['isBundle'] ?? false) && null !== $this->bundleReader && null !== $this->bundleSelectionService;
+        $this->bundleRows = $this->isBundle ? $this->bundleReader->read($this->productId) : [];
+        $this->bundleSelection = $this->defaultBundleSelection();
 
         $this->setInitialCurrentPse();
         $this->setMedia();
@@ -265,6 +321,12 @@ class Base
             return false;
         }
 
+        // A bundle of virtual components only is supplied without limit: the core says so with the
+        // largest quantity it publishes, which is not a stock to show nor to cap the quantity with.
+        if ($this->isBundle && (int) ($this->currentPse['quantity'] ?? 0) >= BundleDisplayedStock::DISPLAY_LIMIT) {
+            return false;
+        }
+
         return ConfigQuery::checkAvailableStock();
     }
 
@@ -299,6 +361,190 @@ class Base
         $stock = (int) ($this->currentPse['quantity'] ?? 0);
 
         return $stock > 0 && $this->getRemainingStock() <= 0;
+    }
+
+    /**
+     * What the sheet of a bundle shows: its components with what the shopper may do with each, the
+     * price of the composition as it stands, and the two ways the sheet can be unable to offer it.
+     * Null for a product that is not a bundle.
+     *
+     * Computed at render time: the composition is the shopper's, and the price is the core's answer
+     * for it. One answer per render, never one per component. The visuals of the components are
+     * preloaded as a group.
+     *
+     * @return array{components: list<array<string, mixed>>, pricing: array{price: float, originalPrice: float|null, saving: float|null}|null, unavailable: bool, refused: bool}|null
+     */
+    #[ExposeInTemplate('bundle')]
+    public function getBundle(): ?array
+    {
+        if (!$this->isBundle) {
+            return null;
+        }
+
+        return $this->bundleView ??= $this->buildBundleView();
+    }
+
+    /**
+     * A bundle priced by its components shows the price of the composition: its promo tag says a
+     * percentage of a catalog price that is nowhere, and the sheet says what is saved instead.
+     */
+    public function isComputedBundle(): bool
+    {
+        return null !== ($this->getBundle()['pricing'] ?? null);
+    }
+
+    /**
+     * A choice the shop refused is shown as the default composition: the fields go back to their default
+     * quantity, so that the next change starts from what is drawn and the refusal is not told again.
+     */
+    #[PreReRender]
+    public function forgetARefusedSelection(): void
+    {
+        if (!$this->isBundle || !$this->composeBundle()['fellBack']) {
+            return;
+        }
+
+        $this->bundleSelection = $this->defaultBundleSelection();
+        $this->selectionRefused = true;
+        $this->bundleView = null;
+    }
+
+    /**
+     * One key per quantity field, at the default quantity (see $bundleSelection).
+     *
+     * @return array<int, string>
+     */
+    private function defaultBundleSelection(): array
+    {
+        if (!$this->isBundle) {
+            return [];
+        }
+
+        $defaults = $this->bundleSelectionService->defaultQuantities($this->productId, $this->bundleRows);
+        $selection = [];
+
+        foreach ($this->bundleRows as $row) {
+            if ('quantity' === $this->bundleControl($row)) {
+                $selection[$row['itemId']] = $defaults[$row['itemId']];
+            }
+        }
+
+        return $selection;
+    }
+
+    /**
+     * What the shopper can do with a component: nothing (listed), switch it, or pick a quantity.
+     *
+     * @param array{required: bool, min: string|null, max: string|null, quantity: string} $row
+     */
+    private function bundleControl(array $row): string
+    {
+        $lowest = $row['min'] ?? $row['quantity'];
+        $highest = $row['max'] ?? $row['quantity'];
+
+        return $row['required'] && $lowest === $highest ? 'none' : ($this->isSwitch($row) ? 'switch' : 'quantity');
+    }
+
+    /**
+     * Puts an optional component in the bundle, or takes it out. The shopper's quantity for a component
+     * that is either there or not: the quantity of a variable one is bound to the field instead.
+     */
+    #[LiveAction]
+    public function toggleBundleItem(#[LiveArg] int $item): void
+    {
+        $row = $this->bundleRow($item);
+
+        if (null === $row || $row['required'] || !$this->isSwitch($row)) {
+            return;
+        }
+
+        $current = $this->composeBundle()['composition']?->quantityOf($item) ?? '0';
+        $this->bundleSelection[$item] = '0' === $current ? $row['quantity'] : '0';
+        $this->bundleView = null;
+    }
+
+    /**
+     * @return array{composition: \Thelia\Domain\Catalog\Bundle\BundleComposition|null, fellBack: bool, refusal: string|null}
+     */
+    private function composeBundle(): array
+    {
+        // Asked several times by one render (the refusal check, the view, the actions): the core
+        // is read once per selection, and a changed selection is a new key.
+        $key = json_encode([$this->productId, $this->bundleSelection], \JSON_THROW_ON_ERROR);
+
+        if ($this->composedFor !== $key || null === $this->composed) {
+            $this->composed = $this->bundleSelectionService->compose($this->productId, $this->bundleRows, $this->bundleSelection);
+            $this->composedFor = $key;
+        }
+
+        return $this->composed;
+    }
+
+    /**
+     * A component is a switch when it is either in the bundle or not: the lowest and the highest
+     * quantity the merchant allows are the same.
+     *
+     * @param array{min: string|null, max: string|null, quantity: string} $row
+     */
+    private function isSwitch(array $row): bool
+    {
+        return ($row['min'] ?? $row['quantity']) === ($row['max'] ?? $row['quantity']);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function bundleRow(int $itemId): ?array
+    {
+        foreach ($this->bundleRows as $row) {
+            if ($row['itemId'] === $itemId) {
+                return $row;
+            }
+        }
+
+        return null;
+    }
+
+    private function buildBundleView(): array
+    {
+        $composed = $this->composeBundle();
+        $composition = $composed['composition'];
+
+        $this->productImageResolver?->preload(array_column($this->bundleRows, 'productId'));
+
+        $components = [];
+
+        foreach ($this->bundleRows as $row) {
+            $lowest = $row['min'] ?? $row['quantity'];
+            $highest = $row['max'] ?? $row['quantity'];
+            $current = $composition?->quantityOf($row['itemId']) ?? $row['quantity'];
+
+            $components[] = [
+                'itemId' => $row['itemId'],
+                'title' => $row['title'],
+                'imageId' => $this->productImageResolver?->firstImageId($row['productId']),
+                'required' => $row['required'],
+                'quantity' => $current,
+                'control' => $this->bundleControl($row),
+                'included' => '0' !== $current,
+                // A component that is not required may be left out, so its field starts at zero.
+                'minQuantity' => $row['required'] ? $lowest : '0',
+                'maxQuantity' => $highest,
+            ];
+        }
+
+        $pricing = null;
+
+        if (null !== $composition && null !== $this->currentPse) {
+            $pricing = $this->bundleSelectionService->quote($this->productId, (int) $this->currentPse['id'], $composition);
+        }
+
+        return [
+            'components' => $components,
+            'pricing' => $pricing,
+            'unavailable' => null === $composition,
+            'refused' => $composed['fellBack'] || $this->selectionRefused,
+        ];
     }
 
     #[LiveAction]
@@ -364,15 +610,31 @@ class Base
         // A refusal of the cart is the shopper's business, not a server error: without this the
         // live request answered 500 and the selector stayed as it was, with no word of why.
         try {
+            // The composition the shopper sees is the one added, and the core judges it again at the cart.
+            // A choice the sheet had to put aside is not added in its place: the shopper is told it was refused.
+            $bundleArguments = [];
+
+            if ($this->isBundle) {
+                $composed = $this->composeBundle();
+
+                if (null === $composed['composition'] || $composed['fellBack']) {
+                    // No reason: the core's sentence is a developer one, the page says the add was refused.
+                    throw new InvalidCartException('');
+                }
+
+                $bundleArguments = ['bundleComposition' => $composed['composition']];
+            }
+
             $cartItem = $this->cartFacade->addItem(
-                new CartItemAddDTO(
-                    cart: $this->cartFacade->getOrCreateFromSession(),
-                    productId: (int) $formData['product'],
-                    productSaleElementId: (int) $formData['product_sale_elements_id'],
-                    quantity: (int) $formData['quantity'],
-                    append: (bool) $formData['append'],
-                    newness: (bool) $formData['newness'],
-                )
+                new CartItemAddDTO(...[
+                    'cart' => $this->cartFacade->getOrCreateFromSession(),
+                    'productId' => (int) $formData['product'],
+                    'productSaleElementId' => (int) $formData['product_sale_elements_id'],
+                    'quantity' => (int) $formData['quantity'],
+                    'append' => (bool) $formData['append'],
+                    'newness' => (bool) $formData['newness'],
+                    ...$bundleArguments,
+                ])
             );
         } catch (InvalidCartException|NotEnoughStockException $exception) {
             $this->cartRefused = true;

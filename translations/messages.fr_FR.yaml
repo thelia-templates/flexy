@@ -480,6 +480,7 @@ This order has not been paid yet and cannot be returned.: Cette commande n'a pas
 Another request is being processed on this order, please try again.: Une autre demande est en cours sur cette commande, merci de réessayer.
 The return window for this order has closed.: Le délai de retour de cette commande est écoulé.
 A virtual product cannot be returned.: Un produit dématérialisé ne peut pas être retourné.
+This item is part of a bundle and cannot be returned on its own.: Cet article fait partie d'un pack et ne peut pas être retourné seul.
 The returned quantity must be positive.: La quantité à retourner doit être supérieure à zéro.
 The returned quantity exceeds the returnable quantity of this line.: La quantité demandée dépasse la quantité encore retournable pour ce produit.
 The order does not exist.: Cette commande n'existe pas.
@@ -664,3 +665,14 @@ Too many payments with a saved payment method in a short time. Please try again 
 'You seem to be in %country%.': 'Pays détecté : %country%.'
 'See prices for %country%': 'Voir les prix (%country%)'
 'Preview: this page is not online as shown.': "Prévisualisation : cette page n'est pas en ligne telle quelle."
+# Product bundles
+'Included in the bundle': 'Inclus dans le pack'
+'You save %amount%': 'Vous économisez %amount%'
+'Optional': 'Optionnel'
+'Bundle composition': 'Composition du pack'
+'Include %title% in the bundle': 'Ajouter %title% au pack'
+'Quantity of %title%': 'Quantité de %title%'
+'This bundle is currently unavailable': 'Ce pack n''est pas disponible actuellement'
+'This composition cannot be sold as chosen, the default one is shown.': 'Cette composition ne peut pas être vendue telle que choisie, la composition par défaut est affichée.'
+'The pack %ref can no longer be ordered as it is in your cart. Please remove it and add it again.': 'Le pack %ref ne peut plus être commandé tel qu''il est dans votre panier. Veuillez le retirer et l''ajouter à nouveau.'
+'Another order took the same products at the same moment. Please try again.': 'Une autre commande a pris les mêmes produits au même moment. Veuillez réessayer.'

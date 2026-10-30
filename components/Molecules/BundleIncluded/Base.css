@@ -1,0 +1,32 @@
+.BundleIncluded {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem 0.75rem;
+  background-color: var(--color-lightest);
+  color: var(--color-grey);
+}
+
+.BundleIncluded-heading {
+  font-size: var(--text-xs);
+  letter-spacing: 0.04375rem;
+  text-transform: uppercase;
+}
+
+.BundleIncluded-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  font-size: var(--text-sm);
+  color: var(--color-black);
+}
+
+.BundleIncluded-item {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.BundleIncluded-quantity {
+  min-width: 2rem;
+  white-space: nowrap;
+}

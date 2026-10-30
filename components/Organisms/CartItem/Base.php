@@ -15,8 +15,11 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Organisms\CartItem;
 
 use FlexyBundle\DTO\CartItemDto;
+use FlexyBundle\Service\BundleLines;
 use FlexyBundle\Service\CartStockService;
 use FlexyBundle\Service\ProductSaleElementsService;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Domain\Taxation\TaxEngine\TaxEngine;
@@ -40,12 +43,17 @@ class Base
     public ?string $desc = '';
     public string $url = '';
     public array $attributesAv = [];
+    /** What tells the shopper this pack can no longer be ordered as it is; empty for any line the order can take. */
+    public string $unorderableMessage = '';
 
     public function __construct(
         private readonly ProductSaleElementsService $pseService,
         private readonly TaxEngine $taxEngine,
         private readonly LangService $langService,
         private readonly CartStockService $cartStockService,
+        // The `translator` service is the one carrying the theme catalogue, which the autowired interface is not.
+        #[Autowire(service: 'translator')]
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -99,6 +107,13 @@ class Base
 
             $this->prices['offeredTaxedPrice'] = $offeredTotal;
             $this->prices['offeredEffectiveTaxedPrice'] = $offeredTotal - $offeredDiscount;
+        }
+
+        if (!$cartItem->bundleOrderable) {
+            // The core words the refusal (and translates it); the theme's sentence stands in for a core that does not.
+            $this->unorderableMessage = '' !== $cartItem->bundleRefusal
+                ? $cartItem->bundleRefusal
+                : BundleLines::notOrderableMessage($this->translator, (string) $product->getRef());
         }
 
         $this->promo = (bool) $cartItemModel->getPromo();

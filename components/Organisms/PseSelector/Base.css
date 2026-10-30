@@ -161,17 +161,6 @@
     }
   }
 
-  .PseSelector-price {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    color: var(--color-black);
-  }
-
-  .PseSelector-originalPrice {
-    text-decoration: line-through;
-  }
-
   /* Two stacked controls below md, a single merged pill from md — see the unlayered block below. */
   .PseSelector-addToCart {
     display: flex;

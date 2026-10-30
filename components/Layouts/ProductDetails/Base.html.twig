@@ -12,7 +12,9 @@
         {% if currentPse.isNew|default(false) %}
             {% set galleryTags = galleryTags|merge([{text: 'New'|trans, color: 'warning'}]) %}
         {% endif %}
-        {% if currentPse.isPromo|default(false) and currentPse.displayInitialPrice|default(true) %}
+        {# A bundle priced by its components says what is saved next to its price instead: a percentage
+           of a catalog price that is nowhere would be wrong as soon as the shopper changes the composition. #}
+        {% if currentPse.isPromo|default(false) and currentPse.displayInitialPrice|default(true) and not this.isComputedBundle() %}
             {% set galleryTags = galleryTags|merge([{text: this.promoRate|format_number(style: 'percent'), color: 'error'}]) %}
         {% endif %}
     {% endif %}
@@ -50,6 +52,17 @@
             <twig:Molecules:Countdown:Base :remainingSeconds="runningSaleTag.countdownRemainingSeconds" size="md" class="mb-5" />
         {% endif %}
 
+        {# The composition sits in this component, not in a LiveComponent of its own: the price and the add to
+           the cart below are drawn from the same state, and two components would need a round trip between
+           them to agree. It is outside the cart form on purpose, its fields are not part of what the form posts. #}
+        {% if bundle %}
+            <twig:Organisms:BundleComposition:Base
+                :components="bundle.components"
+                :refused="bundle.refused"
+                class="mt-6"
+            />
+        {% endif %}
+
         <twig:Organisms:PseSelector:Base
             :form="form"
             :productAttrs="productAttributes"
@@ -61,6 +74,8 @@
             :maxQuantityReached="this.isMaxQuantityReached()"
             :cartRefused="this.cartRefused"
             :cartRefusalReason="this.cartRefusalReason"
+            :bundlePricing="bundle ? bundle.pricing : null"
+            :bundleUnavailable="bundle ? bundle.unavailable : false"
         />
 
         {% set restrictions = this.destinationRestrictions %}

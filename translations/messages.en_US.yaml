@@ -480,6 +480,7 @@ This order has not been paid yet and cannot be returned.: This order has not bee
 Another request is being processed on this order, please try again.: Another request is being processed on this order, please try again.
 The return window for this order has closed.: The return window for this order has closed.
 A virtual product cannot be returned.: A virtual product cannot be returned.
+This item is part of a bundle and cannot be returned on its own.: This item is part of a bundle and cannot be returned on its own.
 The returned quantity must be positive.: The returned quantity must be positive.
 The returned quantity exceeds the returnable quantity of this line.: The returned quantity exceeds the returnable quantity of this line.
 The order does not exist.: The order does not exist.
@@ -655,3 +656,14 @@ Too many payments with a saved payment method in a short time. Please try again 
 'You seem to be in %country%.': 'You seem to be in %country%.'
 'See prices for %country%': 'See prices for %country%'
 'Preview: this page is not online as shown.': "Preview: this page is not online as shown."
+# Product bundles
+'Included in the bundle': 'Included in the bundle'
+'You save %amount%': 'You save %amount%'
+'Optional': 'Optional'
+'Bundle composition': 'Bundle composition'
+'Include %title% in the bundle': 'Include %title% in the bundle'
+'Quantity of %title%': 'Quantity of %title%'
+'This bundle is currently unavailable': 'This bundle is currently unavailable'
+'This composition cannot be sold as chosen, the default one is shown.': 'This composition cannot be sold as chosen, the default one is shown.'
+'The pack %ref can no longer be ordered as it is in your cart. Please remove it and add it again.': 'The pack %ref can no longer be ordered as it is in your cart. Please remove it and add it again.'
+'Another order took the same products at the same moment. Please try again.': 'Another order took the same products at the same moment. Please try again.'

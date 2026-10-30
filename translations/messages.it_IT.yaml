@@ -201,3 +201,16 @@ delivery_estimation_day: Consegna prevista il %date%
 'Quantity': 'Quantità'
 'label_colon': ':'
 My account menu: Menu del mio account
+
+# Product bundles
+'Included in the bundle': 'Incluso nel pack'
+'You save %amount%': 'Risparmi %amount%'
+'Optional': 'Facoltativo'
+'Bundle composition': 'Composizione del pack'
+'Include %title% in the bundle': 'Aggiungi %title% al pack'
+'Quantity of %title%': 'Quantità di %title%'
+'This bundle is currently unavailable': 'Questo pack non è al momento disponibile'
+'This composition cannot be sold as chosen, the default one is shown.': 'Questa composizione non può essere venduta come scelta, viene mostrata quella predefinita.'
+'This item is part of a bundle and cannot be returned on its own.': 'Questo articolo fa parte di un pack e non può essere reso singolarmente.'
+'The pack %ref can no longer be ordered as it is in your cart. Please remove it and add it again.': 'Il pack %ref non può più essere ordinato così com''è nel carrello. Rimuovilo e aggiungilo di nuovo.'
+'Another order took the same products at the same moment. Please try again.': 'Un altro ordine ha preso gli stessi prodotti nello stesso momento. Riprova.'

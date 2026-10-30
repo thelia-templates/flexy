@@ -1,0 +1,17 @@
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">A price</h4>
+        <p class="Story-note">The price to pay, taxes included, in the currency being browsed.</p>
+        <div class="Story-stage"><twig:Molecules:Price:Base :price="540" /></div>
+    </div>
+    <div class="Story-section">
+        <h4 class="Story-title">A struck price and a saving</h4>
+        <p class="Story-note">
+            Both figures come from the shop: the component only prints them. A saving of zero is not printed,
+            and neither is a struck price that was not given.
+        </p>
+        <div class="Story-stage"><twig:Molecules:Price:Base :price="540" :originalPrice="600" :saving="60" /></div>
+        <div class="Story-stage"><twig:Molecules:Price:Base :price="540" :originalPrice="600" /></div>
+        <div class="Story-stage"><twig:Molecules:Price:Base :price="600" :saving="0" /></div>
+    </div>
+</div>

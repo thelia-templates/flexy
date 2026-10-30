@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle;
 
+use FlexyBundle\DependencyInjection\Compiler\BundleServicesPass;
 use FlexyBundle\DependencyInjection\Compiler\TwigComponentDebugDirectoryPass;
 use FlexyBundle\EventListener\TailwindMinifiedBuildListener;
 use FlexyBundle\Template\FrontTemplateChain;
@@ -38,6 +39,7 @@ class FlexyBundle extends AbstractBundle
         parent::build($container);
 
         $container->addCompilerPass(new TwigComponentDebugDirectoryPass());
+        $container->addCompilerPass(new BundleServicesPass());
     }
 
     /**

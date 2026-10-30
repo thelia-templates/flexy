@@ -8,6 +8,8 @@
 {# @prop maxQuantityReached bool The cart already holds the whole available stock #}
 {# @prop cartRefused bool The cart refused the last add (a module rule, the stock gone meanwhile) #}
 {# @prop cartRefusalReason string The reason a module gave with its refusal, printed escaped after the sentence #}
+{# @prop bundlePricing array|null The price of the composition a shopper picked on a bundle priced by its components, taxes included: {price, originalPrice, saving}. Replaces the price of the sale element #}
+{# @prop bundleUnavailable bool The bundle cannot be sold as it stands (a required component is no longer offered) #}
 {% props
     form,
     productAttrs = [],
@@ -18,7 +20,9 @@
     remainingStock = 0,
     maxQuantityReached = false,
     cartRefused = false,
-    cartRefusalReason = ''
+    cartRefusalReason = '',
+    bundlePricing = null,
+    bundleUnavailable = false
 %}
 
 {# The Flexy form theme is no longer global: without this the widgets below silently fall back to
@@ -26,7 +30,7 @@
 {% form_theme form with flexy_form_themes only %}
 
 {# A product with no sale element at all has no currentPse: it is shown as not purchasable. #}
-{% set noPurchasablePse = noAvailablePse or currentPse is null %}
+{% set noPurchasablePse = noAvailablePse or currentPse is null or bundleUnavailable %}
 {% set outOfStock = stockManaged and currentPse is not null and currentPse.quantity == 0 %}
 {# No upper bound when stock is not enforced: the attribute is dropped rather than passed as
    null, which the component rejects outright. #}
@@ -125,7 +129,7 @@
         <twig:Molecules:SnackBar:Base
             variant="warning"
             withIcon
-            text="{{ 'This product combination is not available'|trans }}"
+            text="{{ (bundleUnavailable ? 'This bundle is currently unavailable'|trans : 'This product combination is not available'|trans) }}"
         />
         {{ form_widget(form.quantity, {type: 'hidden'}) }}
     {% elseif outOfStock %}
@@ -133,16 +137,20 @@
     {% else %}
         {# Flex items are blockified: dir="ltr" goes on an inner inline span, so the box keeps
            resolving its own alignment against the page. #}
-        <div class="PseSelector-price">
-            <strong class="h4">
-                <span dir="ltr">{{ (currentPse.isPromo ? currentPse.promoPrice : currentPse.price)|format_currency(current_currency_code(), locale: lang_code) }}</span>
-            </strong>
-            {% if currentPse.isPromo and currentPse.displayInitialPrice|default(true) %}
-                <span class="PseSelector-originalPrice paragraph-4">
-                    <span dir="ltr">{{ currentPse.price|format_currency(current_currency_code(), locale: lang_code) }}</span>
-                </span>
-            {% endif %}
-        </div>
+        {% if bundlePricing %}
+            <twig:Molecules:Price:Base
+                class="PseSelector-price"
+                :price="bundlePricing.price"
+                :originalPrice="bundlePricing.originalPrice"
+                :saving="bundlePricing.saving"
+            />
+        {% else %}
+            <twig:Molecules:Price:Base
+                class="PseSelector-price"
+                :price="currentPse.isPromo ? currentPse.promoPrice : currentPse.price"
+                :originalPrice="currentPse.isPromo and currentPse.displayInitialPrice|default(true) ? currentPse.price : null"
+            />
+        {% endif %}
 
         {% if maxQuantityReached %}
             <twig:Molecules:SnackBar:Base
@@ -179,7 +187,7 @@
         {{ theme_hook('product.pse.alerts', {
             pseId: currentPse.id,
             outOfStock: outOfStock,
-            taxedPrice: currentPse.isPromo ? currentPse.promoPrice : currentPse.price,
+            taxedPrice: bundlePricing ? bundlePricing.price : (currentPse.isPromo ? currentPse.promoPrice : currentPse.price),
         }) }}
     {% endif %}
 </div>

@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace FlexyBundle\DTO;
 
+use FlexyBundle\Service\BundleLines;
+
 class CartItemDto
 {
     public int $id = 0;
@@ -38,6 +40,23 @@ class CartItemDto
     public bool $stockManaged = true;
     public string $title = '';
     public string $desc = '';
+    /**
+     * What the bundle holds for one bundle, for the line to list under itself. Scalars only: the DTO
+     * travels in a LiveProp.
+     *
+     * @var array<int, array<string, string>>
+     */
+    public array $bundleComponents = [];
+    /**
+     * False when the core says the order can no longer take this pack as it stands (the catalogue moved under
+     * its composition). True for every other line, and for a core that predates the verdict.
+     */
+    public bool $bundleOrderable = true;
+    /**
+     * The reason the core gives for it, already translated; empty for an orderable line and for a core that
+     * words none.
+     */
+    public string $bundleRefusal = '';
 
     public static function fromArray(array $data): self
     {
@@ -60,6 +79,10 @@ class CartItemDto
         $cartItem->stockManaged = isset($data['stockManaged']) ? (bool) $data['stockManaged'] : true;
         $cartItem->title = $data['title'] ?? '';
         $cartItem->desc = $data['desc'] ?? '';
+        // Not a column the theme can count on: a core that predates the bundles publishes none.
+        $cartItem->bundleComponents = BundleLines::fromCartComponents($data['bundleComponents'] ?? []);
+        $cartItem->bundleOrderable = (bool) ($data['bundleOrderable'] ?? true);
+        $cartItem->bundleRefusal = (string) ($data['bundleRefusal'] ?? '');
 
         if (isset($data['product'])) {
             $cartItem->product = $data['product'] instanceof ProductDTO

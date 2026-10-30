@@ -3,7 +3,9 @@
 {% set buttonProps = {text: label|trans, disabled: not this.isValid} %}
 {# A null href would crash ComponentAttributes: only pass it when clickable. #}
 {% if this.isValid %}
-    {% set buttonProps = buttonProps|merge({href}) %}
+    {# Turbo 8 prefetches a link on hover: the GET of the next step then runs before any click, and a step that
+       sends the buyer back with a flash would spend it on a page nobody opened. #}
+    {% set buttonProps = buttonProps|merge({href, 'data-turbo-prefetch': 'false'}) %}
 {% endif %}
 {# What is left to do before the button comes alive. A disabled button that says nothing
    leaves the buyer clicking at it; the component names the refusal, the sentences live

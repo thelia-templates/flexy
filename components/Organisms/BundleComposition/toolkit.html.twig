@@ -1,0 +1,27 @@
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">A bundle: fixed, optional and variable components</h4>
+        <p class="Story-note">
+            The bike and the helmets cannot be changed, the lock is a variable quantity from 0 to 3, the bell is
+            ticked on or off. The fields are bound to the LiveComponent of the product sheet, so they are inert
+            here: this story only shows how the list is drawn.
+        </p>
+        <div class="Story-stage Story-stage--roomy">
+            <twig:Organisms:BundleComposition:Base :components="[
+                {itemId: 1, title: 'Mountain bike', imageId: null, required: true, quantity: '1', control: 'none', included: true, minQuantity: '1', maxQuantity: '1'},
+                {itemId: 2, title: 'Helmet', imageId: null, required: true, quantity: '2', control: 'none', included: true, minQuantity: '2', maxQuantity: '2'},
+                {itemId: 3, title: 'Chain lock', imageId: null, required: false, quantity: '1', control: 'quantity', included: true, minQuantity: '0', maxQuantity: '3'},
+                {itemId: 4, title: 'Bell', imageId: null, required: false, quantity: '0', control: 'switch', included: false, minQuantity: '0', maxQuantity: '1'},
+            ]" />
+        </div>
+    </div>
+    <div class="Story-section">
+        <h4 class="Story-title">A choice the shop refused</h4>
+        <p class="Story-note">The default composition is shown again, with a sentence saying why the selection changed.</p>
+        <div class="Story-stage Story-stage--roomy">
+            <twig:Organisms:BundleComposition:Base :refused="true" :components="[
+                {itemId: 1, title: 'Mountain bike', imageId: null, required: true, quantity: '1', control: 'none', included: true, minQuantity: '1', maxQuantity: '1'},
+            ]" />
+        </div>
+    </div>
+</div>
