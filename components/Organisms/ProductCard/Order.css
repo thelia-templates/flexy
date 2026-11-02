@@ -51,7 +51,8 @@
 
   .ProductCard-orderInfos {
     @apply paragraph-6;
-    color: var(--color-grey);
+    /* --color-grey is 4.23:1 on the card's --color-lightest. */
+    color: var(--color-grey-dark);
     display: flex;
     flex-direction: column;
     padding-bottom: 0.375rem;

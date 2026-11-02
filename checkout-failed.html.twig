@@ -6,9 +6,9 @@
     <div class="flex flex-col items-center justify-center text-center">
         {{ ux_icon('not-found', {class: 'w-50 h-auto block mx-auto mb-6'}) }}
         {% if failed_order_message %}
-            <h3 class="mt-4 mb-6 h4">{{ failed_order_message }}</h3>
+            <h1 class="mt-4 mb-6 h4">{{ failed_order_message }}</h1>
         {% else %}
-            <h3 class="mt-4 mb-6 h4">{{ 'The payment could not be completed.'|trans }}</h3>
+            <h1 class="mt-4 mb-6 h4">{{ 'The payment could not be completed.'|trans }}</h1>
         {% endif %}
 
         <twig:Molecules:Button:Base
