@@ -1,10 +1,12 @@
 {# Controller identifier shared by HeaderNav/LangSelect/HeaderMenuItem — must match if renamed. #}
 {% set headerController = 'Layouts--Header--base' %}
 
+{% import '@Flexy/Atoms/StoreName/label.html.twig' as store_name %}
+
 {# Captured once: rendered both in the bar and in the search panel that covers it #}
 {% set logo %}
     {# The logo is the only content of the link, and an inline svg names nothing. #}
-    <a href="/" class="Header-logo" aria-label="{{ attr('config', 'store_name')|default('')|trim ?: 'Home'|trans }}">
+    <a href="/" class="Header-logo" aria-label="{{ store_name.label() }}">
         {{ ux_icon('thelia') }}
     </a>
 {% endset %}
