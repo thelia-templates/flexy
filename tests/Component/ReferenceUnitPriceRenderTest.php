@@ -61,6 +61,22 @@ final class ReferenceUnitPriceRenderTest extends KernelTestCase
         self::assertSame('€10.00 / l', trim($promo->text()), 'of the promotion price, the one shown');
     }
 
+    public function testABottleSoldByThePieceCountsBottlesAndStillShowsItsPricePerLitre(): void
+    {
+        $sheet = $this->sheet(QuantityRuleDTO::fromArray(['unitQuantity' => 0.75, 'referenceUnitQuantity' => 1, 'unitCode' => 'l']), ['isPromo' => false, 'price' => 9.99, 'promoPrice' => 9.99]);
+
+        self::assertSame('number', $sheet->filter('input[name="thelia_cart_add[quantity]"]')->attr('type'));
+        self::assertCount(0, $sheet->filter('.ButtonQuantity__unit'), 'one bottle, not "1 l"');
+        self::assertSame('€13.32 / l', trim($sheet->filter('.PseSelector-referencePrice')->text()));
+    }
+
+    public function testAReferenceOfAHundredGramsKeepsItsUnitOnASaleElementSoldByThePiece(): void
+    {
+        $sheet = $this->sheet(QuantityRuleDTO::fromArray(['unitQuantity' => 250, 'referenceUnitQuantity' => 100, 'unitCode' => 'g']), ['isPromo' => false, 'price' => 3.0, 'promoPrice' => 3.0]);
+
+        self::assertSame('€1.20 / 100 g', trim($sheet->filter('.PseSelector-referencePrice')->text()), 'not "/ 100"');
+    }
+
     public function testASheetWithoutUnitsShowsNoReferencePrice(): void
     {
         self::assertCount(0, $this->sheet(new QuantityRuleDTO(), ['isPromo' => false, 'price' => 9.99, 'promoPrice' => 9.99])->filter('.PseSelector-referencePrice'));
