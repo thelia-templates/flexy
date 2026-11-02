@@ -23,7 +23,7 @@ use Thelia\Domain\Localization\Service\LangService;
 
 /**
  * `{{ quantity|format_quantity(decimals, unitCode) }}` writes a quantity with the decimals of its
- * line and the symbol of its unit, in the language of the session.
+ * line and, when it is sold by measure, the symbol of its unit, in the language of the session.
  */
 final class FormatQuantityTest extends TestCase
 {
@@ -37,6 +37,8 @@ final class FormatQuantityTest extends TestCase
         yield 'the decimals of the line, not of the number' => ['fr_FR', 2, 2, 'kg', '2,00 kg'];
         yield 'a square metre' => ['fr_FR', '3.5', 1, 'm2', '3,5 m²'];
         yield 'six pieces' => ['fr_FR', 6, 0, null, '6'];
+        yield 'a bottle of 0.75 l sold by the piece' => ['fr_FR', 1, 0, 'l', '1'];
+        yield 'bags of a kilogram sold by the piece' => ['fr_FR', 6, 0, 'kg', '6'];
         yield 'a unit this core does not know' => ['fr_FR', 6, 0, 'furlong', '6'];
     }
 
