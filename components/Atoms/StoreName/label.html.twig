@@ -1,0 +1,10 @@
+{# The shop's name where it labels something: the logo links of both headers and the hidden
+   heading of the home page. A shop saved without a name falls back to "Home", so the label is
+   never empty.
+
+       {% import '@Flexy/Atoms/StoreName/label.html.twig' as store_name %}
+       <a href="/" aria-label="{{ store_name.label() }}"> #}
+
+{% macro label() %}
+{{- attr('config', 'store_name')|default('')|trim ?: 'Home'|trans -}}
+{% endmacro %}
