@@ -154,13 +154,14 @@ final readonly class QuantityRuleDTO
     }
 
     /**
-     * The unit as it is written after a quantity ("kg", "m²"), by the core's UnitCode. A code
-     * the core does not know, or a core without units, shows no unit: the unit only says what
-     * the quantity counts, the cart never reads it.
+     * The unit as it is written after a quantity ("kg", "m²"), by the core's UnitCode, and only
+     * for a sale element sold by measure: a bottle of 0.75 l sold by the piece counts bottles,
+     * not litres. A code the core does not know, or a core without units, shows no unit: the
+     * unit only says what the quantity counts, the cart never reads it.
      */
     public function unitSymbol(): ?string
     {
-        if (null === $this->unitCode || !enum_exists(UnitCode::class)) {
+        if (null === $this->unitCode || !$this->isSoldByMeasure() || !enum_exists(UnitCode::class)) {
             return null;
         }
 

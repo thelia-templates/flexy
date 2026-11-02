@@ -20,6 +20,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Thelia\Domain\Catalog\Quantity\QuantityRule;
+use Thelia\Domain\Catalog\Quantity\UnitCode;
 
 /**
  * The rule a sale element is sold by, as the selector reads it: a payload without any rule (a
@@ -85,6 +86,16 @@ final class QuantityRuleTest extends TestCase
         self::assertSame(0.3, $rule->largestValidQuantityUpTo(0.35));
         self::assertSame('1.3', $rule->inputValue(1.25 + 0.05));
         self::assertSame('kg', $rule->unitCode);
+    }
+
+    public function testOnlyASaleElementSoldByMeasureShowsItsUnit(): void
+    {
+        if (!enum_exists(UnitCode::class)) {
+            self::markTestSkipped('This core has no units.');
+        }
+
+        self::assertSame('kg', QuantityRuleDTO::fromArray(['quantityStep' => 0.25, 'quantityDecimals' => 2, 'unitCode' => 'kg'])->unitSymbol());
+        self::assertNull(QuantityRuleDTO::fromArray(['unitQuantity' => 0.75, 'referenceUnitQuantity' => 1, 'unitCode' => 'l'])->unitSymbol(), 'a bottle of 0.75 l sold by the piece counts bottles');
     }
 
     public function testTheRuleRoundTripsThroughTheArrayALivePropHolds(): void

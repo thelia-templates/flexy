@@ -85,6 +85,16 @@ final class ShipmentRenderTest extends KernelTestCase
         self::assertMatchesRegularExpression('#2 &times;.*Mesh shoes#s', $html, 'a line sold by the piece is unchanged');
     }
 
+    public function testAParcelWritesBottlesSoldByThePieceWithoutTheUnitOfTheirContent(): void
+    {
+        $parcel = $this->shippedParcel();
+        $parcel['orderShipmentItems'][] = ['quantity' => 3, 'orderProduct' => ['title' => 'Bordeaux', 'productRef' => 'WINE-75', 'quantityDecimals' => 0, 'unitCode' => 'l']];
+
+        $html = $this->render(['shipment' => $parcel, 'position' => 1, 'total' => 2]);
+
+        self::assertMatchesRegularExpression('#"Shipment-quantity" dir="ltr">3 &times;</span>.*Bordeaux#s', $html, 'three bottles, not "3 l"');
+    }
+
     public function testAParcelBeingPreparedHasNoLinkAndSaysSo(): void
     {
         $parcel = $this->shippedParcel();
