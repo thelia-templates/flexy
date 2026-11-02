@@ -45,7 +45,8 @@ final class QuantityExtension extends AbstractExtension
     }
 
     /**
-     * Written by the core (QuantityFormatter), each theme only declaring its filter. A core
+     * Written by the core (QuantityFormatter), each theme only declaring its filter: the unit
+     * follows only a quantity sold by measure, "1,25 kg" but "1" for a bottle of 0.75 l. A core
      * without quantity rules has no formatter and no units: the number alone, with its decimals.
      */
     public function formatQuantity(float|int|string|null $quantity, int|string|null $decimals = 0, ?string $unitCode = null): string

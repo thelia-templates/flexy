@@ -95,9 +95,9 @@ final class CartMeasureLineTest extends IntegrationTestCase
         }
     }
 
-    public function testAShortStockOfAWholeNumberOfKilogramsStillCarriesItsUnit(): void
+    public function testAShortStockOfBagsSoldByThePieceIsCountedInBags(): void
     {
-        $this->putInSession($this->cartWithAWeight(7.0, 6.0, new QuantityRule(unitCode: UnitCode::KILOGRAM)));
+        $this->putInSession($this->cartWithAWeight(7.0, 6.0, new QuantityRule(unitQuantity: 1.0, referenceUnitQuantity: 1.0, unitCode: UnitCode::KILOGRAM)));
         $this->speak('fr_FR');
         $translator = static::getContainer()->get('translator');
         \assert($translator instanceof LocaleAwareInterface);
@@ -106,8 +106,8 @@ final class CartMeasureLineTest extends IntegrationTestCase
 
         try {
             $line = $this->renderLine();
-            self::assertStringContainsString('Lexie : il n&#039;en reste que 6 kg en stock.', $line);
-            self::assertStringNotContainsString('exemplaires', $line, 'not "6 kg exemplaires"');
+            self::assertStringContainsString('Lexie : il ne reste que 6 exemplaires en stock.', $line, 'six bags of a kilogram, sold by the piece');
+            self::assertStringNotContainsString('6 kg', $line, 'neither "6 kg exemplaires" nor "6 kg en stock"');
         } finally {
             $translator->setLocale($previous);
         }
