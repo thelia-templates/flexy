@@ -65,7 +65,8 @@ final readonly class ReferenceUnitPrices
 
     /**
      * One reference unit is written as its symbol alone, "l"; any other quantity with its own
-     * decimals, "100 g", "0,5 kg".
+     * decimals and always its unit, "100 g", "0,5 kg", whatever the decimals the sale element
+     * is sold with. A core that writes the unit of every quantity has no formatMeasure().
      */
     private function per(float $referenceUnitQuantity, UnitCode $unitCode, ?string $locale): string
     {
@@ -77,6 +78,12 @@ final readonly class ReferenceUnitPrices
 
         $decimals = str_contains($written, '.') ? \strlen($written) - strpos($written, '.') - 1 : 0;
 
-        return (new QuantityFormatter())->format($referenceUnitQuantity, $decimals, $unitCode, $locale);
+        $formatter = new QuantityFormatter();
+
+        if (!method_exists($formatter, 'formatMeasure')) {
+            return $formatter->format($referenceUnitQuantity, $decimals, $unitCode, $locale);
+        }
+
+        return $formatter->formatMeasure($referenceUnitQuantity, $decimals, $unitCode, $locale);
     }
 }
