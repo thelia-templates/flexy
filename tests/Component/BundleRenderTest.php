@@ -155,7 +155,9 @@ final class BundleRenderTest extends KernelTestCase
         $html = $this->renderSelector(['currentPse' => ['id' => 1, 'quantity' => 5, 'price' => 30.0, 'promoPrice' => 25.0, 'isPromo' => true, 'displayInitialPrice' => true]]);
 
         self::assertStringContainsString('25.00', $html);
-        self::assertMatchesRegularExpression('/Price-original[^>]*>\s*<span dir="ltr">[^<]*30\.00/', $html);
+        // A product that is not a bundle keeps the price block of the customer groups: the price for
+        // the display of the visitor, the catalog price struck under it.
+        self::assertMatchesRegularExpression('/PseSelector-originalPrice[^>]*>\s*<span dir="ltr">[^<]*30\.00/', $html);
         self::assertStringNotContainsString('You save', $html);
     }
 

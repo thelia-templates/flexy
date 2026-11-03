@@ -21,6 +21,7 @@ use FlexyBundle\Components\Organisms\Shipment\Base as Shipment;
 use FlexyBundle\Components\Organisms\Shipment\Remaining;
 use FlexyBundle\Components\Organisms\Summary\Order as SummaryOrder;
 use FlexyBundle\Service\OrderProductResolver;
+use FlexyBundle\Service\PriceDisplay;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 
@@ -33,7 +34,7 @@ final class BundleOrderLinesTest extends KernelTestCase
 {
     public function testTheComponentsHangUnderTheLineOfTheirBundleAndHaveNoCardOfTheirOwn(): void
     {
-        $component = new OrderProducts($this->resolver());
+        $component = new OrderProducts($this->resolver(), $this->priceDisplay());
         $component->mount($this->orderProducts());
 
         self::assertSame([10, 13], array_column(array_column($component->lines, 'orderProduct'), 'id'), 'one card for the pack, one for the plain product');
@@ -44,7 +45,7 @@ final class BundleOrderLinesTest extends KernelTestCase
 
     public function testAServiceLineIsStillNotACard(): void
     {
-        $component = new OrderProducts($this->resolver());
+        $component = new OrderProducts($this->resolver(), $this->priceDisplay());
         $component->mount([['id' => 20, 'title' => 'Gift wrapping', 'lineType' => 'service', 'quantity' => 1], ['id' => 21, 'title' => 'Mug', 'lineType' => 'product', 'quantity' => 1]]);
 
         self::assertSame([21], array_column(array_column($component->lines, 'orderProduct'), 'id'));
@@ -52,7 +53,7 @@ final class BundleOrderLinesTest extends KernelTestCase
 
     public function testTheSummaryDoesNotCountTheComponentsAsArticles(): void
     {
-        $summary = new SummaryOrder();
+        $summary = new SummaryOrder($this->priceDisplay());
         $summary->order = ['orderProducts' => $this->orderProducts()];
 
         // The pack counts for the 2 bought and the plain product for 1: 4 and 8 more would be the components.
@@ -63,7 +64,7 @@ final class BundleOrderLinesTest extends KernelTestCase
     {
         $dataAccess = $this->createStub(DataAccessService::class);
         $dataAccess->method('resources')->willReturn(['orderProducts' => $this->orderProducts()]);
-        $card = new OrderCard($dataAccess, $this->resolver());
+        $card = new OrderCard($dataAccess, $this->resolver(), $this->priceDisplay());
         $card->mount(1);
 
         self::assertSame(2, $card->getItemCount(), 'the pack and the plain product');
@@ -100,12 +101,17 @@ final class BundleOrderLinesTest extends KernelTestCase
     {
         $dataAccess = $this->createStub(DataAccessService::class);
         $dataAccess->method('resources')->willReturnCallback(fn (string $path): mixed => str_contains($path, 'account/orders/') ? ['orderProducts' => $this->orderProducts()] : []);
-        $form = new ReturnRequest($dataAccess, $this->resolver());
+        $form = new ReturnRequest($dataAccess, $this->resolver(), $this->priceDisplay());
 
         // Even a list that names the components as returnable (the core does not, the form does not trust it either).
         $form->mount(1, [10 => 2.0, 11 => 2.0, 12 => 4.0, 13 => 1.0]);
 
         self::assertSame([10, 13], array_column(array_column($form->lines, 'orderProduct'), 'id'));
+    }
+
+    private function priceDisplay(): PriceDisplay
+    {
+        return self::getContainer()->get(PriceDisplay::class);
     }
 
     private function resolver(): OrderProductResolver
