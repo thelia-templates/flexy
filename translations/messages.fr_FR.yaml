@@ -61,6 +61,7 @@ Offered: Offert
 This product is offered by a promotion, the discount is deducted in the order summary.: Ce produit est offert par une promotion, la remise est déduite dans le récapitulatif de commande.
 This product was added to your cart by a promotion.: Ce produit a été ajouté à votre panier par une promotion.
 promotion_unavailable_out_of_stock: 'La promotion « %promotion% » n''a pas pu être appliquée : le produit offert est en rupture de stock.'
+promotion_excluded_by_winner: 'Le code %code% (%promotion%) ne se cumule pas avec la promotion « %winner% », qui a été appliquée.'
 View product: Voir le produit
 View my cart: Voir mon panier
 Continue shopping: Continuer vos achats
