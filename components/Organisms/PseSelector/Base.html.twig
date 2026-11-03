@@ -8,7 +8,7 @@
 {# @prop maxQuantityReached bool The cart already holds the whole available stock #}
 {# @prop cartRefused bool The cart refused the last add (a module rule, the stock gone meanwhile) #}
 {# @prop cartRefusalReason string The reason a module gave with its refusal, printed escaped after the sentence #}
-{# @prop bundlePricing array|null The price of the composition a shopper picked on a bundle priced by its components, taxes included: {price, originalPrice, saving}. Replaces the price of the sale element #}
+{# @prop bundlePricing array|null The price of the composition a shopper picked on a bundle priced by its components, each figure with and without its taxes: {price, untaxedPrice, originalPrice, untaxedOriginalPrice, saving, untaxedSaving}. Replaces the price of the sale element #}
 {# @prop bundleUnavailable bool The bundle cannot be sold as it stands (a required component is no longer offered) #}
 {% props
     form,
@@ -149,11 +149,16 @@
         {# Flex items are blockified: dir="ltr" goes on an inner inline span, so the box keeps
            resolving its own alignment against the page. #}
         {% if bundlePricing %}
+            {# The same display as the price of a product: the group of the visitor picks the figure, and the mention says which. #}
+            {% set bundleCharged = displayed_price(display, bundlePricing.untaxedPrice|default(null), bundlePricing.price|default(null)) %}
+            {% set bundleOriginal = displayed_price(display, bundlePricing.untaxedOriginalPrice|default(null), bundlePricing.originalPrice|default(null)) %}
+            {% set bundleSaving = displayed_price(display, bundlePricing.untaxedSaving|default(null), bundlePricing.saving|default(null)) %}
             <twig:Molecules:Price:Base
                 class="PseSelector-price"
-                :price="bundlePricing.price"
-                :originalPrice="bundlePricing.originalPrice"
-                :saving="bundlePricing.saving"
+                :price="bundleCharged ? bundleCharged.amount : null"
+                :originalPrice="bundleOriginal ? bundleOriginal.amount : null"
+                :saving="bundleSaving ? bundleSaving.amount : null"
+                :display="display"
             />
         {% else %}
             <div class="PseSelector-price">

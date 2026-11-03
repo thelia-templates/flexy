@@ -372,7 +372,7 @@ class Base
      * for it. One answer per render, never one per component. The visuals of the components are
      * preloaded as a group.
      *
-     * @return array{components: list<array<string, mixed>>, pricing: array{price: float, originalPrice: float|null, saving: float|null}|null, unavailable: bool, refused: bool}|null
+     * @return array{components: list<array<string, mixed>>, pricing: array{price: float, untaxedPrice: float, originalPrice: float|null, untaxedOriginalPrice: float|null, saving: float|null, untaxedSaving: float|null}|null, unavailable: bool, refused: bool}|null
      */
     #[ExposeInTemplate('bundle')]
     public function getBundle(): ?array

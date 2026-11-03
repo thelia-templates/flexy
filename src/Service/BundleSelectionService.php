@@ -120,13 +120,15 @@ final readonly class BundleSelectionService
     }
 
     /**
-     * The price of a composition, taxes included, for a bundle priced by its components; null for a
-     * bundle in fixed mode, which is priced like any product by its own sale element.
+     * The price of a composition, with and without its taxes, for a bundle priced by its components; null
+     * for a bundle in fixed mode, which is priced like any product by its own sale element. Both amounts
+     * of each figure come from the core, which has priced the group and the discounts of the visitor into
+     * them: the display of the group only picks one.
      *
-     * `originalPrice` and `saving` are null when the bundle gives no discount, or when the shop asks not to
-     * show the price it would cost without.
+     * `originalPrice` and `saving` (and their untaxed counterparts) are null when the bundle gives no
+     * discount, or when the shop asks not to show the price it would cost without.
      *
-     * @return array{price: float, originalPrice: float|null, saving: float|null}|null
+     * @return array{price: float, untaxedPrice: float, originalPrice: float|null, untaxedOriginalPrice: float|null, saving: float|null, untaxedSaving: float|null}|null
      */
     public function quote(int $bundleProductId, int $saleElementId, BundleComposition $composition): ?array
     {
@@ -137,7 +139,14 @@ final readonly class BundleSelectionService
             return null;
         }
 
-        return ['price' => $quote->taxedPrice, 'originalPrice' => $quote->taxedFullPrice, 'saving' => $quote->taxedSaving];
+        return [
+            'price' => $quote->taxedPrice,
+            'untaxedPrice' => $quote->untaxedPrice,
+            'originalPrice' => $quote->taxedFullPrice,
+            'untaxedOriginalPrice' => $quote->untaxedFullPrice,
+            'saving' => $quote->taxedSaving,
+            'untaxedSaving' => $quote->untaxedSaving,
+        ];
     }
 
     /**

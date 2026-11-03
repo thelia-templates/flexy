@@ -1,12 +1,13 @@
-{# @prop price float The price to pay, taxes included, in the currency being browsed #}
-{# @prop originalPrice float|null The price struck through beside it, taxes included; nothing when not given #}
-{# @prop saving float|null What the shopper saves against the struck price, taxes included; nothing when not given #}
-{% props price, originalPrice = null, saving = null %}
+{# @prop price float The price to pay, in the currency being browsed #}
+{# @prop originalPrice float|null The price struck through beside it, in the same display; nothing when not given #}
+{# @prop saving float|null What the shopper saves against the struck price, in the same display; nothing when not given #}
+{# @prop display TaxDisplay|null Which of the two amounts the figures are, with or without the taxes: the price then carries its mention. Nothing when the figures are not told apart #}
+{% props price, originalPrice = null, saving = null, display = null %}
 {# A price keeps its own order, so it carries dir="ltr" — on the inline span only: on a flex item
    the box would re-resolve its own alignment and pin the figure to the left of a right-to-left page. #}
 <div class="{{ ('Price ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
     <strong class="h4">
-        <span dir="ltr">{{ price|format_currency(current_currency_code(), locale: lang_code) }}</span>
+        <span dir="ltr">{{ price|format_currency(current_currency_code(), locale: lang_code) }}</span>{% if display %}<twig:Atoms:TaxMention:Base :display="display" />{% endif %}
     </strong>
     {% if originalPrice is not null %}
         <span class="Price-original paragraph-4">

@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Tests\Component;
 
+use FlexyBundle\Service\TaxDisplay;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -113,6 +114,16 @@ final class BundleRenderTest extends KernelTestCase
         self::assertMatchesRegularExpression('/Price-original[^>]*>\s*<span dir="ltr">[^<]*720\.00/', $html);
         self::assertStringContainsString('You save', $html);
         self::assertStringContainsString('72.00', $html);
+    }
+
+    public function testThePriceBlockNamesTheDisplayOfItsFiguresWhenTheyAreTold(): void
+    {
+        $untaxed = $this->render('Molecules:Price:Base', ['price' => 540.0, 'display' => TaxDisplay::Untaxed]);
+        $taxed = $this->render('Molecules:Price:Base', ['price' => 648.0, 'display' => TaxDisplay::Taxed]);
+
+        self::assertStringContainsString('data-tax-display="untaxed"', $untaxed);
+        self::assertStringContainsString('data-tax-display="taxed"', $taxed);
+        self::assertStringNotContainsString('TaxMention', $this->render('Molecules:Price:Base', ['price' => 540.0]));
     }
 
     public function testThePriceBlockSaysNothingOfASavingThatIsZeroOrAbsent(): void
