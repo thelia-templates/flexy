@@ -20,6 +20,9 @@ use Propel\Runtime\Propel;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Domain\Catalog\Bundle\BundleCompositionService;
 use Thelia\Domain\Catalog\Bundle\BundlePriceMode;
+use Thelia\Domain\Pricing\BundleQuoter;
+use Thelia\Domain\Pricing\PricingActivityChecker;
+use Thelia\Model\Currency;
 use Thelia\Test\FixtureFactory;
 use Thelia\Test\IntegrationTestCase;
 
@@ -66,6 +69,30 @@ final class BundleSelectionServiceTest extends IntegrationTestCase
         self::assertEqualsWithDelta(544.32, $quote['price'], 0.01);
         // The struck price carries the discount of the customer too, as the core quotes it (672 less 10 %).
         self::assertEqualsWithDelta(604.80, $quote['originalPrice'], 0.01);
+    }
+
+    public function testAMemberOfAGroupShownUntaxedPricesIsQuotedTheUntaxedPrice(): void
+    {
+        $example = $this->example();
+        $factory = new FixtureFactory(Propel::getConnection('TheliaMain'));
+        $customer = $factory->customer($factory->customerTitle(), ['customerGroup' => $factory->customerGroup('flexy-bundle-untaxed', 15.0, displayTaxedPrice: false)]);
+        $this->getService(PricingActivityChecker::class)->reset();
+        $session = static::getContainer()->get('request_stack')->getCurrentRequest()?->getSession();
+        self::assertInstanceOf(Session::class, $session);
+        $session->setCustomerUser($customer);
+
+        $composed = $this->service()->compose((int) $example['bundle']->getId(), $this->rows($example), []);
+        $saleElementsId = $this->saleElementsIdOf($example['bundle']);
+        $quote = $this->service()->quote((int) $example['bundle']->getId(), $saleElementsId, $composed['composition']);
+        $core = $this->getService(BundleQuoter::class)->quote((int) $example['bundle']->getId(), $saleElementsId, $composed['composition'], Currency::getDefaultCurrency(), $customer);
+
+        self::assertNotNull($core);
+        self::assertFalse($core->displaysTaxedPrices);
+        // 504 less the 15 % of the group, shown without the 20 % tax, as the core quotes it.
+        self::assertEqualsWithDelta(428.40, $quote['price'], 0.01);
+        self::assertEqualsWithDelta($core->untaxedPrice, $quote['price'], 0.001);
+        self::assertEqualsWithDelta($core->untaxedFullPrice, $quote['originalPrice'], 0.001);
+        self::assertEqualsWithDelta($core->untaxedSaving, $quote['saving'], 0.001);
     }
 
     public function testAChangeOfTheSelectionChangesThePrice(): void
