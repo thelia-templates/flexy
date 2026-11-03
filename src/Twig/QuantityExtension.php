@@ -39,7 +39,7 @@ final class QuantityExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            // {{ quantity|format_quantity(decimals, unitCode) }}: "1,25 kg" in French, "6" for six pieces.
+            // {{ quantity|format_quantity(decimals, unitCode, locale) }}: "1,25 kg" in French, "6" for six pieces; the language of the session unless one is given.
             new TwigFilter('format_quantity', $this->formatQuantity(...)),
         ];
     }
@@ -49,11 +49,11 @@ final class QuantityExtension extends AbstractExtension
      * follows only a quantity sold by measure, "1,25 kg" but "1" for a bottle of 0.75 l. A core
      * without quantity rules has no formatter and no units: the number alone, with its decimals.
      */
-    public function formatQuantity(float|int|string|null $quantity, int|string|null $decimals = 0, ?string $unitCode = null): string
+    public function formatQuantity(float|int|string|null $quantity, int|string|null $decimals = 0, ?string $unitCode = null, ?string $locale = null): string
     {
         $quantity = is_numeric($quantity) ? (float) $quantity : 0.0;
         $decimals = max(0, min(3, (int) $decimals));
-        $locale = $this->langService->getLocale();
+        $locale ??= $this->langService->getLocale();
 
         if (class_exists(QuantityFormatter::class)) {
             return (new QuantityFormatter())->format($quantity, $decimals, UnitCode::tryFrom((string) $unitCode), $locale);

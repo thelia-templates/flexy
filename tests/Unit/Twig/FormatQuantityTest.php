@@ -55,6 +55,21 @@ final class FormatQuantityTest extends TestCase
         self::assertSame($expected, (new QuantityExtension(new ReferenceUnitPrices(), $lang))->formatQuantity($quantity, $decimals, $unitCode));
     }
 
+    public function testTheLanguageGivenToTheFilterWinsOverTheSessionsOne(): void
+    {
+        if (!class_exists(QuantityFormatter::class)) {
+            self::markTestSkipped('This core has no quantity formatter.');
+        }
+
+        $lang = self::createStub(LangService::class);
+        $lang->method('getLocale')->willReturn('en_US');
+        $extension = new QuantityExtension(new ReferenceUnitPrices(), $lang);
+
+        self::assertSame('1,25 kg', $extension->formatQuantity(1.25, 2, 'kg', 'fr_FR'));
+        self::assertSame('1.25 kg', $extension->formatQuantity(1.25, 2, 'kg', 'en_US'));
+        self::assertSame('1.25 kg', $extension->formatQuantity(1.25, 2, 'kg'));
+    }
+
     public function testTheFilterIsDeclared(): void
     {
         $names = array_map(static fn ($filter): string => $filter->getName(), (new QuantityExtension(new ReferenceUnitPrices(), self::createStub(LangService::class)))->getFilters());
