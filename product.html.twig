@@ -91,6 +91,10 @@
             <twig:Organisms:Blocks:Base itemType="product" itemId="{{ productId }}" />
         </div>
 
+        {# The editorial content a module keeps for the product, after the description and before
+           the products related to it. #}
+        {{ theme_hook('product.content', {product: product}) }}
+
         {# One block per type that has something under it, in the order the types are
            arranged, before the automatic category strip. A type nothing was picked under
            renders nothing: the block guards on its own list, so no empty title is left
