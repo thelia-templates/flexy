@@ -211,6 +211,7 @@ final class CartItemTaxDisplayTest extends IntegrationTestCase
             $this->getService(TaxEngine::class),
             $langService,
             new CartStockService(),
+            $this->getService('translator'),
             $this->getService(PriceDisplay::class),
         );
 
