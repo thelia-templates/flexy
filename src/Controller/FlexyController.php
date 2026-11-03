@@ -14,11 +14,17 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Controller;
 
+use FlexyBundle\Form\CustomerRegisterForm;
+use FlexyBundle\Service\GuestCheckoutGate;
 use FlexyBundle\View\ViewName;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -32,7 +38,13 @@ use Thelia\Core\Template\Parser\ParserResolver;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Core\Template\TemplateDefinition;
 use Thelia\Core\Template\TemplateHelperInterface;
+use Thelia\Domain\Customer\DTO\CustomerRegisterDTO;
+use Thelia\Domain\Customer\Exception\InvalidRegistrationTokenException;
 use Thelia\Domain\Customer\Service\AuthenticationReturnUrl;
+use Thelia\Domain\Customer\Service\CustomerAuthenticator;
+use Thelia\Domain\Customer\Service\CustomerRegistrationService;
+use Thelia\Domain\Localization\Service\LangService;
+use Thelia\Form\Exception\FormValidationException;
 
 class FlexyController extends BaseController
 {
@@ -86,6 +98,95 @@ class FlexyController extends BaseController
                 AuthenticationReturnUrl::PARAMETER => $this->getRequest()->getRequestUri(),
             ]));
         }
+    }
+
+    /**
+     * The sign-up page, for the standard form and for the link of a customer group alike.
+     *
+     * Without the detour, a logged-in visitor creates a second, orphaned Customer row and the
+     * informations step then writes onto their original account. A registration under
+     * way is the exception: its first step signs the visitor in, so coming back to this
+     * page (a reload, the stepper) belongs to the step that follows.
+     *
+     * @param array<string, mixed> $args what the page needs beyond the return URL
+     */
+    protected function renderRegistrationPage(AuthenticationReturnUrl $authenticationReturnUrl, SessionInterface $session, array $args = []): Response
+    {
+        $authenticationReturnUrl->capture();
+
+        if ($this->getSecurityContext()->hasAuthenticatedCustomerUser()) {
+            return $this->generateRedirect($this->generateUrl(
+                null !== $session->get('registration_customer_id') ? 'customer_informations' : 'account_index'
+            ));
+        }
+
+        // Handed to the form so that its POST carries the destination too: a cached
+        // registration page would not have run this controller to remember it.
+        return $this->render('register', ['returnUrl' => $authenticationReturnUrl->requested()] + $args);
+    }
+
+    /**
+     * Registers the account the sign-up form describes, for the standard form (no token) and
+     * for the link of a customer group (its token), and comes back to $errorUrl when the form
+     * does not validate.
+     */
+    protected function registerCustomerFromForm(
+        CustomerRegistrationService $customerRegistrationProcessor,
+        SessionInterface $session,
+        LangService $langService,
+        CustomerAuthenticator $customerLoginProcessor,
+        GuestCheckoutGate $guestCheckoutGate,
+        AuthenticationReturnUrl $authenticationReturnUrl,
+        ?string $registrationToken,
+        string $errorUrl,
+    ): RedirectResponse {
+        $form = $this->createForm(CustomerRegisterForm::class);
+
+        try {
+            $formValidated = $this->validateForm($form, Request::METHOD_POST);
+
+            try {
+                $customer = $customerRegistrationProcessor->registerCustomer(new CustomerRegisterDTO(
+                    firstname: $formValidated->get('firstname')->getData(),
+                    lastname: $formValidated->get('lastname')->getData(),
+                    email: $formValidated->get('email')->getData(),
+                    password: $formValidated->get('password')->getData(),
+                    // The language the visitor registered in is only known here. Left out, the
+                    // account keeps a NULL lang_id and every later message for that customer
+                    // goes out in the shop default instead.
+                    langId: $langService->getLang()?->getId(),
+                ), $registrationToken);
+            } catch (InvalidRegistrationTokenException) {
+                // The link of the group was closed between the check of the caller and the write.
+                throw new NotFoundHttpException();
+            }
+
+            $session->set('registration_customer_id', $customer->getId());
+            $authenticationReturnUrl->capture();
+
+            // A shop that does not confirm email addresses has nothing left to check, so
+            // the visitor is signed in right away: the step that follows edits their own
+            // address as an authenticated customer, and the registration ends on the page
+            // they came from instead of a sign-in form they have just filled in. An account
+            // waiting for its activation code stays signed out, as the code is the check.
+            if ($customer->getEnable()) {
+                $customerLoginProcessor->processLogin($customer);
+                $guestCheckoutGate->markAsAuthenticated();
+            }
+
+            return $this->generateSuccessRedirect($form);
+        } catch (FormValidationException $e) {
+            $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
+        }
+
+        $form->setErrorMessage($message);
+        $this->getParserContext()->addForm($form);
+
+        if ($form->hasErrorUrl()) {
+            return $this->generateErrorRedirect($form);
+        }
+
+        return $this->generateRedirect($errorUrl);
     }
 
     protected function generateUrl(string $route, array $parameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): string

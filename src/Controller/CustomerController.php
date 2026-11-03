@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace FlexyBundle\Controller;
 
 use FlexyBundle\Form\CustomerInformationsForm;
-use FlexyBundle\Form\CustomerRegisterForm;
 use FlexyBundle\Form\CustomerUpdateForm;
 use FlexyBundle\Service\GuestCheckoutGate;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -183,21 +182,7 @@ class CustomerController extends FlexyController
     #[Route('/register', name: 'register', methods: ['GET'])]
     public function register(AuthenticationReturnUrl $authenticationReturnUrl, SessionInterface $session): Response
     {
-        $authenticationReturnUrl->capture();
-
-        // Without this, a logged-in visitor creates a second, orphaned Customer row and the
-        // informations step then writes onto their original account. A registration under
-        // way is the exception: its first step signs the visitor in, so coming back to this
-        // page (a reload, the stepper) belongs to the step that follows.
-        if ($this->getSecurityContext()->hasAuthenticatedCustomerUser()) {
-            return $this->generateRedirect($this->generateUrl(
-                null !== $session->get('registration_customer_id') ? 'customer_informations' : 'account_index'
-            ));
-        }
-
-        // Handed to the form so that its POST carries the destination too: a cached
-        // registration page would not have run this controller to remember it.
-        return $this->render('register', ['returnUrl' => $authenticationReturnUrl->requested()]);
+        return $this->renderRegistrationPage($authenticationReturnUrl, $session);
     }
 
     #[Route('/register', name: 'register_create', methods: ['POST'])]
@@ -213,48 +198,16 @@ class CustomerController extends FlexyController
             return $this->generateRedirect('/account');
         }
 
-        $form = $this->createForm(CustomerRegisterForm::class);
-
-        try {
-            $formValidated = $this->validateForm($form, Request::METHOD_POST);
-
-            $customer = $customerRegistrationProcessor->registerCustomer(new CustomerRegisterDTO(
-                firstname: $formValidated->get('firstname')->getData(),
-                lastname: $formValidated->get('lastname')->getData(),
-                email: $formValidated->get('email')->getData(),
-                password: $formValidated->get('password')->getData(),
-                // The language the visitor registered in is only known here. Left out, the
-                // account keeps a NULL lang_id and every later message for that customer
-                // goes out in the shop default instead.
-                langId: $langService->getLang()?->getId(),
-            ));
-
-            $session->set('registration_customer_id', $customer->getId());
-            $authenticationReturnUrl->capture();
-
-            // A shop that does not confirm email addresses has nothing left to check, so
-            // the visitor is signed in right away: the step that follows edits their own
-            // address as an authenticated customer, and the registration ends on the page
-            // they came from instead of a sign-in form they have just filled in. An account
-            // waiting for its activation code stays signed out, as the code is the check.
-            if ($customer->getEnable()) {
-                $customerLoginProcessor->processLogin($customer);
-                $guestCheckoutGate->markAsAuthenticated();
-            }
-
-            return $this->generateSuccessRedirect($form);
-        } catch (FormValidationException $e) {
-            $message = $this->getTranslator()->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
-        }
-
-        $form->setErrorMessage($message);
-        $this->getParserContext()->addForm($form);
-
-        if ($form->hasErrorUrl()) {
-            return $this->generateErrorRedirect($form);
-        }
-
-        return $this->generateRedirect($this->generateUrl('customer_register'));
+        return $this->registerCustomerFromForm(
+            $customerRegistrationProcessor,
+            $session,
+            $langService,
+            $customerLoginProcessor,
+            $guestCheckoutGate,
+            $authenticationReturnUrl,
+            null,
+            $this->generateUrl('customer_register'),
+        );
     }
 
     #[Route('/informations', name: 'informations', methods: ['GET'])]
