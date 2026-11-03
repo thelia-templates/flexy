@@ -59,6 +59,7 @@ Offered: Offered
 This product is offered by a promotion, the discount is deducted in the order summary.: This product is offered by a promotion, the discount is deducted in the order summary.
 This product was added to your cart by a promotion.: This product was added to your cart by a promotion.
 promotion_unavailable_out_of_stock: 'The "%promotion%" promotion could not be applied: the offered product is out of stock.'
+promotion_excluded_by_winner: 'The code %code% (%promotion%) cannot be combined with the "%winner%" promotion, which was applied.'
 View product: View product
 View my cart: View my cart
 Continue shopping: Continue shopping

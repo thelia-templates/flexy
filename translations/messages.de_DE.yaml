@@ -59,6 +59,7 @@ Offered: Gratis
 This product is offered by a promotion, the discount is deducted in the order summary.: Dieses Produkt ist ein Geschenk aus einer Aktion, der Rabatt wird in der Bestellübersicht abgezogen.
 This product was added to your cart by a promotion.: Dieses Produkt wurde im Rahmen einer Aktion in Ihren Warenkorb gelegt.
 promotion_unavailable_out_of_stock: 'Die Aktion „%promotion%“ konnte nicht angewendet werden: Der Gratisartikel ist nicht vorrätig.'
+promotion_excluded_by_winner: 'Der Code %code% (%promotion%) lässt sich nicht mit der Aktion „%winner%“ kombinieren, die angewendet wurde.'
 View product: Produkt ansehen
 View my cart: Warenkorb anzeigen
 Continue shopping: Weiter einkaufen

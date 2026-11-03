@@ -17,6 +17,7 @@ namespace FlexyBundle\Components\Organisms\Summary;
 use FlexyBundle\DTO\DisplayedPrice;
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Service\DeliveryDateBridge;
+use FlexyBundle\Service\ExcludedPromotionsReader;
 use FlexyBundle\Service\PriceDisplay;
 use FlexyBundle\Service\TaxDisplay;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -54,6 +55,7 @@ class Checkout
         private readonly CartFacade $cartFacade,
         private readonly LangService $langService,
         private readonly PriceDisplay $priceDisplay,
+        private readonly ExcludedPromotionsReader $excludedPromotions,
     ) {
     }
 
@@ -112,6 +114,7 @@ class Checkout
             'delivery_date' => $this->deliveryDates->chosenOn($this->cartFacade->getOrCreateFromSession(), $this->langService->getLocale()),
             'taxed_gift_wrapping' => $this->attributeAccessService->attributeCart('taxed_gift_wrapping'),
             'discounts' => $this->readDiscounts($display),
+            'excluded_promotions' => $this->excludedPromotions->read(),
             'coupons' => $this->attributeAccessService->attributeCoupon('coupon_list'),
             'invoice_vat_number' => $this->attributeAccessService->attributeCart('invoice_vat_number'),
             'vat_exemption_state' => $this->attributeAccessService->attributeCart('vat_exemption_state'),

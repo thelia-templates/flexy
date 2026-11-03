@@ -77,6 +77,18 @@
                     </ul>
                 </div>
             {% endif %}
+            {# A code the buyer typed that the core left out because another promotion was kept: said
+               here, where the codes are listed. The titles are merchant-authored and SnackBar
+               prints its text raw, so they are escaped here, once. #}
+            {% for excluded in summary.excluded_promotions ?? [] %}
+                <twig:Molecules:SnackBar:Base
+                    variant="warning"
+                    withIcon
+                    role="status"
+                    data-summary-excluded-promotion="{{ excluded.code }}"
+                    text="{{ 'promotion_excluded_by_winner'|trans({'%code%': excluded.code, '%promotion%': excluded.title, '%winner%': excluded.winner_title})|escape('html') }}"
+                />
+            {% endfor %}
             {# Named lines when the core publishes them, the single global line otherwise:
                the theme has to render against both, the core and the theme ship apart. #}
             {% if discounts|length %}
