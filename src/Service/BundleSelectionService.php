@@ -120,7 +120,8 @@ final readonly class BundleSelectionService
     }
 
     /**
-     * The price of a composition, taxes included, for a bundle priced by its components; null for a
+     * The price of a composition in the price display of the customer (taxes included, or excluded for a
+     * group shown untaxed prices), for a bundle priced by its components; null for a
      * bundle in fixed mode, which is priced like any product by its own sale element.
      *
      * `originalPrice` and `saving` are null when the bundle gives no discount, or when the shop asks not to
@@ -135,6 +136,12 @@ final readonly class BundleSelectionService
 
         if (null === $quote) {
             return null;
+        }
+
+        // The figures follow the price display of the customer, as the core chose it: a group shown
+        // untaxed prices reads its bundle untaxed, like every other price of the sheet.
+        if (!$quote->displaysTaxedPrices) {
+            return ['price' => $quote->untaxedPrice, 'originalPrice' => $quote->untaxedFullPrice, 'saving' => $quote->untaxedSaving];
         }
 
         return ['price' => $quote->taxedPrice, 'originalPrice' => $quote->taxedFullPrice, 'saving' => $quote->taxedSaving];
