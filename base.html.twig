@@ -27,15 +27,20 @@
            out as &amp;#039;. A {% set %} capture is Markup, which the escaper leaves alone. #}
         {% set pageTitle %}{% if block('title') is defined %}{{ block('title')|trim|raw }}{% endif %}{% endset %}
         {% set pageDescription %}{% if block('meta_description') is defined %}{{ block('meta_description')|trim|raw }}{% endif %}{% endset %}
+        {# What a share shows, when a page asks for other words than its title and description. #}
+        {% set ogTitle %}{% if block('og_title') is defined %}{{ block('og_title')|trim|raw }}{% endif %}{% endset %}
+        {% set ogDescription %}{% if block('og_description') is defined %}{{ block('og_description')|trim|raw }}{% endif %}{% endset %}
 
         {# Title, description, canonical, hreflang and the breadcrumb JSON-LD are rendered by
            whoever answers this hook: the SEOne module does, and falls back to its own
            SEOnePage*() values for anything a page leaves unset. #}
         {{ theme_hook('layout.head.top', {
             breadcrumb,
-            title:       pageTitle ?: null,
-            description: pageDescription ?: null,
-            og_type:     block('og_type') is defined ? block('og_type')|trim : null,
+            title:          pageTitle ?: null,
+            description:    pageDescription ?: null,
+            og_type:        block('og_type') is defined ? block('og_type')|trim : null,
+            og_title:       ogTitle ?: null,
+            og_description: ogDescription ?: null,
         }) }}
 
         {# A preview of a content or a folder (the core's /preview route marks the request with
@@ -62,7 +67,9 @@
         {% endif %}
         <meta property="og:locale" content="{{ current_locale() }}">
         <meta property="og:site_name" content="{{ attr('config', 'store_name')|default('') }}">
-        <meta name="twitter:card" content="summary_large_image">
+        {# A page may ask for the small card; any other value keeps the large one. #}
+        {% set twitterCard = block('twitter_card') is defined ? block('twitter_card')|trim : '' %}
+        <meta name="twitter:card" content="{{ twitterCard == 'summary' ? 'summary' : 'summary_large_image' }}">
 
         {# A child template replaces the whole set with its own: the files under assets/favicons
            are looked up through the chain, but a shop rarely ships them under these very names. #}
