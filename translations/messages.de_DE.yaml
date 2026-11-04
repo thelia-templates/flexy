@@ -413,6 +413,7 @@ I order without an account: Ich bestelle ohne Konto
 You will receive your order confirmation and a link to follow your order by email.: Sie erhalten Ihre Bestellbestätigung und einen Link zur Verfolgung Ihrer Bestellung per E-Mail.
 This email address already has an account. Please sign in to place your order.: Für diese E-Mail-Adresse besteht bereits ein Konto. Bitte melden Sie sich an, um Ihre Bestellung aufzugeben.
 This email address already has an account. Please sign in instead.: Für diese E-Mail-Adresse besteht bereits ein Konto. Bitte melden Sie sich stattdessen an.
+This order is now in your customer account. Please sign in to see it.: Diese Bestellung befindet sich jetzt in Ihrem Kundenkonto. Melden Sie sich an, um sie anzusehen.
 Too many attempts. Please try again later.: Zu viele Versuche. Bitte versuchen Sie es später erneut.
 The billing address is the same as the delivery address: Die Rechnungsadresse entspricht der Lieferadresse
 Your details: Ihre Kontaktdaten
@@ -650,3 +651,4 @@ Skip to content: Zum Inhalt springen
 'Another order took the same products at the same moment. Please try again.': 'Eine andere Bestellung hat zur selben Zeit dieselben Produkte erhalten. Bitte versuchen Sie es erneut.'
 # Checkout: the core refused the payment because a price moved since the cart was read
 The prices of your cart have changed. Check your cart before paying.: Die Preise in Ihrem Warenkorb haben sich geändert. Prüfen Sie Ihren Warenkorb, bevor Sie bezahlen.
+The message must be %max characters at most.: Die Nachricht darf höchstens %max Zeichen lang sein.
