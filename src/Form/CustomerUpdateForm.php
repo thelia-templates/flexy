@@ -20,7 +20,6 @@ use Symfony\Component\Validator\Constraints;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Thelia\Core\Security\SecurityContext;
-use Thelia\Core\Translation\Translator;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\CustomerQuery;
 
@@ -56,7 +55,7 @@ class CustomerUpdateForm extends CustomerRegisterForm
             ] : [],
             'required' => $canUpdateEmail,
             'disabled' => !$canUpdateEmail,
-            'label' => Translator::getInstance()->trans('Email'),
+            'label' => $this->translation->trans('Email'),
             'label_attr' => [
                 'for' => 'email',
             ],

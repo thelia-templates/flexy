@@ -152,7 +152,7 @@ class GuestCheckoutForm extends AddressCreateForm
         $this->formBuilder->add('cellphone', TelType::class, [
             'required' => true,
             'constraints' => [new NotBlank()],
-            'label' => Translator::getInstance()->trans('Mobile phone'),
+            'label' => $this->translation->trans('Mobile phone'),
             'label_attr' => ['for' => 'cellphone'],
         ]);
     }
