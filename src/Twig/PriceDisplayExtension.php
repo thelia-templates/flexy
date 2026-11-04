@@ -17,6 +17,7 @@ namespace FlexyBundle\Twig;
 use FlexyBundle\DTO\DisplayedPrice;
 use FlexyBundle\Service\PriceDisplay;
 use FlexyBundle\Service\TaxDisplay;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -31,6 +32,7 @@ class PriceDisplayExtension extends AbstractExtension
 {
     public function __construct(
         private readonly PriceDisplay $priceDisplay,
+        #[Autowire(service: 'translator')]
         private readonly TranslatorInterface $translator,
     ) {
     }

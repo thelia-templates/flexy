@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Service;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Thelia\Core\HttpKernel\Exception\RedirectException;
@@ -29,8 +30,10 @@ use Thelia\Domain\Order\Exception\StockShortageException;
  */
 final readonly class CheckoutStockRefusal
 {
-    public function __construct(private TranslatorInterface $translator)
-    {
+    public function __construct(
+        #[Autowire(service: 'translator')]
+        private TranslatorInterface $translator,
+    ) {
     }
 
     public function answer(StockShortageException $shortage, string $cartPath, ?object $session): RedirectException
