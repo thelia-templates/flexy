@@ -14,15 +14,22 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Form;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints;
-use Thelia\Core\Translation\Translator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Thelia\Model\Customer;
 
 class CustomerActivationForm extends AbstractType
 {
+    public function __construct(
+        #[Autowire(service: 'translator')]
+        private readonly TranslatorInterface $translation,
+    ) {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         // The account being activated is the pending registration held in the session, so
@@ -30,7 +37,7 @@ class CustomerActivationForm extends AbstractType
         // check at any address, and answer whether that address has an account.
         $builder
             ->add('activation_code', TextType::class, [
-                'label' => Translator::getInstance()->trans('Enter the code received by e-mail'),
+                'label' => $this->translation->trans('Enter the code received by e-mail'),
                 'attr' => [
                     'maxlength' => Customer::CODE_LENGTH,
                     'pattern' => '[0-9]{'.Customer::CODE_LENGTH.'}',
@@ -44,7 +51,7 @@ class CustomerActivationForm extends AbstractType
                     ]),
                     new Constraints\Regex([
                         'pattern' => '/^[0-9]{'.Customer::CODE_LENGTH.'}$/',
-                        'message' => Translator::getInstance()->trans('Activation code must contain only digits'),
+                        'message' => $this->translation->trans('Activation code must contain only digits'),
                     ]),
                 ],
             ]);

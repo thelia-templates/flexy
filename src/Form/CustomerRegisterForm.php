@@ -80,7 +80,7 @@ class CustomerRegisterForm extends BaseForm
                         [$this, 'verifyExistingEmail']
                     ),
                 ],
-                'label' => Translator::getInstance()->trans('Email'),
+                'label' => $this->translation->trans('Email'),
                 'label_attr' => [
                     'for' => 'email',
                 ],

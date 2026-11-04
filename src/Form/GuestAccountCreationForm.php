@@ -14,11 +14,12 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Form;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\PasswordStrength;
-use Thelia\Core\Translation\Translator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Thelia\Form\BaseForm;
 
 /**
@@ -35,17 +36,23 @@ class GuestAccountCreationForm extends BaseForm
 {
     public const FORM_NAME = 'flexybundle_form_guest_account_creation';
 
+    public function __construct(
+        #[Autowire(service: 'translator')]
+        private readonly TranslatorInterface $translation,
+    ) {
+    }
+
     protected function buildForm(): void
     {
         $this->formBuilder->add('password', RepeatedType::class, [
             'type' => PasswordType::class,
-            'invalid_message' => Translator::getInstance()->trans('The two passwords do not match.'),
+            'invalid_message' => $this->translation->trans('The two passwords do not match.'),
             'first_options' => [
-                'label' => Translator::getInstance()->trans('Password'),
+                'label' => $this->translation->trans('Password'),
                 'label_attr' => ['for' => 'password'],
             ],
             'second_options' => [
-                'label' => Translator::getInstance()->trans('Confirm password'),
+                'label' => $this->translation->trans('Confirm password'),
                 'label_attr' => ['for' => 'password_confirmation'],
             ],
             'constraints' => [
