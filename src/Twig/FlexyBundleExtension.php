@@ -19,6 +19,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Domain\Customer\Service\AuthenticationReturnUrl;
 use Thelia\Domain\Localization\Service\LangService;
+use Thelia\Model\ConfigQuery;
 use Thelia\Model\Customer;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -64,7 +65,16 @@ class FlexyBundleExtension extends AbstractExtension
             new TwigFunction('current_locale', [$this, 'currentLocale']),
             new TwigFunction('hasCustomerAccount', [$this, 'hasCustomerAccount']),
             new TwigFunction('sign_in_path', [$this, 'signInPath']),
+            new TwigFunction('newsletter_enabled', [$this, 'newsletterEnabled']),
         ];
+    }
+
+    /**
+     * Whether the shop takes newsletter sign-ups: the pages that offer one hide it otherwise.
+     */
+    public function newsletterEnabled(): bool
+    {
+        return ConfigQuery::isNewsletterEnabled();
     }
 
     public function getCurrentCustomer(): ?Customer
