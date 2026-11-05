@@ -1,5 +1,7 @@
 {# @prop withNewsletter bool Show the newsletter column and switch to a 3-column layout on desktop #}
 {% props withNewsletter = false %}
+{# Switched off by the shop: no column, and no modifier class either, or the 3-column grid keeps an empty cell. #}
+{% set withNewsletter = withNewsletter and newsletter_enabled() %}
 
 {% set footer = html_cva(
     base: 'Footer',

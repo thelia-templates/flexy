@@ -52,7 +52,7 @@
     <section class="mb-10">
         <h2 class="h4 text-black mb-4">{{ 'I want to create an account'|trans }}</h2>
         <p class="paragraph-2 text-black mb-6">
-            {{ 'With your account, you can track your orders, manage your profile, receive the newsletter, manage your wish lists...'|trans }}
+            {{ newsletter_enabled() ? 'With your account, you can track your orders, manage your profile, receive the newsletter, manage your wish lists...'|trans : 'With your account, you can track your orders, manage your profile, manage your wish lists...'|trans }}
         </p>
         <twig:Molecules:Button:Base
             href="{{ path('customer_register') }}"

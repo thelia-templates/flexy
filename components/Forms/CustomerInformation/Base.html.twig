@@ -47,7 +47,9 @@
         {{ form_row(form.cellphone) }}
     </div>
 
-    {{ form_row(form.newsletter) }}
+    {% if form.newsletter is defined %}
+        {{ form_row(form.newsletter) }}
+    {% endif %}
     {{ form_row(form.accept_privacy_policy) }}
     {{ form_rest(form) }}
 
