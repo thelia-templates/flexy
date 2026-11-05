@@ -1,6 +1,6 @@
 {# @prop form FormView The core CART_ADD form, owned by the parent LiveComponent #}
 {# @prop productAttrs array Attributes of the product: [{id, label, values: [{id, label, color, available}]}] #}
-{# @prop currentPse array|null Selected product sale element #}
+{# @prop currentPse array|null Selected product sale element, as the core publishes it: `availableQuantity` is what may still be sold (absent: no limit), `isPreorder` and `restockDate` tell a sale below zero stock #}
 {# @prop currentCombination array attributeId => attributeAvId of the selected PSE #}
 {# @prop noAvailablePse bool No PSE matches the selected combination #}
 {# @prop stockManaged bool Whether stock is enforced for this product #}
@@ -31,10 +31,15 @@
 
 {# A product with no sale element at all has no currentPse: it is shown as not purchasable. #}
 {% set noPurchasablePse = noAvailablePse or currentPse is null or bundleUnavailable %}
-{% set outOfStock = stockManaged and currentPse is not null and currentPse.quantity == 0 %}
-{# No upper bound when stock is not enforced: the attribute is dropped rather than passed as
+{# What may be sold, read from the core: no `availableQuantity` means no limit, which is not zero. #}
+{% set sellable = currentPse is not null ? (currentPse.availableQuantity ?? null) : null %}
+{% set bounded = stockManaged and sellable is not null %}
+{% set outOfStock = bounded and sellable <= 0 %}
+{% set preorder = not outOfStock and currentPse is not null and (currentPse.isPreorder ?? false) %}
+{% set restockDate = preorder ? (currentPse.restockDate ?? null) : null %}
+{# No upper bound when nothing limits the sale: the attribute is dropped rather than passed as
    null, which the component rejects outright. #}
-{% set quantityBounds = stockManaged ? {'input:max': remainingStock} : {} %}
+{% set quantityBounds = bounded ? {'input:max': remainingStock} : {} %}
 {% set mobileDrawerController = 'Molecules--MobileDrawer--base' %}
 
 <div class="{{ ('PseSelector ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
@@ -46,9 +51,12 @@
 
     <div class="PseSelector-heading">
         <twig:Molecules:Tag:Stock
-            color="{{ outOfStock ? 'out' : 'in' }}"
-            customText="{{ (outOfStock ? 'Out of stock' : 'In stock')|trans }}"
+            color="{{ outOfStock ? 'out' : (preorder ? 'preorder' : 'in') }}"
+            customText="{{ (outOfStock ? 'Out of stock' : (preorder ? 'Pre-order' : 'In stock'))|trans }}"
         />
+        {% if restockDate %}
+            <p class="PseSelector-restock paragraph-4">{{ 'Restock expected on %date%'|trans({'%date%': restockDate|format_date('long', locale: lang_code)}) }}</p>
+        {% endif %}
     </div>
 
     {% if outOfStock %}

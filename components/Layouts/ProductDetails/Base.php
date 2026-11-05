@@ -44,7 +44,6 @@ use Thelia\Domain\Shipping\DestinationRestriction\CartDestinations;
 use Thelia\Domain\Shipping\DestinationRestriction\DestinationRestrictionChecker;
 use Thelia\Domain\Shipping\DestinationRestriction\ProductDestinationRestrictionReader;
 use Thelia\Form\Definition\FrontForm;
-use Thelia\Model\ConfigQuery;
 
 #[AsLiveComponent]
 class Base
@@ -312,31 +311,45 @@ class Base
     }
 
     /**
-     * Stock is only enforced front-side when the `check-available-stock` config is enabled
-     * and the product is not virtual (mirrors Thelia core CartAdd / OrderFacade logic).
+     * What the shop may still sell of the selected sale element, as the core publishes it
+     * (`availableQuantity`: the stock and what the sale mode allows below zero, less what other carts
+     * reserve). Null is no limit: the key is absent from the payload when there is nothing to enforce
+     * (stock not checked, virtual product, sale mode without limit), and absent is not zero.
      */
-    public function isStockManaged(): bool
+    private function availableQuantity(): ?int
     {
-        if ($this->virtual) {
-            return false;
+        $available = $this->currentPse['availableQuantity'] ?? null;
+
+        if (null === $available) {
+            return null;
         }
 
         // A bundle of virtual components only is supplied without limit: the core says so with the
         // largest quantity it publishes, which is not a stock to show nor to cap the quantity with.
-        if ($this->isBundle && (int) ($this->currentPse['quantity'] ?? 0) >= BundleDisplayedStock::DISPLAY_LIMIT) {
-            return false;
+        if ($this->isBundle && (float) $available >= BundleDisplayedStock::DISPLAY_LIMIT) {
+            return null;
         }
 
-        return ConfigQuery::checkAvailableStock();
+        return max(0, (int) floor((float) $available));
+    }
+
+    /**
+     * Whether a limit is enforced front-side: the core publishes a number of units that may be sold.
+     */
+    public function isStockManaged(): bool
+    {
+        return null !== $this->availableQuantity();
     }
 
     public function getRemainingStock(): int
     {
-        if (!$this->isStockManaged()) {
+        $available = $this->availableQuantity();
+
+        if (null === $available) {
             return \PHP_INT_MAX;
         }
 
-        return max(0, (int) ($this->currentPse['quantity'] ?? 0) - $this->getCartQuantityForCurrentPse());
+        return max(0, $available - $this->getCartQuantityForCurrentPse());
     }
 
     public function getPromoRate(): float
@@ -358,9 +371,7 @@ class Base
             return false;
         }
 
-        $stock = (int) ($this->currentPse['quantity'] ?? 0);
-
-        return $stock > 0 && $this->getRemainingStock() <= 0;
+        return ($this->availableQuantity() ?? 0) > 0 && $this->getRemainingStock() <= 0;
     }
 
     /**

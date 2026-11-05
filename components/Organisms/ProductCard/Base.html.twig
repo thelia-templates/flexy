@@ -12,6 +12,9 @@
 			{% if this.isNew %}
 				{{ include('@Flexy/Molecules/Tag/Base.html.twig', {customText: 'New'|trans, color: 'warning'}) }}
 			{% endif %}
+			{% if this.isPreorder %}
+				{{ include('@Flexy/Molecules/Tag/Stock.html.twig', {customText: 'Pre-order'|trans, color: 'preorder'}) }}
+			{% endif %}
 			{% if this.showsInitialPrice %}
 				{{ include('@Flexy/Molecules/Tag/Base.html.twig', {customText: this.promoRate|format_number(style: 'percent'), color: 'error'}) }}
 			{% endif %}

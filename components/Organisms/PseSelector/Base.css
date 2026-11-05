@@ -12,6 +12,10 @@
     justify-content: space-between;
   }
 
+  .PseSelector-restock {
+    color: var(--color-grey-dark);
+  }
+
   .PseSelector-attributes > ul {
     display: grid;
 

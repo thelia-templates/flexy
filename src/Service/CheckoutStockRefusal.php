@@ -18,6 +18,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Thelia\Core\HttpKernel\Exception\RedirectException;
+use Thelia\Domain\Catalog\Stock\Exception\StockReservationConflictException;
+use Thelia\Domain\Catalog\Stock\Exception\StockReservationRefusedException;
 use Thelia\Domain\Order\Exception\StockShortageException;
 
 /**
@@ -36,11 +38,32 @@ final readonly class CheckoutStockRefusal
     ) {
     }
 
+    /**
+     * The sentence for the buyer, in the language of the page: what the refusal of a hold says (a line another cart holds,
+     * a tie the database broke) is not what a placement that ran out of stock says.
+     */
+    public function sentenceOf(StockShortageException $shortage): string
+    {
+        if ($shortage instanceof StockReservationConflictException) {
+            return $this->translator->trans('Another buyer took the same products at the same moment. Please try again.');
+        }
+
+        $hasReference = null !== $shortage->productReference && '' !== $shortage->productReference;
+
+        if ($shortage instanceof StockReservationRefusedException) {
+            return $hasReference
+                ? $this->translator->trans('%reference% is held in another cart for the moment. Please adjust your cart or try again later.', ['%reference%' => $shortage->productReference])
+                : $this->translator->trans('Some products in your cart are held in another cart for the moment. Please adjust your cart or try again later.');
+        }
+
+        return $hasReference
+            ? $this->translator->trans('The stock of %reference% ran out while your order was placed. Please adjust your cart.', ['%reference%' => $shortage->productReference])
+            : $this->translator->trans('Some products in your cart are no longer available in the requested quantity. Please adjust the quantities before ordering.');
+    }
+
     public function answer(StockShortageException $shortage, string $cartPath, ?object $session): RedirectException
     {
-        $sentence = null === $shortage->productReference || '' === $shortage->productReference
-            ? $this->translator->trans('Some products in your cart are no longer available in the requested quantity. Please adjust the quantities before ordering.')
-            : $this->translator->trans('The stock of %reference% ran out while your order was placed. Please adjust your cart.', ['%reference%' => $shortage->productReference]);
+        $sentence = $this->sentenceOf($shortage);
 
         if ($session instanceof FlashBagAwareSessionInterface) {
             $session->getFlashBag()->add('error', $sentence);

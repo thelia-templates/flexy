@@ -654,3 +654,10 @@ Skip to content: Zum Inhalt springen
 # Checkout: the core refused the payment because a price moved since the cart was read
 The prices of your cart have changed. Check your cart before paying.: Die Preise in Ihrem Warenkorb haben sich geändert. Prüfen Sie Ihren Warenkorb, bevor Sie bezahlen.
 The message must be %max characters at most.: Die Nachricht darf höchstens %max Zeichen lang sein.
+Pre-order: Vorbestellung
+'Restock expected on %date%': 'Wiederverfügbar voraussichtlich am %date%'
+
+# Hold of the stock refused at the checkout (Service/CheckoutStockRefusal)
+"Another buyer took the same products at the same moment. Please try again.": "Ein anderer Käufer hat dieselben Produkte im selben Moment genommen. Bitte versuchen Sie es erneut."
+"%reference% is held in another cart for the moment. Please adjust your cart or try again later.": "%reference% ist im Moment in einem anderen Warenkorb reserviert. Bitte passen Sie Ihren Warenkorb an oder versuchen Sie es später erneut."
+"Some products in your cart are held in another cart for the moment. Please adjust your cart or try again later.": "Einige Produkte in Ihrem Warenkorb sind im Moment in einem anderen Warenkorb reserviert. Bitte passen Sie Ihren Warenkorb an oder versuchen Sie es später erneut."

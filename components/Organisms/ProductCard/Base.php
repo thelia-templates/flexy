@@ -42,6 +42,7 @@ class Base extends AbstractProductCard
     private bool $isPromo = false;
     private bool $displayInitialPrice = true;
     private bool $isNew = false;
+    private bool $isPreorder = false;
 
     /** @var RunningSaleResolver::forProduct()'s return type */
     private ?array $runningSaleTag = null;
@@ -89,6 +90,7 @@ class Base extends AbstractProductCard
             $this->isPromo = $defaultPse->promo;
             $this->displayInitialPrice = $defaultPse->displayInitialPrice;
             $this->isNew = $defaultPse->newness;
+            $this->isPreorder = $defaultPse->isPreorder;
         }
     }
 
@@ -148,6 +150,15 @@ class Base extends AbstractProductCard
     public function getIsNew()
     {
         return $this->isNew;
+    }
+
+    /**
+     * Pre-order badge: the verdict of the core on the sale element the card shows (the default one), as the
+     * listing already publishes it.
+     */
+    public function getIsPreorder(): bool
+    {
+        return $this->isPreorder;
     }
 
     /**

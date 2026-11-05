@@ -24,6 +24,8 @@ class ProductSaleElementDTO
     public bool $newness = false;
     public float $weight = 0.0;
     public bool $isDefault = false;
+    /** The next unit sold of it is sold below zero stock: the verdict of the core, which owns the rule. */
+    public bool $isPreorder = false;
 
     /** @var ProductPriceDTO[] */
     public array $productPrices = [];
@@ -40,6 +42,7 @@ class ProductSaleElementDTO
         $dto->newness = (bool) ($data['newness'] ?? false);
         $dto->weight = isset($data['weight']) ? (float) $data['weight'] : 0.0;
         $dto->isDefault = (bool) ($data['isDefault'] ?? false);
+        $dto->isPreorder = (bool) ($data['isPreorder'] ?? false);
 
         $dto->productPrices = array_values(
             array_map(
