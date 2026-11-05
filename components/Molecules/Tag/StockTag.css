@@ -21,6 +21,9 @@
   .StockTag--low::before {
     background-color: var(--color-warning);
   }
+  .StockTag--preorder::before {
+    background-color: var(--color-informative);
+  }
   .StockTag--out::before {
     background-color: var(--color-error);
   }

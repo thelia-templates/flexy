@@ -16,6 +16,7 @@ namespace FlexyBundle\Components\Organisms\Invoice;
 
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Service\BillingAddressChoice;
+use FlexyBundle\Service\CheckoutStockHold;
 use FlexyBundle\Service\DeliveryAddressCopy;
 use FlexyBundle\Service\GuestCheckoutGate;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -47,11 +48,15 @@ class Base
     #[LiveProp]
     public ?int $editingAddressId = null;
 
+    /** Said when the line another cart holds keeps the stock from being held for this buyer after their choice. */
+    public ?string $stockRefusal = null;
+
     public function __construct(
         private readonly CartFacade $cartFacade,
         private readonly GuestCheckoutGate $guestCheckoutGate,
         private readonly DeliveryAddressCopy $deliveryAddressCopy,
         private readonly UrlGeneratorInterface $urls,
+        private readonly CheckoutStockHold $stockHold,
     ) {
     }
 
@@ -163,6 +168,7 @@ class Base
         }
 
         $this->billTo($addressId);
+        $this->stockRefusal = $this->stockHold->extend($this->cartFacade->getOrCreateFromSession());
 
         $this->emit('hideShowAddressList');
         $this->emit('updateNextButton');

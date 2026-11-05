@@ -46,6 +46,10 @@ class CartItemDto
     public ?ProductDTO $product = null;
     public int $stock = 0;
     public bool $stockManaged = true;
+    /** The line is sold below zero stock: the shop gets the stock back after the order. */
+    public bool $isPreorder = false;
+    /** When the stock is expected back (Y-m-d), for a pre-order line the merchant dated. */
+    public ?string $restockDate = null;
     public string $title = '';
     public string $desc = '';
     /**
@@ -90,6 +94,8 @@ class CartItemDto
         $cartItem->lineTotalAfterDiscountUntaxed = self::amount($data, 'lineTotalAfterDiscountUntaxed', 'line_total_after_discount_untaxed');
         $cartItem->stock = isset($data['stock']) ? (int) $data['stock'] : 0;
         $cartItem->stockManaged = isset($data['stockManaged']) ? (bool) $data['stockManaged'] : true;
+        $cartItem->isPreorder = (bool) ($data['isPreorder'] ?? false);
+        $cartItem->restockDate = isset($data['restockDate']) && '' !== $data['restockDate'] ? (string) $data['restockDate'] : null;
         $cartItem->title = $data['title'] ?? '';
         $cartItem->desc = $data['desc'] ?? '';
         // Not a column the theme can count on: a core that predates the bundles publishes none.

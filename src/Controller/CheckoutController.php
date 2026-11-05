@@ -87,6 +87,7 @@ class CheckoutController extends FlexyController
     #[Route('/cart', name: 'cart')]
     public function cartAction(
         CheckoutFacade $checkoutFacade,
+        CheckoutStockRefusal $stockRefusal,
         CartGuard $cartGuard,
         CartFacade $cartFacade,
         GuestCheckoutGate $guestCheckoutGate,
@@ -102,7 +103,7 @@ class CheckoutController extends FlexyController
         $identifiesNext = !$guestCheckoutGate->mayEnterCheckout() && $guestCheckoutGate->isOfferedForCurrentCart();
 
         if ($routes->isOnePage()) {
-            return $this->renderTheWholeTunnel($cart, $cartGuard, $checkoutFacade, $routes);
+            return $this->renderTheWholeTunnel($cart, $cartGuard, $checkoutFacade, $stockRefusal, $routes);
         }
 
         // A page fetched ahead of a click (hovering "Previous step" on the payment step) is not a visit to the
@@ -137,6 +138,8 @@ class CheckoutController extends FlexyController
     #[Route('/delivery', name: 'delivery')]
     public function deliveryModesAction(
         CartFacade $cartFacade,
+        CheckoutFacade $checkoutFacade,
+        CheckoutStockRefusal $stockRefusal,
         GuestCheckoutGate $guestCheckoutGate,
         CheckoutProgressionService $progression,
         CheckoutStepRouteResolver $routes,
@@ -148,9 +151,16 @@ class CheckoutController extends FlexyController
 
         // On a one-page checkout the delivery is a section of the cart page, so this
         // route has no screen of its own left to serve.
-        if ($routes->isOnePage() || !$progression->isReachable($cart, CheckoutStep::CODE_DELIVERY)) {
+        if ($routes->isOnePage()) {
             return $this->redirectToTheFirstIncompleteStep($cart, $progression, $routes);
         }
+
+        if (!$progression->isReachable($cart, CheckoutStep::CODE_DELIVERY)) {
+            return $this->redirectToTheFirstIncompleteStep($cart, $progression, $routes);
+        }
+
+        // After the reachability: a step the buyer is sent away from holds nothing.
+        $this->holdTheStockOfTheCart($cart, $checkoutFacade, $stockRefusal, $routes);
 
         return $this->render('checkout-delivery', [
             'current' => CheckoutStep::CODE_DELIVERY,
@@ -167,6 +177,7 @@ class CheckoutController extends FlexyController
     public function paymentAction(
         CartFacade $cartFacade,
         CheckoutFacade $checkoutFacade,
+        CheckoutStockRefusal $stockRefusal,
         GuestCheckoutGate $guestCheckoutGate,
         CheckoutProgressionService $progression,
         CheckoutStepRouteResolver $routes,
@@ -191,6 +202,8 @@ class CheckoutController extends FlexyController
         if (!$progression->isReachable($cart, CheckoutStep::CODE_PAYMENT)) {
             return $this->redirectToTheFirstIncompleteStep($cart, $progression, $routes);
         }
+
+        $this->holdTheStockOfTheCart($cart, $checkoutFacade, $stockRefusal, $routes);
 
         return $this->render('checkout-payment', [
             'current' => CheckoutStep::CODE_PAYMENT,
@@ -243,6 +256,8 @@ class CheckoutController extends FlexyController
     public function moduleStepAction(
         string $code,
         CartFacade $cartFacade,
+        CheckoutFacade $checkoutFacade,
+        CheckoutStockRefusal $stockRefusal,
         GuestCheckoutGate $guestCheckoutGate,
         CheckoutProgressionService $progression,
         CheckoutStepRouteResolver $routes,
@@ -265,6 +280,8 @@ class CheckoutController extends FlexyController
         if ($routes->isOnePage() || null === $component || '' === $component || !$progression->isReachable($cart, $code)) {
             return $this->redirectToTheFirstIncompleteStep($cart, $progression, $routes);
         }
+
+        $this->holdTheStockOfTheCart($cart, $checkoutFacade, $stockRefusal, $routes);
 
         return $this->render('checkout-step', [
             'current' => $code,
@@ -573,6 +590,7 @@ class CheckoutController extends FlexyController
         Cart $cart,
         CartGuard $cartGuard,
         CheckoutFacade $checkoutFacade,
+        CheckoutStockRefusal $stockRefusal,
         CheckoutStepRouteResolver $routes,
     ): Response {
         $checkoutFacade->settleVirtualDeliveryIfNeeded($cart);
@@ -585,11 +603,44 @@ class CheckoutController extends FlexyController
             $emptyCart = true;
         }
 
+        if (!$emptyCart) {
+            // This page is the cart page too: sending the buyer back to it would loop, so the refusal is told here
+            // and the cart below spells out the line.
+            $this->holdTheStockOfTheCart($cart, $checkoutFacade, $stockRefusal, $routes, false);
+        }
+
         return $this->render('checkout-onepage', [
             'emptyCart' => $emptyCart,
             'pay_step' => $routes->lastStepToSettle($cart),
             'next_step_url' => $this->generateUrl('checkout_pay'),
         ]);
+    }
+
+    /**
+     * The buyer is in the checkout: the stock of the lines is held for them, when the shop reserves its stock (the core
+     * does nothing otherwise).
+     *
+     * Never for a page fetched ahead of a click, which is no visit. A line another cart holds is a refusal told by
+     * CheckoutStockRefusal, and the buyer goes back to the cart, where the quantities are changed.
+     *
+     * @throws RedirectException a line is held by another cart (back to the cart), unless $redirects is off
+     */
+    private function holdTheStockOfTheCart(Cart $cart, CheckoutFacade $checkoutFacade, CheckoutStockRefusal $stockRefusal, CheckoutStepRouteResolver $routes, bool $redirects = true): void
+    {
+        if (PrefetchRequest::is($this->getRequest())) {
+            return;
+        }
+
+        try {
+            $checkoutFacade->holdStock($cart);
+        } catch (StockShortageException $shortage) {
+            $sentence = $stockRefusal->sentenceOf($shortage);
+            $this->addFlash('error', $sentence);
+
+            if ($redirects) {
+                throw new RedirectException($routes->pathFor(CheckoutStep::CODE_CART), Response::HTTP_FOUND, $sentence);
+            }
+        }
     }
 
     /**

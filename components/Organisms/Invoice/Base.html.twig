@@ -1,4 +1,8 @@
 <div class="{{ ('Invoice my-8 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    {% if this.stockRefusal %}
+        {# SnackBar prints its text raw: the sentence carries the reference of a product, which is the merchant's. #}
+        <twig:Molecules:SnackBar:Base variant="error" withIcon role="alert" class="mb-5" text="{{ this.stockRefusal|escape('html') }}" data-testid="checkout-stock-refusal" />
+    {% endif %}
     <div class="flex gap-2 justify-between mb-4">
         <p class="paragraph-1 font-bold text-black items-center">{{ 'Billing address'|trans }}</p>
         {% if this.invoiceAddressId and not this.showAddressList and not this.editingAddressId %}

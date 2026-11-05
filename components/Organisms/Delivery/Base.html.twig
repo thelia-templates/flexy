@@ -1,4 +1,8 @@
 <div {{ attributes.defaults(stimulus_controller('live-refresh-on-focus')) }} data-loading="addClass(opacity-50 pointer-events-none)">
+    {% if this.stockRefusal %}
+        {# SnackBar prints its text raw: the sentence carries the reference of a product, which is the merchant's. #}
+        <twig:Molecules:SnackBar:Base variant="error" withIcon role="alert" class="mb-5" text="{{ this.stockRefusal|escape('html') }}" data-testid="checkout-stock-refusal" />
+    {% endif %}
     <{{ this.headingLevel }} class="text-black h4">
         {{ 'Choose a delivery address'|trans }}
     </{{ this.headingLevel }}>

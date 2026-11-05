@@ -49,7 +49,7 @@ final class CartLinesReadTest extends IntegrationTestCase
             [$one, $four] = $this->queriesForOneAndFourLines();
 
             self::assertSame($one, $four, 'one line or four, the same queries');
-            // A cart of one line, the common one, read in one query (the combination) before: it must not cost more.
+            // A cart of one line, the common one: the combination alone, the core reads nothing the component read already.
             self::assertLessThanOrEqual(1, $one);
         } finally {
             Propel::disableInstancePooling();
