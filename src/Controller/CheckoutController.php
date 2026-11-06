@@ -29,6 +29,7 @@ use FlexyBundle\Service\PrefetchRequest;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Session\Session;
@@ -36,6 +37,7 @@ use Thelia\Core\HttpKernel\Exception\RedirectException;
 use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Cart\Exception\CartPricesChangedException;
 use Thelia\Domain\Cart\Service\CartGuard;
+use Thelia\Domain\Catalog\Stock\Exception\StockReservationRateLimitedException;
 use Thelia\Domain\Checkout\CheckoutFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
 use Thelia\Domain\Checkout\DTO\CheckoutViolation;
@@ -353,7 +355,16 @@ class CheckoutController extends FlexyController
             // means were read to apply under the old one is read again by whoever asks next.
             $paymentParts->forget();
 
-            $checkoutFacade->validateForOrder($cart);
+            try {
+                $checkoutFacade->validateForOrder($cart);
+            } catch (StockReservationRateLimitedException $rateLimited) {
+                // validateForOrder() holds the stock once more. Over the budget of holds, back to the payment step, which
+                // says how long to wait: not a shortage, and never a server error.
+                $message = $stockRefusal->sentenceOfRateLimit($rateLimited);
+                $this->flashOnce($message, $stockRefusal->stemOfRateLimit());
+
+                throw new RedirectException($routes->pathFor(CheckoutStep::CODE_PAYMENT), Response::HTTP_FOUND, $message);
+            }
 
             // validateForOrder() does not look at stock, and the core only re-checks it once the
             // order row exists — failing there leaves a dangling order and shows the visitor a raw
@@ -633,6 +644,10 @@ class CheckoutController extends FlexyController
 
         try {
             $checkoutFacade->holdStock($cart);
+        } catch (StockReservationRateLimitedException $rateLimited) {
+            // Not a shortage: the cart holds more often than a buyer does, and nothing is missing from the stock. The step
+            // is shown as it is, with how long to wait: the placement holds the stock again, and says no if it still must.
+            $this->flashOnce($stockRefusal->sentenceOfRateLimit($rateLimited), $stockRefusal->stemOfRateLimit());
         } catch (StockShortageException $shortage) {
             $sentence = $stockRefusal->sentenceOf($shortage);
             $this->addFlash('error', $sentence);
@@ -641,6 +656,25 @@ class CheckoutController extends FlexyController
                 throw new RedirectException($routes->pathFor(CheckoutStep::CODE_CART), Response::HTTP_FOUND, $sentence);
             }
         }
+    }
+
+    /**
+     * Flashes the sentence unless an error flash already says it. Told apart by the message ($stem, what precedes the delay),
+     * not by the whole sentence: the delay left differs by a second between two requests of the same buyer.
+     */
+    private function flashOnce(string $sentence, string $stem): void
+    {
+        $session = $this->getRequest()->getSession();
+
+        if ($session instanceof FlashBagAwareSessionInterface) {
+            foreach ($session->getFlashBag()->peek('error') as $flash) {
+                if (\is_string($flash) && str_starts_with($flash, $stem)) {
+                    return;
+                }
+            }
+        }
+
+        $this->addFlash('error', $sentence);
     }
 
     /**

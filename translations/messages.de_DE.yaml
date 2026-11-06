@@ -660,3 +660,6 @@ Pre-order: Vorbestellung
 "Another buyer took the same products at the same moment. Please try again.": "Ein anderer Käufer hat dieselben Produkte im selben Moment genommen. Bitte versuchen Sie es erneut."
 "%reference% is held in another cart for the moment. Please adjust your cart or try again later.": "%reference% ist im Moment in einem anderen Warenkorb reserviert. Bitte passen Sie Ihren Warenkorb an oder versuchen Sie es später erneut."
 "Some products in your cart are held in another cart for the moment. Please adjust your cart or try again later.": "Einige Produkte in Ihrem Warenkorb sind im Moment in einem anderen Warenkorb reserviert. Bitte passen Sie Ihren Warenkorb an oder versuchen Sie es später erneut."
+"Too many attempts to hold your products. Please try again in %delay%.": "Zu viele Versuche, Ihre Produkte zu reservieren. Bitte versuchen Sie es in %delay% erneut."
+"%count% second|%count% seconds": "%count% Sekunde|%count% Sekunden"
+"%count% minute|%count% minutes": "%count% Minute|%count% Minuten"

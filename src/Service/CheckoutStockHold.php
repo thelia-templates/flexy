@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Service;
 
+use Thelia\Domain\Catalog\Stock\Exception\StockReservationRateLimitedException;
 use Thelia\Domain\Checkout\CheckoutFacade;
 use Thelia\Domain\Order\Exception\StockShortageException;
 use Thelia\Model\Cart;
@@ -35,12 +36,17 @@ final readonly class CheckoutStockHold
     }
 
     /**
-     * @return string|null the sentence for the buyer when a line of the cart is held by another cart, null when the stock is held
+     * @return string|null the sentence for the buyer when a line of the cart is held by another cart or the cart holds too often, null when the stock is held
      */
     public function extend(Cart $cart): ?string
     {
         try {
             $this->checkoutFacade->holdStock($cart);
+        } catch (StockReservationRateLimitedException $rateLimited) {
+            // Not a shortage: the cart holds more often than a buyer does. The live response stays a 200 carrying the message:
+            // a non-2xx answer would not redraw the component, so the buyer would never read how long to wait. The 429 with
+            // Retry-After is kept for the API and the express checkout, which answer to a client and not to a page.
+            return $this->stockRefusal->sentenceOfRateLimit($rateLimited);
         } catch (StockShortageException $shortage) {
             return $this->stockRefusal->sentenceOf($shortage);
         }
