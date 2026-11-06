@@ -248,7 +248,7 @@ class CustomerController extends FlexyController
                 return $this->generateRedirect($this->generateUrl('customer_register'));
             }
 
-            if ($formValidated->get('newsletter')->getData()) {
+            if ($formValidated->has('newsletter') && $formValidated->get('newsletter')->getData()) {
                 $newsletterProcessor->subscribe($customer);
             }
 

@@ -29,6 +29,7 @@ use Symfonycasts\DynamicForms\DynamicFormBuilder;
 use Thelia\Domain\Customer\Service\CustomerTitleService;
 use Thelia\Domain\Localization\Service\CountryService;
 use Thelia\Form\AddressCreateForm;
+use Thelia\Model\ConfigQuery;
 
 class CustomerInformationsForm extends AddressCreateForm
 {
@@ -91,17 +92,24 @@ class CustomerInformationsForm extends AddressCreateForm
                 'for' => 'cellphone',
             ],
             'required' => true,
-        ])->add(
-            'newsletter',
-            CheckboxType::class,
-            [
-                'required' => false,
-                'label' => $this->translation->trans('I agree to receive promotional offers by newsletter'),
-                'label_attr' => [
-                    'for' => 'newsletter',
-                ],
-            ]
-        )->add(
+        ]);
+
+        // The shop switched the newsletter off: no box, so nothing is offered or submitted.
+        if (ConfigQuery::isNewsletterEnabled()) {
+            $this->formBuilder->add(
+                'newsletter',
+                CheckboxType::class,
+                [
+                    'required' => false,
+                    'label' => $this->translation->trans('I agree to receive promotional offers by newsletter'),
+                    'label_attr' => [
+                        'for' => 'newsletter',
+                    ],
+                ]
+            );
+        }
+
+        $this->formBuilder->add(
             'accept_privacy_policy',
             CheckboxType::class,
             [
