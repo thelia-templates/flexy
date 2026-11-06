@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Organisms\Delivery;
 
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\CheckoutStockHold;
 use FlexyBundle\Service\DeliveryAddressCopy;
 use FlexyBundle\Service\DeliveryDateBridge;
 use FlexyBundle\Service\DeliveryEstimate;
@@ -95,6 +96,12 @@ class Base
     #[LiveProp]
     public array $restrictedProducts = [];
 
+    /**
+     * Said when the line another cart holds keeps the stock from being held for this buyer after their choice. Not live
+     * state: it is read by the render that follows the choice.
+     */
+    public ?string $stockRefusal = null;
+
     public function __construct(
         private readonly Session $session,
         private readonly ShippingFacade $shippingFacade,
@@ -106,6 +113,7 @@ class Base
         private readonly DeliveryDateBridge $deliveryDates,
         private readonly DeliveryAddressCopy $deliveryAddressCopy,
         private readonly PriceDisplay $priceDisplay,
+        private readonly CheckoutStockHold $stockHold,
     ) {
     }
 
@@ -125,7 +133,7 @@ class Base
             $defaultAddress = reset($defaultAddresses);
 
             if (false !== $defaultAddress) {
-                $this->selectDeliveryAddress($defaultAddress['id']);
+                $this->applyDeliveryAddress($defaultAddress['id']);
             }
         }
 
@@ -340,6 +348,8 @@ class Base
             $this->shippingFacade->setCustomerDefaultDeliveryAddress($this->cartFacade->getOrCreateFromSession());
         }
 
+        $this->stockRefusal = $this->stockHold->extend($this->cartFacade->getOrCreateFromSession());
+
         $this->emit(CheckoutEvents::DELIVERY_MODULE_OPTION_SAVED);
         $this->emit('syncSummary');
         $this->emit('updateNextButton');
@@ -347,6 +357,12 @@ class Base
 
     #[LiveListener(CheckoutEvents::SET_DELIVERY_ORDER_ADDRESS_ID)]
     public function selectDeliveryAddress(#[LiveArg] int $addressId): void
+    {
+        $this->applyDeliveryAddress($addressId);
+        $this->stockRefusal = $this->stockHold->extend($this->cartFacade->getOrCreateFromSession());
+    }
+
+    private function applyDeliveryAddress(int $addressId): void
     {
         $this->guestCheckoutGate->assertVisible($addressId);
 
@@ -434,6 +450,7 @@ class Base
             invoiceAddressId: $addressId,
         ));
         $this->invoiceAddressId = $this->cartFacade->getInvoiceAddressId();
+        $this->stockRefusal = $this->stockHold->extend($this->cartFacade->getOrCreateFromSession());
 
         $this->emit('syncSummary');
     }

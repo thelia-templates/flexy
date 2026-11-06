@@ -18,62 +18,62 @@ use FlexyBundle\DTO\CartItemDto;
 use Thelia\Domain\Cart\Bundle\CartLineAvailability;
 use Thelia\Domain\Catalog\Bundle\BundleComposition;
 use Thelia\Domain\Catalog\Bundle\Exception\InvalidBundleCompositionException;
+use Thelia\Domain\Catalog\Stock\SellableStock;
 use Thelia\Model\Cart;
 use Thelia\Model\CartItem;
-use Thelia\Model\ConfigQuery;
 use Thelia\Model\ProductSaleElements;
 
 /**
+ * What the shop may still sell of a line is the answer of the core (the stock and what the sale mode allows
+ * below zero, less what other carts reserve): the theme holds no stock rule of its own, it reads the answer.
+ *
  * The core only re-checks stock when the order changes status, i.e. once the order row already
  * exists, and it reports the shortage as a raw developer string (`Thelia\Action\Order`). Reading
- * the same rule up front lets the checkout stop before that point.
+ * the same answer up front lets the checkout stop before that point.
  */
 final readonly class CartStockService
 {
     /**
-     * Optional: a core without the bundles has no such service, and has no bundle line either.
+     * Optional: a core without the bundles has no line service, and has no bundle line either.
      */
     public function __construct(
         private ?CartLineAvailability $lineAvailability = null,
+        private ?SellableStock $sellableStock = null,
     ) {
     }
 
-    public function isStockManaged(ProductSaleElements $pse): bool
-    {
-        return ConfigQuery::checkAvailableStock() && 0 === $pse->getProduct()->getVirtual();
-    }
-
     /**
-     * How many units of a line the shop can supply, and whether it enforces that number.
-     *
-     * A line of a bundle is supplied by its components, never by the stock of its own sale element
-     * (which stays at zero and would read as « out of stock » on every bundle): the core answers for it
-     * (CartLineAvailability), from the composition the line holds. A bundle of virtual components only
-     * has no limit to enforce.
-     *
-     * @return array{stock: int, managed: bool}
+     * @return array{stock: int, managed: bool, preorder: bool}
      */
     public function stockOf(CartItem $line, ProductSaleElements $pse): array
     {
-        return $this->stocksOf([[$line, $pse]])[0];
+        return $this->stocksOf([[$line, $pse]], $line->getCart())[0];
     }
 
     /**
-     * The same answer for many lines, the bundle lines of the cart read in one pass by the core
-     * (a composition shared by two lines is asked once, a cart without bundle asks nothing).
+     * What the shop can supply of each line, and whether it enforces that number, with the verdict of the
+     * core on whether the line is sold below zero stock.
+     *
+     * The lines that are not a bundle are read in one pass for the whole cart (SellableStock::forCart: a
+     * count of queries that does not grow with the lines). A line of a bundle is supplied by its components,
+     * never by the stock of its own sale element (which stays at zero and would read as « out of stock » on
+     * every bundle): the core answers for it (CartLineAvailability), from the composition the line holds, a
+     * composition shared by two lines asked once. A bundle of virtual components only has no limit to enforce.
      *
      * @param array<int|string, array{0: CartItem, 1: ProductSaleElements}> $lines the line and its sale element, by a key of the caller's
+     * @param Cart|null                                                     $cart  the cart the lines belong to, whose own reservation is not held against it
      *
-     * @return array<int|string, array{stock: int, managed: bool}> by the same keys
+     * @return array<int|string, array{stock: int, managed: bool, preorder: bool}> by the same keys
      */
-    public function stocksOf(array $lines): array
+    public function stocksOf(array $lines, ?Cart $cart = null): array
     {
         $answers = [];
         $bundleLines = [];
+        $plainLines = [];
 
         foreach ($lines as $key => [$line, $pse]) {
             if (!method_exists($line, 'getBundleCompositionValue')) {
-                $answers[$key] = $this->stockFor($pse, null);
+                $plainLines[$key] = [$line, $pse];
 
                 continue;
             }
@@ -82,13 +82,13 @@ final readonly class CartStockService
                 $composition = $line->getBundleCompositionValue();
             } catch (InvalidBundleCompositionException) {
                 // A composition nobody can read is a line nobody can fill.
-                $answers[$key] = ['stock' => 0, 'managed' => true];
+                $answers[$key] = ['stock' => 0, 'managed' => true, 'preorder' => false];
 
                 continue;
             }
 
             if (null === $composition || null === $this->lineAvailability) {
-                $answers[$key] = $this->stockFor($pse, null);
+                $plainLines[$key] = [$line, $pse];
 
                 continue;
             }
@@ -97,8 +97,22 @@ final readonly class CartStockService
         }
 
         if ([] !== $bundleLines) {
-            foreach ($this->lineAvailability->forBundleLines($bundleLines) as $key => $available) {
-                $answers[$key] = $this->answerFor($lines[$key][1], $available);
+            foreach ($this->lineAvailability?->forBundleLines($bundleLines) ?? [] as $key => $available) {
+                $answers[$key] = $this->answerFor($available, false);
+            }
+        }
+
+        if ([] !== $plainLines) {
+            $cart ??= $plainLines[array_key_first($plainLines)][0]->getCart();
+            // Absent from the answer: nothing to enforce (the shop does not check the stock).
+            // The sale elements of the lines are read already: the core does not read them again.
+            $read = $this->sellableStock?->forCart($cart, $this->saleElementsOf($plainLines)) ?? [];
+
+            foreach ($plainLines as $key => [$line, $pse]) {
+                $answer = $read[(int) $line->getId()] ?? null;
+                $answers[$key] = null === $answer
+                    ? $this->answerFor(CartLineAvailability::UNLIMITED, false)
+                    : $this->answerFor($answer['available'] ?? CartLineAvailability::UNLIMITED, $answer['preorder']);
             }
         }
 
@@ -106,31 +120,47 @@ final readonly class CartStockService
     }
 
     /**
-     * The same answer for a composition not on a line yet (a line being put back in the cart).
+     * @param array<int|string, array{0: CartItem, 1: ProductSaleElements}> $lines
      *
-     * @return array{stock: int, managed: bool}
+     * @return array<int, ProductSaleElements> by id
      */
-    public function stockFor(ProductSaleElements $pse, ?BundleComposition $composition): array
+    private function saleElementsOf(array $lines): array
     {
-        $managed = $this->isStockManaged($pse);
+        $saleElements = [];
 
-        if (null === $this->lineAvailability || null === $composition) {
-            return ['stock' => (int) $pse->getQuantity(), 'managed' => $managed];
+        foreach ($lines as [, $pse]) {
+            $saleElements[(int) $pse->getId()] = $pse;
         }
 
-        return $this->answerFor($pse, $this->lineAvailability->forLine($pse, $composition));
+        return $saleElements;
     }
 
     /**
-     * @return array{stock: int, managed: bool}
+     * The same answer for a composition not on a line yet (a line being put back in the cart).
+     *
+     * @param Cart|null $cart the cart asking, whose own reservation is not held against it
+     *
+     * @return array{stock: int, managed: bool, preorder: bool}
      */
-    private function answerFor(ProductSaleElements $pse, float $available): array
+    public function stockFor(ProductSaleElements $pse, ?BundleComposition $composition, ?Cart $cart = null): array
     {
-        if ($available >= CartLineAvailability::UNLIMITED) {
-            return ['stock' => \PHP_INT_MAX, 'managed' => false];
+        if (null === $this->lineAvailability) {
+            return $this->answerFor(CartLineAvailability::UNLIMITED, false);
         }
 
-        return ['stock' => (int) floor($available), 'managed' => $this->isStockManaged($pse)];
+        return $this->answerFor($this->lineAvailability->forLine($pse, $composition, $cart), false);
+    }
+
+    /**
+     * @return array{stock: int, managed: bool, preorder: bool}
+     */
+    private function answerFor(float $available, bool $preorder): array
+    {
+        if ($available >= CartLineAvailability::UNLIMITED) {
+            return ['stock' => \PHP_INT_MAX, 'managed' => false, 'preorder' => $preorder];
+        }
+
+        return ['stock' => (int) floor($available), 'managed' => true, 'preorder' => $preorder];
     }
 
     /**
@@ -160,7 +190,7 @@ final readonly class CartStockService
             }
         }
 
-        foreach ($this->stocksOf($lines) as $id => ['stock' => $stock, 'managed' => $managed]) {
+        foreach ($this->stocksOf($lines, $cart) as $id => ['stock' => $stock, 'managed' => $managed]) {
             if ($managed && $lines[$id][0]->getQuantity() > $stock) {
                 return true;
             }

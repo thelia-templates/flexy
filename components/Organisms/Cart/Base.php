@@ -166,7 +166,7 @@ class Base
                 $stockedLines[(int) $cartItemModel->getId()] = [$cartItemModel, $pse];
             }
         }
-        $stocks = $this->cartStockService->stocksOf($stockedLines);
+        $stocks = $this->cartStockService->stocksOf($stockedLines, $cart);
 
         foreach ($lines as $cartItemModel) {
             $item = $cartItemModel->toArray(TableMap::TYPE_CAMELNAME, true, [], true);
@@ -176,7 +176,8 @@ class Base
                 continue;
             }
 
-            ['stock' => $stock, 'managed' => $stockManaged] = $stocks[(int) $item['id']];
+            ['stock' => $stock, 'managed' => $stockManaged, 'preorder' => $isPreorder] = $stocks[(int) $item['id']];
+            $restockDate = $isPreorder ? $pse->getRestockDate('Y-m-d') : null;
 
             $cartItem = CartItemDto::fromArray([
                 ...$item,
@@ -186,6 +187,8 @@ class Base
                 'product' => null,
                 'stock' => $stock,
                 'stockManaged' => $stockManaged,
+                'isPreorder' => $isPreorder,
+                'restockDate' => $restockDate,
                 'bundleComponents' => $bundleComponents[(int) $item['id']] ?? [],
                 'bundleOrderable' => !isset($unorderableBundles[(int) $item['id']]),
                 'bundleRefusal' => $unorderableBundles[(int) $item['id']] ?? '',
@@ -653,7 +656,10 @@ class Base
             return $managed && $stock < $quantity;
         }
 
-        return 0 === $productSaleElements->getProduct()->getVirtual() && $productSaleElements->getQuantity() < $quantity;
+        // The number the core publishes for the line (its sale mode included), for the cart of the visitor.
+        ['stock' => $stock, 'managed' => $managed] = $this->cartStockService->stockFor($productSaleElements, null, $this->cartFacade->getCartFromSession());
+
+        return $managed && $stock < $quantity;
     }
 
     /**

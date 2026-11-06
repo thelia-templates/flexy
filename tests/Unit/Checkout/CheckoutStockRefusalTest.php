@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Translation\IdentityTranslator;
 use Thelia\Core\Translation\Translator;
+use Thelia\Domain\Catalog\Stock\Exception\StockReservationRateLimitedException;
 use Thelia\Domain\Order\Exception\StockShortageException;
 
 /**
@@ -63,5 +64,27 @@ final class CheckoutStockRefusalTest extends TestCase
 
         self::assertStringNotContainsString('Not enough stock', (string) $redirect->getMessage());
         self::assertStringNotContainsString('Not enough stock', implode('', $session->getFlashBag()->get('error')));
+    }
+
+    /**
+     * @return iterable<string, array{int, string}>
+     */
+    public static function delaysToWait(): iterable
+    {
+        yield 'one second' => [1, '1 second'];
+        yield 'some seconds' => [42, '42 seconds'];
+        yield 'just under a minute' => [59, '59 seconds'];
+        yield 'a minute' => [60, '1 minute'];
+        yield 'rounded up to the next minute' => [61, '2 minutes'];
+        yield 'the whole hour' => [3601, '61 minutes'];
+        yield 'a null delay is one second' => [0, '1 second'];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('delaysToWait')]
+    public function testTheBuyerIsToldHowLongToWaitAndNeverThatAProductRanOut(int $seconds, string $delay): void
+    {
+        $sentence = (new CheckoutStockRefusal(new IdentityTranslator()))->sentenceOfRateLimit(new StockReservationRateLimitedException($seconds));
+
+        self::assertSame('Too many attempts to hold your products. Please try again in '.$delay.'.', $sentence);
     }
 }

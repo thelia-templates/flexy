@@ -16,6 +16,7 @@ namespace FlexyBundle\Components\Organisms\Payment;
 
 use FlexyBundle\DTO\PaymentPartsView;
 use FlexyBundle\Event\CheckoutEvents;
+use FlexyBundle\Service\CheckoutStockHold;
 use FlexyBundle\Service\InstantPaymentParts;
 use FlexyBundle\Service\PaymentOptionChoice;
 use FlexyBundle\Service\PaymentOptionChoiceStore;
@@ -90,6 +91,9 @@ class Base
      */
     public ?string $notice = null;
 
+    /** Said when the line another cart holds keeps the stock from being held for this buyer after their choice. */
+    public ?string $stockRefusal = null;
+
     /** @var array<array-key, array<string, mixed>>|null */
     private ?array $modules = null;
 
@@ -104,6 +108,7 @@ class Base
         private readonly ContentSlotService $contentSlotService,
         private readonly PaymentOptionChoiceStore $paymentOptionChoiceStore,
         private readonly InstantPaymentParts $instantPaymentParts,
+        private readonly CheckoutStockHold $stockHold,
     ) {
     }
 
@@ -244,6 +249,7 @@ class Base
         }
 
         $this->refillFromTheCart();
+        $this->stockRefusal = $this->stockHold->extend($this->cartFacade->getOrCreateFromSession());
         $this->emit('updateNextButton');
     }
 
@@ -452,6 +458,8 @@ class Base
             $this->paymentOptionChoiceStore->replace([]);
             $this->paymentOptionChoices = [];
         }
+
+        $this->stockRefusal = $this->stockHold->extend($cart);
 
         $this->emit('updateNextButton');
     }

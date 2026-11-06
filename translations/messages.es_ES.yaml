@@ -224,3 +224,13 @@ Total incl. tax to pay: Total con IVA a pagar
 # Checkout: the core refused the payment because a price moved since the cart was read
 The prices of your cart have changed. Check your cart before paying.: Los precios de su carrito han cambiado. Revise su carrito antes de pagar.
 This order is now in your customer account. Please sign in to see it.: Este pedido ya está en su cuenta de cliente. Inicie sesión para verlo.
+Pre-order: Preventa
+'Restock expected on %date%': 'Reposición prevista el %date%'
+
+# Hold of the stock refused at the checkout (Service/CheckoutStockRefusal)
+"Another buyer took the same products at the same moment. Please try again.": "Otro comprador ha cogido los mismos productos en el mismo momento. Inténtelo de nuevo."
+"%reference% is held in another cart for the moment. Please adjust your cart or try again later.": "%reference% está reservado en otro carrito por el momento. Ajuste su carrito o inténtelo de nuevo más tarde."
+"Some products in your cart are held in another cart for the moment. Please adjust your cart or try again later.": "Algunos productos de su carrito están reservados en otro carrito por el momento. Ajuste su carrito o inténtelo de nuevo más tarde."
+"Too many attempts to hold your products. Please try again in %delay%.": "Demasiados intentos de reservar sus productos. Inténtelo de nuevo dentro de %delay%."
+"%count% second|%count% seconds": "%count% segundo|%count% segundos"
+"%count% minute|%count% minutes": "%count% minuto|%count% minutos"

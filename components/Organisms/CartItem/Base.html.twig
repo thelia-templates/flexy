@@ -70,6 +70,16 @@
                         class="mb-1"
                     />
                 {% endif %}
+                {% if this.cartItem.isPreorder %}
+                    <twig:Molecules:Tag:Stock
+                        color="preorder"
+                        customText="{{ 'Pre-order'|trans }}"
+                        class="mb-1"
+                    />
+                    {% if this.cartItem.restockDate %}
+                        <p class="CartItem-restock paragraph-6">{{ 'Restock expected on %date%'|trans({'%date%': this.cartItem.restockDate|format_date('long', locale: lang_code)}) }}</p>
+                    {% endif %}
+                {% endif %}
                 <div class="CartItem-orderInfos paragraph-6">
                     {# Merchant wording and a count glued to a word: each fragment is isolated
                        so its colons, commas and figures stay where its own language puts them. #}

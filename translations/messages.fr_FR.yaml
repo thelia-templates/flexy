@@ -686,3 +686,13 @@ Skip to content: Aller au contenu
 'Another order took the same products at the same moment. Please try again.': 'Une autre commande a pris les mêmes produits au même moment. Veuillez réessayer.'
 # Checkout: the core refused the payment because a price moved since the cart was read
 The prices of your cart have changed. Check your cart before paying.: Les prix de votre panier ont changé. Vérifiez votre panier avant de payer.
+Pre-order: Précommande
+'Restock expected on %date%': 'Réassort prévu le %date%'
+
+# Hold of the stock refused at the checkout (Service/CheckoutStockRefusal)
+"Another buyer took the same products at the same moment. Please try again.": "Un autre acheteur a pris les mêmes produits au même moment. Veuillez réessayer."
+"%reference% is held in another cart for the moment. Please adjust your cart or try again later.": "%reference% est retenu dans un autre panier pour le moment. Veuillez ajuster votre panier ou réessayer plus tard."
+"Some products in your cart are held in another cart for the moment. Please adjust your cart or try again later.": "Certains produits de votre panier sont retenus dans un autre panier pour le moment. Veuillez ajuster votre panier ou réessayer plus tard."
+"Too many attempts to hold your products. Please try again in %delay%.": "Trop de tentatives pour réserver vos produits. Veuillez réessayer dans %delay%."
+"%count% second|%count% seconds": "%count% seconde|%count% secondes"
+"%count% minute|%count% minutes": "%count% minute|%count% minutes"

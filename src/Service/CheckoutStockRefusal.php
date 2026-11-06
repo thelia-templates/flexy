@@ -18,6 +18,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Thelia\Core\HttpKernel\Exception\RedirectException;
+use Thelia\Domain\Catalog\Stock\Exception\StockReservationConflictException;
+use Thelia\Domain\Catalog\Stock\Exception\StockReservationRateLimitedException;
+use Thelia\Domain\Catalog\Stock\Exception\StockReservationRefusedException;
 use Thelia\Domain\Order\Exception\StockShortageException;
 
 /**
@@ -36,11 +39,59 @@ final readonly class CheckoutStockRefusal
     ) {
     }
 
+    /**
+     * The sentence for the buyer, in the language of the page: what the refusal of a hold says (a line another cart holds,
+     * a tie the database broke) is not what a placement that ran out of stock says.
+     */
+    public function sentenceOf(StockShortageException $shortage): string
+    {
+        if ($shortage instanceof StockReservationConflictException) {
+            return $this->translator->trans('Another buyer took the same products at the same moment. Please try again.');
+        }
+
+        $hasReference = null !== $shortage->productReference && '' !== $shortage->productReference;
+
+        if ($shortage instanceof StockReservationRefusedException) {
+            return $hasReference
+                ? $this->translator->trans('%reference% is held in another cart for the moment. Please adjust your cart or try again later.', ['%reference%' => $shortage->productReference])
+                : $this->translator->trans('Some products in your cart are held in another cart for the moment. Please adjust your cart or try again later.');
+        }
+
+        return $hasReference
+            ? $this->translator->trans('The stock of %reference% ran out while your order was placed. Please adjust your cart.', ['%reference%' => $shortage->productReference])
+            : $this->translator->trans('Some products in your cart are no longer available in the requested quantity. Please adjust the quantities before ordering.');
+    }
+
+    /**
+     * The sentence for a cart, or the address it comes from, that holds the stock more often than a buyer does: nothing is
+     * missing from the stock, so it never says a product ran out, and it names the delay to wait.
+     */
+    public function sentenceOfRateLimit(StockReservationRateLimitedException $rateLimited): string
+    {
+        $seconds = max(1, $rateLimited->retryAfterSeconds);
+
+        $delay = $seconds < 60
+            ? $this->translator->trans('%count% second|%count% seconds', ['%count%' => $seconds])
+            : $this->translator->trans('%count% minute|%count% minutes', ['%count%' => (int) ceil($seconds / 60)]);
+
+        return $this->translator->trans('Too many attempts to hold your products. Please try again in %delay%.', ['%delay%' => $delay]);
+    }
+
+    /**
+     * What the sentence of a rate limit says before its delay: the same for every delay, so a flash can be told apart by
+     * its message and not by the seconds left, which change between two requests.
+     */
+    public function stemOfRateLimit(): string
+    {
+        $sentence = $this->translator->trans('Too many attempts to hold your products. Please try again in %delay%.', ['%delay%' => "\0"]);
+        $stem = explode("\0", $sentence)[0];
+
+        return '' === $stem ? $sentence : $stem;
+    }
+
     public function answer(StockShortageException $shortage, string $cartPath, ?object $session): RedirectException
     {
-        $sentence = null === $shortage->productReference || '' === $shortage->productReference
-            ? $this->translator->trans('Some products in your cart are no longer available in the requested quantity. Please adjust the quantities before ordering.')
-            : $this->translator->trans('The stock of %reference% ran out while your order was placed. Please adjust your cart.', ['%reference%' => $shortage->productReference]);
+        $sentence = $this->sentenceOf($shortage);
 
         if ($session instanceof FlashBagAwareSessionInterface) {
             $session->getFlashBag()->add('error', $sentence);

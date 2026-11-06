@@ -267,6 +267,7 @@ final class ProductDetailsBundleTest extends IntegrationTestCase
         }
         $component = $this->component($example);
         $component->currentPse['quantity'] = 2147483647;
+        $component->currentPse['availableQuantity'] = 2147483647.0;
 
         self::assertFalse($component->isStockManaged());
         self::assertSame(\PHP_INT_MAX, $component->getRemainingStock());
