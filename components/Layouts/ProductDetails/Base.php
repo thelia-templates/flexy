@@ -14,11 +14,14 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Layouts\ProductDetails;
 
+use FlexyBundle\DTO\QuantityRuleDTO;
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Service\BundleProductReader;
 use FlexyBundle\Service\BundleSelectionService;
+use FlexyBundle\Service\CartQuantity;
 use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\RunningSaleResolver;
+use FlexyBundle\Service\SaleElementQuantityRules;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -214,6 +217,8 @@ class Base
         private readonly ?BundleProductReader $bundleReader = null,
         private readonly ?BundleSelectionService $bundleSelectionService = null,
         private readonly ?ProductImageResolver $productImageResolver = null,
+        // Optional for the same reason: a unit test builds this component by hand, and the sheet then sells one at a time.
+        private readonly ?SaleElementQuantityRules $quantityRules = null,
     ) {
     }
 
@@ -330,13 +335,25 @@ class Base
         return ConfigQuery::checkAvailableStock();
     }
 
-    public function getRemainingStock(): int
+    /**
+     * In the unit the sale element is sold in, decimals included: a stock of 7.5 kilograms with
+     * 1.25 in the cart leaves 6.25.
+     */
+    public function getRemainingStock(): int|float
     {
         if (!$this->isStockManaged()) {
             return \PHP_INT_MAX;
         }
 
-        return max(0, (int) ($this->currentPse['quantity'] ?? 0) - $this->getCartQuantityForCurrentPse());
+        $remaining = (float) ($this->currentPse['quantity'] ?? 0) - $this->getCartQuantityForCurrentPse();
+
+        // A quantity sold by the unit leaves a whole number, unless stock left holds a fraction of one.
+        if (0 === $this->getQuantityRule()->decimals && floor($remaining) === $remaining) {
+            return max(0, (int) $remaining);
+        }
+
+        // Rounded at the micro unit, the precision of the columns: 7.5 - 1.25 is no 6.2499999.
+        return max(0.0, round($remaining, 6));
     }
 
     public function getPromoRate(): float
@@ -352,15 +369,50 @@ class Base
         return -(($price - $promoPrice) / $price);
     }
 
+    /**
+     * Nothing more can be added once the stock left is below the smallest quantity sold: with
+     * lots of six, a stock of four left buys nothing.
+     */
     public function isMaxQuantityReached(): bool
     {
         if (!$this->isStockManaged()) {
             return false;
         }
 
-        $stock = (int) ($this->currentPse['quantity'] ?? 0);
+        $stock = (float) ($this->currentPse['quantity'] ?? 0);
 
-        return $stock > 0 && $this->getRemainingStock() <= 0;
+        return $stock > 0 && null === $this->getQuantityRule()->largestValidQuantityUpTo($this->getRemainingStock());
+    }
+
+    /**
+     * The stock cannot fill even the smallest quantity sold while nothing of the sale element is
+     * in the cart yet: a shortage, which is not the maximum "already in the cart".
+     */
+    public function isStockBelowSmallestQuantity(): bool
+    {
+        return $this->isMaxQuantityReached() && 0.0 === $this->getCartQuantityForCurrentPse();
+    }
+
+    /**
+     * The quantities a lot sold by a whole step above one can be bought in, up to the stock left:
+     * the selector lists them rather than letting the shopper type one the cart would refuse.
+     * Empty for a quantity that is typed.
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    #[ExposeInTemplate('quantityChoices')]
+    public function getQuantityChoices(): array
+    {
+        $rule = $this->getQuantityRule();
+
+        if (!$rule->offersAList()) {
+            return [];
+        }
+
+        return array_map(
+            static fn (float $quantity): array => ['value' => $rule->inputValue($quantity), 'label' => $rule->inputValue($quantity)],
+            $rule->validQuantitiesUpTo($this->getRemainingStock()),
+        );
     }
 
     /**
@@ -595,11 +647,15 @@ class Base
     {
         // Clamp the requested quantity to the remaining stock before validation, so a manually
         // typed value above the stock cannot trigger a 422. getRemainingStock() returns
-        // PHP_INT_MAX when stock is not managed.
+        // PHP_INT_MAX when stock is not managed. Clamped to the last quantity the rule accepts
+        // under the stock, not to the stock itself: seven left of a lot of six is six, not a
+        // seven the cart would refuse.
         $remainingStock = $this->getRemainingStock();
+        $requested = CartQuantity::typed($this->formValues['quantity'] ?? 1);
 
-        if ($remainingStock > 0 && (int) ($this->formValues['quantity'] ?? 1) > $remainingStock) {
-            $this->formValues['quantity'] = $remainingStock;
+        if ($remainingStock > 0 && null !== $requested && $requested > $remainingStock) {
+            $rule = $this->getQuantityRule();
+            $this->formValues['quantity'] = $rule->inputValue($rule->largestValidQuantityUpTo($remainingStock) ?? $remainingStock);
         }
 
         $this->submitForm();
@@ -630,7 +686,7 @@ class Base
                     'cart' => $this->cartFacade->getOrCreateFromSession(),
                     'productId' => (int) $formData['product'],
                     'productSaleElementId' => (int) $formData['product_sale_elements_id'],
-                    'quantity' => (int) $formData['quantity'],
+                    'quantity' => CartQuantity::forTheCart((float) $formData['quantity']),
                     'append' => (bool) $formData['append'],
                     'newness' => (bool) $formData['newness'],
                     ...$bundleArguments,
@@ -647,12 +703,12 @@ class Base
         $this->emit(CheckoutEvents::ADD_ITEM_EVENT);
 
         // What the line gained, not what the form asked for: with `append` off the form's quantity replaces the one the line had.
-        $difference = (int) $cartItem->getQuantity() - ($quantitiesBefore[(int) $cartItem->getId()] ?? 0);
+        $difference = round((float) $cartItem->getQuantity() - ($quantitiesBefore[(int) $cartItem->getId()] ?? 0.0), 6);
 
-        if (0 !== $difference) {
+        if (0.0 !== $difference) {
             $this->dispatchBrowserEvent(
                 $difference > 0 ? CheckoutEvents::BROWSER_ADD_PSE : CheckoutEvents::BROWSER_REMOVE_PSE,
-                ['pse' => (int) $formData['product_sale_elements_id'], 'quantity' => abs($difference)],
+                ['pse' => (int) $formData['product_sale_elements_id'], 'quantity' => CartQuantity::wholeWhenWhole(abs($difference))],
             );
         }
     }
@@ -662,21 +718,64 @@ class Base
         return $this->formService->getFormByName(FrontForm::CART_ADD, [
             'product' => $this->productId,
             'product_sale_elements_id' => $this->currentPse['id'] ?? null,
-            'quantity' => 1,
+            // The selector starts at the smallest quantity sold, the minimum rounded up to the step.
+            'quantity' => $this->getQuantityRule()->inputValue($this->getQuantityRule()->smallestQuantity()),
             'append' => 1,
             'newness' => 0,
         ]);
     }
 
     /**
+     * The quantities the selected sale element is sold in: its minimum, its step, its decimals
+     * and its unit. Read off currentPse, which carries them from getPses().
+     */
+    public function getQuantityRule(): QuantityRuleDTO
+    {
+        return QuantityRuleDTO::fromArray($this->currentPse ?? []);
+    }
+
+    /**
+     * The quantity in the field, written with the decimals of the rule in the language of the
+     * page ("0,50" on a French page for half a kilogram): the stepper's controller writes it the
+     * same way after each press, where the form wrote "0,5" and the controller then "0,75".
+     * Something that is no quantity is shown as the shopper typed it, for the form to refuse.
+     */
+    public function getQuantityFieldValue(): string
+    {
+        $typed = $this->formValues['quantity'] ?? null;
+        $quantity = CartQuantity::typed($typed);
+
+        if (null === $quantity) {
+            return \is_scalar($typed) ? (string) $typed : '';
+        }
+
+        return $this->getQuantityRule()->fieldValue($quantity, $this->langService?->getLocale());
+    }
+
+    /**
+     * Each sale element carries its quantity rule under the keys of the front API, so that the
+     * rule travels with currentPse and needs no read of its own on a re-render. A key the core
+     * payload already has is left as the core gave it.
+     *
      * @return array<int, array<string, mixed>>
      */
     private function getPses(): array
     {
-        return $this->pses ??= json_decode(
+        if (null !== $this->pses) {
+            return $this->pses;
+        }
+
+        $pses = json_decode(
             $this->pseAccessService->psesByProduct($this->productId) ?: '[]',
             true,
         ) ?? [];
+        $rules = $this->quantityRules?->ofProduct($this->productId) ?? [];
+
+        foreach ($pses as $index => $pse) {
+            $pses[$index] += $rules[(int) ($pse['id'] ?? 0)] ?? [];
+        }
+
+        return $this->pses = $pses;
     }
 
     private function selectPse(?array $pse): void
@@ -687,9 +786,19 @@ class Base
             return;
         }
 
+        $previousRule = $this->getQuantityRule();
         $this->currentPse = $pse;
         $this->currentCombination = $pse['combination'] ?? [];
         $this->formValues['product_sale_elements_id'] = $pse['id'];
+
+        // The rule lives on the sale element: the quantity typed for a bottle means nothing for
+        // a case of six, and the selector starts again at the smallest quantity of the new one.
+        // Between two sale elements sold alike the quantity typed is kept.
+        $rule = $this->getQuantityRule();
+
+        if ($rule != $previousRule) {
+            $this->formValues['quantity'] = $rule->inputValue($rule->smallestQuantity());
+        }
     }
 
     private function isAvailableAttrValue(array $variant): bool
@@ -718,37 +827,37 @@ class Base
     /**
      * The quantity of each line of the session's cart, by line id (none when there is no cart yet).
      *
-     * @return array<int, int>
+     * @return array<int, float>
      */
     private function quantitiesInCart(): array
     {
         $quantities = [];
 
         foreach ($this->cartFacade->getCartFromSession()?->getCartItems() ?? [] as $cartItem) {
-            $quantities[(int) $cartItem->getId()] = (int) $cartItem->getQuantity();
+            $quantities[(int) $cartItem->getId()] = (float) $cartItem->getQuantity();
         }
 
         return $quantities;
     }
 
-    private function getCartQuantityForCurrentPse(): int
+    private function getCartQuantityForCurrentPse(): float
     {
         if ($this->currentPse === null) {
-            return 0;
+            return 0.0;
         }
 
         $cart = $this->cartFacade->getCartFromSession();
 
         if ($cart === null) {
-            return 0;
+            return 0.0;
         }
 
         $pseId = (int) $this->currentPse['id'];
-        $quantity = 0;
+        $quantity = 0.0;
 
         foreach ($cart->getCartItems() as $cartItem) {
             if ($cartItem->getProductSaleElementsId() === $pseId) {
-                $quantity += (int) $cartItem->getQuantity();
+                $quantity += (float) $cartItem->getQuantity();
             }
         }
 

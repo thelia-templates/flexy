@@ -17,6 +17,7 @@ namespace FlexyBundle\Components\Organisms\ProductCard;
 use FlexyBundle\DTO\DisplayedPrice;
 use FlexyBundle\DTO\ProductDTO;
 use FlexyBundle\DTO\ProductSaleElementDTO;
+use FlexyBundle\DTO\QuantityRuleDTO;
 use FlexyBundle\Service\PriceDisplay;
 use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\RunningSaleResolver;
@@ -42,6 +43,8 @@ class Base extends AbstractProductCard
     private bool $isPromo = false;
     private bool $displayInitialPrice = true;
     private bool $isNew = false;
+    /** The rule of the default sale element: it says what the reference price is per. */
+    private ?QuantityRuleDTO $quantityRule = null;
 
     /** @var RunningSaleResolver::forProduct()'s return type */
     private ?array $runningSaleTag = null;
@@ -89,6 +92,7 @@ class Base extends AbstractProductCard
             $this->isPromo = $defaultPse->promo;
             $this->displayInitialPrice = $defaultPse->displayInitialPrice;
             $this->isNew = $defaultPse->newness;
+            $this->quantityRule = $defaultPse->quantityRule;
         }
     }
 
@@ -143,6 +147,11 @@ class Base extends AbstractProductCard
     public function getShowsInitialPrice(): bool
     {
         return $this->isPromo && $this->displayInitialPrice;
+    }
+
+    public function getQuantityRule(): ?QuantityRuleDTO
+    {
+        return $this->quantityRule;
     }
 
     public function getIsNew()

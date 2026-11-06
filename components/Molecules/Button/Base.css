@@ -229,3 +229,18 @@
   --tw-ring-color: transparent;
   outline: 0;
 }
+
+/* The unit a quantity is counted in, right after the value inside the field: same size as
+   the unit of a text field. */
+.ButtonQuantity__unit {
+  display: flex;
+  align-items: center;
+  padding-inline-end: 0.5rem;
+  font-size: var(--font-size-paragraph-4);
+}
+
+/* Value and unit read as one: "1,25 kg". */
+.ButtonQuantity input:has(+ .ButtonQuantity__unit) {
+  text-align: end;
+  padding-inline-end: 0.25rem;
+}

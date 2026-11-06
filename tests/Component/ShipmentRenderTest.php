@@ -16,6 +16,7 @@ namespace FlexyBundle\Tests\Component;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\UX\TwigComponent\ComponentRendererInterface;
+use Thelia\Domain\Catalog\Quantity\QuantityFormatter;
 
 /** One parcel of an order shipped in several, as the order page shows it. */
 final class ShipmentRenderTest extends KernelTestCase
@@ -70,6 +71,28 @@ final class ShipmentRenderTest extends KernelTestCase
         preg_match('/<a[^>]*data-testid="shipment-delivery-note-link"[^>]*>/', $html, $note);
         self::assertNotEmpty($note, 'the parcel offers its delivery note');
         self::assertStringContainsString('href="/account/order/pdf/delivery/42/1"', $note[0]);
+    }
+
+    public function testAParcelWritesAWeightWithItsDecimalsAndItsUnit(): void
+    {
+        $parcel = $this->shippedParcel();
+        $parcel['orderShipmentItems'][] = ['quantity' => 1.25, 'orderProduct' => ['title' => 'Lexie', 'productRef' => 'LEX-1', 'quantityDecimals' => 2, 'unitCode' => 'kg']];
+
+        $html = $this->render(['shipment' => $parcel, 'position' => 1, 'total' => 2]);
+
+        // A core without quantity rules has no unit to write: the decimals still show.
+        self::assertMatchesRegularExpression(class_exists(QuantityFormatter::class) ? '#1\.25 kg &times;.*Lexie#s' : '#1\.25 &times;.*Lexie#s', $html);
+        self::assertMatchesRegularExpression('#2 &times;.*Mesh shoes#s', $html, 'a line sold by the piece is unchanged');
+    }
+
+    public function testAParcelWritesBottlesSoldByThePieceWithoutTheUnitOfTheirContent(): void
+    {
+        $parcel = $this->shippedParcel();
+        $parcel['orderShipmentItems'][] = ['quantity' => 3, 'orderProduct' => ['title' => 'Bordeaux', 'productRef' => 'WINE-75', 'quantityDecimals' => 0, 'unitCode' => 'l']];
+
+        $html = $this->render(['shipment' => $parcel, 'position' => 1, 'total' => 2]);
+
+        self::assertMatchesRegularExpression('#"Shipment-quantity" dir="ltr">3 &times;</span>.*Bordeaux#s', $html, 'three bottles, not "3 l"');
     }
 
     public function testAParcelBeingPreparedHasNoLinkAndSaysSo(): void

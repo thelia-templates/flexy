@@ -94,6 +94,13 @@
 					{% endif %}
 				{% endif %}
 			</div>
+			{# The price per litre, per kilogram, of the price shown above: only for a sale element that
+			   says what one unit sold contains. #}
+			{% set shownPrice = this.isPromo ? this.displayedPromoPrice : this.displayedPrice %}
+			{% set referencePrice = shownPrice ? reference_unit_price(shownPrice.amount, this.quantityRule) : null %}
+			{% if referencePrice %}
+				<p class="ProductCard-referencePrice paragraph-6 text-grey">{{ 'reference_unit_price'|trans({'%price%': referencePrice.price|format_currency(current_currency_code(), locale: lang_code), '%unit%': referencePrice.per}) }}</p>
+			{% endif %}
 			{% if this.runningSaleTag and this.runningSaleTag.shouldDisplayCountdown and this.runningSaleTag.countdownRemainingSeconds is not null %}
 				<twig:Molecules:Countdown:Base :remainingSeconds="this.runningSaleTag.countdownRemainingSeconds" size="sm" class="ProductCard-countdown" />
 			{% endif %}

@@ -17,7 +17,10 @@ namespace FlexyBundle\Components\Organisms\Cart;
 use FlexyBundle\DTO\CartItemDto;
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Service\BundleLines;
+use FlexyBundle\Service\CartItemCount;
+use FlexyBundle\Service\CartQuantity;
 use FlexyBundle\Service\CartStockService;
+use FlexyBundle\Service\SaleElementQuantityRules;
 use Propel\Runtime\Map\TableMap;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
@@ -109,6 +112,9 @@ class Base
         private readonly CartStockService $cartStockService,
         private readonly AttributeAccessService $attributeAccessService,
         private readonly LangService $langService,
+        // Optional so that a child theme calling this constructor keeps working: without it the
+        // lines are read with the rule built from their own sale element all the same.
+        private readonly ?SaleElementQuantityRules $quantityRules = null,
     ) {
     }
 
@@ -185,6 +191,8 @@ class Base
                 // This path never carried one: the line is priced by its own columns.
                 'product' => null,
                 'stock' => $stock,
+                // The rule of the sale element moves the stepper of the line by its step.
+                'quantityRule' => ($this->quantityRules ?? new SaleElementQuantityRules())->ofSaleElement($pse) ?? [],
                 'stockManaged' => $stockManaged,
                 'bundleComponents' => $bundleComponents[(int) $item['id']] ?? [],
                 'bundleOrderable' => !isset($unorderableBundles[(int) $item['id']]),
@@ -396,9 +404,16 @@ class Base
         return $unorderable;
     }
 
+    /**
+     * The sum of the quantities, as it always was, until a line is sold by measure: 1.25 kg
+     * and two bottles are no "3.25 items", and the cart then counts its lines.
+     */
     public function getTotalItems(): int
     {
-        return array_sum(array_map(static fn (CartItemDto $item): int => $item->quantity, $this->items));
+        return CartItemCount::count(array_map(
+            static fn (CartItemDto $item): array => ['quantity' => $item->quantity, 'decimals' => $item->rule()->decimals],
+            $this->items,
+        ));
     }
 
     /**
@@ -420,8 +435,12 @@ class Base
         return $cartItem;
     }
 
+    /**
+     * The quantity the shopper typed, already written on the line by the data-model binding
+     * ("1.5" for a line sold by measure: the stepper's controller hands the binding a point).
+     */
     #[LiveAction]
-    public function onQuantityChanged(#[LiveArg] int $index, #[LiveArg] int $baseQuantity): void
+    public function onQuantityChanged(#[LiveArg] int $index, #[LiveArg] float $baseQuantity): void
     {
         $cartItem = $this->findCartItemByIndex($index);
 
@@ -449,8 +468,13 @@ class Base
         }
     }
 
+    /**
+     * One step down, by the step of the line's rule: a lot of six loses six, a kilogram sold by
+     * the quarter loses a quarter. Below the smallest quantity sold the line goes, as a line of
+     * one always went on its "minus".
+     */
     #[LiveAction]
-    public function minus(#[LiveArg] int $index, ?int $quantity = null): void
+    public function minus(#[LiveArg] int $index, ?float $quantity = null): void
     {
         $cartItem = $this->findCartItemByIndex($index);
 
@@ -458,17 +482,21 @@ class Base
             return;
         }
 
-        $newQuantity = max(0, $quantity ?? $cartItem->quantity - 1);
+        $rule = $cartItem->rule();
+        $newQuantity = max(0.0, $quantity ?? $rule->moveBy($cartItem->quantity, -1));
 
         // The core rejects any quantity still above the remaining stock
         // (Thelia\Model\CartItem::updateQuantity), so a line that already exceeds it could not be
         // decremented at all: every intermediate step was refused and the visitor stayed stuck on
-        // the very quantity the cart asks them to lower.
+        // the very quantity the cart asks them to lower. Brought to the largest quantity the rule
+        // accepts under the stock: seven left of a lot of six is six.
         if ($cartItem->stockManaged && $newQuantity > $cartItem->stock) {
-            $newQuantity = $cartItem->stock;
+            $newQuantity = $rule->largestValidQuantityUpTo($cartItem->stock) ?? 0.0;
         }
 
-        if (0 === $newQuantity) {
+        // A step taken from the smallest quantity sold leaves nothing the cart accepts. A quantity
+        // the shopper typed is left to the cart, which says why it refuses it.
+        if ($newQuantity <= 0.0 || (null === $quantity && $newQuantity < $rule->smallestQuantity())) {
             $this->remove($index);
 
             return;
@@ -477,8 +505,12 @@ class Base
         $this->updateQuantity($cartItem, $newQuantity);
     }
 
+    /**
+     * One step up, by the step of the line's rule, no further than the largest quantity the
+     * rule accepts under the stock.
+     */
     #[LiveAction]
-    public function plus(#[LiveArg] int $index, ?int $quantity = null): void
+    public function plus(#[LiveArg] int $index, ?float $quantity = null): void
     {
         $cartItem = $this->findCartItemByIndex($index);
 
@@ -486,8 +518,12 @@ class Base
             return;
         }
 
-        $maxQuantity = $cartItem->stockManaged ? $cartItem->stock : \PHP_INT_MAX;
-        $newQuantity = min($maxQuantity, $quantity ?? $cartItem->quantity + 1);
+        $rule = $cartItem->rule();
+        $newQuantity = $quantity ?? $rule->moveBy($cartItem->quantity, 1);
+
+        if ($cartItem->stockManaged) {
+            $newQuantity = min($newQuantity, $rule->largestValidQuantityUpTo($cartItem->stock) ?? $cartItem->stock);
+        }
 
         $this->updateQuantity($cartItem, $newQuantity);
     }
@@ -497,13 +533,13 @@ class Base
      * live request answered 500. The line the shopper typed into is put back by the re-render,
      * which reads the cart again (refreshBeforeRender()).
      */
-    private function updateQuantity(CartItemDto $cartItem, int $quantity): void
+    private function updateQuantity(CartItemDto $cartItem, float $quantity): void
     {
         try {
             $this->cartFacade->updateItemQuantity(new CartItemUpdateQuantityDTO(
                 cart: $this->cartFacade->getOrCreateFromSession(),
                 cartItemId: $cartItem->id,
-                quantity: $quantity,
+                quantity: CartQuantity::forTheCart($quantity),
             ));
         } catch (InvalidCartException|NotEnoughStockException $exception) {
             $this->recordRefusal('quantity', $exception);
@@ -544,7 +580,7 @@ class Base
             'title' => $match->title,
             'productId' => $line->getProductId(),
             'pseId' => $line->getProductSaleElementsId(),
-            'quantity' => (int) $line->getQuantity(),
+            'quantity' => CartQuantity::wholeWhenWhole((float) $line->getQuantity()),
             'imageId' => $this->resolveImageId($line->getProductId(), $line->getProductSaleElementsId()),
             // Read from the stored line, like the declination and the quantity: the composition a removed
             // bundle comes back with is the one it had, never a browser's word. Null for any other line.
@@ -556,11 +592,11 @@ class Base
             cartItemId: $line->getId(),
         ));
         $this->emit(CheckoutEvents::DELETE_ITEM_EVENT);
-        $this->dispatchQuantityChange((int) $line->getProductSaleElementsId(), -(int) $line->getQuantity());
+        $this->dispatchQuantityChange((int) $line->getProductSaleElementsId(), -(float) $line->getQuantity());
     }
 
     #[LiveAction]
-    public function restoreCartItem(#[LiveArg] int $pseId, #[LiveArg] int $productId, #[LiveArg] ?int $quantity = null): void
+    public function restoreCartItem(#[LiveArg] int $pseId, #[LiveArg] int $productId, #[LiveArg] ?float $quantity = null): void
     {
         // Only the line this component removed comes back, in the quantity it had: the arguments come from the
         // browser, the pending removal is the component's own signed state.
@@ -569,7 +605,12 @@ class Base
             return;
         }
 
-        $quantity = max(1, min($quantity ?? (int) $this->pendingDelete['quantity'], (int) $this->pendingDelete['quantity']));
+        // Never more than was removed, and nothing when the browser asks for nothing.
+        $quantity = min($quantity ?? (float) $this->pendingDelete['quantity'], (float) $this->pendingDelete['quantity']);
+
+        if ($quantity <= 0.0) {
+            return;
+        }
 
         // The cart form is replayed below for its side effects only (its CSRF token cannot be given from a live
         // action), so the stock rule it holds is applied here: a line is not put back above what is left.
@@ -590,7 +631,7 @@ class Base
         $form->submit([
             'product' => $productId,
             'product_sale_elements_id' => $pseId,
-            'quantity' => $quantity,
+            'quantity' => CartQuantity::forTheCart($quantity),
             'append' => 1,
             'newness' => 0,
         ]);
@@ -600,7 +641,7 @@ class Base
                 'cart' => $cart,
                 'productId' => $productId,
                 'productSaleElementId' => $pseId,
-                'quantity' => $quantity,
+                'quantity' => CartQuantity::forTheCart($quantity),
                 // A bundle comes back with the composition it was removed with, not the default one.
                 ...(null === $composition ? [] : ['bundleComposition' => $composition]),
             ]));
@@ -622,19 +663,22 @@ class Base
      * Tells the page, through a DOM event, what the line just gained or lost (CheckoutEvents::BROWSER_ADD_PSE and
      * BROWSER_REMOVE_PSE). A change of nothing is not told.
      */
-    protected function dispatchQuantityChange(int $pseId, int $difference): void
+    protected function dispatchQuantityChange(int $pseId, float $difference): void
     {
-        if (0 === $difference) {
+        // Rounded at the micro unit, the precision of the columns: 1.5 - 1.25 is no 0.2500001.
+        $difference = round($difference, 6);
+
+        if (0.0 === $difference) {
             return;
         }
 
         $this->dispatchBrowserEvent(
             $difference > 0 ? CheckoutEvents::BROWSER_ADD_PSE : CheckoutEvents::BROWSER_REMOVE_PSE,
-            ['pse' => $pseId, 'quantity' => abs($difference)],
+            ['pse' => $pseId, 'quantity' => CartQuantity::wholeWhenWhole(abs($difference))],
         );
     }
 
-    private function isShortOfStock(int $pseId, int $quantity, ?BundleComposition $composition = null): bool
+    private function isShortOfStock(int $pseId, float $quantity, ?BundleComposition $composition = null): bool
     {
         if (!ConfigQuery::checkAvailableStock()) {
             return false;

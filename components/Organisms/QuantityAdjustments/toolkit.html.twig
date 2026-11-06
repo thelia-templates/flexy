@@ -1,0 +1,16 @@
+<div class="Story">
+<div class="Story-section">
+    <h4 class="Story-title">Base (the lines of the cart the shop brought back to how their product is sold)</h4>
+    <p class="Story-label">
+        Shown at the top of the cart and of the checkout pages, once, after the shop read back a
+        cart whose quantities no longer fit their product (a cart restored, a lot size changed
+        since). On a page it reads them from the session; here they are given.
+    </p>
+    <div class="Story-stage Story-stage--roomy">
+        <twig:Organisms:QuantityAdjustments:Base :adjustments="[
+            {product: 'Wine, case of six', message: 'The quantity was brought down to 6: sold by 6.'},
+            {product: 'Coffee beans', message: 'This line was removed: the smallest quantity you can order is 0.50.'},
+        ]" />
+    </div>
+</div>
+</div>

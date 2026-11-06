@@ -4,8 +4,12 @@
 {# @prop currentCombination array attributeId => attributeAvId of the selected PSE #}
 {# @prop noAvailablePse bool No PSE matches the selected combination #}
 {# @prop stockManaged bool Whether stock is enforced for this product #}
-{# @prop remainingStock int Stock left once what is already in the cart is deducted #}
-{# @prop maxQuantityReached bool The cart already holds the whole available stock #}
+{# @prop remainingStock float Stock left once what is already in the cart is deducted, in the unit the sale element is sold in #}
+{# @prop maxQuantityReached bool The stock left is below the smallest quantity the sale element is sold in #}
+{# @prop stockBelowSmallestQuantity bool With maxQuantityReached: nothing of it is in the cart, the stock is short of the smallest quantity #}
+{# @prop quantityRule QuantityRuleDTO|null Minimum, step, decimals and unit of the selected sale element; null sells one at a time #}
+{# @prop quantityValue string|null The quantity in the field, with the decimals of the rule in the language of the page; null shows the form's own value #}
+{# @prop quantityChoices array The quantities to list, [{value, label}], for a lot sold by a whole step above one; empty when the quantity is typed #}
 {# @prop cartRefused bool The cart refused the last add (a module rule, the stock gone meanwhile) #}
 {# @prop cartRefusalReason string The reason a module gave with its refusal, printed escaped after the sentence #}
 {# @prop bundlePricing array|null The price of the composition a shopper picked on a bundle priced by its components, taxes included: {price, originalPrice, saving}. Replaces the price of the sale element #}
@@ -19,10 +23,14 @@
     stockManaged = false,
     remainingStock = 0,
     maxQuantityReached = false,
+    stockBelowSmallestQuantity = false,
     cartRefused = false,
     cartRefusalReason = '',
     bundlePricing = null,
-    bundleUnavailable = false
+    bundleUnavailable = false,
+    quantityRule = null,
+    quantityValue = null,
+    quantityChoices = []
 %}
 
 {# The Flexy form theme is no longer global: without this the widgets below silently fall back to
@@ -34,7 +42,15 @@
 {% set outOfStock = stockManaged and currentPse is not null and currentPse.quantity == 0 %}
 {# No upper bound when stock is not enforced: the attribute is dropped rather than passed as
    null, which the component rejects outright. #}
-{% set quantityBounds = stockManaged ? {'input:max': remainingStock} : {} %}
+{% set rule = quantityRule ?? null %}
+{% set smallestQuantity = rule ? rule.inputValue(rule.smallestQuantity) : '1' %}
+{# The highest quantity the rule accepts under the stock left, not the stock itself: seven left
+   of a lot of six is six. #}
+{% set largestQuantity = stockManaged and rule ? rule.largestValidQuantityUpTo(remainingStock) : null %}
+{% set quantityBounds = stockManaged ? {'input:max': largestQuantity is not null ? rule.inputValue(largestQuantity) : remainingStock} : {} %}
+{# The cart judges the quantity by the rules of the sale element and says why it refuses it
+   ("Sold by 6: 6, 12, 18…"): that sentence is shown as it is, escaped like a module's reason. #}
+{% set quantityErrors = form.quantity.vars.errors|default([])|map(error => error.message) %}
 {% set mobileDrawerController = 'Molecules--MobileDrawer--base' %}
 
 <div class="{{ ('PseSelector ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
@@ -120,6 +136,15 @@
         </fieldset>
     {% endif %}
 
+    {% if quantityErrors|length %}
+        <twig:Molecules:SnackBar:Base
+            variant="error"
+            withIcon
+            role="alert"
+            text="{{ quantityErrors|join(' ')|escape('html') }}"
+        />
+    {% endif %}
+
     {% if cartRefused %}
         <twig:Molecules:SnackBar:Base
             variant="error"
@@ -168,24 +193,48 @@
                     </span>
                 {% endif %}
             </div>
+            {# The price per litre, per kilogram: of the price shown above, promotion included, and only
+               for a sale element that says what one unit sold contains. #}
+            {% set referencePrice = chargedPrice ? reference_unit_price(chargedPrice.amount, rule) : null %}
+            {% if referencePrice %}
+                <p class="PseSelector-referencePrice paragraph-5 text-grey">
+                    {{ 'reference_unit_price'|trans({'%price%': referencePrice.price|format_currency(current_currency_code(), locale: lang_code), '%unit%': referencePrice.per}) }}
+                </p>
+            {% endif %}
         {% endif %}
 
         {% if maxQuantityReached %}
             <twig:Molecules:SnackBar:Base
                 variant="warning"
                 withIcon
-                text="{{ 'You already have the maximum available quantity of this product in your cart'|trans }}"
+                text="{{ (stockBelowSmallestQuantity ? 'Not enough stock for the smallest quantity this product is sold in' : 'You already have the maximum available quantity of this product in your cart')|trans }}"
             />
             {{ form_widget(form.quantity, {type: 'hidden'}) }}
         {% else %}
-            <div class="PseSelector-addToCart">
-                <twig:Molecules:Button:Quantity
-                    input:name="{{ field_name(form.quantity) }}"
-                    input:value="{{ field_value(form.quantity) }}"
-                    input:min="1"
-                    {{ ...quantityBounds }}
-                    input:aria-label="{{ 'Quantity'|trans }}"
-                />
+            {# Sold by measure, the field holds a value and its unit: the add-to-cart goes under it,
+               full width, as it does on a phone. #}
+            <div class="PseSelector-addToCart{{ rule and rule.soldByMeasure ? ' PseSelector-addToCart--stacked' : '' }}">
+                {% if quantityChoices is not empty %}
+                    {# A lot of six is bought in six, twelve, eighteen: listed, up to the stock left. #}
+                    <twig:Fields:Select:Base
+                        class="PseSelector-quantity"
+                        select:name="{{ field_name(form.quantity) }}"
+                        select:aria-label="{{ 'Quantity'|trans }}"
+                        :choices="quantityChoices"
+                        :value="field_value(form.quantity)"
+                    />
+                {% else %}
+                    <twig:Molecules:Button:Quantity
+                        input:name="{{ field_name(form.quantity) }}"
+                        input:value="{{ quantityValue ?? field_value(form.quantity) }}"
+                        input:min="{{ smallestQuantity }}"
+                        {{ ...quantityBounds }}
+                        input:aria-label="{{ 'Quantity'|trans }}"
+                        step="{{ rule ? rule.inputStep : 1 }}"
+                        :decimals="rule ? rule.decimals : 0"
+                        unit="{{ rule ? rule.unitSymbol : '' }}"
+                    />
+                {% endif %}
                 <twig:Molecules:Button:Base
                     type="submit"
                     text="{{ 'Add to cart'|trans }}"

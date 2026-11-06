@@ -44,7 +44,7 @@ class Remaining
     }
 
     /**
-     * @return list<array{title: string, ref: string, quantity: float}>
+     * @return list<array{title: string, ref: string, quantity: float, quantityDecimals: int, unitCode: string|null}>
      */
     public function getLines(): array
     {
@@ -66,6 +66,9 @@ class Remaining
                 'title' => (string) ($orderProduct['title'] ?? ''),
                 'ref' => (string) ($orderProduct['productRef'] ?? ''),
                 'quantity' => $left,
+                // Frozen on the order line; absent from the payload of an older core.
+                'quantityDecimals' => (int) ($orderProduct['quantityDecimals'] ?? 0),
+                'unitCode' => \is_string($orderProduct['unitCode'] ?? null) ? $orderProduct['unitCode'] : null,
             ];
         }
 

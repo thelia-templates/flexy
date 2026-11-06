@@ -26,6 +26,7 @@ use FlexyBundle\Service\GuestOrderView;
 use FlexyBundle\Service\InstantPaymentParts;
 use FlexyBundle\Service\PlacedOrderMemory;
 use FlexyBundle\Service\PrefetchRequest;
+use FlexyBundle\Service\RestoredCartLines;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -95,6 +96,13 @@ class CheckoutController extends FlexyController
         CheckoutTrail $trail,
     ): Response {
         $cart = $cartFacade->getOrCreateFromSession();
+
+        // A line read again against rules that changed since it was put there is brought to
+        // them before the page shows it, and the shopper is told. Not for a page fetched ahead
+        // of a click: the message would be spent on a page nobody sees.
+        if (!PrefetchRequest::is($this->getRequest())) {
+            (new RestoredCartLines($cartGuard))->adjust($cart);
+        }
 
         // The trail has to name the step the "next" button actually leads to. A visitor
         // the session does not know yet is taken to the identification page whenever

@@ -458,7 +458,7 @@ class AccountOrderController extends FlexyController
      * return's front read group, so the nested object normalizes to nothing. Same shape as
      * the context the core hands the PDF template, so both read alike.
      *
-     * @return list<array{title: string, ref: string, quantity: float, refund: float}>
+     * @return list<array{title: string, ref: string, quantity: float, quantityDecimals: int, unitCode: string|null, refund: float}>
      */
     private function returnLines(OrderReturnModel $return): array
     {
@@ -471,6 +471,9 @@ class AccountOrderController extends FlexyController
                 'title' => (string) $orderProduct?->getTitle(),
                 'ref' => (string) $orderProduct?->getProductRef(),
                 'quantity' => (float) $line->getQuantity(),
+                // Frozen on the order line by a core that sells by measure; none before.
+                'quantityDecimals' => null !== $orderProduct && method_exists($orderProduct, 'getQuantityDecimals') ? (int) $orderProduct->getQuantityDecimals() : 0,
+                'unitCode' => null !== $orderProduct && method_exists($orderProduct, 'getUnitCode') ? $orderProduct->getUnitCode() : null,
                 'refund' => (float) $line->getRefundAmount(),
             ];
         }

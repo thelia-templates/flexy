@@ -654,3 +654,7 @@ Skip to content: Zum Inhalt springen
 # Checkout: the core refused the payment because a price moved since the cart was read
 The prices of your cart have changed. Check your cart before paying.: Die Preise in Ihrem Warenkorb haben sich geändert. Prüfen Sie Ihren Warenkorb, bevor Sie bezahlen.
 The message must be %max characters at most.: Die Nachricht darf höchstens %max Zeichen lang sein.
+'The quantity of %product% in your cart was adjusted.': 'Die Menge von %product% in Ihrem Warenkorb wurde angepasst.'
+reference_unit_price: '%price% / %unit%'
+only_quantity_left_in_stock: '%title%: nur noch %count% auf Lager.'
+Not enough stock for the smallest quantity this product is sold in: Der Bestand reicht für die kleinste Verkaufsmenge dieses Produkts nicht aus

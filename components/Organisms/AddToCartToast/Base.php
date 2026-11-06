@@ -14,7 +14,10 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\AddToCartToast;
 
+use FlexyBundle\DTO\QuantityRuleDTO;
+use FlexyBundle\Service\CartQuantity;
 use FlexyBundle\Service\ProductSaleElementsService;
+use FlexyBundle\Service\SaleElementQuantityRules;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -31,8 +34,16 @@ class Base
 {
     use DefaultActionTrait;
 
+    /** In the unit the sale element is sold in: 1.25 for a kilogram and a quarter. */
     #[LiveProp]
-    public ?int $quantity = null;
+    public ?float $quantity = null;
+
+    /** The decimals and the unit the quantity is written with: "1,25 kg". */
+    #[LiveProp]
+    public int $quantityDecimals = 0;
+
+    #[LiveProp]
+    public ?string $unitCode = null;
 
     #[LiveProp]
     public ?int $pseId = null;
@@ -55,6 +66,9 @@ class Base
     public function __construct(
         private readonly ProductSaleElementsService $pseService,
         private readonly LocalizationFacade $localizationFacade,
+        // Optional so that a child theme calling this constructor keeps working: the quantity
+        // is then written without its unit.
+        private readonly ?SaleElementQuantityRules $quantityRules = null,
     ) {
     }
 
@@ -71,7 +85,12 @@ class Base
         $locale = $this->localizationFacade->getCurrentLocale();
         $product = $pse->getProduct()->setLocale($locale);
 
-        $this->quantity = max(1, (int) ($values['quantity'] ?? 1));
+        // As the shopper typed it, "1,25" or "1.25"; a quantity that reads as nothing shows as one.
+        $quantity = CartQuantity::typed($values['quantity'] ?? null) ?? 0.0;
+        $this->quantity = $quantity > 0.0 ? $quantity : 1.0;
+        $rule = QuantityRuleDTO::fromArray($this->quantityRules?->ofSaleElement($pse) ?? []);
+        $this->quantityDecimals = $rule->decimals;
+        $this->unitCode = $rule->unitCode;
         $this->pseId = $pse->getId();
         $this->title = $product->getTitle();
         $this->secondaryTitle = $product->getChapo();
@@ -101,6 +120,8 @@ class Base
     public function closeToast(): void
     {
         $this->quantity = null;
+        $this->quantityDecimals = 0;
+        $this->unitCode = null;
         $this->pseId = null;
         $this->title = null;
         $this->secondaryTitle = null;

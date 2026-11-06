@@ -21,7 +21,8 @@ class CartItemDto
     public int $id = 0;
     public int $cartId = 0;
     public int $productId = 0;
-    public int $quantity = 0;
+    /** In the unit the line is sold in: 1.25 for a kilogram and a quarter. */
+    public float $quantity = 0.0;
     public int $productSaleElementsId = 0;
     public float $price = 0.0;
     public float $promoPrice = 0.0;
@@ -44,7 +45,12 @@ class CartItemDto
     public float $lineTotalAfterDiscountTaxed = 0.0;
     public float $lineTotalAfterDiscountUntaxed = 0.0;
     public ?ProductDTO $product = null;
-    public int $stock = 0;
+    /**
+     * The stock of the sale element, in the same unit as the quantity: a whole number for a quantity
+     * sold without decimals, a float otherwise. Left as `mixed` because the DTO travels in a LiveProp,
+     * which refuses a union type.
+     */
+    public mixed $stock = 0;
     public bool $stockManaged = true;
     public string $title = '';
     public string $desc = '';
@@ -65,6 +71,14 @@ class CartItemDto
      * words none.
      */
     public string $bundleRefusal = '';
+    /**
+     * The quantity rule of the sale element, as QuantityRuleDTO::toArray() writes it: an array
+     * travels in the LiveProp, a readonly object would not hydrate. Empty on a core without
+     * quantity rules, which reads as one at a time.
+     *
+     * @var array<string, mixed>
+     */
+    public array $quantityRule = [];
 
     public static function fromArray(array $data): self
     {
@@ -72,7 +86,7 @@ class CartItemDto
         $cartItem->id = isset($data['id']) ? (int) $data['id'] : 0;
         $cartItem->cartId = isset($data['cartId']) ? (int) $data['cartId'] : 0;
         $cartItem->productId = isset($data['productId']) ? (int) $data['productId'] : 0;
-        $cartItem->quantity = isset($data['quantity']) ? (int) $data['quantity'] : 0;
+        $cartItem->quantity = isset($data['quantity']) ? (float) $data['quantity'] : 0.0;
         $cartItem->productSaleElementsId = isset($data['productSaleElementsId']) ? (int) $data['productSaleElementsId'] : 0;
         $cartItem->price = isset($data['price']) ? (float) $data['price'] : 0.0;
         $cartItem->promoPrice = isset($data['promoPrice']) ? (float) $data['promoPrice'] : 0.0;
@@ -88,7 +102,7 @@ class CartItemDto
         $cartItem->lineTotalUntaxed = self::amount($data, 'lineTotalUntaxed', 'line_total_untaxed');
         $cartItem->lineTotalAfterDiscountTaxed = self::amount($data, 'lineTotalAfterDiscountTaxed', 'line_total_after_discount_taxed');
         $cartItem->lineTotalAfterDiscountUntaxed = self::amount($data, 'lineTotalAfterDiscountUntaxed', 'line_total_after_discount_untaxed');
-        $cartItem->stock = isset($data['stock']) ? (int) $data['stock'] : 0;
+        $cartItem->stock = isset($data['stock']) ? (\is_float($data['stock']) ? $data['stock'] : (int) $data['stock']) : 0;
         $cartItem->stockManaged = isset($data['stockManaged']) ? (bool) $data['stockManaged'] : true;
         $cartItem->title = $data['title'] ?? '';
         $cartItem->desc = $data['desc'] ?? '';
@@ -96,6 +110,7 @@ class CartItemDto
         $cartItem->bundleComponents = BundleLines::fromCartComponents($data['bundleComponents'] ?? []);
         $cartItem->bundleOrderable = (bool) ($data['bundleOrderable'] ?? true);
         $cartItem->bundleRefusal = (string) ($data['bundleRefusal'] ?? '');
+        $cartItem->quantityRule = \is_array($data['quantityRule'] ?? null) ? $data['quantityRule'] : [];
 
         if (isset($data['product'])) {
             $cartItem->product = $data['product'] instanceof ProductDTO
@@ -112,5 +127,10 @@ class CartItemDto
     private static function amount(array $data, string $camelKey, string $snakeKey): float
     {
         return (float) ($data[$camelKey] ?? $data[$snakeKey] ?? 0.0);
+    }
+
+    public function rule(): QuantityRuleDTO
+    {
+        return QuantityRuleDTO::fromArray($this->quantityRule);
     }
 }

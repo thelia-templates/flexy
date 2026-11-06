@@ -4,6 +4,18 @@ import { Controller } from "@hotwired/stimulus";
 class QuantityController extends Controller {
   static targets = ["input"];
 
+  /**
+   * step: what one press adds or takes away (6, 0.25). decimals: how many the quantity
+   * accepts, 0 for a count of pieces. min and max: the bounds, "" for none — a text field
+   * (a quantity sold by measure) has no min or max attribute to read them from.
+   */
+  static values = {
+    step: { type: Number, default: 1 },
+    decimals: { type: Number, default: 0 },
+    min: { type: String, default: "" },
+    max: { type: String, default: "" },
+  };
+
   initialize() {
     // Bound once per element so inputTargetDisconnected() actually removes them: a fresh
     // bind() is a different reference and removeEventListener() matched nothing, so the
@@ -14,19 +26,25 @@ class QuantityController extends Controller {
 
   inputTargetConnected(element) {
     const handlers = {
-      keyup: (event) => this.enforceMinMax(element, event),
-      keypress: (event) => this.enforceNumberOnly(element, event),
+      // Clamped on change, not on each key (see below); main's announce-on-blur stays for a clamp the browser did not announce itself.
+      change: () => {
+        this.enforceMinMax(element);
+        this.clamped.delete(element);
+      },
+      keypress: (event) => this.enforceNumberOnly(event),
       keydown: (event) => event.key === "Enter" && this.announceClamp(element),
       blur: () => this.announceClamp(element),
-      change: () => this.clamped.delete(element),
     };
 
     this.handlers.set(element, handlers);
-    element.addEventListener("keyup", handlers.keyup);
+    // On change rather than on each key: "1" on its way to "12" is below a minimum of six,
+    // and "1," on its way to "1,25" is no number yet. Registered on the field itself, it
+    // runs before the LiveComponent, which listens on its root, so the model receives the
+    // value once it is within its bounds.
+    element.addEventListener("change", handlers.change);
     element.addEventListener("keypress", handlers.keypress);
     element.addEventListener("keydown", handlers.keydown);
     element.addEventListener("blur", handlers.blur);
-    element.addEventListener("change", handlers.change);
   }
 
   inputTargetDisconnected(element) {
@@ -36,30 +54,80 @@ class QuantityController extends Controller {
       return;
     }
 
-    element.removeEventListener("keyup", handlers.keyup);
+    element.removeEventListener("change", handlers.change);
     element.removeEventListener("keypress", handlers.keypress);
     element.removeEventListener("keydown", handlers.keydown);
     element.removeEventListener("blur", handlers.blur);
-    element.removeEventListener("change", handlers.change);
     this.handlers.delete(element);
   }
 
-  getStep() {
-    const step = parseInt(this.inputTarget.getAttribute("step"), 10);
-
-    return step > 0 ? step : 1;
+  /** Whole numbers scaled by the decimals, so that 0.1 + 0.2 lands on 0.3. */
+  get scale() {
+    return 10 ** Math.max(0, this.decimalsValue);
   }
 
-  /** An absent attribute reads as "", the only thing that means no bound: 0 is a real one. */
-  getBound(name) {
-    const raw = this.inputTarget[name];
+  getStep() {
+    const step = Math.round(this.stepValue * this.scale);
 
-    return raw === "" ? null : parseInt(raw, 10);
+    return step > 0 ? step : this.scale;
+  }
+
+  /**
+   * The field's own attribute first (a number field), then the value the component was
+   * given. null means no bound: 0 is a real one.
+   */
+  getBound(name) {
+    const attribute = this.inputTarget.getAttribute(name);
+    const raw = attribute !== null && attribute !== "" ? attribute : this[`${name}Value`];
+    const bound = this.parse(raw);
+
+    return bound === null ? null : Math.round(bound * this.scale);
+  }
+
+  /**
+   * "1,25" and "1.25" both read 1.25: a quantity is never written with a thousands
+   * separator, so a single comma or point can only be the decimal one. Anything else is no
+   * number, and is left for the cart to refuse with its own message.
+   */
+  parse(raw) {
+    const text = String(raw ?? "").trim();
+
+    if (!/^\d+([.,]\d+)?$/.test(text)) {
+      return null;
+    }
+
+    return Number(text.replace(",", "."));
+  }
+
+  /** The quantity in units of the last decimal, or null when the field holds no number. */
+  read() {
+    const value = this.parse(this.inputTarget.value);
+
+    return value === null ? null : Math.round(value * this.scale);
+  }
+
+  /**
+   * Written the way the page writes numbers ("1,25" on a French page): the field is what the
+   * shopper reads, and the cart reads both separators. A count of pieces stays digits only,
+   * which is all a number field takes.
+   */
+  format(scaled) {
+    const decimals = Math.max(0, this.decimalsValue);
+
+    if (decimals === 0) {
+      return String(Math.round(scaled / this.scale));
+    }
+
+    return new Intl.NumberFormat(document.documentElement.lang || undefined, {
+      useGrouping: false,
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(scaled / this.scale);
   }
 
   decrement() {
     const min = this.getBound("min");
-    const value = parseInt(this.inputTarget.value) || 0;
+    const value = this.read() ?? 0;
 
     if (min !== null && value <= min) {
       return;
@@ -67,17 +135,20 @@ class QuantityController extends Controller {
 
     const next = value - this.getStep();
 
-    this.setValue(min !== null && next < min ? min : next);
+    this.setValue(min !== null && next < min ? min : Math.max(0, next));
   }
+
   increment() {
     const max = this.getBound("max");
-    const value = parseInt(this.inputTarget.value) || 0;
+    const min = this.getBound("min");
+    const value = this.read();
 
-    if (max !== null && value >= max) {
+    if (max !== null && value !== null && value >= max) {
       return;
     }
 
-    const next = value + this.getStep();
+    // An empty field starts at the minimum rather than one step above nothing.
+    const next = value === null ? (min ?? this.getStep()) : value + this.getStep();
 
     this.setValue(max !== null && next > max ? max : next);
   }
@@ -88,33 +159,41 @@ class QuantityController extends Controller {
    * field either (the component's own model is the only channel), and the server would keep
    * validating the quantity it last knew about. Announce the change explicitly.
    */
-  setValue(value) {
-    this.inputTarget.value = value;
+  setValue(scaled) {
+    this.inputTarget.value = this.format(scaled);
     this.inputTarget.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
-  enforceNumberOnly(el, e) {
-    if (e.key.length === 1 && !/[0-9]/.test(e.key)) {
-      e.preventDefault();
+  /** Digits only, and a decimal separator when the quantity takes decimals. */
+  enforceNumberOnly(event) {
+    if (event.key.length !== 1) {
+      return;
+    }
+
+    const allowed = this.decimalsValue > 0 ? /[0-9.,]/ : /[0-9]/;
+
+    if (!allowed.test(event.key)) {
+      event.preventDefault();
     }
   }
 
-  enforceMinMax(el, e) {
-    if (el.value !== "") {
-      const typed = el.value;
+  /** Brought back within the bounds, rewritten only when it had to move. */
+  enforceMinMax(element) {
+    const value = this.read();
 
-      if (parseInt(el.value) < parseInt(el.min)) {
-        el.value = el.min;
-      }
-      if (parseInt(el.value) > parseInt(el.max)) {
-        el.value = el.max;
-      } else {
-        el.value = parseInt(el.value);
-      }
+    if (value === null) {
+      return;
+    }
 
-      if (el.value !== typed) {
-        this.clamped.add(el);
-      }
+    const min = this.getBound("min");
+    const max = this.getBound("max");
+
+    if (min !== null && value < min) {
+      element.value = this.format(min);
+      this.clamped.add(element);
+    } else if (max !== null && value > max) {
+      element.value = this.format(max);
+      this.clamped.add(element);
     }
   }
 
