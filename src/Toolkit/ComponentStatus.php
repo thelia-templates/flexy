@@ -105,6 +105,10 @@ final class ComponentStatus
             'Organisms/BundleComposition' => self::READY,
             'Molecules/BundleIncluded' => self::READY,
             'Molecules/Price' => self::READY,
+
+            // What a buyer is told about a price: the price and its tiers, an invitation to sign in,
+            // a request for a price, an item that is not on sale to them. Shipped with the core feature it renders.
+            'Molecules/PriceBlock' => self::READY,
             // Stories handled on our side and open to review:
             'Organisms/OrderNotes' => self::READY,
             // Waiting for the design of the lines of a parcel: listed as quantity and title

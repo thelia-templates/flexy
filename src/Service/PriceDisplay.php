@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Service;
 
 use FlexyBundle\DTO\DisplayedPrice;
+use FlexyBundle\DTO\DisplayedPriceTier;
 use Thelia\Api\Resource\DeliveryModuleOption;
 use Thelia\Domain\Catalog\Product\VisitorPriceReader;
 
@@ -61,6 +62,37 @@ final readonly class PriceDisplay
     public function ofProduct(TaxDisplay $display, ?float $untaxedPrice, ?float $taxedPrice): ?DisplayedPrice
     {
         return $this->choose($display, $untaxedPrice, $taxedPrice);
+    }
+
+    /**
+     * The tiers of the price list that prices a sale element for the buyer, each in the display
+     * of the buyer: the figure with or without its taxes out of the two the core published for
+     * the tier, never a calculation. A tier the core published without the figure of the display
+     * is left out rather than printed with the other one. Ordered by quantity, as published.
+     *
+     * @param list<array<string, mixed>> $priceTiers `priceTiers` of a sale element of the front API
+     *
+     * @return list<DisplayedPriceTier>
+     */
+    public function tiers(TaxDisplay $display, array $priceTiers): array
+    {
+        $tiers = [];
+
+        foreach ($priceTiers as $tier) {
+            $price = $this->choose(
+                $display,
+                isset($tier['price']) ? (float) $tier['price'] : null,
+                isset($tier['taxedPrice']) ? (float) $tier['taxedPrice'] : null,
+            );
+
+            if (null !== $price) {
+                $tiers[] = new DisplayedPriceTier((int) ($tier['minQuantity'] ?? 1), $price);
+            }
+        }
+
+        usort($tiers, static fn (DisplayedPriceTier $left, DisplayedPriceTier $right): int => $left->minQuantity <=> $right->minQuantity);
+
+        return $tiers;
     }
 
     /**

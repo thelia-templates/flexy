@@ -84,18 +84,16 @@
 				   figure to the left of a right-to-left card while the title stays on the right. #}
 				{# The mention follows every figure: the price a buyer reads is with or without the taxes
 				   according to its group, and the card says which. #}
-				{% if this.displayedPrice %}
-					{% if this.showsInitialPrice %}
-						<div class="ProductCard-footerRight">
-							<div class="ProductCard-price"><span dir="ltr">{{ this.displayedPromoPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.displayedPromoPrice.display" /></div>
-							<div class="ProductCard-originalPrice"><span dir="ltr">{{ this.displayedPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
-						</div>
-					{% elseif this.isPromo %}
-						<div class="ProductCard-price"><span dir="ltr">{{ this.displayedPromoPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.displayedPromoPrice.display" /></div>
-					{% else %}
-						<div class="ProductCard-price"><span dir="ltr">{{ this.displayedPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.displayedPrice.display" /></div>
-					{% endif %}
-				{% endif %}
+				<twig:Molecules:PriceBlock:Base
+					variant="card"
+					class="ProductCard-footerRight"
+					:mode="this.priceDisplayMode"
+					:price="this.shownPrice"
+					:originalPrice="this.struckPrice"
+					:purchasable="this.purchasable"
+					:reference="this.reference"
+					:productReference="this.product.ref"
+				/>
 			</div>
 			{# The price per litre, per kilogram, of the price shown above: only for a sale element that
 			   says what one unit sold contains. #}

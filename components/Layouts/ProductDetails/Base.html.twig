@@ -13,8 +13,9 @@
             {% set galleryTags = galleryTags|merge([{text: 'New'|trans, color: 'warning'}]) %}
         {% endif %}
         {# A bundle priced by its components says what is saved next to its price instead: a percentage
-           of a catalog price that is nowhere would be wrong as soon as the shopper changes the composition. #}
-        {% if currentPse.isPromo|default(false) and currentPse.displayInitialPrice|default(true) and not this.isComputedBundle() %}
+           of a catalog price that is nowhere would be wrong as soon as the shopper changes the composition.
+           Nor is a promotion tagged on a price the visitor is not shown: the percentage would give it away. #}
+        {% if currentPse.isPromo|default(false) and currentPse.untaxedPrice|default(null) is not null and currentPse.displayInitialPrice|default(true) and not this.isComputedBundle() %}
             {% set galleryTags = galleryTags|merge([{text: this.promoRate|format_number(style: 'percent'), color: 'error'}]) %}
         {% endif %}
     {% endif %}
@@ -80,6 +81,7 @@
             :cartRefusalReason="this.cartRefusalReason"
             :bundlePricing="bundle ? bundle.pricing : null"
             :bundleUnavailable="bundle ? bundle.unavailable : false"
+            :productReference="this.productRef"
         />
 
         {% set restrictions = this.destinationRestrictions %}

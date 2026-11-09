@@ -63,6 +63,10 @@ class Base
     #[LiveProp]
     public int $productId = 0;
 
+    /** The reference of the product, quoted with the request for a price on its sheet. */
+    #[LiveProp]
+    public ?string $productRef = null;
+
     #[LiveProp]
     public bool $virtual = false;
 
@@ -224,6 +228,7 @@ class Base
     public function mount(array $product, ?string $title = null, ?array $brand = null): void
     {
         $this->productId = (int) $product['id'];
+        $this->productRef = isset($product['ref']) && '' !== $product['ref'] ? (string) $product['ref'] : null;
         $this->virtual = (bool) ($product['virtual'] ?? false);
         $this->chapo = $product['i18ns']['chapo'] ?? null;
         $this->title = $title ?: ($product['i18ns']['title'] ?? null);
