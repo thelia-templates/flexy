@@ -15,7 +15,8 @@
     {% set stateClass = state == 'unavailable' ? 'PriceBlock--unavailable ' : '' %}
     {% if this.variant == 'card' %}
         <div class="{{ ('PriceBlock PriceBlock--card ' ~ stateClass ~ 'flex flex-col items-start ' ~ attributes.render('class'))|tailwind_merge }}" data-price-state="{{ state }}" {{ attributes.without('class') }}>
-            <div class="ProductCard-price"><span dir="ltr">{{ this.price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.price.display" /></div>
+            {# The mention is nowrap and tied to the amount by a no-break space: on a card 130 px wide the pair has to be allowed to break onto two lines, or the mention is cut by the edge of the screen. #}
+            <div class="ProductCard-price flex flex-wrap items-baseline"><span dir="ltr">{{ this.price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.price.display" /></div>
             {% if state == 'price' and this.originalPrice %}
                 <div class="ProductCard-originalPrice"><span dir="ltr">{{ this.originalPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
             {% endif %}

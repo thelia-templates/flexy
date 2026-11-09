@@ -56,6 +56,16 @@ final class PriceDisplayModeBlockRenderTest extends IntegrationTestCase
         self::assertStringContainsString('100.00', $block->filter('.ProductCard-originalPrice')->text());
     }
 
+    public function testThePriceOfACardMayBreakOntoTwoLinesSoTheMentionNeverLeavesANarrowCard(): void
+    {
+        // The mention is nowrap and tied to the amount by a no-break space: on a card 130 px wide
+        // (a 320 px screen, two to a row) the pair only fits when the line is allowed to break.
+        $block = $this->block(['variant' => 'card', 'price' => $this->price(80.0)]);
+
+        self::assertContains('flex-wrap', explode(' ', (string) $block->filter('.ProductCard-price')->attr('class')));
+        self::assertSame('untaxed', $block->filter('.ProductCard-price .TaxMention')->attr('data-tax-display'));
+    }
+
     public function testAVisitorOfAShopThatShowsItsPricesToCustomersIsInvitedToSignInAndComesBackToThePage(): void
     {
         $block = $this->block(['mode' => 'logged_in', 'purchasable' => false, 'returnUrl' => '/a-product.html?pse=3']);

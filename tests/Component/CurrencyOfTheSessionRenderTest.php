@@ -67,7 +67,7 @@ final class CurrencyOfTheSessionRenderTest extends IntegrationTestCase
 
         $html = $this->productCard();
 
-        self::assertMatchesRegularExpression('/ProductCard-price"><span dir="ltr">\$/', $html);
+        self::assertMatchesRegularExpression('/ProductCard-price[^"]*"><span dir="ltr">\$/', $html);
         self::assertStringNotContainsString('€', $html);
     }
 
