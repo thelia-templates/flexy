@@ -18,19 +18,17 @@
         placeholder: asset('images/placeholder2.webp'),
     })|raw }}
 
-    <span class="ProductCard-desc">
+    <div class="ProductCard-desc">
         <span class="ProductCard-title">{{ this.product.title }}</span>
-        {# .ProductCard-desc is a stretching flex column here, so these spans are blockified:
-           dir="ltr" goes on an inner inline span, never on the flex item itself. #}
-        {% if this.displayedPrice %}
-            {% if this.isPromo %}
-                <span class="ProductCard-price"><span dir="ltr">{{ this.displayedPromoPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.displayedPromoPrice.display" /></span>
-                {% if this.showsInitialPrice %}
-                    <span class="ProductCard-originalPrice"><span dir="ltr">{{ this.displayedPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span></span>
-                {% endif %}
-            {% else %}
-                <span class="ProductCard-price"><span dir="ltr">{{ this.displayedPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.displayedPrice.display" /></span>
-            {% endif %}
-        {% endif %}
-    </span>
+        {# The same block as the card and the sheet: a price the buyer is not shown, or may not buy, is not printed here either.
+           The tile is the link, so the block keeps its wording and drops its buttons. #}
+        <twig:Molecules:PriceBlock:Base
+            variant="card"
+            :actions="false"
+            :mode="this.priceDisplayMode"
+            :price="this.shownPrice"
+            :originalPrice="this.struckPrice"
+            :purchasable="this.purchasable"
+        />
+    </div>
 </a>

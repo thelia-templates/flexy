@@ -31,6 +31,23 @@ class ProductSaleElementDTO
     /** Minimum, step, decimals and unit; the default rule on a core that sends none. */
     public QuantityRuleDTO $quantityRule;
 
+    /**
+     * Who the front API shows the prices of this sale element to, as it publishes it:
+     * `visible`, `logged_in` or `on_request`. A core that predates the modes says nothing: visible.
+     */
+    public string $priceDisplayMode = 'visible';
+
+    /** Whether the caller may put the sale element in a cart. A core that does not say allows it. */
+    public bool $purchasable = true;
+
+    /**
+     * The quantity tiers of the price list that prices the sale element for the caller, as the
+     * API publishes them: [{minQuantity, price, promoPrice, taxedPrice, taxedPromoPrice}].
+     *
+     * @var list<array<string, mixed>>
+     */
+    public array $priceTiers = [];
+
     /** @var ProductPriceDTO[] */
     public array $productPrices = [];
 
@@ -53,6 +70,9 @@ class ProductSaleElementDTO
         $dto->isDefault = (bool) ($data['isDefault'] ?? false);
         $dto->isPreorder = (bool) ($data['isPreorder'] ?? false);
         $dto->quantityRule = QuantityRuleDTO::fromArray($data);
+        $dto->priceDisplayMode = \is_string($data['priceDisplayMode'] ?? null) ? $data['priceDisplayMode'] : 'visible';
+        $dto->purchasable = (bool) ($data['purchasable'] ?? true);
+        $dto->priceTiers = array_values((array) ($data['priceTiers'] ?? []));
 
         $dto->productPrices = array_values(
             array_map(

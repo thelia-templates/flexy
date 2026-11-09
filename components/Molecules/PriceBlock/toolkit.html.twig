@@ -1,0 +1,47 @@
+{% set taxed = enum('FlexyBundle\\Service\\TaxDisplay').Taxed %}
+{% set untaxed = enum('FlexyBundle\\Service\\TaxDisplay').Untaxed %}
+{% set tiers = price_tiers(taxed, [
+    {minQuantity: 1, price: 10.0, taxedPrice: 12.0},
+    {minQuantity: 10, price: 9.0, taxedPrice: 10.8},
+]) %}
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">The price</h4>
+        <p class="Story-note">
+            The price the shop shows this buyer, with the mention of their display. The figures arrive printed:
+            the component only prints them. The struck price is the catalog one, shown while the product is on sale.
+        </p>
+        <div class="Story-stage"><twig:Molecules:PriceBlock:Base :price="displayed_price(taxed, 100.0, 120.0)" /></div>
+        <div class="Story-stage"><twig:Molecules:PriceBlock:Base :price="displayed_price(untaxed, 80.0, 96.0)" :originalPrice="displayed_price(untaxed, 100.0, 120.0)" /></div>
+        <div class="Story-stage"><twig:Molecules:PriceBlock:Base variant="card" :price="displayed_price(taxed, 100.0, 120.0)" /></div>
+    </div>
+    <div class="Story-section">
+        <h4 class="Story-title">The tiers of a price list</h4>
+        <p class="Story-note">
+            Printed when the price changes with the quantity: more than one tier, or a first tier above one unit.
+            One tier from one unit is the price itself, and nothing is added.
+        </p>
+        <div class="Story-stage"><twig:Molecules:PriceBlock:Base :price="displayed_price(taxed, 10.0, 12.0)" :tiers="tiers" /></div>
+    </div>
+    <div class="Story-section">
+        <h4 class="Story-title">Prices shown to identified customers only</h4>
+        <p class="Story-note">
+            The shop (or the product) shows its prices to signed-in customers: a visitor reads no price and is invited
+            to sign in, with a way back to the page they were on.
+        </p>
+        <div class="Story-stage"><twig:Molecules:PriceBlock:Base mode="logged_in" :purchasable="false" returnUrl="/product.html" /></div>
+    </div>
+    <div class="Story-section">
+        <h4 class="Story-title">Price on request</h4>
+        <p class="Story-note">
+            Nobody is shown the price. The button leads to the contact page with the references of the item and never
+            an amount.
+        </p>
+        <div class="Story-stage"><twig:Molecules:PriceBlock:Base mode="on_request" :purchasable="false" reference="SKU-1" productReference="PRODUCT-1" /></div>
+    </div>
+    <div class="Story-section">
+        <h4 class="Story-title">Not on sale to this buyer</h4>
+        <p class="Story-note">A sale element an exclusive price list does not price: shown, not sold, and no price printed.</p>
+        <div class="Story-stage"><twig:Molecules:PriceBlock:Base :price="displayed_price(taxed, 100.0, 120.0)" :purchasable="false" /></div>
+    </div>
+</div>

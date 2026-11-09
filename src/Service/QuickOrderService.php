@@ -46,7 +46,10 @@ final readonly class QuickOrderService
      */
     public function resolve(Customer $customer, ReferenceQuantityLines $lines): QuickOrderTable
     {
-        return $this->quickOrderFacade->resolve($customer, $lines, $this->currency());
+        $cart = $this->cartFacade->getCartFromSession();
+
+        // The cart of the buyer decides the tier with what it already holds; a cart of somebody else never does.
+        return $this->quickOrderFacade->resolve($customer, $lines, $this->currency(), null !== $cart && (int) $cart->getCustomerId() === (int) $customer->getId() ? $cart : null);
     }
 
     /**

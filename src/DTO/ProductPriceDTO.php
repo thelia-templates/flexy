@@ -17,7 +17,12 @@ namespace FlexyBundle\DTO;
 class ProductPriceDTO
 {
     public string $currency = '';
-    public float $price = 0.0;
+    /**
+     * Null when the front API does not show the price to this caller (a shop or a product that
+     * shows its prices to identified customers only, or on request): the serializer leaves the
+     * field out, and the theme prints nothing in its place.
+     */
+    public ?float $price = null;
     public ?float $promoPrice = null;
     /**
      * The same two prices with their taxes, as the front API publishes them for the sale
@@ -36,8 +41,8 @@ class ProductPriceDTO
             $dto->currency = $data['currency']['code'] ?? '';
         }
 
-        $dto->price = isset($data['price']) ? (float) $data['price'] : 0.0;
-        $dto->promoPrice = array_key_exists('promoPrice', $data) ? (float) $data['promoPrice'] : null;
+        $dto->price = isset($data['price']) ? (float) $data['price'] : null;
+        $dto->promoPrice = isset($data['promoPrice']) ? (float) $data['promoPrice'] : null;
 
         $dto->taxedPrice = isset($data['taxedPrice']) ? (float) $data['taxedPrice'] : null;
         $dto->taxedPromoPrice = isset($data['taxedPromoPrice']) ? (float) $data['taxedPromoPrice'] : null;

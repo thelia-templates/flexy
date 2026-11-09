@@ -47,6 +47,11 @@ class Base extends AbstractProductCard
     /** The rule of the default sale element: it says what the reference price is per. */
     private ?QuantityRuleDTO $quantityRule = null;
 
+    /** Who the API shows the price to (`visible`, `logged_in`, `on_request`), whether the item may be bought, and what to quote in a request. */
+    private string $priceDisplayMode = 'visible';
+    private bool $purchasable = true;
+    private ?string $reference = null;
+
     /** @var RunningSaleResolver::forProduct()'s return type */
     private ?array $runningSaleTag = null;
 
@@ -85,11 +90,15 @@ class Base extends AbstractProductCard
             // of the group and of the customer included: the display of the group decides which
             // figure is printed, the product page reads the same two.
             $display = $this->display ?? $this->priceDisplay->forVisitor();
-            $prices = $defaultPse->productPrices[0];
-            $this->price = $prices->price;
-            $this->promoPrice = $prices->promoPrice;
-            $this->displayedPrice = $this->priceDisplay->ofProduct($display, $prices->price, $prices->taxedPrice);
-            $this->displayedPromoPrice = $this->priceDisplay->ofProduct($display, $prices->promoPrice, $prices->taxedPromoPrice) ?? $this->displayedPrice;
+            // The price row is absent, or empty, when the API does not show the price to this visitor.
+            $prices = $defaultPse->productPrices[0] ?? null;
+            $this->price = $prices?->price;
+            $this->promoPrice = $prices?->promoPrice;
+            $this->displayedPrice = $this->priceDisplay->ofProduct($display, $prices?->price, $prices?->taxedPrice);
+            $this->displayedPromoPrice = $this->priceDisplay->ofProduct($display, $prices?->promoPrice, $prices?->taxedPromoPrice) ?? $this->displayedPrice;
+            $this->priceDisplayMode = $defaultPse->priceDisplayMode;
+            $this->purchasable = $defaultPse->purchasable;
+            $this->reference = '' === $defaultPse->ref ? null : $defaultPse->ref;
             $this->isPromo = $defaultPse->promo;
             $this->displayInitialPrice = $defaultPse->displayInitialPrice;
             $this->isNew = $defaultPse->newness;
@@ -136,6 +145,40 @@ class Base extends AbstractProductCard
         return $this->displayedPromoPrice;
     }
 
+    /**
+     * What the card tells about the price: the API's own words, `visible`, `logged_in` or `on_request`.
+     */
+    public function getPriceDisplayMode(): string
+    {
+        return $this->priceDisplayMode;
+    }
+
+    public function getPurchasable(): bool
+    {
+        return $this->purchasable;
+    }
+
+    public function getReference(): ?string
+    {
+        return $this->reference;
+    }
+
+    /**
+     * The price the buyer pays, struck price apart: the promotional one while the product is on promotion.
+     */
+    public function getShownPrice(): ?DisplayedPrice
+    {
+        return $this->isPromo ? $this->displayedPromoPrice : $this->displayedPrice;
+    }
+
+    /**
+     * The catalog price struck beside the price paid, when the promotion is to be shown.
+     */
+    public function getStruckPrice(): ?DisplayedPrice
+    {
+        return $this->getShowsInitialPrice() ? $this->displayedPrice : null;
+    }
+
     public function getIsPromo()
     {
         return $this->isPromo;
@@ -148,7 +191,8 @@ class Base extends AbstractProductCard
      */
     public function getShowsInitialPrice(): bool
     {
-        return $this->isPromo && $this->displayInitialPrice;
+        // No price to strike when the API does not show it to the visitor.
+        return $this->isPromo && $this->displayInitialPrice && null !== $this->displayedPrice;
     }
 
     public function getQuantityRule(): ?QuantityRuleDTO

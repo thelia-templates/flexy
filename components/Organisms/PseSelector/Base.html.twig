@@ -14,6 +14,7 @@
 {# @prop cartRefusalReason string The reason a module gave with its refusal, printed escaped after the sentence #}
 {# @prop bundlePricing array|null The price of the composition a shopper picked on a bundle priced by its components, taxes included: {price, originalPrice, saving}. Replaces the price of the sale element #}
 {# @prop bundleUnavailable bool The bundle cannot be sold as it stands (a required component is no longer offered) #}
+{# @prop productReference string|null Reference of the product, quoted with the request for a price #}
 {% props
     form,
     productAttrs = [],
@@ -28,6 +29,7 @@
     cartRefusalReason = '',
     bundlePricing = null,
     bundleUnavailable = false,
+    productReference = null,
     quantityRule = null,
     quantityValue = null,
     quantityChoices = []
@@ -173,15 +175,18 @@
         {{ form_widget(form.quantity, {type: 'hidden'}) }}
     {% else %}
         {# Both amounts of each price come from the core, which has priced the group and the
-           discounts of the visitor into them: the display of the group only picks one. #}
+           discounts of the visitor into them: the display of the group only picks one. What
+           the core says about who is shown the price and who may buy it is read as it comes
+           (see priceFacts): the sheet applies no rule of its own. #}
+        {% set facts = this.priceFacts(currentPse) %}
         {% set display = visitor_tax_display() %}
-        {% set catalogPrice = displayed_price(display, currentPse.untaxedPrice|default(null), currentPse.price|default(null)) %}
-        {% set chargedPrice = currentPse.isPromo
-            ? displayed_price(display, currentPse.promoUntaxedPrice|default(null), currentPse.promoPrice|default(null))
-            : catalogPrice %}
-        {# Flex items are blockified: dir="ltr" goes on an inner inline span, so the box keeps
-           resolving its own alignment against the page. #}
-        {% if bundlePricing %}
+        {% set catalogPrice = facts.showsPrice ? displayed_price(display, currentPse.untaxedPrice|default(null), currentPse.price|default(null)) : null %}
+        {% set chargedPrice = facts.showsPrice
+            ? (currentPse.isPromo
+                ? displayed_price(display, currentPse.promoUntaxedPrice|default(null), currentPse.promoPrice|default(null))
+                : catalogPrice)
+            : null %}
+        {% if bundlePricing and facts.showsPrice %}
             <twig:Molecules:Price:Base
                 class="PseSelector-price"
                 :price="bundlePricing.price"
@@ -189,18 +194,18 @@
                 :saving="bundlePricing.saving"
             />
         {% else %}
-            <div class="PseSelector-price">
-                {% if chargedPrice %}
-                    <strong class="h4">
-                        <span dir="ltr">{{ chargedPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="chargedPrice.display" />
-                    </strong>
-                {% endif %}
-                {% if catalogPrice and currentPse.isPromo and currentPse.displayInitialPrice|default(true) %}
-                    <span class="PseSelector-originalPrice paragraph-4">
-                        <span dir="ltr">{{ catalogPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>
-                    </span>
-                {% endif %}
-            </div>
+            <twig:Molecules:PriceBlock:Base
+                class="PseSelector-price"
+                variant="sheet"
+                originalClass="PseSelector-originalPrice"
+                :mode="facts.mode"
+                :price="chargedPrice"
+                :originalPrice="catalogPrice and currentPse.isPromo and currentPse.displayInitialPrice|default(true) ? catalogPrice : null"
+                :purchasable="facts.purchasable"
+                :tiers="price_tiers(display, facts.tiers)"
+                :reference="currentPse.ref|default(null)"
+                :productReference="productReference"
+            />
             {# The price per litre, per kilogram: of the price shown above, promotion included, and only
                for a sale element that says what one unit sold contains. #}
             {% set referencePrice = chargedPrice ? reference_unit_price(chargedPrice.amount, rule) : null %}
@@ -211,7 +216,10 @@
             {% endif %}
         {% endif %}
 
-        {% if maxQuantityReached %}
+        {% if not facts.purchasable %}
+            {# Nothing to add: no quantity, no button. The selector above stays usable, the sheet says why. #}
+            {{ form_widget(form.quantity, {type: 'hidden'}) }}
+        {% elseif maxQuantityReached %}
             <twig:Molecules:SnackBar:Base
                 variant="warning"
                 withIcon
@@ -262,7 +270,7 @@
         {{ theme_hook('product.pse.alerts', {
             pseId: currentPse.id,
             outOfStock: outOfStock,
-            taxedPrice: bundlePricing ? bundlePricing.price : (currentPse.isPromo ? currentPse.promoPrice : currentPse.price),
+            taxedPrice: this.alertPrice(currentPse, bundlePricing ? bundlePricing.price : null),
         }) }}
     {% endif %}
 </div>

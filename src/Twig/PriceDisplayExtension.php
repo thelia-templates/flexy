@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Twig;
 
 use FlexyBundle\DTO\DisplayedPrice;
+use FlexyBundle\DTO\DisplayedPriceTier;
 use FlexyBundle\Service\PriceDisplay;
 use FlexyBundle\Service\TaxDisplay;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -65,6 +66,7 @@ class PriceDisplayExtension extends AbstractExtension
         return [
             new TwigFunction('visitor_tax_display', [$this, 'visitorTaxDisplay']),
             new TwigFunction('displayed_price', [$this, 'displayedPrice']),
+            new TwigFunction('price_tiers', [$this, 'priceTiers']),
             new TwigFunction('order_total', [$this, 'orderTotal']),
         ];
     }
@@ -82,6 +84,18 @@ class PriceDisplayExtension extends AbstractExtension
     public function orderTotal(array $order): DisplayedPrice
     {
         return $this->priceDisplay->orderTotal($this->priceDisplay->forOrder($order), $order);
+    }
+
+    /**
+     * The tiers of a price list in the display of the buyer, for the table of tiers of a product sheet.
+     *
+     * @param list<array<string, mixed>> $priceTiers
+     *
+     * @return list<DisplayedPriceTier>
+     */
+    public function priceTiers(TaxDisplay $display, array $priceTiers): array
+    {
+        return $this->priceDisplay->tiers($display, $priceTiers);
     }
 
     public function displayedPrice(TaxDisplay $display, ?float $untaxed, ?float $taxed): ?DisplayedPrice

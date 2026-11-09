@@ -700,3 +700,12 @@ Pre-order: Précommande
 reference_unit_price: '%price% / %unit%'
 only_quantity_left_in_stock: '%title% : il n''en reste que %count% en stock.'
 Not enough stock for the smallest quantity this product is sold in: Le stock ne suffit pas pour la plus petite quantité vendue de ce produit
+
+# Price lists and price display modes: what a buyer is told instead of, or beside, a price
+'From %quantity%:': 'À partir de %quantity% :'
+'Log in to see the prices': 'Connectez-vous pour voir les prix'
+'Price on request': 'Prix sur demande'
+'Price by quantity': 'Prix par quantité'
+'Request a price': 'Demander un tarif'
+'Not available for purchase': 'Non disponible à l''achat'
+'Price request for %reference%': 'Demande de tarif pour %reference%'

@@ -86,7 +86,7 @@ The points are part of the theme's public surface: their names and parameters ar
 | `category.top`, `category.bottom` | Category page | `category` |
 | `brand.top`, `brand.bottom` | Brand page | `brand` |
 | `product.top`, `product.details.bottom`, `product.content`, `product.bottom` | Product page (`product.content`: after the description, before the related products) | `product` |
-| `product.pse.alerts` | Under the variant selector, outside the cart form | `pseId`, `outOfStock`, `taxedPrice` |
+| `product.pse.alerts` | Under the variant selector, outside the cart form | `pseId`, `outOfStock`, `taxedPrice` (`null` when the buyer is not shown the price: a module types it nullable) |
 | `product-card.bottom` | Product card of every listing, under the price, outside the card links | `productId` |
 | `cart.top`, `cart.bottom` | Cart page (and one-page checkout) | — |
 | `cart.item.bottom` | Each cart line | `cartItem` |

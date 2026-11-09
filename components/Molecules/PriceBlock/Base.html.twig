@@ -1,0 +1,70 @@
+{# @prop mode string visible, logged_in or on_request, as the front API publishes it #}
+{# @prop price DisplayedPrice|null What the buyer pays, in their display; null when the API did not show it to them #}
+{# @prop originalPrice DisplayedPrice|null The catalog price struck through beside it #}
+{# @prop purchasable bool Whether the caller may put the item in a cart #}
+{# @prop tiers array The tiers of the price list that prices the item for the buyer (DisplayedPriceTier), the table is printed when the price changes with the quantity #}
+{# @prop variant string sheet (product page) or card (listing) #}
+{# @prop originalClass string Class of the struck price of the sheet variant, owned by the host's stylesheet #}
+{# @prop reference string|null Reference of the sale element, passed to the contact page by the request for a price #}
+{# @prop productReference string|null Reference of the product, same use #}
+{# @prop actions bool Whether the invitation to sign in and the request for a price come with their button; false inside a link (a suggestion row), where only the wording stays #}
+{# @prop returnUrl string|null The page to come back to after signing in; the page being served when not given #}
+{# Four ways to tell a price, one per answer of the core (see Base.php): the price, an invitation to sign in, an invitation to ask, an item that is not on sale to this buyer (its public price stays, with the mention that it cannot be bought here, and no table of tiers). Nothing is printed when the core has nothing to say. The component never chooses a figure and never calculates: the amounts arrive printed, with their mention. aria-* attributes are stripped from the page by the HTML cleaner: the meaning is carried by the text. #}
+{% set state = this.state %}
+{% if state == 'price' or state == 'unavailable' %}
+    {% set stateClass = state == 'unavailable' ? 'PriceBlock--unavailable ' : '' %}
+    {% if this.variant == 'card' %}
+        <div class="{{ ('PriceBlock PriceBlock--card ' ~ stateClass ~ 'flex flex-col items-start ' ~ attributes.render('class'))|tailwind_merge }}" data-price-state="{{ state }}" {{ attributes.without('class') }}>
+            <div class="ProductCard-price"><span dir="ltr">{{ this.price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.price.display" /></div>
+            {% if state == 'price' and this.originalPrice %}
+                <div class="ProductCard-originalPrice"><span dir="ltr">{{ this.originalPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
+            {% endif %}
+            {% if state == 'unavailable' %}
+                <p class="PriceBlock-text paragraph-3" data-testid="price-unavailable">{{ 'Not available for purchase'|trans }}</p>
+            {% endif %}
+        </div>
+    {% else %}
+        {# Flex items are blockified: dir="ltr" goes on an inner inline span, so the box keeps resolving its own alignment against the page. #}
+        <div class="{{ ('PriceBlock PriceBlock--sheet ' ~ stateClass ~ 'flex flex-wrap items-baseline gap-x-4 gap-y-1 ' ~ attributes.render('class'))|tailwind_merge }}" data-price-state="{{ state }}" {{ attributes.without('class') }}>
+            <strong class="h4">
+                <span dir="ltr">{{ this.price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.price.display" />
+            </strong>
+            {% if state == 'price' and this.originalPrice %}
+                <span class="{{ ('paragraph-4 ' ~ this.originalClass)|trim }}">
+                    <span dir="ltr">{{ this.originalPrice.amount|format_currency(current_currency_code(), locale: lang_code) }}</span>
+                </span>
+            {% endif %}
+            {% if state == 'price' and this.showsTiers %}
+                {# The title is text, not an aria-labelledby: the HTML cleaner strips aria-* attributes from the page. #}
+                <div class="PriceBlock-tiersBlock basis-full">
+                    <p class="PriceBlock-tiersTitle paragraph-4 font-semibold" data-testid="price-tiers-title">{{ 'Price by quantity'|trans }}</p>
+                    <ul class="PriceBlock-tiers paragraph-4 flex flex-col gap-0.5" data-testid="price-tiers">
+                        {% for tier in this.tiers %}
+                            <li class="PriceBlock-tier" data-min-quantity="{{ tier.minQuantity }}">
+                                <span class="PriceBlock-tierFrom font-semibold">{{ 'From %quantity%:'|trans({'%quantity%': tier.minQuantity}) }}</span>
+                                <span dir="ltr">{{ tier.price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="tier.price.display" />
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            {% if state == 'unavailable' %}
+                <p class="PriceBlock-text paragraph-3 basis-full" data-testid="price-unavailable">{{ 'Not available for purchase'|trans }}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+{% elseif state == 'hidden' %}
+    <div class="{{ ('PriceBlock PriceBlock--hidden flex flex-col items-start gap-2 ' ~ attributes.render('class'))|tailwind_merge }}" data-price-state="hidden" {{ attributes.without('class') }}>
+        <p class="PriceBlock-text paragraph-3">{{ 'Log in to see the prices'|trans }}</p>
+        {% if this.actions %}
+            <twig:Molecules:Button:Base href="{{ this.loginUrl }}" text="{{ 'Log in'|trans }}" color="secondary" data-testid="price-login" />
+        {% endif %}
+    </div>
+{% elseif state == 'on_request' %}
+    <div class="{{ ('PriceBlock PriceBlock--onRequest flex flex-col items-start gap-2 ' ~ attributes.render('class'))|tailwind_merge }}" data-price-state="on_request" {{ attributes.without('class') }}>
+        <p class="PriceBlock-text paragraph-3">{{ 'Price on request'|trans }}</p>
+        {% if this.actions %}
+            <twig:Molecules:Button:Base href="{{ this.requestUrl }}" text="{{ 'Request a price'|trans }}" color="secondary" data-testid="price-request" />
+        {% endif %}
+    </div>
+{% endif %}
