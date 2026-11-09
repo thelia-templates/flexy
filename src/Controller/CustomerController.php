@@ -128,7 +128,7 @@ class CustomerController extends FlexyController
             } catch (UserNotFoundException|WrongPasswordException) {
                 // Both cases must be indistinguishable: a message specific to an unknown
                 // email would tell an attacker which addresses have an account here.
-                $message = $this->getTranslator()->trans('Wrong email or password. Please try again');
+                $message = $this->getTranslator()->trans('Wrong email or password. Please try again.');
             } catch (CustomerNotConfirmedException $e) {
                 // The password has been checked before this point, so the visitor owns
                 // the account: put it back in the activation flow the registration uses,
