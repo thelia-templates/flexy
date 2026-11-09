@@ -27,8 +27,19 @@
         {% block contactForm %}
             {{ form_start(form, {attr: {class: 'flex flex-col gap-4'}}) }}
 
+            {# "Request a price" leads here with the reference of the item: the message is started for the
+               buyer with that reference and nothing else (no amount), and a message already typed or
+               sent back with an error is never replaced. Only text is accepted from the query. #}
+            {% set query = app.request.query.all %}
+            {% set askedReference = query.pse_ref|default(query.product_ref|default('')) %}
+            {% set askedReference = askedReference is iterable ? '' : askedReference|replace({"\n": ' ', "\r": ' '})|trim|slice(0, 100) %}
+            {% set messageStart = form.message.vars.value is empty and askedReference ? 'Price request for %reference%'|trans({'%reference%': askedReference}) : form.message.vars.value %}
+
             {# RGAA 11.13: the purpose of the name field is declared for autofill. #}
             {{ form_row(form.name, {attr: {autocomplete: 'name'}}) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.subject) }}
+            {{ form_row(form.message, {value: messageStart}) }}
             {{ form_rest(form) }}
 
             <twig:Molecules:Button:Base
