@@ -82,6 +82,9 @@
             :bundlePricing="bundle ? bundle.pricing : null"
             :bundleUnavailable="bundle ? bundle.unavailable : false"
             :productReference="this.productRef"
+            :subscriptionPlans="subscriptionPlans"
+            :selectedPlan="selectedPlan"
+            :subscriptionSignedIn="this.subscriptionSignedIn()"
         />
 
         {% set restrictions = this.destinationRestrictions %}

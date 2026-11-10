@@ -15,6 +15,9 @@
 {# @prop bundlePricing array|null The price of the composition a shopper picked on a bundle priced by its components, taxes included: {price, originalPrice, saving}. Replaces the price of the sale element #}
 {# @prop bundleUnavailable bool The bundle cannot be sold as it stands (a required component is no longer offered) #}
 {# @prop productReference string|null Reference of the product, quoted with the request for a price #}
+{# @prop subscriptionPlans array The visible plans of the product (see SubscriptionPlanOffers); none: the sheet sells one-off only #}
+{# @prop selectedPlan int The plan chosen, 0 for a one-time purchase; bound to the `selectedPlan` model of the product component #}
+{# @prop subscriptionSignedIn bool The visitor may order a plan; otherwise the plans come with an invitation to sign in #}
 {% props
     form,
     productAttrs = [],
@@ -32,7 +35,10 @@
     productReference = null,
     quantityRule = null,
     quantityValue = null,
-    quantityChoices = []
+    quantityChoices = [],
+    subscriptionPlans = [],
+    selectedPlan = 0,
+    subscriptionSignedIn = false
 %}
 
 {# The Flexy form theme is no longer global: without this the widgets below silently fall back to
@@ -214,6 +220,16 @@
                     {{ 'reference_unit_price'|trans({'%price%': referencePrice.price|format_currency(current_currency_code(), locale: lang_code), '%unit%': referencePrice.per}) }}
                 </p>
             {% endif %}
+        {% endif %}
+
+        {% if subscriptionPlans|length and facts.purchasable %}
+            <twig:Organisms:SubscriptionPlanChooser:Base
+                :plans="subscriptionPlans"
+                :selectedPlan="selectedPlan"
+                :signedIn="subscriptionSignedIn"
+                :display="display"
+                class="PseSelector-plans"
+            />
         {% endif %}
 
         {% if not facts.purchasable %}
