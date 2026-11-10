@@ -20,6 +20,7 @@ use FlexyBundle\Service\CheckoutStockHold;
 use FlexyBundle\Service\InstantPaymentParts;
 use FlexyBundle\Service\PaymentOptionChoice;
 use FlexyBundle\Service\PaymentOptionChoiceStore;
+use FlexyBundle\Service\Subscription\SubscriptionLineView;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -109,6 +110,8 @@ class Base
         private readonly PaymentOptionChoiceStore $paymentOptionChoiceStore,
         private readonly InstantPaymentParts $instantPaymentParts,
         private readonly CheckoutStockHold $stockHold,
+        // Optional: a core without subscriptions has no such service, and a unit test builds this component by hand.
+        private readonly ?SubscriptionLineView $subscriptionLineView = null,
     ) {
     }
 
@@ -120,6 +123,17 @@ class Base
         $this->refillFromTheCart();
         $this->consentAcceptances = $this->consentAcceptanceStore->all();
         $this->paymentOptionChoices = $this->paymentOptionChoiceStore->all();
+    }
+
+    /**
+     * The installments the buyer is about to take on, when the cart holds a plan line: its period, the commitment, the
+     * price of one installment and the date of the first one (see SubscriptionLineView). Null for any other cart.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getSubscriptionReminder(): ?array
+    {
+        return $this->subscriptionLineView?->ofCart($this->cartFacade->getOrCreateFromSession());
     }
 
     public function getModules(): array

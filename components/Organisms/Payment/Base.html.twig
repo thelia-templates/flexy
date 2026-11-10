@@ -8,6 +8,32 @@
     </{{ this.headingLevel }}>
     {% set parts = this.parts %}
 
+    {% set reminder = this.subscriptionReminder %}
+    {% if reminder %}
+        {% import '@theme_flexy/subscription-macros.html.twig' as sub %}
+        <section class="my-5 p-4 bg-grey-lightest paragraph-3" aria-labelledby="payment-subscription-title" data-testid="payment-subscription-reminder">
+            <h{{ this.partsHeadingLevel|slice(1) }} id="payment-subscription-title" class="h5 mb-2">{{ 'Your next installments'|trans }}</h{{ this.partsHeadingLevel|slice(1) }}>
+            <ul class="flex flex-col gap-1">
+                {% if reminder.price %}
+                    <li>
+                        <span dir="ltr">{{ reminder.price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="reminder.price.display" />
+                        {{ sub.period(reminder.periodUnit, reminder.periodCount)|lower }}{% if reminder.quantity > 1 %}, {{ 'for each of the %count% units'|trans({'%count%': reminder.quantity}) }}{% endif %}
+                    </li>
+                {% endif %}
+                {% if reminder.firstInstallmentOn %}
+                    <li>{{ sub.trial(reminder.trialDays) }}. {{ 'First installment on %date%'|trans({'%date%': reminder.firstInstallmentOn|format_date('long', locale: lang_code)}) }}</li>
+                {% endif %}
+                {% if reminder.commitmentCount %}
+                    <li>{{ sub.commitment(reminder.commitmentCount) }}</li>
+                {% endif %}
+                {% if reminder.installmentCount %}
+                    <li>{{ sub.installments(reminder.installmentCount) }}</li>
+                {% endif %}
+                <li>{{ 'The following installments are charged to the payment method you choose, without further action from you.'|trans }}</li>
+            </ul>
+        </section>
+    {% endif %}
+
     {% if this.notice == 'stored_method_refused' %}
         <twig:Molecules:SnackBar:Base
             variant="warning"
