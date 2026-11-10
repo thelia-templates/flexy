@@ -1,0 +1,27 @@
+{% set plans = [
+    {id: 1, title: 'Monthly box', periodUnit: 'month', periodCount: 1, trialDays: 0, installmentCount: null, commitmentCount: 3, pausable: true, priceUntaxed: 9.9, priceTaxed: 11.88},
+    {id: 2, title: 'Quarterly box with trial', periodUnit: 'quarter', periodCount: 1, trialDays: 14, installmentCount: 4, commitmentCount: null, pausable: false, priceUntaxed: 24.9, priceTaxed: 29.88},
+] %}
+<div class="Story">
+<div class="Story-section">
+    <h4 class="Story-title">Base (signed-in customer)</h4>
+    <p class="Story-label">
+        The choice between a one-time purchase and a subscription plan, on the product sheet: period, price of one
+        installment as the buyer reads prices, trial, commitment, number of installments and whether the plan can be
+        paused. In the product component the radios are bound to its `selectedPlan` model; here they only show the states.
+    </p>
+    <div class="Story-stage Story-stage--roomy">
+        <twig:Organisms:SubscriptionPlanChooser:Base :plans="plans" :selectedPlan="2" :signedIn="true" :display="visitor_tax_display()" />
+    </div>
+</div>
+<div class="Story-section">
+    <h4 class="Story-title">Base (visitor not signed in)</h4>
+    <p class="Story-label">
+        The plans are shown disabled, with an invitation to sign in: the core refuses a subscription to a visitor who
+        is not a signed-in customer.
+    </p>
+    <div class="Story-stage Story-stage--roomy">
+        <twig:Organisms:SubscriptionPlanChooser:Base :plans="plans" :selectedPlan="0" :signedIn="false" name="plan_choice_guest" :display="visitor_tax_display()" />
+    </div>
+</div>
+</div>
