@@ -21,6 +21,7 @@ use FlexyBundle\Service\BundleLines;
 use FlexyBundle\Service\CartStockService;
 use FlexyBundle\Service\PriceDisplay;
 use FlexyBundle\Service\ProductSaleElementsService;
+use FlexyBundle\Service\Subscription\SubscriptionLineView;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
@@ -54,6 +55,13 @@ class Base
     public array $attributesAv = [];
     /** What tells the shopper this pack can no longer be ordered as it is; empty for any line the order can take. */
     public string $unorderableMessage = '';
+    /**
+     * What a line bought on a subscription plan says about it (period, trial, first installment date, price of an
+     * installment); null for every other line and on a core without subscriptions. Codes and numbers: the template writes the sentences.
+     *
+     * @var array<string, mixed>|null
+     */
+    public ?array $subscription = null;
 
     public function __construct(
         private readonly ProductSaleElementsService $pseService,
@@ -64,6 +72,8 @@ class Base
         #[Autowire(service: 'translator')]
         private readonly TranslatorInterface $translator,
         private readonly PriceDisplay $priceDisplay,
+        // Optional: a core without subscriptions has no such service, and a unit test builds this component by hand.
+        private readonly ?SubscriptionLineView $subscriptionLineView = null,
     ) {
     }
 
@@ -144,6 +154,10 @@ class Base
             $this->unorderableMessage = '' !== $cartItem->bundleRefusal
                 ? $cartItem->bundleRefusal
                 : BundleLines::notOrderableMessage($this->translator, (string) $product->getRef());
+        }
+
+        if (null !== $this->subscriptionLineView && method_exists($cartItemModel, 'getSubscriptionPlanId')) {
+            $this->subscription = $this->subscriptionLineView->ofLine($cartItemModel);
         }
 
         $this->promo = (bool) $cartItemModel->getPromo();
