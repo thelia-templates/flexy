@@ -39,4 +39,18 @@ final class QuickOrderTableRejectedLineTest extends KernelTestCase
             html_entity_decode($html),
         );
     }
+
+    public function testTheStockOfARefusedLineIsWrittenAsItIsNotRoundedDown(): void
+    {
+        $request = Request::create('/account/quick-order');
+        $request->setSession(new Session(new MockArraySessionStorage()));
+        self::getContainer()->get('request_stack')->push($request);
+        self::getContainer()->get('twig')->addGlobal('lang_code', 'en');
+
+        $html = self::getContainer()->get('twig')->createTemplate(
+            '<twig:Organisms:QuickOrderTable:Base :rows="[{key: \'k1\', reference: \'ecrou-m6\', quantity: 50}]" :lines="[{reference: \'ecrou-m6\', quantity: 50, status: \'quantity_refused\', title: \'Hexagon nut M6\', availableQuantity: 7.5, candidates: []}]" />'
+        )->render();
+
+        self::assertStringContainsString('7.5 in stock', html_entity_decode($html));
+    }
 }

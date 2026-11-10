@@ -176,7 +176,8 @@
                             {% if line %}
                                 <twig:Molecules:Tag:Base color="{{ statusColors[line.status]|default('neutral') }}" customText="{{ statusLabels[line.status]|default('') }}" />
                                 {% if line.status == 'quantity_refused' and line.availableQuantity is not null %}
-                                    <span class="QuickOrderTable-detail">{{ '%quantity% in stock'|trans({'%quantity%': line.availableQuantity|round(0, 'floor')}) }}</span>
+                                    {# The stock as it is, 7.5 and not 7: the line carries neither decimals nor unit, so the number is written to three decimals at most, without trailing zeros. #}
+                                    <span class="QuickOrderTable-detail">{{ '%quantity% in stock'|trans({'%quantity%': line.availableQuantity|format_number({max_fraction_digit: 3})}) }}</span>
                                 {% endif %}
                                 {% if line.status == 'destination_refused' and line.refusalReason|default(null) %}
                                     <span class="QuickOrderTable-detail" data-testid="quick-order-destination-reason">{{ line.refusalReason }}</span>
