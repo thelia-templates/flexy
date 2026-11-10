@@ -665,7 +665,9 @@ class Base
         // typed value above the stock cannot trigger a 422. getRemainingStock() returns
         // PHP_INT_MAX when stock is not managed. Clamped to the last quantity the rule accepts
         // under the stock, not to the stock itself: seven left of a lot of six is six, not a
-        // seven the cart would refuse.
+        // seven the cart would refuse. When the stock is under the smallest quantity the rule
+        // accepts (four left of a minimum of six) no valid quantity exists: the stock itself is
+        // submitted, out of the rule on purpose, and the cart then refuses it with its message.
         $remainingStock = $this->getRemainingStock();
         $requested = CartQuantity::typed($this->formValues['quantity'] ?? 1);
 
