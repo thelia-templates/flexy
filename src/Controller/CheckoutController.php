@@ -43,6 +43,7 @@ use Thelia\Domain\Checkout\CheckoutFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
 use Thelia\Domain\Checkout\DTO\CheckoutViolation;
 use Thelia\Domain\Checkout\Enum\CheckoutViolationCode;
+use Thelia\Domain\Checkout\Exception\CartQuantitiesAdjustedException;
 use Thelia\Domain\Checkout\Exception\CheckoutException;
 use Thelia\Domain\Checkout\Exception\EmptyCartException;
 use Thelia\Domain\Checkout\Exception\GuestCheckoutNotAllowedException;
@@ -487,6 +488,12 @@ class CheckoutController extends FlexyController
             $this->addFlash('error', $this->translator->trans('The prices of your cart have changed. Check your cart before paying.'));
 
             throw new RedirectException($routes->pathFor(CheckoutStep::CODE_CART), Response::HTTP_FOUND);
+        } catch (CartQuantitiesAdjustedException) {
+            // The core brought lines back to how their product is sold and refused this one placement so that
+            // the buyer reads the cart again. The adjustment flashes (QuantityAdjustedFlashListener) already tell
+            // each line, shown by the page: the generic refusal below would add a second, vaguer message
+            // ("Quantities of your cart were adjusted...") on top of them. Nothing but the cart is shown.
+            throw new RedirectException($routes->pathOfTheFirstIncompleteStep($cart), Response::HTTP_FOUND);
         } catch (CheckoutException $e) {
             // A refusal the theme knows nothing about: the step of a module (a minimum
             // order amount, an age check) refusing the cart at placement. Answered as the
