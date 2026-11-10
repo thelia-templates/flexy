@@ -8,3 +8,8 @@ framework:
             policy: sliding_window
             limit: 60
             interval: '1 hour'
+
+        flexy_product_search:
+            policy: sliding_window
+            limit: 120
+            interval: '1 minute'

@@ -155,6 +155,10 @@ public function productIds(string $term, string $locale, int $limit): array; // 
 
 The engine only says which products match. The theme keeps the rest: it drops the products a visitor may not see, paginates, and reads the page through the product API. With no sort chosen the results follow the engine's order; a sort chosen in the selector applies to the matches. An engine returning `[]` means no result: the theme does not fall back on its own search.
 
+Without such a module, a search engine plugged into the core (`Thelia\Domain\Search\Contract\SearchEngineInterface`) answers through `Thelia\Domain\Search\SearchService`: the core's term rewriters (synonyms) apply, and a submitted search whose term a `SearchRedirectResolverInterface` maps to a page lands on that page, on its first page only, unsorted. When the core's engine is unavailable or fails, the `title` filter answers instead.
+
+Each client may ask an engine, the theme's or the core's, 120 times a minute (`flexy_product_search` rate limiter, keyed on the client IP). Past it the `title` filter answers, so a robot walking terms cannot wear the engine out and a visitor still gets results.
+
 ### Account menu
 
 The account navigation, in the sub-header of the account pages and in the profile dropdown, is gathered from the services implementing `FlexyBundle\AccountMenu\AccountMenuItemProviderInterface`. Autoconfiguration tags them: a module whose `configureServices()` loads its classes with `->autoconfigure()` declares nothing else.

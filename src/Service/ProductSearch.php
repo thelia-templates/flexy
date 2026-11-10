@@ -17,11 +17,18 @@ namespace FlexyBundle\Service;
 use FlexyBundle\DTO\ProductDTO;
 use FlexyBundle\Search\ProductSearchEngineInterface;
 use FlexyBundle\Search\VisibleProductIds;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 use Thelia\Core\Event\Product\ProductSearchedEvent;
 use Thelia\Domain\Localization\Service\LangService;
+use Thelia\Domain\Search\Document\SearchQuery;
+use Thelia\Domain\Search\Provider\ProductDocumentProvider;
+use Thelia\Domain\Search\SearchService;
 
 /**
  * Single entry point for product search: the search page, the listing and the suggestions all
@@ -65,6 +72,11 @@ final readonly class ProductSearch
         #[AutowireIterator('flexy.product_search_engine')]
         iterable $engines = [],
         private ?VisibleProductIds $visibleProductIds = null,
+        private ?SearchService $coreSearch = null,
+        #[Autowire(service: 'limiter.flexy_product_search')]
+        private ?RateLimiterFactoryInterface $searchLimiter = null,
+        private ?RequestStack $requestStack = null,
+        private ?LoggerInterface $logger = null,
     ) {
         $engine = null;
 
@@ -86,8 +98,10 @@ final readonly class ProductSearch
             return ['products' => [], 'total' => 0];
         }
 
-        if ($this->engine !== null) {
-            return $this->searchWithEngine($this->engine, trim($term), max(1, $page), $itemsPerPage, $sort);
+        $matches = $this->engineMatches(trim($term));
+
+        if ($matches !== null) {
+            return $this->searchWithEngine($matches, max(1, $page), $itemsPerPage, $sort);
         }
 
         return $this->fetch($this->parameters(['title' => trim($term)], $page, $itemsPerPage, $sort));
@@ -117,6 +131,80 @@ final readonly class ProductSearch
     }
 
     /**
+     * @return list<int>|null
+     */
+    private function engineMatches(string $term): ?array
+    {
+        $coreEngine = $this->engine === null && $this->coreSearch?->hasEngine() === true;
+
+        if ($this->engine === null && !$coreEngine) {
+            return null;
+        }
+
+        if (!$this->engineAllowed()) {
+            return null;
+        }
+
+        $locale = (string) $this->langService->getLocale();
+
+        if ($this->engine !== null) {
+            return array_map('intval', $this->engine->productIds($term, $locale, self::ENGINE_LIMIT));
+        }
+
+        return $this->coreEngineMatches($term, $locale);
+    }
+
+    /**
+     * @return list<int>|null
+     */
+    private function coreEngineMatches(string $term, string $locale): ?array
+    {
+        \assert($this->coreSearch !== null);
+        $ids = [];
+
+        for ($offset = 0; $offset < self::ENGINE_LIMIT; $offset += SearchQuery::MAX_LIMIT) {
+            $result = $this->coreSearch->search(new SearchQuery(
+                $term,
+                $locale,
+                families: [ProductDocumentProvider::FAMILY],
+                limit: min(SearchQuery::MAX_LIMIT, self::ENGINE_LIMIT - $offset),
+                offset: $offset,
+            ));
+
+            if ($result === null) {
+                return null;
+            }
+
+            foreach ($result->hits as $hit) {
+                $ids[] = $hit->id;
+            }
+
+            if (\count($result->hits) < SearchQuery::MAX_LIMIT || $offset + SearchQuery::MAX_LIMIT >= $result->total) {
+                break;
+            }
+        }
+
+        return $ids;
+    }
+
+    private function engineAllowed(): bool
+    {
+        $request = $this->requestStack?->getMainRequest();
+
+        if ($this->searchLimiter === null || $request === null) {
+            return true;
+        }
+
+        if ($this->searchLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
+            return true;
+        }
+
+        $this->logger?->notice('Product search rate limit reached: the database answers instead of the search engine.');
+
+        return false;
+    }
+
+    /**
      * The engine's matches are first narrowed to the visible ones, so that both paths paginate
      * the same list and agree on the total.
      *
@@ -126,14 +214,13 @@ final readonly class ProductSearch
      * would scatter the best match anywhere in the results. Page n is thus always the n-th slice
      * of one ordered list, whatever the page size.
      *
+     * @param list<int> $matches
+     *
      * @return array{products: list<ProductDTO>, total: int}
      */
-    private function searchWithEngine(ProductSearchEngineInterface $engine, string $term, int $page, int $itemsPerPage, ?string $sort): array
+    private function searchWithEngine(array $matches, int $page, int $itemsPerPage, ?string $sort): array
     {
-        $ids = array_values(array_unique(array_map(
-            'intval',
-            $engine->productIds($term, (string) $this->langService->getLocale(), self::ENGINE_LIMIT),
-        )));
+        $ids = array_values(array_unique($matches));
 
         if ($this->visibleProductIds !== null) {
             $ids = $this->visibleProductIds->filter($ids);
