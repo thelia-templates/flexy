@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+{% import '@theme_flexy/subscription-macros.html.twig' as sub %}
+
+{% block title %}{{ 'Cancel the subscription'|trans }}{% endblock %}
+
+{% block body %}
+    <twig:Layouts:Subheader:Account
+        title="{{ 'My subscriptions'|trans }}"
+        selected="subscriptions"
+        :breadcrumb="[
+            {title: 'My account'|trans, url: path('account_index')},
+            {title: 'My subscriptions'|trans, url: path('account_subscriptions')},
+            {title: subscription.ref, url: path('account_subscription_show', {id: subscription.id})},
+            {title: 'Cancel the subscription'|trans},
+        ]"
+    />
+
+    <div class="container-l pt-6 pb-20 md:pt-11 md:pb-30">
+        <div class="flex flex-col max-w-screen-md mx-auto gap-6" data-testid="subscription-cancel">
+            <h2 class="h4">{{ 'Are you sure you want to cancel this subscription?'|trans }}</h2>
+            <p class="paragraph-3"><bdi>{{ subscription.productTitle }}</bdi> ({{ sub.period(subscription.periodUnit, subscription.periodCount)|lower }})</p>
+            <p class="paragraph-3" data-testid="subscription-cancel-until">
+                {{ 'Your subscription stays active until %date%. You will not be charged after that date.'|trans({'%date%': cancelOn|format_date('long', locale: lang_code)}) }}
+            </p>
+            {% if subscription.commitmentCount and cancelOn|date('Y-m-d') != subscription.currentPeriodEnd %}
+                <p class="paragraph-4 text-grey">{{ 'This date takes your commitment into account: the installments it covers are still charged.'|trans }}</p>
+            {% endif %}
+            <form method="post" action="{{ path('account_subscription_cancel_do', {id: subscription.id}) }}" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <input type="hidden" name="_token" value="{{ csrf_token('subscription_action') }}">
+                <twig:Molecules:Button:Base href="{{ path('account_subscription_show', {id: subscription.id}) }}" text="{{ 'Keep my subscription'|trans }}" color="secondary" :fill="true" />
+                <twig:Molecules:Button:Base type="submit" text="{{ 'Yes, cancel'|trans }}" :fill="true" />
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}
