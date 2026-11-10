@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+{% import '@theme_flexy/subscription-macros.html.twig' as sub %}
+
+{% block title %}{{ 'My subscriptions'|trans }}{% endblock %}
+
+{% block body %}
+    {# subscriptions comes from the controller, which reads the ones of the signed-in customer only. #}
+    <twig:Layouts:Subheader:Account
+        title="{{ 'My subscriptions'|trans }}"
+        selected="subscriptions"
+        :breadcrumb="[
+            {title: 'My account'|trans, url: path('account_index')},
+            {title: 'My subscriptions'|trans},
+        ]"
+    />
+
+    <div class="container-l pt-6 pb-20 md:pt-11 md:pb-30">
+        <div class="flex flex-col items-center max-w-screen-lg mx-auto">
+            {% if subscriptions|length %}
+                <ul class="flex flex-col w-full gap-6">
+                    {% for subscription in subscriptions %}
+                        <li class="p-5 border border-grey-lighter" data-testid="subscription" data-subscription-id="{{ subscription.id }}">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <h2 class="h5"><bdi>{{ subscription.productTitle }}</bdi></h2>
+                                <twig:Molecules:Tag:Base color="{{ {trial: 'success', active: 'success', payment_failed: 'error', suspended: 'error', paused: 'warning'}[subscription.status]|default('neutral') }}" customText="{{ sub.status(subscription.status) }}" />
+                            </div>
+                            <dl class="grid grid-cols-1 gap-x-6 gap-y-2 mt-4 sm:grid-cols-3 paragraph-3">
+                                <div>
+                                    <dt class="text-grey">{{ 'Amount'|trans }}</dt>
+                                    <dd>
+                                        <span dir="ltr">{{ subscription.price.amount|format_currency(subscription.currencyCode, locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="subscription.price.display" />
+                                        {{ sub.period(subscription.periodUnit, subscription.periodCount)|lower }}
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt class="text-grey">{{ 'Next billing date'|trans }}</dt>
+                                    <dd>{{ subscription.nextBillingAt ? subscription.nextBillingAt|format_date('long', locale: lang_code) : '-' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-grey">{{ 'Reference'|trans }}</dt>
+                                    <dd><bdi>{{ subscription.ref }}</bdi></dd>
+                                </div>
+                            </dl>
+                            <div class="mt-4">
+                                <twig:Molecules:Button:Base
+                                    href="{{ path('account_subscription_show', {id: subscription.id}) }}"
+                                    text="{{ 'See subscription details'|trans }}"
+                                    color="secondary"
+                                    size="small"
+                                />
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="flex flex-col items-center text-center" data-testid="subscriptions-empty">
+                    <div class="w-36 h-auto lg:w-60">
+                        {{ source('assets/images/nothing.svg') }}
+                    </div>
+                    <h3 class="h3 mt-4 mb-2">{{ 'You have no subscription yet'|trans }}</h3>
+                    <p>{{ 'A product you subscribe to will be listed here.'|trans }}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}
