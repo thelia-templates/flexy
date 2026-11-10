@@ -4,14 +4,15 @@
    @prop selectedPlan int The plan chosen, 0 for a one-time purchase
    @prop signedIn bool The visitor may order a plan: otherwise the plans are shown disabled, with an invitation to sign in
    @prop display TaxDisplay Which of the two prices of a plan the visitor reads #}
-{% props plans, selectedPlan = 0, signedIn = false, display %}
+{# @prop name string Name of the radio group: distinct when two choosers share a document (the toolkit) #}
+{% props plans, selectedPlan = 0, signedIn = false, display, name = 'subscription_plan_choice' %}
 {% import '@theme_flexy/subscription-macros.html.twig' as sub %}
 
 <fieldset class="{{ ('flex flex-col gap-3 my-5 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }} data-testid="subscription-plans">
     <legend class="h5 mb-2">{{ 'How do you want to buy it?'|trans }}</legend>
 
     <label class="flex items-start gap-3 p-4 border border-grey-lighter cursor-pointer has-[:checked]:border-black">
-        <input type="radio" name="subscription_plan_choice" value="0" class="mt-1" data-model="selectedPlan" {{ selectedPlan == 0 ? 'checked' : '' }}>
+        <input type="radio" name="{{ name }}" value="0" class="mt-1" data-model="selectedPlan" {{ selectedPlan == 0 ? 'checked' : '' }}>
         <span class="paragraph-3"><strong>{{ 'One-time purchase'|trans }}</strong></span>
     </label>
 
@@ -20,7 +21,7 @@
         <label class="flex items-start gap-3 p-4 border border-grey-lighter {{ signedIn ? 'cursor-pointer has-[:checked]:border-black' : 'opacity-70' }}" data-testid="subscription-plan" data-plan-id="{{ plan.id }}">
             <input
                 type="radio"
-                name="subscription_plan_choice"
+                name="{{ name }}"
                 value="{{ plan.id }}"
                 class="mt-1"
                 data-model="selectedPlan"
