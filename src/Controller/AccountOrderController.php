@@ -54,6 +54,11 @@ class AccountOrderController extends FlexyController
      */
     private const RETURN_DOCUMENT = 'order_return';
 
+    /**
+     * The name of the quote document in the active PDF template.
+     */
+    private const QUOTATION_DOCUMENT = 'quotation';
+
     private const RETURNS_PER_PAGE = 10;
 
     private ?CompanyAccount $companyAccount = null;
@@ -106,6 +111,8 @@ class AccountOrderController extends FlexyController
             'orderId' => $orderId,
             // Read off the order itself: the API payload does not publish the code of its currency.
             'currencyCode' => $order->getCurrency()?->getCode() ?: 'EUR',
+            // The quote link is only worth showing when the route behind it has a document to render.
+            'quotationAvailable' => $this->pdfDocumentExists(self::QUOTATION_DOCUMENT),
         ]);
     }
 
@@ -164,7 +171,7 @@ class AccountOrderController extends FlexyController
         // A quote is drawn from a `quotation` document of the active PDF template, and the
         // default template ships an invoice and a delivery slip only. A shop that has not
         // added one has nothing to render here, which is a 404 and not a server error.
-        if (!$this->pdfDocumentExists('quotation')) {
+        if (!$this->pdfDocumentExists(self::QUOTATION_DOCUMENT)) {
             throw new NotFoundHttpException();
         }
 
@@ -172,7 +179,7 @@ class AccountOrderController extends FlexyController
             $eventDispatcher,
             $orderId,
             // A quotation is by definition not paid: the status guard must stay off here.
-            'quotation',
+            self::QUOTATION_DOCUMENT,
             checkOrderStatus: false,
             checkAdminUser: false,
         );
