@@ -123,8 +123,9 @@
         {% endif %}
 
         {# The core refuses an invoice for an order that is not paid, so the link would
-           dead-end on a 404. Mirrors Thelia's own isPaid() status set. #}
-        {% if isQuotation or statusCode in ['paid', 'processing', 'sent'] %}
+           dead-end on a 404. Mirrors Thelia's own isPaid() status set. The same goes for a
+           quote when the active PDF template has no quotation document. #}
+        {% if (isQuotation and quotationAvailable) or statusCode in ['paid', 'processing', 'sent'] %}
             <twig:Molecules:Button:Base
                 text="{{ (isQuotation ? 'Download quote' : 'Download invoice')|trans }}"
                 href="{{ isQuotation
