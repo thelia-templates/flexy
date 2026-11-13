@@ -5,6 +5,9 @@
 {# @prop reviews.review What the customer wrote #}
 {# @prop reviews.date When, written as it is read (12/03/2026) #}
 {# @prop reviews.note The score, out of 5 #}
+{# @prop button {href: string, label: string}|null The button under the band, to a page that shows more #}
+{# @prop button.href Where the button leads #}
+{# @prop button.label What the button says #}
 {% props title = '', reviews = [], button = null %}
 
 <div class="{{ ('container-l py-14 xl:py-20 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
