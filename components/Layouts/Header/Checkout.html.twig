@@ -1,7 +1,7 @@
 {% import '@Flexy/Atoms/StoreName/label.html.twig' as store_name %}
 <header class="{{ ('HeaderCheckout ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
     <a href="{{ path('index') }}" class="HeaderCheckout-logo" aria-label="{{ store_name.label() }}">
-        {{ ux_icon('thelia') }}
+        {{ include('@Flexy/Layouts/Header/store-logo.html.twig') }}
     </a>
     <div class="HeaderCheckout-reassurance">
         {{ ux_icon('lock') }}

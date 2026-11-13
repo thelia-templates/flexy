@@ -62,7 +62,8 @@
     }
   }
 
-  .Header-logo svg {
+  .Header-logo svg,
+  .Header-logo img {
     height: 100%;
     width: auto;
     display: block;
