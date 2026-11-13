@@ -37,6 +37,7 @@ class Base
     {
         return $this->langs ??= $this->dataAccessService->resources('/api/front/languages', [
             'active' => true,
+            'visible' => true,
         ]) ?? [];
     }
 
