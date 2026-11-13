@@ -1,3 +1,6 @@
+{# @description The latest contents of a folder under a heading, in a slider: picture, title and date of each. #}
+{# @prop title string The heading above the contents #}
+{# @prop folderId folder|null The folder whose contents are listed; the contents of the whole site when there is none #}
 {% props title = '', button = null %}
 
 <div class="{{ ('container-l py-14 xl:py-20 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>

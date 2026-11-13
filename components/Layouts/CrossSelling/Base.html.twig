@@ -1,3 +1,7 @@
+{# @description Products under a heading, in a slider: the products picked by hand, in their order, or else the first products of a category. #}
+{# @prop title string The heading above the products #}
+{# @prop productIds product[] max:12 The products shown, in this order; none picked shows the first products of the category #}
+{# @prop categoryId category|null The category whose first products are shown when none is picked; the whole catalogue when there is none either #}
 {% props title = '', button = null %}
 
 {% if this.products is not empty %}
