@@ -15,7 +15,10 @@ declare(strict_types=1);
 namespace FlexyBundle\Tests\Component;
 
 use FlexyBundle\Service\Subscription\SubscriptionLineView;
+use Symfony\Component\Clock\Clock;
+use Symfony\Component\Clock\MockClock;
 use Symfony\Component\DomCrawler\Crawler;
+use Thelia\Domain\Subscription\SubscriptionFactory;
 use Thelia\Model\Currency;
 use Thelia\Model\Product;
 use Thelia\Model\SubscriptionPlan;
@@ -87,6 +90,38 @@ final class SubscriptionProductSheetTest extends IntegrationTestCase
         $this->plan($product, '10.000000', ['Visible' => 0]);
 
         self::assertCount(0, $this->page($product)->filter('[data-testid="subscription-plans"]'));
+    }
+
+    /**
+     * The date told in the cart and at payment is the one billing will write, from the same
+     * calendar and the same clock: a trial of 30 days taken on 31 January 2028 ends on 1 March.
+     */
+    public function testTheFirstInstallmentOfATrialIsTheDateBillingWillWrite(): void
+    {
+        $factory = $this->createFixtureFactory();
+        $plan = $this->plan($this->product($factory), '10.000000', ['TrialDays' => 30]);
+        $clockOfTheShop = Clock::get();
+        Clock::set(new MockClock('2028-01-31 23:30:00', date_default_timezone_get()));
+
+        try {
+            $lineView = self::getContainer()->get(SubscriptionLineView::class);
+
+            self::assertSame('2028-03-01', $lineView->firstInstallmentOn($plan));
+            self::assertSame(
+                self::getContainer()->get(SubscriptionFactory::class)->firstBillingDateOf($plan)->format('Y-m-d'),
+                $lineView->firstInstallmentOn($plan),
+            );
+        } finally {
+            Clock::set($clockOfTheShop);
+        }
+    }
+
+    public function testAPlanWithoutATrialTellsNoFirstInstallment(): void
+    {
+        $factory = $this->createFixtureFactory();
+        $plan = $this->plan($this->product($factory), '10.000000');
+
+        self::assertNull(self::getContainer()->get(SubscriptionLineView::class)->firstInstallmentOn($plan), 'The order paid is the first installment.');
     }
 
     public function testTheLineViewIsServedByTheContainer(): void
