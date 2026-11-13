@@ -83,6 +83,17 @@ final class SubscriptionProductSheetTest extends IntegrationTestCase
         self::assertCount(0, $this->page($this->product($factory))->filter('[data-testid="subscription-plans"]'));
     }
 
+    public function testAProductSoldOnRequestOffersNoPlan(): void
+    {
+        $factory = $this->createFixtureFactory();
+        $product = $this->product($factory);
+        $this->plan($product, '10.000000');
+        $product->setPriceDisplayMode('on_request')->save();
+        $this->getService('services_resetter')->reset();
+
+        self::assertCount(0, $this->page($product)->filter('[data-testid="subscription-plans"]'), 'Neither the price of an installment nor a plan to take: the sheet asks for a request.');
+    }
+
     public function testAHiddenPlanIsNotOffered(): void
     {
         $factory = $this->createFixtureFactory();
