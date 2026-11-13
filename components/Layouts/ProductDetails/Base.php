@@ -22,6 +22,7 @@ use FlexyBundle\Service\CartQuantity;
 use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\RunningSaleResolver;
 use FlexyBundle\Service\SaleElementQuantityRules;
+use FlexyBundle\Service\Subscription\SubscriptionPlanOffers;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -191,6 +192,23 @@ class Base
     #[LiveProp(writable: true)]
     public array $bundleSelection = [];
 
+    /**
+     * The visible plans of the product, as the sheet offers them (see SubscriptionPlanOffers). Empty on a core
+     * without subscriptions and for a product sold in one-off purchase only: the sheet is then the one it always was.
+     * A LiveProp, for the reason the others are: the component re-renders in a process that never calls mount() again.
+     *
+     * @var list<array{id: int, title: string, periodUnit: string, periodCount: int, trialDays: int, installmentCount: ?int, commitmentCount: ?int, pausable: bool, priceUntaxed: float, priceTaxed: float}>
+     */
+    #[LiveProp]
+    public array $subscriptionPlans = [];
+
+    /**
+     * The plan the shopper chose: its id, or 0 for a one-time purchase. Writable, so the choice binds to it;
+     * the core guard judges it again at the cart (a hidden plan, a plan of another product are refused there).
+     */
+    #[LiveProp(writable: true)]
+    public int $selectedPlan = 0;
+
     private ?array $pses = null;
 
     private ?array $bundleView = null;
@@ -222,6 +240,8 @@ class Base
         private readonly ?ProductImageResolver $productImageResolver = null,
         // Optional for the same reason: a unit test builds this component by hand, and the sheet then sells one at a time.
         private readonly ?SaleElementQuantityRules $quantityRules = null,
+        // Optional: a core without subscriptions has no such service, and a unit test builds this component by hand.
+        private readonly ?SubscriptionPlanOffers $subscriptionPlanOffers = null,
     ) {
     }
 
@@ -243,6 +263,8 @@ class Base
         $this->isBundle = (bool) ($product['isBundle'] ?? false) && null !== $this->bundleReader && null !== $this->bundleSelectionService;
         $this->bundleRows = $this->isBundle ? $this->bundleReader->read($this->productId) : [];
         $this->bundleSelection = $this->defaultBundleSelection();
+        // A bundle is a pack of other products: a plan is sold on a product's own sale element, so a bundle keeps its one-off purchase.
+        $this->subscriptionPlans = null === $this->subscriptionPlanOffers || $this->isBundle ? [] : $this->subscriptionPlanOffers->forProduct($this->productId);
 
         $this->setInitialCurrentPse();
         $this->setMedia();
@@ -663,6 +685,15 @@ class Base
         }
     }
 
+    /**
+     * Whether the visitor may order a plan (signed in, not a guest of the checkout): a visitor who may not is invited to sign in.
+     */
+    #[ExposeInTemplate('subscriptionSignedIn')]
+    public function subscriptionSignedIn(): bool
+    {
+        return null !== $this->subscriptionPlanOffers && $this->subscriptionPlanOffers->visitorMaySubscribe();
+    }
+
     #[LiveAction]
     public function save(): void
     {
@@ -704,6 +735,11 @@ class Base
                 $bundleArguments = ['bundleComposition' => $composed['composition']];
             }
 
+            // Named only when a plan is chosen: a core without subscriptions has no such argument, and has no plan to choose.
+            $planArguments = $this->selectedPlan > 0 && class_exists('Thelia\\Domain\\Subscription\\SubscriptionStateMachine')
+                ? ['subscriptionPlanId' => $this->selectedPlan]
+                : [];
+
             $cartItem = $this->cartFacade->addItem(
                 new CartItemAddDTO(...[
                     'cart' => $this->cartFacade->getOrCreateFromSession(),
@@ -713,6 +749,7 @@ class Base
                     'append' => (bool) $formData['append'],
                     'newness' => (bool) $formData['newness'],
                     ...$bundleArguments,
+                    ...$planArguments,
                 ])
             );
         } catch (InvalidCartException|NotEnoughStockException $exception) {

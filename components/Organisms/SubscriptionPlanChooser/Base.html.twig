@@ -1,0 +1,62 @@
+{# The choice between a one-time purchase and a subscription plan, on the product sheet. The radios are bound to the
+   `selectedPlan` model of the product component, so the choice travels with the add to the cart.
+   @prop plans array The plans: id, title, periodUnit, periodCount, trialDays, installmentCount, commitmentCount, pausable, priceUntaxed, priceTaxed
+   @prop selectedPlan int The plan chosen, 0 for a one-time purchase
+   @prop signedIn bool The visitor may order a plan: otherwise the plans are shown disabled, with an invitation to sign in
+   @prop display TaxDisplay Which of the two prices of a plan the visitor reads #}
+{# @prop name string Name of the radio group: distinct when two choosers share a document (the toolkit) #}
+{% props plans, selectedPlan = 0, signedIn = false, display, name = 'subscription_plan_choice' %}
+{% import '@theme_flexy/subscription-macros.html.twig' as sub %}
+
+<fieldset class="{{ ('flex flex-col gap-3 my-5 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }} data-testid="subscription-plans">
+    <legend class="h5 mb-2">{{ 'How do you want to buy it?'|trans }}</legend>
+
+    <label class="flex items-start gap-3 p-4 border border-grey-lighter cursor-pointer has-[:checked]:border-black">
+        <input type="radio" name="{{ name }}" value="0" class="mt-1" data-model="selectedPlan" {{ selectedPlan == 0 ? 'checked' : '' }}>
+        <span class="paragraph-3"><strong>{{ 'One-time purchase'|trans }}</strong></span>
+    </label>
+
+    {% for plan in plans %}
+        {% set price = displayed_price(display, plan.priceUntaxed, plan.priceTaxed) %}
+        <label class="flex items-start gap-3 p-4 border border-grey-lighter {{ signedIn ? 'cursor-pointer has-[:checked]:border-black' : 'opacity-70' }}" data-testid="subscription-plan" data-plan-id="{{ plan.id }}">
+            <input
+                type="radio"
+                name="{{ name }}"
+                value="{{ plan.id }}"
+                class="mt-1"
+                data-model="selectedPlan"
+                {{ selectedPlan == plan.id ? 'checked' : '' }}
+                {{ signedIn ? '' : 'disabled' }}
+            >
+            <span class="flex flex-col gap-1 paragraph-3">
+                <strong>{{ plan.title ?: 'Subscription'|trans }}</strong>
+                {% if price %}
+                    <span>
+                        <span dir="ltr">{{ price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="price.display" />
+                        {{ sub.period(plan.periodUnit, plan.periodCount)|lower }}
+                    </span>
+                {% endif %}
+                {% if plan.trialDays > 0 %}
+                    <span class="text-grey">{{ sub.trial(plan.trialDays) }}</span>
+                {% endif %}
+                {% if plan.commitmentCount %}
+                    <span class="text-grey">{{ sub.commitment(plan.commitmentCount) }}</span>
+                {% endif %}
+                {% if plan.installmentCount %}
+                    <span class="text-grey">{{ sub.installments(plan.installmentCount) }}</span>
+                {% endif %}
+                {% if plan.pausable %}
+                    <span class="text-grey">{{ 'Can be paused'|trans }}</span>
+                {% endif %}
+            </span>
+        </label>
+    {% endfor %}
+
+    {% if not signedIn %}
+        <p class="paragraph-4" data-testid="subscription-sign-in">
+            {# On a live render the request is the component's own endpoint: the page the visitor came from is its referer. #}
+            {% set back = 'live_component' in (app.request.attributes.get('_route')|default('')) ? app.request.headers.get('referer') : app.request.requestUri %}
+            <a class="underline" href="{{ path('customer_login', back ? {redirect: back} : {}) }}">{{ 'Sign in to subscribe'|trans }}</a>
+        </p>
+    {% endif %}
+</fieldset>

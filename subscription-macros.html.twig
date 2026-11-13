@@ -1,0 +1,45 @@
+{# Sentences about a subscription, shared by the product sheet, the cart, the payment step and the account.
+   Each one is a message of the theme catalogue: the pages keep codes and numbers, the sentences are written here. #}
+
+{% macro period(unit, count) %}
+    {%- if unit == 'week' -%}
+        {{- 'Every week|Every %count% weeks'|trans({'%count%': count}) -}}
+    {%- elseif unit == 'quarter' -%}
+        {{- 'Every quarter|Every %count% quarters'|trans({'%count%': count}) -}}
+    {%- elseif unit == 'year' -%}
+        {{- 'Every year|Every %count% years'|trans({'%count%': count}) -}}
+    {%- else -%}
+        {{- 'Every month|Every %count% months'|trans({'%count%': count}) -}}
+    {%- endif -%}
+{% endmacro %}
+
+{# The terms of a plan or of a subscription, one short sentence each. #}
+{% macro commitment(count) %}
+    {{- 'Commitment of %count% installment|Commitment of %count% installments'|trans({'%count%': count}) -}}
+{% endmacro %}
+
+{% macro installments(count) %}
+    {{- 'Ends after %count% installment|Ends after %count% installments'|trans({'%count%': count}) -}}
+{% endmacro %}
+
+{% macro trial(days) %}
+    {{- '%count% day free trial|%count% days free trial'|trans({'%count%': days}) -}}
+{% endmacro %}
+
+{% macro status(status) %}
+    {%- if status == 'trial' -%}
+        {{- 'Free trial'|trans -}}
+    {%- elseif status == 'active' -%}
+        {{- 'Active'|trans -}}
+    {%- elseif status == 'payment_failed' -%}
+        {{- 'Payment failed'|trans -}}
+    {%- elseif status == 'suspended' -%}
+        {{- 'Suspended'|trans -}}
+    {%- elseif status == 'paused' -%}
+        {{- 'Paused'|trans -}}
+    {%- elseif status == 'cancelled' -%}
+        {{- 'Cancelled'|trans -}}
+    {%- else -%}
+        {{- 'Ended'|trans -}}
+    {%- endif -%}
+{% endmacro %}

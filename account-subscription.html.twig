@@ -1,0 +1,185 @@
+{% extends 'base.html.twig' %}
+{% import '@theme_flexy/subscription-macros.html.twig' as sub %}
+
+{% block title %}{{ 'Subscription'|trans }} {{ subscription.ref }}{% endblock %}
+
+{% block body %}
+    {# subscription, installments and methods come from the controller, scoped to the signed-in customer. #}
+    {% set notices = {
+        cancelled: {variant: 'success', text: 'Your subscription is cancelled. It stays active until the date shown below.'|trans},
+        paused: {variant: 'success', text: 'Your subscription is paused.'|trans},
+        resumed: {variant: 'success', text: 'Your subscription is active again.'|trans},
+        method_changed: {variant: 'success', text: 'The payment method of your subscription has been changed.'|trans},
+        state: {variant: 'error', text: 'This change is not possible for your subscription in its current state.'|trans},
+        method: {variant: 'error', text: 'This payment method cannot be used for this subscription.'|trans},
+        refused: {variant: 'error', text: 'This change is not possible for your subscription in its current state.'|trans},
+        error: {variant: 'error', text: 'An error has occurred, please try again later'|trans},
+    } %}
+    {% set notice = notices[app.request.query.get('notice')|default('')]|default(null) %}
+
+    <twig:Layouts:Subheader:Account
+        title="{{ 'My subscriptions'|trans }}"
+        selected="subscriptions"
+        :breadcrumb="[
+            {title: 'My account'|trans, url: path('account_index')},
+            {title: 'My subscriptions'|trans, url: path('account_subscriptions')},
+            {title: subscription.ref},
+        ]"
+    />
+
+    <div class="container-l pt-6 pb-20 md:pt-11 md:pb-30">
+        <div class="flex flex-col max-w-screen-lg mx-auto gap-8">
+            {% if notice %}
+                <twig:Molecules:SnackBar:Base variant="{{ notice.variant }}" :withIcon="true" text="{{ notice.text }}" role="status" data-testid="subscription-notice" />
+            {% endif %}
+
+            <section aria-labelledby="subscription-title" data-testid="subscription-detail">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h2 id="subscription-title" class="h4"><bdi>{{ subscription.productTitle }}</bdi></h2>
+                    <twig:Molecules:Tag:Base color="{{ {trial: 'success', active: 'success', payment_failed: 'error', suspended: 'error', paused: 'warning'}[subscription.status]|default('neutral') }}" customText="{{ sub.status(subscription.status) }}" />
+                </div>
+                <dl class="grid grid-cols-1 gap-x-6 gap-y-3 mt-5 sm:grid-cols-2 paragraph-3">
+                    <div>
+                        <dt class="text-grey">{{ 'Reference'|trans }}</dt>
+                        <dd><bdi>{{ subscription.ref }}</bdi></dd>
+                    </div>
+                    <div>
+                        <dt class="text-grey">{{ 'Quantity'|trans }}</dt>
+                        <dd>{{ subscription.quantity }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-grey">{{ 'Amount of an installment'|trans }}</dt>
+                        <dd>
+                            <span dir="ltr">{{ subscription.price.amount|format_currency(subscription.currencyCode, locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="subscription.price.display" />
+                            {{ sub.period(subscription.periodUnit, subscription.periodCount)|lower }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-grey">{{ 'Installments paid'|trans }}</dt>
+                        <dd>{{ subscription.installmentsBilled }}{% if subscription.installmentCount %} / {{ subscription.installmentCount }}{% endif %}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-grey">{{ 'Next billing date'|trans }}</dt>
+                        <dd>{{ subscription.nextBillingAt ? subscription.nextBillingAt|format_date('long', locale: lang_code) : '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-grey">{{ 'Current period ends on'|trans }}</dt>
+                        <dd>{{ subscription.currentPeriodEnd ? subscription.currentPeriodEnd|format_date('long', locale: lang_code) : '-' }}</dd>
+                    </div>
+                    {% if subscription.commitmentCount %}
+                        <div>
+                            <dt class="text-grey">{{ 'Commitment'|trans }}</dt>
+                            <dd>{{ sub.commitment(subscription.commitmentCount) }}</dd>
+                        </div>
+                    {% endif %}
+                    {% if subscription.installmentCount %}
+                        <div>
+                            <dt class="text-grey">{{ 'Duration'|trans }}</dt>
+                            <dd>{{ sub.installments(subscription.installmentCount) }}</dd>
+                        </div>
+                    {% endif %}
+                    {% if subscription.cancelAt %}
+                        <div>
+                            <dt class="text-grey">{{ 'Ends on'|trans }}</dt>
+                            <dd data-testid="subscription-cancel-at">{{ subscription.cancelAt|format_date('long', locale: lang_code) }}</dd>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <dt class="text-grey">{{ 'Payment method'|trans }}</dt>
+                        <dd><bdi>{{ subscription.paymentMethodLabel ?: '-' }}</bdi></dd>
+                    </div>
+                </dl>
+
+                {% if subscription.status in ['payment_failed', 'suspended'] %}
+                    <twig:Molecules:SnackBar:Base variant="warning" :withIcon="true" class="mt-5" text="{{ 'The last installment could not be charged. Choose another payment method below to try again.'|trans }}" />
+                {% endif %}
+
+                {% if subscription.canPause or subscription.canResume or subscription.canCancel %}
+                    <div class="flex flex-wrap gap-4 mt-6">
+                        {% if subscription.canPause %}
+                            <form method="post" action="{{ path('account_subscription_pause', {id: subscription.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('subscription_action') }}">
+                                <twig:Molecules:Button:Base type="submit" text="{{ 'Pause'|trans }}" color="secondary" />
+                            </form>
+                        {% endif %}
+                        {% if subscription.canResume %}
+                            <form method="post" action="{{ path('account_subscription_resume', {id: subscription.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('subscription_action') }}">
+                                <twig:Molecules:Button:Base type="submit" text="{{ 'Resume'|trans }}" />
+                            </form>
+                        {% endif %}
+                        {% if subscription.canCancel %}
+                            <twig:Molecules:Button:Base href="{{ path('account_subscription_cancel', {id: subscription.id}) }}" text="{{ 'Cancel the subscription'|trans }}" color="secondary" />
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </section>
+
+            {% if subscription.canChangePaymentMethod %}
+                <section aria-labelledby="subscription-method-title" data-testid="subscription-method">
+                    <h2 id="subscription-method-title" class="h5">{{ 'Change the payment method'|trans }}</h2>
+                    {% if methods|length %}
+                        <form method="post" action="{{ path('account_subscription_payment_method', {id: subscription.id}) }}" class="mt-4 flex flex-col gap-3">
+                            <input type="hidden" name="_token" value="{{ csrf_token('subscription_action') }}">
+                            <fieldset class="flex flex-col gap-3">
+                                <legend class="sr-only">{{ 'Change the payment method'|trans }}</legend>
+                                {% for method in methods %}
+                                    <label class="flex items-start gap-3 p-4 border border-grey-lighter cursor-pointer has-[:checked]:border-black">
+                                        <input type="radio" name="payment_method" value="{{ method.id }}" class="mt-1" {{ method.label == subscription.paymentMethodLabel ? 'checked' : '' }} required>
+                                        <span class="paragraph-3">
+                                            <strong><bdi>{{ method.label }}</bdi></strong>
+                                            <span class="block text-grey"><bdi>{{ method.paymentModuleTitle }}</bdi></span>
+                                            {% if method.expiresAt %}<span class="block text-grey">{{ 'Expires %date%'|trans({'%date%': method.expiresAt|date('m/Y')}) }}</span>{% endif %}
+                                        </span>
+                                    </label>
+                                {% endfor %}
+                            </fieldset>
+                            <div><twig:Molecules:Button:Base type="submit" text="{{ 'Use this payment method'|trans }}" /></div>
+                        </form>
+                    {% else %}
+                        <p class="paragraph-3 mt-3">{{ 'You have no other saved payment method for this subscription.'|trans }}</p>
+                    {% endif %}
+                    <p class="paragraph-4 mt-3"><a class="underline" href="{{ path('account_payment_methods') }}">{{ 'My payment methods'|trans }}</a></p>
+                </section>
+            {% endif %}
+
+            <section aria-labelledby="subscription-installments-title" data-testid="subscription-installments">
+                <h2 id="subscription-installments-title" class="h5">{{ 'Installments'|trans }}</h2>
+                {% if installments|length %}
+                    <table class="w-full mt-4 text-left paragraph-3">
+                        <thead>
+                            <tr class="border-b border-grey-lighter">
+                                <th scope="col" class="py-2 pe-4 text-start">{{ 'Installment'|trans }}</th>
+                                <th scope="col" class="py-2 pe-4 text-start">{{ 'Status'|trans }}</th>
+                                <th scope="col" class="py-2 text-start">{{ 'Order'|trans }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for installment in installments %}
+                                <tr class="border-b border-grey-lighter">
+                                    <td class="py-2 pe-4">{{ installment.number }}</td>
+                                    <td class="py-2 pe-4">
+                                        {%- if installment.state == 'paid' -%}{{ 'Paid'|trans }}
+                                        {%- elseif installment.state == 'failed' -%}{{ 'Failed'|trans }}
+                                        {%- else -%}{{ 'Pending'|trans }}{%- endif -%}
+                                    </td>
+                                    <td class="py-2">
+                                        {% if installment.orderRef %}
+                                            <a class="underline" href="{{ path('account_order', {orderId: installment.orderId}) }}"><bdi>{{ installment.orderRef }}</bdi></a>
+                                        {% else %}-{% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="paragraph-3 mt-3">{{ 'No installment yet.'|trans }}</p>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}

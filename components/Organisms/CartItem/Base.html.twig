@@ -4,6 +4,7 @@
 {# A line the shop offers is read-only for the same reason a summary line is: the customer
    does not own it. The server refuses to change it either way. #}
 {% set readOnly = disabled or this.isOffered %}
+{% import '@theme_flexy/subscription-macros.html.twig' as sub %}
 <div
     class="{{ (this.outOfStock ? 'CartItem-wrapper CartItem-wrapper--outOfStock ' : 'CartItem-wrapper ') ~ attributes.render('class')|tailwind_merge }}"
     {{ attributes.without('class') }}
@@ -101,6 +102,26 @@
                         </span>
                     {% endif %}
                 </div>
+
+                {% if this.subscription %}
+                    <div class="paragraph-6 flex flex-col gap-0.5 my-1" data-testid="cart-subscription">
+                        <span><strong>{{ sub.period(this.subscription.periodUnit, this.subscription.periodCount) }}</strong></span>
+                        {% if this.subscription.firstInstallmentOn %}
+                            <span>{{ sub.trial(this.subscription.trialDays) }}</span>
+                            <span>{{ 'First installment on %date%'|trans({'%date%': this.subscription.firstInstallmentOn|format_date('long', locale: lang_code)}) }}</span>
+                        {% endif %}
+                        {% if this.subscription.firstInstallmentOn and this.subscription.price %}
+                            <span>
+                                {{ 'Then'|trans }}
+                                <span dir="ltr">{{ this.subscription.price.amount|format_currency(current_currency_code(), locale: lang_code) }}</span><twig:Atoms:TaxMention:Base :display="this.subscription.price.display" />
+                                {{ sub.period(this.subscription.periodUnit, this.subscription.periodCount)|lower }}
+                            </span>
+                        {% endif %}
+                        {% if this.subscription.commitmentCount %}
+                            <span>{{ sub.commitment(this.subscription.commitmentCount) }}</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
 
                 {# The components of a bundle line, for one bundle: no price and no control, the price of the
                    pack is the one of the line. Nothing for any other line. #}
