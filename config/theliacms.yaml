@@ -7,7 +7,9 @@ sections:
         - Layouts:CrossSelling:Base
         - Layouts:ProductCategory:Base
         - Layouts:SimilarContent:Base
-        - Layouts:FolderContents:Base
+        # Not Layouts:FolderContents:Base: added without its folder, it draws
+        # the empty state through `source('assets/images/nothing.svg')`, a
+        # path of the theme the back office of the module does not resolve.
         - Layouts:Review:Base
         - Layouts:ReinsuranceModule:Base
         - Molecules:Reinsurance:Base
