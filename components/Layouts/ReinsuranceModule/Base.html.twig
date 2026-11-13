@@ -1,4 +1,9 @@
-{# @prop items array List of {icon, strongText, text, link, linkLabel} — link/linkLabel are optional #}
+{# @prop items list<{strongText: string|null, text: string, icon: icon|null, link: string|null, linkLabel: string|null}> max:6 The reassurance points, side by side #}
+{# @prop items.strongText The lead-in, in bold #}
+{# @prop items.text The line that follows it #}
+{# @prop items.icon The icon drawn above the point #}
+{# @prop items.link The address of a page that tells more, optional #}
+{# @prop items.linkLabel The words of that link #}
 {% props items = [] %}
 
 <div class="{{ ('ReinsuranceModule ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>

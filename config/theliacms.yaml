@@ -1,0 +1,78 @@
+# The components of the theme a page of the TheliaCMS module may be made of
+# (thelia/cms-module). The module reads their props off the `{# @prop #}`
+# comments at the top of each template, and their defaults off `{% props %}`.
+sections:
+    components:
+        - Layouts:Subheader:Base
+        - Layouts:CrossSelling:Base
+        - Layouts:ProductCategory:Base
+        - Layouts:SimilarContent:Base
+        - Layouts:FolderContents:Base
+        - Layouts:Review:Base
+        - Layouts:ReinsuranceModule:Base
+        - Molecules:Reinsurance:Base
+        - Molecules:Rating:Base
+        - Organisms:ArticleCard:Base
+        - Organisms:SimilarContentCard:Base
+        - Organisms:CategoryCard:Base
+        - Organisms:ProductCard:Base
+        - Organisms:ReviewCard:Base
+        - Organisms:VideoPlayer:Base
+
+    # The Stimulus controllers these components wire themselves with: a
+    # published page keeps their attributes and drops those of any other.
+    controllers:
+        - simple-slider
+        - Organisms--VideoPlayer--base
+
+    # The props a component is shown with when its defaults draw nothing:
+    # what the toolkit of the module draws, what its generator is shown, and
+    # what a section added by hand starts from.
+    examples:
+        Organisms:VideoPlayer:Base:
+            alt: Big Buck Bunny, an animated short film
+            provider: youtube
+            embedUrl: https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ
+        Organisms:ReviewCard:Base:
+            author: Claire M.
+            title: Quick delivery
+            review: 'Ordered on Monday, delivered on Wednesday, well packed.'
+            date: 12/03/2026
+            note: 5
+        Molecules:Rating:Base:
+            average: 4.5
+            count: 12
+        Layouts:Review:Base:
+            title: What our customers say
+            reviews:
+                -   author: Claire M.
+                    review: 'Ordered on Monday, delivered on Wednesday, well packed.'
+                    date: 12/03/2026
+                    note: 5
+                -   author: Paul D.
+                    review: 'The size guide was right, the fit is perfect.'
+                    date: 02/03/2026
+                    note: 4
+                -   author: Inès R.
+                    review: 'A question answered within the hour by the shop.'
+                    date: 21/02/2026
+                    note: 5
+        Layouts:ReinsuranceModule:Base:
+            items:
+                -   icon: reinsurance-delivery
+                    strongText: Free delivery
+                    text: On orders over 50 €
+                -   icon: reinsurance-payment
+                    strongText: Secure payment
+                    text: 'Card, PayPal or bank transfer'
+                -   icon: reinsurance-returns
+                    strongText: Free returns
+                    text: Within 30 days
+        Molecules:Reinsurance:Base:
+            items:
+                -   icon: reinsurance-delivery
+                    strongText: Free delivery
+                    text: on orders over 50 €
+                -   icon: reinsurance-shipping
+                    strongText: Shipped
+                    text: within 24 hours

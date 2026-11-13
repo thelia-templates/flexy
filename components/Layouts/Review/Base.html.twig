@@ -1,3 +1,10 @@
+{# @description Customer reviews under a heading, in a slider: author, text, date and score of each. #}
+{# @prop title string The heading above the reviews #}
+{# @prop reviews list<{author: string, review: string, date: string, note: int}> max:12 The reviews, in the order they are shown #}
+{# @prop reviews.author Who wrote the review #}
+{# @prop reviews.review What the customer wrote #}
+{# @prop reviews.date When, written as it is read (12/03/2026) #}
+{# @prop reviews.note The score, out of 5 #}
 {% props title = '', reviews = [], button = null %}
 
 <div class="{{ ('container-l py-14 xl:py-20 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>

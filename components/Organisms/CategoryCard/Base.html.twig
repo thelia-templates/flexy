@@ -1,3 +1,7 @@
+{# @description One category as a card: its picture, its name and a button that leads to it. #}
+{# @prop id category The category whose picture the card shows #}
+{# @prop title string The name written on the card #}
+{# @prop href string The address the card leads to, the page of the category #}
 {% props id, title = '', href = '#' %}
 
 <div class="{{ ('CategoryCard ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
