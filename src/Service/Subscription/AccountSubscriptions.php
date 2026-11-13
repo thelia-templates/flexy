@@ -22,9 +22,10 @@ use Thelia\Domain\Payment\Exception\CustomerPaymentMethodException;
 use Thelia\Domain\Subscription\BillingCalendar;
 use Thelia\Domain\Subscription\Enum\ActorType;
 use Thelia\Domain\Subscription\Enum\PeriodUnit;
+use Thelia\Domain\Subscription\Enum\SubscriptionAction;
 use Thelia\Domain\Subscription\Enum\SubscriptionStatus;
 use Thelia\Domain\Subscription\Exception\SubscriptionException;
-use Thelia\Domain\Subscription\SubscriptionManager;
+use Thelia\Domain\Subscription\SubscriptionLifecycle;
 use Thelia\Domain\Taxation\TaxEngine\TaxEngine;
 use Thelia\Model\CurrencyQuery;
 use Thelia\Model\Customer;
@@ -38,7 +39,7 @@ use Thelia\Model\SubscriptionQuery;
  * The subscriptions of the signed-in customer, as the account pages read them, and what the customer does to them.
  *
  * Every read and every write is scoped to the customer it is given: a subscription of someone else is read as one that
- * does not exist (findOwned() answers null, the controller answers 404). The writes go through SubscriptionManager with
+ * does not exist (findOwned() answers null, the controller answers 404). The writes go through SubscriptionLifecycle with
  * the customer as actor. A refusal of the state (a subscription already cancelled, a plan that cannot be paused) comes
  * back as a code the template turns into a sentence, never as an exception.
  */
@@ -48,7 +49,7 @@ final readonly class AccountSubscriptions
     public const REFUSED_METHOD = 'method';
 
     public function __construct(
-        private SubscriptionManager $manager,
+        private SubscriptionLifecycle $lifecycle,
         private BillingCalendar $calendar,
         private CustomerPaymentMethodService $paymentMethodService,
         private AccountPaymentMethods $accountPaymentMethods,
@@ -94,6 +95,7 @@ final readonly class AccountSubscriptions
     public function view(Subscription $subscription): array
     {
         $status = SubscriptionStatus::from((string) $subscription->getStatus());
+        $allowed = $this->lifecycle->allowedActions($subscription);
         $saleElements = $subscription->getProductSaleElements();
         $product = $saleElements?->getProduct();
         $unitPrice = (float) $subscription->getUnitPrice();
@@ -123,10 +125,11 @@ final readonly class AccountSubscriptions
             'currentPeriodEnd' => $subscription->getCurrentPeriodEnd('Y-m-d'),
             'cancelAt' => $subscription->getCancelAt('Y-m-d'),
             'paymentMethodLabel' => $subscription->getCustomerPaymentMethod()?->getLabel(),
-            'canPause' => 1 === (int) $subscription->getPausable() && SubscriptionStatus::Active === $status,
-            'canResume' => SubscriptionStatus::Paused === $status,
-            'canCancel' => $status->canBecome(SubscriptionStatus::Cancelled),
-            'canChangePaymentMethod' => !$status->isFinal() && SubscriptionStatus::Cancelled !== $status,
+            // What the state allows, as the core decides it and refuses the rest.
+            'canPause' => \in_array(SubscriptionAction::Pause, $allowed, true),
+            'canResume' => \in_array(SubscriptionAction::Resume, $allowed, true),
+            'canCancel' => \in_array(SubscriptionAction::Cancel, $allowed, true),
+            'canChangePaymentMethod' => \in_array(SubscriptionAction::ChangePaymentMethod, $allowed, true),
         ];
     }
 
@@ -153,7 +156,7 @@ final readonly class AccountSubscriptions
 
     /**
      * The date the customer is told a cancellation takes effect, before they confirm: the end of the paid period, or the
-     * end of the commitment when it is later. The same rule SubscriptionManager::cancel() writes into `cancel_at`
+     * end of the commitment when it is later. The same rule SubscriptionLifecycle::cancel() writes into `cancel_at`
      * (a test keeps the two equal).
      */
     public function cancellationDate(Subscription $subscription): \DateTimeImmutable
@@ -202,17 +205,17 @@ final readonly class AccountSubscriptions
 
     public function cancel(Customer $customer, Subscription $subscription): ?string
     {
-        return $this->attempt(fn () => $this->manager->cancel($subscription, ActorType::Customer, (int) $customer->getId()));
+        return $this->attempt(fn () => $this->lifecycle->cancel($subscription, ActorType::Customer, (int) $customer->getId()));
     }
 
     public function pause(Customer $customer, Subscription $subscription): ?string
     {
-        return $this->attempt(fn () => $this->manager->pause($subscription, ActorType::Customer, (int) $customer->getId()));
+        return $this->attempt(fn () => $this->lifecycle->pause($subscription, ActorType::Customer, (int) $customer->getId()));
     }
 
     public function resume(Customer $customer, Subscription $subscription): ?string
     {
-        return $this->attempt(fn () => $this->manager->resume($subscription, ActorType::Customer, (int) $customer->getId()));
+        return $this->attempt(fn () => $this->lifecycle->resume($subscription, ActorType::Customer, (int) $customer->getId()));
     }
 
     public function changePaymentMethod(Customer $customer, Subscription $subscription, int $methodId): ?string
@@ -224,7 +227,7 @@ final readonly class AccountSubscriptions
         }
 
         return $this->attempt(
-            fn () => $this->manager->changePaymentMethod($subscription, $method, ActorType::Customer, (int) $customer->getId()),
+            fn () => $this->lifecycle->changePaymentMethod($subscription, $method, ActorType::Customer, (int) $customer->getId()),
             self::REFUSED_METHOD,
         );
     }
