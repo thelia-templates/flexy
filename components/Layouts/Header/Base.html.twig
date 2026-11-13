@@ -7,7 +7,7 @@
 {% set logo %}
     {# The logo is the only content of the link, and an inline svg names nothing. #}
     <a href="/" class="Header-logo" aria-label="{{ store_name.label() }}">
-        {{ ux_icon('thelia') }}
+        {{ include('@Flexy/Layouts/Header/store-logo.html.twig') }}
     </a>
 {% endset %}
 

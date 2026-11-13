@@ -1,0 +1,9 @@
+{# The mark inside the logo link of the headers: the logo saved in the store information,
+   the theme's own mark when none is saved or the saved file cannot be read. The link around
+   it carries the name of the shop, hence the empty alt. #}
+{% set storeLogo = attr('config', 'logo_file') ? media_url('logo', {height: 120}) : '' %}
+{% if storeLogo %}
+    <img src="{{ storeLogo }}" alt="" decoding="async">
+{% else %}
+    {{ ux_icon('thelia') }}
+{% endif %}
