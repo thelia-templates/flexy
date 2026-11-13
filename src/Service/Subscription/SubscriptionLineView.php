@@ -17,11 +17,13 @@ namespace FlexyBundle\Service\Subscription;
 use FlexyBundle\Service\PriceDisplay;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Domain\Subscription\Exception\SubscriptionPlanPriceMissingException;
+use Thelia\Domain\Subscription\SubscriptionFactory;
 use Thelia\Domain\Subscription\SubscriptionPlanPricing;
 use Thelia\Domain\Taxation\TaxEngine\TaxEngine;
 use Thelia\Model\Cart;
 use Thelia\Model\CartItem;
 use Thelia\Model\Currency;
+use Thelia\Model\SubscriptionPlan;
 use Thelia\Model\SubscriptionPlanQuery;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -40,7 +42,21 @@ final readonly class SubscriptionLineView
         private TaxEngine $taxEngine,
         private PriceDisplay $priceDisplay,
         private RequestStack $requestStack,
+        private SubscriptionFactory $subscriptionFactory,
     ) {
+    }
+
+    /**
+     * The day the first installment of a plan with a trial will be charged if the order is paid now: the date billing
+     * will write, from the calendar of the core. Null without a trial: the order paid is the first installment.
+     */
+    public function firstInstallmentOn(SubscriptionPlan $plan): ?string
+    {
+        if ((int) $plan->getTrialDays() < 1) {
+            return null;
+        }
+
+        return $this->subscriptionFactory->firstBillingDateOf($plan)->format('Y-m-d');
     }
 
     /**
@@ -78,8 +94,7 @@ final readonly class SubscriptionLineView
             'periodUnit' => (string) $plan->getPeriodUnit(),
             'periodCount' => (int) $plan->getPeriodCount(),
             'trialDays' => $trialDays,
-            // From today: the date is fixed when the order is paid, a trial of N days ends N days after.
-            'firstInstallmentOn' => $trialDays > 0 ? (new \DateTimeImmutable('today'))->modify(\sprintf('+%d days', $trialDays))->format('Y-m-d') : null,
+            'firstInstallmentOn' => $this->firstInstallmentOn($plan),
             'installmentCount' => null === $plan->getInstallmentCount() ? null : (int) $plan->getInstallmentCount(),
             'commitmentCount' => null === $plan->getCommitmentCount() ? null : (int) $plan->getCommitmentCount(),
             'pausable' => 1 === (int) $plan->getPausable(),
