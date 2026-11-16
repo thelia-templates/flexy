@@ -1,3 +1,5 @@
+{# @description The contents of a folder as cards, twelve per page, with a pager under them. #}
+{# @prop folderId folder The folder whose contents are listed #}
 {% if this.contents|length %}
     <ul class="grid gap-4 my-8 grid-cols-[repeat(auto-fill,minmax(240px,1fr))]">
         {% for content in this.contents %}
