@@ -27,7 +27,7 @@
             {% if this.showsInitialPrice %}
                 <span class="ProductCard-originalPrice"><span dir="ltr">{{ this.taxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></span>
             {% endif %}
-        {% else %}
+        {% elseif this.price is not null %}
             <span class="ProductCard-price"><span dir="ltr">{{ this.taxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></span>
         {% endif %}
     </span>
