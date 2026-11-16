@@ -1,5 +1,7 @@
 {# @description Customer reviews under a heading, in a slider: author, text, date and score of each. #}
 {# @prop title string The heading above the reviews #}
+{# @prop titleTag 'h2'|'h3'|'h4' The level of the heading: h2 under the title of the page, h3 under a heading of level 2 #}
+{# @prop titleStyle 'h1'|'h2'|'h3'|'h4'|'h5'|'h6' The look of the heading, among the heading styles of the theme, whatever its level #}
 {# @prop reviews list<{author: string, review: string, date: string, note: int}> max:12 The reviews, in the order they are shown #}
 {# @prop reviews.author Who wrote the review #}
 {# @prop reviews.review What the customer wrote #}
@@ -8,10 +10,12 @@
 {# @prop button {href: string, label: string}|null The button under the band, to a page that shows more #}
 {# @prop button.href Where the button leads #}
 {# @prop button.label What the button says #}
-{% props title = '', reviews = [], button = null %}
+{% props title = '', titleTag = 'h2', titleStyle = 'h2', reviews = [], button = null %}
+{% set titleTag = titleTag in ['h2', 'h3', 'h4'] ? titleTag : 'h2' %}
+{% set titleStyle = titleStyle in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] ? titleStyle : 'h2' %}
 
 <div class="{{ ('container-l py-14 xl:py-20 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
-    <div class="pb-6 text-black h2">{{ title }}</div>
+    <{{ titleTag }} class="pb-6 text-black {{ titleStyle }}">{{ title }}</{{ titleTag }}>
     <div class="Reviews" {{ stimulus_controller('simple-slider') }}>
         {% for review in reviews %}
             <twig:Organisms:ReviewCard:Base
