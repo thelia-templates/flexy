@@ -6,7 +6,9 @@
 {% set titleStyle = titleStyle in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] ? titleStyle : 'h2' %}
 
 <div class="{{ ('container-l py-14 xl:py-20 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
-    <{{ titleTag }} class="pb-6 text-black {{ titleStyle }}">{{ title }}</{{ titleTag }}>
+    {% if title is not empty %}
+        <{{ titleTag }} class="pb-6 text-black {{ titleStyle }}">{{ title }}</{{ titleTag }}>
+    {% endif %}
 
     <div class="flex flex-col gap-10 lg:grid lg:grid-cols-3">
         {% for category in this.categories %}
