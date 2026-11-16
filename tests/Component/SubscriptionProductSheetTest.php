@@ -24,7 +24,9 @@ use Thelia\Model\Product;
 use Thelia\Model\SubscriptionPlan;
 use Thelia\Model\SubscriptionPlanPrice;
 use Thelia\Test\FixtureFactory;
+use Thelia\Domain\Pricing\PriceVisibility\PriceDisplayMode;
 use Thelia\Test\IntegrationTestCase;
+use Thelia\Tests\Integration\Domain\Pricing\PriceVisibility\PriceDisplayFixtures;
 use Twig\Environment;
 
 /**
@@ -36,6 +38,10 @@ use Twig\Environment;
  */
 final class SubscriptionProductSheetTest extends IntegrationTestCase
 {
+    use PriceDisplayFixtures;
+
+    private const HIDDEN_PLAN_PRICE = '37.910000';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -92,6 +98,34 @@ final class SubscriptionProductSheetTest extends IntegrationTestCase
         $this->getService('services_resetter')->reset();
 
         self::assertCount(0, $this->page($product)->filter('[data-testid="subscription-plans"]'), 'Neither the price of an installment nor a plan to take: the sheet asks for a request.');
+    }
+
+    /**
+     * The plans are a LiveProp of the sheet, so their price is in the source of the page even when the sheet
+     * draws none: a price the visitor is not shown must be nowhere in it.
+     */
+    public function testTheSourceOfThePageOfAnAnonymousVisitorHoldsNoPlanPriceWhenThePricesAreForCustomers(): void
+    {
+        $factory = $this->createFixtureFactory();
+        $product = $this->product($factory);
+        $this->plan($product, self::HIDDEN_PLAN_PRICE);
+        $this->forgetPriceDisplayMemos();
+
+        self::assertStringContainsString('37.91', $this->decodedHtml($product), 'A shop that shows every price prints the price of the plan: the needle is valid.');
+
+        $this->shopShows(PriceDisplayMode::LoggedIn);
+
+        self::assertStringNotContainsString('37.91', $this->decodedHtml($product));
+    }
+
+    public function testTheSourceOfThePageOfAProductSoldOnRequestHoldsNoPlanPrice(): void
+    {
+        $factory = $this->createFixtureFactory();
+        $product = $this->product($factory);
+        $this->plan($product, self::HIDDEN_PLAN_PRICE);
+        $this->productShows($product, PriceDisplayMode::OnRequest);
+
+        self::assertStringNotContainsString('37.91', $this->decodedHtml($product));
     }
 
     public function testAHiddenPlanIsNotOffered(): void
@@ -177,6 +211,16 @@ final class SubscriptionProductSheetTest extends IntegrationTestCase
 
     private function page(Product $product): Crawler
     {
+        return new Crawler($this->html($product));
+    }
+
+    private function decodedHtml(Product $product): string
+    {
+        return html_entity_decode($this->html($product), \ENT_QUOTES | \ENT_HTML5);
+    }
+
+    private function html(Product $product): string
+    {
         $twig = $this->getService('twig');
         self::assertInstanceOf(Environment::class, $twig);
         $twig->addGlobal('lang_code', 'en');
@@ -185,6 +229,6 @@ final class SubscriptionProductSheetTest extends IntegrationTestCase
             'product-sheet.html.twig',
         )->render(['id' => $product->getId()]);
 
-        return new Crawler($html);
+        return $html;
     }
 }
