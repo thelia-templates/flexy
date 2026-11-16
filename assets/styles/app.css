@@ -16,6 +16,11 @@
    inside: without this, the loading state stops dimming. */
 @source inline("opacity-50 pointer-events-none");
 
+/* The heading components take their look from a `titleStyle` prop, so h1 to h6 are written
+   as a variable class, which the scanner cannot read: all six are emitted whatever the
+   templates say (they are @utility, emitted only when detected). */
+@source inline("h1 h2 h3 h4 h5 h6");
+
 /* Theme and utilities : automatic layering / per file layering */
 @import "./variables.css";
 @import "./cms.css";
