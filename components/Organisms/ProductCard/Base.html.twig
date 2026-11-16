@@ -86,7 +86,7 @@
 					</div>
 				{% elseif this.isPromo %}
 					<div class="ProductCard-price"><span dir="ltr">{{ this.promoTaxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
-				{% else %}
+				{% elseif this.price is not null %}
 					<div class="ProductCard-price"><span dir="ltr">{{ this.taxedPrice|format_currency(current_currency_code(), locale: lang_code) }}</span></div>
 				{% endif %}
 			</div>
