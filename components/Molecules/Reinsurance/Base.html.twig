@@ -1,4 +1,7 @@
-{# @prop items array List of {icon, strongText, text} — strongText is the emphasised lead-in, text follows it inline #}
+{# @prop items list<{strongText: string|null, text: string, icon: icon|null}> max:6 The reassurance points, side by side #}
+{# @prop items.strongText The emphasised lead-in #}
+{# @prop items.text The words that follow it, on the same line #}
+{# @prop items.icon The icon drawn before the point #}
 {% props items = [] %}
 
 <div class="{{ ('Reinsurance ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
