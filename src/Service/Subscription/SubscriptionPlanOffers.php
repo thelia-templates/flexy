@@ -17,6 +17,7 @@ namespace FlexyBundle\Service\Subscription;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\SecurityContext;
+use Thelia\Domain\Pricing\PriceVisibility\PriceVisibilityResolver;
 use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Domain\Subscription\Exception\SubscriptionPlanPriceMissingException;
 use Thelia\Domain\Subscription\SubscriptionPlanPricing;
@@ -35,7 +36,8 @@ use Thelia\Model\SubscriptionPlanQuery;
  * the product in the country of the visitor: the same call the cart line makes (TaxEngine::getDeliveryCountry()
  * and Product::getTaxedPrice()). Nothing is calculated here, and the page picks one of the two figures with
  * the display of the group of the visitor, as it does for the price of the product. A plan with no price in the
- * currency of the visitor cannot be bought and is left out.
+ * currency of the visitor cannot be bought and is left out. A product whose price the visitor is not shown
+ * offers no plan: the price of a plan would otherwise travel in the LiveProp, in the source of the page.
  *
  * Only built when the core carries subscriptions (SubscriptionServicesPass drops the service otherwise).
  */
@@ -47,6 +49,7 @@ final readonly class SubscriptionPlanOffers
         private LangService $langService,
         private RequestStack $requestStack,
         private SecurityContext $securityContext,
+        private PriceVisibilityResolver $priceVisibilityResolver,
     ) {
     }
 
@@ -62,6 +65,12 @@ final readonly class SubscriptionPlanOffers
             ->find();
 
         if (0 === $plans->count()) {
+            return [];
+        }
+
+        $customer = $this->securityContext->getCustomerUser();
+
+        if (!$this->priceVisibilityResolver->showsPriceOf($productId, $customer instanceof Customer ? $customer : null)) {
             return [];
         }
 
