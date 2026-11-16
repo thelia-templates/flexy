@@ -1,7 +1,12 @@
-{% props title = '' %}
+{# @prop title string The heading above the categories #}
+{# @prop titleTag 'h2'|'h3'|'h4' The level of the heading: h2 under the title of the page, h3 under a heading of level 2 #}
+{# @prop titleStyle 'h1'|'h2'|'h3'|'h4'|'h5'|'h6' The look of the heading, among the heading styles of the theme, whatever its level #}
+{% props title = '', titleTag = 'h2', titleStyle = 'h2' %}
+{% set titleTag = titleTag in ['h2', 'h3', 'h4'] ? titleTag : 'h2' %}
+{% set titleStyle = titleStyle in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] ? titleStyle : 'h2' %}
 
 <div class="{{ ('container-l py-14 xl:py-20 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
-    <h2 class="pb-6 text-black h2">{{ title }}</h2>
+    <{{ titleTag }} class="pb-6 text-black {{ titleStyle }}">{{ title }}</{{ titleTag }}>
 
     <div class="flex flex-col gap-10 lg:grid lg:grid-cols-3">
         {% for category in this.categories %}

@@ -21,6 +21,15 @@ sections:
         - Organisms:ReviewCard:Base
         - Organisms:VideoPlayer:Base
 
+    # The looks a heading of a page may take, whatever its level.
+    heading_styles:
+        h1: { label: Heading 1 of the theme, class: h1 }
+        h2: { label: Heading 2 of the theme, class: h2 }
+        h3: { label: Heading 3 of the theme, class: h3 }
+        h4: { label: Heading 4 of the theme, class: h4 }
+        h5: { label: Heading 5 of the theme, class: h5 }
+        h6: { label: Heading 6 of the theme, class: h6 }
+
     # The Stimulus controllers these components wire themselves with: a
     # published page keeps their attributes and drops those of any other.
     controllers:
