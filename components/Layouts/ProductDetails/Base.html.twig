@@ -12,7 +12,8 @@
         {% if currentPse.isNew|default(false) %}
             {% set galleryTags = galleryTags|merge([{text: 'New'|trans, color: 'warning'}]) %}
         {% endif %}
-        {% if currentPse.isPromo|default(false) and currentPse.displayInitialPrice|default(true) %}
+        {# The rate of a discount tells the price relation the visitor is not shown on a showcase site. #}
+        {% if this.showsPrices and currentPse.isPromo|default(false) and currentPse.displayInitialPrice|default(true) %}
             {% set galleryTags = galleryTags|merge([{text: this.promoRate|format_number(style: 'percent'), color: 'error'}]) %}
         {% endif %}
     {% endif %}
@@ -61,6 +62,7 @@
             :maxQuantityReached="this.isMaxQuantityReached()"
             :cartRefused="this.cartRefused"
             :cartRefusalReason="this.cartRefusalReason"
+            :showsPrices="this.showsPrices"
         />
 
         {% set restrictions = this.destinationRestrictions %}

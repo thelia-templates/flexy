@@ -8,6 +8,7 @@
 {# @prop maxQuantityReached bool The cart already holds the whole available stock #}
 {# @prop cartRefused bool The cart refused the last add (a module rule, the stock gone meanwhile) #}
 {# @prop cartRefusalReason string The reason a module gave with its refusal, printed escaped after the sentence #}
+{# @prop showsPrices bool Whether the visitor is shown the price and offered the cart (false on a showcase site) #}
 {% props
     form,
     productAttrs = [],
@@ -18,7 +19,8 @@
     remainingStock = 0,
     maxQuantityReached = false,
     cartRefused = false,
-    cartRefusalReason = ''
+    cartRefusalReason = '',
+    showsPrices = true
 %}
 
 {# The Flexy form theme is no longer global: without this the widgets below silently fall back to
@@ -128,7 +130,9 @@
             text="{{ 'This product combination is not available'|trans }}"
         />
         {{ form_widget(form.quantity, {type: 'hidden'}) }}
-    {% elseif outOfStock %}
+    {% elseif outOfStock or not showsPrices %}
+        {# No price, no quantity, no add to cart: out of stock, or a shop that does not show its
+           prices to this visitor. #}
         {{ form_widget(form.quantity, {type: 'hidden'}) }}
     {% else %}
         {# Flex items are blockified: dir="ltr" goes on an inner inline span, so the box keeps
@@ -175,7 +179,8 @@
 
     {# Alerts a shopper can leave on the selected variant (back in stock, price drop): a module
        answers here. Outside the cart form on purpose, since the block carries its own form. #}
-    {% if not noPurchasablePse %}
+    {# Not without the price: the hook is handed it, and a price drop alert means nothing there. #}
+    {% if not noPurchasablePse and showsPrices %}
         {{ theme_hook('product.pse.alerts', {
             pseId: currentPse.id,
             outOfStock: outOfStock,

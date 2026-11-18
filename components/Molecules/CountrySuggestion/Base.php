@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Molecules\CountrySuggestion;
 
 use FlexyBundle\Components\Organisms\LangSelect\Base as LangSelect;
+use FlexyBundle\Service\ShopPriceDisplay;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Thelia\Core\HttpFoundation\Session\Session;
@@ -46,12 +47,17 @@ class Base
         private readonly LangSelect $langSelect,
         // Optional: the facade exists only in a core that carries the detection, and the CI of the theme installs the published one.
         private readonly ?VisitorCountryFacade $visitorCountry = null,
+        private readonly ?ShopPriceDisplay $shopPriceDisplay = null,
     ) {
     }
 
+    /**
+     * Not on a shop that does not show its prices to the visitor: the banner offers to see the
+     * prices of their country.
+     */
     public function isOffered(): bool
     {
-        return null !== $this->suggestion();
+        return false !== $this->shopPriceDisplay?->showsPrices() && null !== $this->suggestion();
     }
 
     public function getCountryId(): int

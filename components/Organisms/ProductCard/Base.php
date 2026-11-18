@@ -19,6 +19,7 @@ use FlexyBundle\DTO\ProductSaleElementDTO;
 use FlexyBundle\Service\ProductImageResolver;
 use FlexyBundle\Service\ProductTaxationResolver;
 use FlexyBundle\Service\RunningSaleResolver;
+use FlexyBundle\Service\ShopPriceDisplay;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Symfony\UX\TwigComponent\Attribute\PreMount;
 use Thelia\Api\Service\DataAccess\DataAccessService;
@@ -43,6 +44,8 @@ class Base extends AbstractProductCard
         ProductImageResolver $productImageResolver,
         private readonly ProductTaxationResolver $productTaxationResolver,
         private readonly RunningSaleResolver $runningSaleResolver,
+        // Optional: a test builds the card by hand.
+        private readonly ?ShopPriceDisplay $shopPriceDisplay = null,
     ) {
         parent::__construct($dataAccessService, $productImageResolver);
     }
@@ -69,6 +72,14 @@ class Base extends AbstractProductCard
         $defaultPse = $this->findDefaultPse($this->product->productSaleElements);
 
         if ($defaultPse instanceof ProductSaleElementDTO) {
+            $this->isNew = $defaultPse->newness;
+
+            // Not shown to this visitor (a showcase site): no price, no discount rate, nothing
+            // in the page to read one from.
+            if (false === $this->shopPriceDisplay?->showsPrices()) {
+                return;
+            }
+
             //TODO: temporary fix taxed prices — the front API exposes untaxed prices only
             $this->price = $defaultPse->productPrices[0]->price;
             $this->taxedPrice = $this->productTaxationResolver->taxedPrice($this->product->id, $this->price);
@@ -76,7 +87,6 @@ class Base extends AbstractProductCard
             $this->promoTaxedPrice = $this->productTaxationResolver->taxedPrice($this->product->id, $this->promoPrice);
             $this->isPromo = $defaultPse->promo;
             $this->displayInitialPrice = $defaultPse->displayInitialPrice;
-            $this->isNew = $defaultPse->newness;
         }
     }
 
