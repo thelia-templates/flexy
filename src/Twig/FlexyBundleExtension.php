@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Twig;
 
+use FlexyBundle\Service\ShopPriceDisplay;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Thelia\Core\Security\SecurityContext;
@@ -55,6 +56,7 @@ class FlexyBundleExtension extends AbstractExtension
         private readonly LangService $langService,
         private readonly RequestStack $requestStack,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly ShopPriceDisplay $shopPriceDisplay,
     ) {
     }
 
@@ -65,8 +67,18 @@ class FlexyBundleExtension extends AbstractExtension
             new TwigFunction('current_locale', [$this, 'currentLocale']),
             new TwigFunction('hasCustomerAccount', [$this, 'hasCustomerAccount']),
             new TwigFunction('sign_in_path', [$this, 'signInPath']),
+            new TwigFunction('shop_shows_prices', [$this, 'shopShowsPrices']),
             new TwigFunction('newsletter_enabled', [$this, 'newsletterEnabled']),
         ];
+    }
+
+    /**
+     * Whether the visitor is shown the prices, and so offered the cart and the currencies:
+     * false on a showcase site that sells nothing (see ShopPriceDisplay).
+     */
+    public function shopShowsPrices(): bool
+    {
+        return $this->shopPriceDisplay->showsPrices();
     }
 
     /**
