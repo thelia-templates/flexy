@@ -55,6 +55,7 @@ final readonly class ProductSort
     public function __construct(
         #[AutowireIterator('thelia.catalog.product_sort')]
         private iterable $providers = [],
+        private ?ShopPriceDisplay $shopPriceDisplay = null,
     ) {
     }
 
@@ -126,6 +127,15 @@ final readonly class ProductSort
                 'position' => $provider->position(),
                 'parameters' => $provider->parameters(),
             ];
+        }
+
+        // A shop that does not show its prices to the visitor (a showcase site) offers no sort by
+        // price: the order would tell them. A url still asking for one gets the merchant's order.
+        if (false === $this->shopPriceDisplay?->showsPrices()) {
+            $sorts = array_filter($sorts, static fn (array $sort): bool => [] === array_filter(
+                array_keys($sort['parameters']),
+                static fn (string $parameter): bool => str_contains($parameter, 'price'),
+            ));
         }
 
         uasort($sorts, static fn (array $left, array $right): int => $left['position'] <=> $right['position']);

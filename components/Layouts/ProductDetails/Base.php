@@ -16,6 +16,7 @@ namespace FlexyBundle\Components\Layouts\ProductDetails;
 
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Service\RunningSaleResolver;
+use FlexyBundle\Service\ShopPriceDisplay;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -162,7 +163,16 @@ class Base
         private readonly ?ProductDestinationRestrictionReader $destinationRestrictionReader = null,
         private readonly ?DestinationRestrictionChecker $destinationRestrictionChecker = null,
         private readonly ?LangService $langService = null,
+        private readonly ?ShopPriceDisplay $shopPriceDisplay = null,
     ) {
+    }
+
+    /**
+     * Whether the visitor is shown the price, and so offered the cart: false on a showcase site.
+     */
+    public function showsPrices(): bool
+    {
+        return false !== $this->shopPriceDisplay?->showsPrices();
     }
 
     public function mount(array $product, ?string $title = null, ?array $brand = null): void
@@ -347,6 +357,14 @@ class Base
     #[LiveAction]
     public function save(): void
     {
+        // The selector offers no cart to a visitor who is not shown the price; a request built
+        // by hand gets no further.
+        if (!$this->showsPrices()) {
+            $this->cartRefused = true;
+
+            return;
+        }
+
         // Clamp the requested quantity to the remaining stock before validation, so a manually
         // typed value above the stock cannot trigger a 422. getRemainingStock() returns
         // PHP_INT_MAX when stock is not managed.

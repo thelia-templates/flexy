@@ -50,6 +50,7 @@ final readonly class FormService
         // Optional so that a caller building the service by hand keeps working; without it the
         // price slider shows no amounts.
         private ?RequestStack $requestStack = null,
+        private ?ShopPriceDisplay $shopPriceDisplay = null,
     ) {
     }
 
@@ -58,6 +59,11 @@ final readonly class FormService
      */
     public function renderFieldFromFieldType(array $filter, FormBuilderInterface $fieldset, array $tfilters): void
     {
+        // A range of prices tells the prices a showcase site does not show.
+        if (self::PRICE_FILTER_TYPE === ($filter['type'] ?? null) && false === $this->shopPriceDisplay?->showsPrices()) {
+            return;
+        }
+
         if (!$fieldset->has($filter['type'])) {
             $fieldset->add($fieldset->create(
                 $filter['type'],
