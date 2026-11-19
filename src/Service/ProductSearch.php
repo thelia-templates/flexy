@@ -16,6 +16,7 @@ namespace FlexyBundle\Service;
 
 use FlexyBundle\DTO\ProductDTO;
 use FlexyBundle\Search\ProductSearchEngineInterface;
+use FlexyBundle\Search\ProductSearchEngineWithAlternativeTermsInterface;
 use FlexyBundle\Search\VisibleProductIds;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -147,6 +148,10 @@ final readonly class ProductSearch
 
         $locale = (string) $this->langService->getLocale();
 
+        if ($this->engine instanceof ProductSearchEngineWithAlternativeTermsInterface) {
+            return array_map('intval', $this->engine->productIdsMatchingAnyTerm($term, $this->alternativeTerms($term, $locale), $locale, self::ENGINE_LIMIT));
+        }
+
         if ($this->engine !== null) {
             return array_map('intval', $this->engine->productIds($term, $locale, self::ENGINE_LIMIT));
         }
@@ -259,13 +264,34 @@ final readonly class ProductSearch
      */
     private function titleFilter(string $term): string|array
     {
-        if ($this->coreSearch === null || !method_exists($this->coreSearch, 'expand')) {
-            return $term;
+        $alternatives = $this->alternativeTerms($term, (string) $this->langService->getLocale());
+
+        if ($alternatives === []) {
+            return self::literal($term);
         }
 
-        $alternatives = $this->coreSearch->expand($term, (string) $this->langService->getLocale());
+        return array_map(self::literal(...), [$term, ...$alternatives]);
+    }
 
-        return $alternatives === [] ? $term : [$term, ...$alternatives];
+    /**
+     * @return list<string>
+     */
+    private function alternativeTerms(string $term, string $locale): array
+    {
+        if ($this->coreSearch === null) {
+            return [];
+        }
+
+        if (method_exists($this->coreSearch, 'alternativeTermsOf')) {
+            return $this->coreSearch->alternativeTermsOf($term, $locale);
+        }
+
+        return method_exists($this->coreSearch, 'expand') ? $this->coreSearch->expand($term, $locale) : [];
+    }
+
+    private static function literal(string $term): string
+    {
+        return addcslashes($term, '%_\\');
     }
 
     /**

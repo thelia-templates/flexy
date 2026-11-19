@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Tests\Unit\Service;
 
 use FlexyBundle\Search\ProductSearchEngineInterface;
+use FlexyBundle\Search\ProductSearchEngineWithAlternativeTermsInterface;
 use FlexyBundle\Search\VisibleProductIds;
 use FlexyBundle\Service\ProductSearch;
 use FlexyBundle\Service\ProductSort;
@@ -90,6 +91,77 @@ final class ProductSearchTest extends TestCase
 
         self::assertSame(['chaise', 'siège', 'tabouret'], $this->apiCalls[0]['title']);
         self::assertSame('table', $this->apiCalls[1]['title']);
+    }
+
+    public function testWithoutEngineTheWildcardsOfTheTermAreSearchedLiterally(): void
+    {
+        $this->productSearch(catalog: [3, 7])->search('100%_coton\\');
+
+        self::assertSame('100\\%\\_coton\\\\', $this->apiCalls[0]['title']);
+    }
+
+    public function testWithoutEngineTheWildcardsOfTheSynonymsAreSearchedLiterally(): void
+    {
+        if (!interface_exists(SearchTermExpanderInterface::class)) {
+            self::markTestSkipped('The installed core has no search dictionary.');
+        }
+
+        $expander = $this->createStub(SearchTermExpanderInterface::class);
+        $expander->method('expand')->willReturn(['50%']);
+        $coreSearch = new SearchService(new SearchEngineRegistry([]), new SearchDocumentProviders([]), [], [], new NullLogger(), [$expander]);
+
+        $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch)->search('half_price');
+
+        self::assertSame(['half\\_price', '50\\%'], $this->apiCalls[0]['title']);
+    }
+
+    public function testWithoutEngineTheTitlesAreSearchedForTheRewrittenTermAndItsSynonyms(): void
+    {
+        if (!interface_exists(SearchTermExpanderInterface::class)) {
+            self::markTestSkipped('The installed core has no search dictionary.');
+        }
+
+        $rewriter = $this->createStub(SearchTermRewriterInterface::class);
+        $rewriter->method('rewrite')->willReturnCallback(static fn (string $term): string => $term === 'chaize' ? 'chaise' : $term);
+        $expander = $this->createStub(SearchTermExpanderInterface::class);
+        $expander->method('expand')->willReturnCallback(static fn (string $term): array => $term === 'chaise' ? ['siège'] : []);
+        $coreSearch = new SearchService(new SearchEngineRegistry([]), new SearchDocumentProviders([]), [$rewriter], [], new NullLogger(), [$expander]);
+
+        $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch)->search('chaize');
+
+        self::assertSame(['chaize', 'chaise', 'siège'], $this->apiCalls[0]['title']);
+    }
+
+    public function testAnEngineThatTakesAlternativeTermsReceivesTheSynonymsOfTheCore(): void
+    {
+        if (!interface_exists(SearchTermExpanderInterface::class)) {
+            self::markTestSkipped('The installed core has no search dictionary.');
+        }
+
+        $expander = $this->createStub(SearchTermExpanderInterface::class);
+        $expander->method('expand')->willReturnCallback(static fn (string $term, ?string $locale): array => $term === 'tel' && $locale === 'fr_FR' ? ['téléphone'] : []);
+        $coreSearch = new SearchService(new SearchEngineRegistry([]), new SearchDocumentProviders([]), [], [], new NullLogger(), [$expander]);
+        $engine = new class implements ProductSearchEngineWithAlternativeTermsInterface {
+            /** @var list<array{string, list<string>}> */
+            public array $calls = [];
+
+            public function productIds(string $term, string $locale, int $limit): array
+            {
+                throw new \LogicException('The engine is asked with its alternative terms.');
+            }
+
+            public function productIdsMatchingAnyTerm(string $term, array $alternativeTerms, string $locale, int $limit): array
+            {
+                $this->calls[] = [$term, $alternativeTerms];
+
+                return [7];
+            }
+        };
+
+        $result = $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch, engine: $engine)->search(' tel ');
+
+        self::assertSame([['tel', ['téléphone']]], $engine->calls);
+        self::assertSame([7], $this->ids($result));
     }
 
     public function testWithAnEngineAndNoSortTheRelevanceOrderIsKept(): void
@@ -246,7 +318,7 @@ final class ProductSearchTest extends TestCase
      * @param list<int>|null $engineIds null for no engine
      * @param list<int>|null $visible   null when every id is visible
      */
-    private function productSearch(array $catalog, ?array $engineIds = null, ?array $visible = null, ?SearchService $coreSearch = null, ?int $limit = null, ?RateLimiterFactory $limiter = null): ProductSearch
+    private function productSearch(array $catalog, ?array $engineIds = null, ?array $visible = null, ?SearchService $coreSearch = null, ?int $limit = null, ?RateLimiterFactory $limiter = null, ?ProductSearchEngineInterface $engine = null): ProductSearch
     {
         $requestStack = new RequestStack();
         $requestStack->push(Request::create('/search', server: ['REMOTE_ADDR' => '203.0.113.9']));
@@ -261,7 +333,7 @@ final class ProductSearchTest extends TestCase
             new ProductSort(),
             new EventDispatcher(),
             $this->langService(),
-            $engineIds === null ? [] : [$this->engine($engineIds)],
+            $engine !== null ? [$engine] : ($engineIds === null ? [] : [$this->engine($engineIds)]),
             $visibleProductIds,
             $coreSearch,
             $limiter ?? $this->limiter($limit ?? 1000),
