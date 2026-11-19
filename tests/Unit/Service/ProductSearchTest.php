@@ -272,6 +272,17 @@ final class ProductSearchTest extends TestCase
         self::assertSame(range(1, 10), $this->ids($result));
     }
 
+    public function testAHiddenMatchOfTheIndexDoesNotStopTheReadingOfTheNextPages(): void
+    {
+        $matches = range(1, 250);
+        $search = $this->productSearch(catalog: $matches, coreSearch: $this->coreSearch($matches, hidden: [5]));
+
+        $result = $search->search('chaise', 1, 10);
+
+        self::assertSame([0, 100, 200], array_map(static fn (SearchQuery $query): int => $query->offset, $this->coreQueries));
+        self::assertSame(249, $result['total']);
+    }
+
     public function testAnUnavailableCoreEngineLetsTheDatabaseAnswer(): void
     {
         $search = $this->productSearch(catalog: [3, 7], coreSearch: $this->coreSearch([3], available: false));
@@ -348,8 +359,9 @@ final class ProductSearchTest extends TestCase
 
     /**
      * @param list<int> $matches
+     * @param list<int> $hidden
      */
-    private function coreSearch(array $matches, ?string $rewriteTo = null, bool $available = true): SearchService
+    private function coreSearch(array $matches, ?string $rewriteTo = null, bool $available = true, array $hidden = []): SearchService
     {
         $record = function (SearchQuery $query): void {
             $this->coreQueries[] = $query;
@@ -358,6 +370,7 @@ final class ProductSearchTest extends TestCase
         $engine = new class($matches, $available, $record) implements SearchEngineInterface {
             /**
              * @param list<int> $matches
+     * @param list<int> $hidden
              */
             public function __construct(private array $matches, private bool $available, private \Closure $record)
             {
@@ -392,7 +405,7 @@ final class ProductSearchTest extends TestCase
         $provider = $this->createStub(SearchableDocumentProviderInterface::class);
         $provider->method('family')->willReturn('product');
         $provider->method('scope')->willReturn(SearchScope::Shop);
-        $provider->method('visibleIds')->willReturnArgument(0);
+        $provider->method('visibleIds')->willReturnCallback(static fn (array $ids): array => array_values(array_diff($ids, $hidden)));
 
         $rewriters = [];
 
