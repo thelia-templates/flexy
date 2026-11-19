@@ -104,7 +104,7 @@ final readonly class ProductSearch
             return $this->searchWithEngine($matches, max(1, $page), $itemsPerPage, $sort);
         }
 
-        return $this->fetch($this->parameters(['title' => trim($term)], $page, $itemsPerPage, $sort));
+        return $this->fetch($this->parameters(['title' => $this->titleFilter(trim($term))], $page, $itemsPerPage, $sort));
     }
 
     public function count(string $term): int
@@ -252,6 +252,20 @@ final readonly class ProductSearch
         usort($products, static fn (ProductDTO $left, ProductDTO $right): int => ($rank[$left->id] ?? \PHP_INT_MAX) <=> ($rank[$right->id] ?? \PHP_INT_MAX));
 
         return ['products' => $products, 'total' => \count($ids)];
+    }
+
+    /**
+     * @return string|list<string>
+     */
+    private function titleFilter(string $term): string|array
+    {
+        if ($this->coreSearch === null || !method_exists($this->coreSearch, 'expand')) {
+            return $term;
+        }
+
+        $alternatives = $this->coreSearch->expand($term, (string) $this->langService->getLocale());
+
+        return $alternatives === [] ? $term : [$term, ...$alternatives];
     }
 
     /**

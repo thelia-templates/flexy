@@ -155,7 +155,9 @@ public function productIds(string $term, string $locale, int $limit): array; // 
 
 The engine only says which products match. The theme keeps the rest: it drops the products a visitor may not see, paginates, and reads the page through the product API. With no sort chosen the results follow the engine's order; a sort chosen in the selector applies to the matches. An engine returning `[]` means no result: the theme does not fall back on its own search.
 
-Without such a module, a search engine plugged into the core (`Thelia\Domain\Search\Contract\SearchEngineInterface`) answers through `Thelia\Domain\Search\SearchService`: the core's term rewriters (synonyms) apply, and a submitted search whose term a `SearchRedirectResolverInterface` maps to a page lands on that page, on its first page only, unsorted. When the core's engine is unavailable or fails, the `title` filter answers instead.
+Without such a module, a search engine plugged into the core (`Thelia\Domain\Search\Contract\SearchEngineInterface`) answers through `Thelia\Domain\Search\SearchService`: the core's term rewriters apply, and a submitted search whose term a `SearchRedirectResolverInterface` maps to a page lands on that page, on its first page only, unsorted. When the core's engine is unavailable or fails, the `title` filter answers instead.
+
+The search synonyms of the back office (Configuration > Search synonyms) widen the search of the core's engine, which receives them as alternative terms, and the `title` filter, which matches the term or any of them. An engine of the theme receives the searched term alone: it applies the synonyms only if it reads them itself, through `SearchService::expand()`.
 
 Each client may ask an engine, the theme's or the core's, 120 times a minute (`flexy_product_search` rate limiter, keyed on the client IP). Past it the `title` filter answers, so a robot walking terms cannot wear the engine out and a visitor still gets results.
 
