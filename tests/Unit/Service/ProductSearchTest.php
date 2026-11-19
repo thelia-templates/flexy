@@ -30,6 +30,7 @@ use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Domain\Search\Contract\SearchableDocumentProviderInterface;
 use Thelia\Domain\Search\Contract\SearchEngineInterface;
 use Thelia\Domain\Search\Contract\SearchScope;
+use Thelia\Domain\Search\Contract\SearchTermExpanderInterface;
 use Thelia\Domain\Search\Contract\SearchTermRewriterInterface;
 use Thelia\Domain\Search\Document\SearchHit;
 use Thelia\Domain\Search\Document\SearchQuery;
@@ -72,6 +73,23 @@ final class ProductSearchTest extends TestCase
         self::assertSame(10, $this->apiCalls[0]['itemsPerPage']);
         self::assertArrayNotHasKey('id', $this->apiCalls[0]);
         self::assertSame(2, $result['total']);
+    }
+
+    public function testWithoutEngineTheSynonymsOfTheTermAreLookedForInTheTitles(): void
+    {
+        if (!interface_exists(SearchTermExpanderInterface::class)) {
+            self::markTestSkipped('The installed core has no search dictionary.');
+        }
+
+        $expander = $this->createStub(SearchTermExpanderInterface::class);
+        $expander->method('expand')->willReturnCallback(static fn (string $term, ?string $locale): array => $term === 'chaise' && $locale === 'fr_FR' ? ['siège', 'tabouret'] : []);
+        $coreSearch = new SearchService(new SearchEngineRegistry([]), new SearchDocumentProviders([]), [], [], new NullLogger(), [$expander]);
+
+        $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch)->search(' chaise ');
+        $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch)->search('table');
+
+        self::assertSame(['chaise', 'siège', 'tabouret'], $this->apiCalls[0]['title']);
+        self::assertSame('table', $this->apiCalls[1]['title']);
     }
 
     public function testWithAnEngineAndNoSortTheRelevanceOrderIsKept(): void
