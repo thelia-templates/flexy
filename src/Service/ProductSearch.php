@@ -184,7 +184,7 @@ final readonly class ProductSearch
                 $ids[] = $hit->id;
             }
 
-            if (\count($result->hits) < SearchQuery::MAX_LIMIT || $offset + SearchQuery::MAX_LIMIT >= $result->total) {
+            if ($result->hits === [] || $offset + SearchQuery::MAX_LIMIT >= $result->total) {
                 break;
             }
         }
