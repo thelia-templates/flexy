@@ -23,7 +23,10 @@ use Thelia\Domain\Catalog\DTO\ReferenceQuantityLines;
  * already read, into reference and quantity rows.
  *
  * One line is one row: the reference first, the quantity second, separated by a tab
- * (what a spreadsheet copies), a semicolon or a comma. Blank lines are skipped, and a
+ * (what a spreadsheet copies), a semicolon or a comma. A quantity sold by measure keeps
+ * its decimals, after a comma or a point; on a line whose columns are separated by
+ * commas, the decimals take a point: "REF,1,25" is refused with a reason that says so
+ * rather than read as one quantity or another. Blank lines are skipped, and a
  * first line whose quantity is not a number is taken for a header. A line that cannot
  * be read is not dropped silently: it comes back with its number so the page can say
  * which one to fix. A reference longer than the core takes is refused here, line by
@@ -42,6 +45,11 @@ final readonly class ReferenceQuantityTextParser
     public const string REASON_QUANTITY = 'quantity';
 
     public const string REASON_REFERENCE = 'reference';
+
+    public const string REASON_DECIMAL_COMMA = 'decimal_comma';
+
+    /** The finest quantity a sale element is sold in, a gram of a kilogram. */
+    private const int MAXIMUM_DECIMALS = 3;
 
     /**
      * @throws ReferenceQuantityTextRefusedException when the text is longer or has more rows than a table takes
@@ -62,12 +70,19 @@ final readonly class ReferenceQuantityTextParser
                 continue;
             }
 
+            $separator = self::separatorOf($line);
             $cells = array_values(array_filter(
-                array_map(static fn (?string $cell): string => trim((string) $cell), str_getcsv($line, self::separatorOf($line), '"', '')),
+                array_map(static fn (?string $cell): string => trim((string) $cell), str_getcsv($line, $separator, '"', '')),
                 static fn (string $cell): bool => '' !== $cell,
             ));
             $isFirstLine = !$headerChecked;
             $headerChecked = true;
+
+            if (',' === $separator && 3 === \count($cells) && 1 === preg_match('/^\d+$/', $cells[1]) && 1 === preg_match('/^\d+$/', $cells[2])) {
+                $rejected[] = ['line' => $index + 1, 'content' => $line, 'reason' => self::REASON_DECIMAL_COMMA];
+
+                continue;
+            }
 
             if (2 !== \count($cells)) {
                 $rejected[] = ['line' => $index + 1, 'content' => $line, 'reason' => self::REASON_COLUMNS];
@@ -77,7 +92,7 @@ final readonly class ReferenceQuantityTextParser
 
             [$reference, $quantity] = $cells;
 
-            if (1 !== preg_match('/^[1-9]\d{0,8}$/', $quantity)) {
+            if (1 !== preg_match('/^\d{1,9}(?:[.,]\d+)?$/', $quantity)) {
                 if (!$isFirstLine) {
                     $rejected[] = ['line' => $index + 1, 'content' => $line, 'reason' => self::REASON_QUANTITY];
                 }
@@ -85,7 +100,9 @@ final readonly class ReferenceQuantityTextParser
                 continue;
             }
 
-            if ((int) $quantity > ReferenceQuantityLines::MAX_QUANTITY) {
+            $quantity = (float) str_replace(',', '.', $quantity);
+
+            if ($quantity <= 0 || $quantity > ReferenceQuantityLines::MAX_QUANTITY || 1 !== preg_match('/^\d+(?:[.,]\d{1,'.self::MAXIMUM_DECIMALS.'})?$/', $cells[1])) {
                 $rejected[] = ['line' => $index + 1, 'content' => $line, 'reason' => self::REASON_QUANTITY];
 
                 continue;
@@ -101,7 +118,7 @@ final readonly class ReferenceQuantityTextParser
                 throw ReferenceQuantityTextRefusedException::tooManyLines(self::MAX_LINES);
             }
 
-            $rows[] = ['reference' => $reference, 'quantity' => (int) $quantity];
+            $rows[] = ['reference' => $reference, 'quantity' => $quantity];
         }
 
         return new ParsedReferenceQuantities($rows, $rejected);

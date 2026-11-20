@@ -38,8 +38,8 @@ final class ReferenceQuantityTextParserTest extends TestCase
         $parsed = (new ReferenceQuantityTextParser())->parse($text);
 
         self::assertSame([
-            ['reference' => 'VIS-M6', 'quantity' => 3],
-            ['reference' => 'ECROU-M6', 'quantity' => 12],
+            ['reference' => 'VIS-M6', 'quantity' => 3.0],
+            ['reference' => 'ECROU-M6', 'quantity' => 12.0],
         ], $parsed->rows);
         self::assertSame([], $parsed->rejected);
     }
@@ -58,8 +58,8 @@ final class ReferenceQuantityTextParserTest extends TestCase
         $parsed = (new ReferenceQuantityTextParser())->parse($text);
 
         self::assertSame([
-            ['reference' => 'VIS-M6', 'quantity' => 3],
-            ['reference' => 'ECROU-M6', 'quantity' => 12],
+            ['reference' => 'VIS-M6', 'quantity' => 3.0],
+            ['reference' => 'ECROU-M6', 'quantity' => 12.0],
         ], $parsed->rows);
         self::assertSame([], $parsed->rejected);
     }
@@ -71,8 +71,8 @@ final class ReferenceQuantityTextParserTest extends TestCase
         $parsed = (new ReferenceQuantityTextParser())->parse($text);
 
         self::assertSame([
-            ['reference' => 'VIS-M6', 'quantity' => 3],
-            ['reference' => 'VIS-M10', 'quantity' => 5],
+            ['reference' => 'VIS-M6', 'quantity' => 3.0],
+            ['reference' => 'VIS-M10', 'quantity' => 5.0],
         ], $parsed->rows);
         self::assertSame([
             ['line' => 2, 'content' => 'ECROU-M6;douze', 'reason' => ReferenceQuantityTextParser::REASON_QUANTITY],
@@ -82,11 +82,40 @@ final class ReferenceQuantityTextParserTest extends TestCase
         ], $parsed->rejected);
     }
 
+    public function testADecimalQuantityIsReadWithACommaOrAPoint(): void
+    {
+        $parsed = (new ReferenceQuantityTextParser())->parse("FARINE-T65;1,25\nSEL\t0,5\nSUCRE;2.75\nRIZ,1.5");
+
+        self::assertSame([
+            ['reference' => 'FARINE-T65', 'quantity' => 1.25],
+            ['reference' => 'SEL', 'quantity' => 0.5],
+            ['reference' => 'SUCRE', 'quantity' => 2.75],
+            ['reference' => 'RIZ', 'quantity' => 1.5],
+        ], $parsed->rows);
+        self::assertSame([], $parsed->rejected);
+    }
+
+    public function testADecimalCommaOnALineSeparatedByCommasIsRefusedWithItsReason(): void
+    {
+        $parsed = (new ReferenceQuantityTextParser())->parse("VIS-M6,3\nFARINE-T65,1,25");
+
+        self::assertSame([['reference' => 'VIS-M6', 'quantity' => 3.0]], $parsed->rows);
+        self::assertSame([['line' => 2, 'content' => 'FARINE-T65,1,25', 'reason' => ReferenceQuantityTextParser::REASON_DECIMAL_COMMA]], $parsed->rejected);
+    }
+
+    public function testAQuantityWithMoreThanThreeDecimalsIsRefusedAlone(): void
+    {
+        $parsed = (new ReferenceQuantityTextParser())->parse("VIS-M6;3\nSAFRAN;0,0005");
+
+        self::assertSame([['reference' => 'VIS-M6', 'quantity' => 3.0]], $parsed->rows);
+        self::assertSame([['line' => 2, 'content' => 'SAFRAN;0,0005', 'reason' => ReferenceQuantityTextParser::REASON_QUANTITY]], $parsed->rejected);
+    }
+
     public function testAReferenceLongerThanTheCoreTakesIsRefusedAloneRatherThanWithTheTable(): void
     {
         $parsed = (new ReferenceQuantityTextParser())->parse("VIS-M6;3\n".str_repeat('X', 256).';1');
 
-        self::assertSame([['reference' => 'VIS-M6', 'quantity' => 3]], $parsed->rows);
+        self::assertSame([['reference' => 'VIS-M6', 'quantity' => 3.0]], $parsed->rows);
         self::assertSame([2], array_column($parsed->rejected, 'line'));
         self::assertSame(ReferenceQuantityTextParser::REASON_REFERENCE, $parsed->rejected[0]['reason']);
     }
@@ -95,7 +124,7 @@ final class ReferenceQuantityTextParserTest extends TestCase
     {
         $parsed = (new ReferenceQuantityTextParser())->parse("VIS-M6;999999\nECROU-M6;1000000");
 
-        self::assertSame([['reference' => 'VIS-M6', 'quantity' => 999999]], $parsed->rows);
+        self::assertSame([['reference' => 'VIS-M6', 'quantity' => 999999.0]], $parsed->rows);
         self::assertSame([['line' => 2, 'content' => 'ECROU-M6;1000000', 'reason' => ReferenceQuantityTextParser::REASON_QUANTITY]], $parsed->rejected);
     }
 
