@@ -16,6 +16,7 @@ namespace FlexyBundle\Components\Forms\Address;
 
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Form\AddressEditForm;
+use FlexyBundle\Service\GuestCheckoutGate;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
@@ -23,13 +24,12 @@ use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
-use FlexyBundle\Service\GuestCheckoutGate;
 use Thelia\Core\Form\FormServiceInterface;
 use Thelia\Domain\Addressing\Exception\AddressNotFoundException;
+use Thelia\Domain\Addressing\Service\AddressAccess;
 use Thelia\Domain\Addressing\Service\AddressService;
-use Thelia\Domain\Customer\Exception\CustomerException;
 use Thelia\Domain\Customer\CustomerFacade;
-use Thelia\Model\AddressQuery;
+use Thelia\Domain\Customer\Exception\CustomerException;
 
 #[AsLiveComponent]
 class Base
@@ -53,12 +53,16 @@ class Base
         private readonly AddressService $addressService,
         private readonly CustomerFacade $customerFacade,
         private readonly GuestCheckoutGate $guestCheckoutGate,
+        private readonly AddressAccess $addressAccess,
     ) {
     }
 
     protected function instantiateForm(): FormInterface
     {
         $form = $this->formService->getFormByName(AddressEditForm::FORM_NAME, $this->getData());
+
+        // The box of the account address book: the checkout form has none.
+        $form->remove('share_with_company');
         $form->remove('address3');
 
         if (!$this->withCompany) {
@@ -97,12 +101,10 @@ class Base
             return [];
         }
 
-        $address = AddressQuery::create()
-            ->filterByCustomerId($customer->getId())
-            ->findPk($this->addressId)
-        ;
+        // The customer's own address, or one of their company that their role manages.
+        $address = $this->addressAccess->find($customer, $this->addressId);
 
-        if (null === $address) {
+        if (null === $address || !$this->addressAccess->canEdit($customer, $address)) {
             return [];
         }
 

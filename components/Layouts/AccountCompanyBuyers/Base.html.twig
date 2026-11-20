@@ -1,0 +1,101 @@
+{# @prop buyers array The buyers of the page, as the account API serves them #}
+{# @prop roleTitles array The title of every role of the company, by code #}
+{# @prop roles array The title of each role the signed-in buyer may give, by code #}
+{# @prop pagination array totalItems, itemsPerPage and currentPage #}
+{# @prop currentCustomerId int|null The signed-in customer: their own row says so #}
+<div {{ attributes.defaults(stimulus_controller('Organisms--AddressCard--base')) }}>
+    {% if this.buyers|length %}
+        <ul class="flex flex-col gap-6" data-testid="company-buyers">
+            {% for buyer in this.buyers %}
+                {% set editable = this.isEditable(buyer) %}
+                <li class="flex flex-col gap-4 rounded-lg bg-lighter px-6 py-5" data-testid="company-buyer">
+                    <div class="flex flex-col gap-1">
+                        <span class="h5"><bdi>{{ buyer.firstname }} {{ buyer.lastname }}</bdi>{% if buyer.customerId == this.currentCustomerId %} ({{ 'you'|trans }}){% endif %}</span>
+                        <span class="paragraph-3"><bdi>{{ buyer.email }}</bdi></span>
+                    </div>
+
+                    {% if buyer.orderLimit is not null or buyer.periodLimit is not null %}
+                        {% set periods = {week: 'Week'|trans, month: 'Month'|trans, year: 'Year'|trans} %}
+                        <p class="paragraph-3" data-testid="company-buyer-limits">
+                            {% if buyer.orderLimit is not null %}
+                                {{ 'Limit per order'|trans }} : <span dir="ltr">{{ this.shown(buyer.orderLimit) }}</span>
+                            {% endif %}
+                            {% if buyer.orderLimit is not null and buyer.periodLimit is not null %}<br>{% endif %}
+                            {% if buyer.periodLimit is not null %}
+                                {{ 'Limit per period'|trans }} : <span dir="ltr">{{ this.shown(buyer.periodLimit) }}</span>{% if buyer.period %} ({{ periods[buyer.period]|default(buyer.period) }}){% endif %}
+                            {% endif %}
+                        </p>
+                    {% endif %}
+
+                    {% if editable %}
+                        <form method="post" action="{{ path('account_company_buyer_update', {buyerId: buyer.id}) }}" class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                            <input type="hidden" name="_token" value="{{ csrf_token('company_action') }}">
+                            <twig:Fields:Select:Base
+                                label="{{ 'Role'|trans }}"
+                                select:name="role"
+                                id="role-{{ buyer.id }}"
+                                :choices="this.roleChoices"
+                                value="{{ buyer.roleCode }}"
+                            />
+                            <twig:Fields:Input:Base
+                                label="{{ 'Limit per order'|trans }}"
+                                name="order_limit"
+                                id="order-limit-{{ buyer.id }}"
+                                value="{{ this.plain(buyer.orderLimit) }}"
+                                unit="{{ this.currencySymbol }}"
+                                autocomplete="off"
+                                dir="ltr"
+                                :optional="true"
+                            />
+                            <twig:Fields:Input:Base
+                                label="{{ 'Limit per period'|trans }}"
+                                name="period_limit"
+                                id="period-limit-{{ buyer.id }}"
+                                value="{{ this.plain(buyer.periodLimit) }}"
+                                unit="{{ this.currencySymbol }}"
+                                autocomplete="off"
+                                dir="ltr"
+                                :optional="true"
+                            />
+                            <twig:Fields:Select:Base
+                                label="{{ 'Period'|trans }}"
+                                select:name="period"
+                                id="period-{{ buyer.id }}"
+                                :choices="[{value: '', label: 'No period'|trans}, {value: 'week', label: 'Week'|trans}, {value: 'month', label: 'Month'|trans}, {value: 'year', label: 'Year'|trans}]"
+                                value="{{ buyer.period|default('') }}"
+                            />
+                            <div class="flex gap-4 md:col-span-4">
+                                <twig:Molecules:Button:Base text="{{ 'Save'|trans }}" type="submit" size="small" />
+                                <twig:Molecules:Button:Base
+                                    text="{{ 'Remove from the company'|trans }}"
+                                    type="button"
+                                    size="small"
+                                    color="secondary"
+                                    {{ ...stimulus_action('Organisms--AddressCard--base', 'openModal', 'click') }}
+                                    data-modal="confirmDetachBuyer"
+                                    data-confirm="{{ path('account_company_buyer_detach', {buyerId: buyer.id}) }}"
+                                />
+                            </div>
+                        </form>
+                    {% else %}
+                        <p class="paragraph-3">
+                            {{ 'Role'|trans }} : <span data-testid="company-buyer-role">{{ this.roleTitles[buyer.roleCode]|default(buyer.roleCode) }}</span>
+                            <br>
+                            {{ 'This buyer holds rights beyond yours: only a buyer with the same rights can change them.'|trans }}
+                        </p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="flex justify-center mt-10">
+            <twig:Molecules:Pagination:Base
+                :totalItems="this.pagination.totalItems"
+                :itemsPerPage="this.pagination.itemsPerPage"
+                :currentPage="this.pagination.currentPage"
+            />
+        </div>
+    {% else %}
+        <p class="paragraph-2">{{ 'Your company has no buyer yet'|trans }}</p>
+    {% endif %}
+</div>

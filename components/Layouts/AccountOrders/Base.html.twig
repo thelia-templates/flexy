@@ -1,7 +1,12 @@
 {% if this.orders|length %}
     <div class="AccountOrders-list">
         {% for order in this.orders %}
-            <twig:Organisms:OrderCard:Base :orderId="order.id" />
+            <div>
+                <twig:Organisms:OrderCard:Base :orderId="order.id" />
+                {% if this.scope == 'company' and this.placedBy[order.id]|default('') %}
+                    <p class="paragraph-3 mt-2" data-testid="order-placed-by">{{ 'Placed by'|trans }} <bdi>{{ this.placedBy[order.id] }}</bdi></p>
+                {% endif %}
+            </div>
         {% endfor %}
     </div>
 

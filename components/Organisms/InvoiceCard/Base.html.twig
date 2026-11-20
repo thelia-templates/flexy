@@ -4,6 +4,8 @@
         {# Reuses the address info markup of the AddressCard component. #}
         {{ block('infos', '@Flexy/Organisms/AddressCard/Base.html.twig') }}
     </div>
+    {# Only an address the customer may change offers the edit: one shared by a colleague is theirs to use, not to edit. #}
+    {% if this.canEdit %}
     <div class="InvoiceCard-bottom">
         <twig:Molecules:Button:Base
             type="button"
@@ -14,4 +16,5 @@
             data-live-address-id-param="{{ this.address.id }}"
         />
     </div>
+    {% endif %}
 </div>

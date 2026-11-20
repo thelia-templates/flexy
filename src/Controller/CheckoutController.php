@@ -246,6 +246,12 @@ class CheckoutController extends FlexyController
                 : $violation->message);
         }
 
+        // The company of a buyer refuses the order (suspended, role, limit): a step with no screen
+        // of its own, whose reason would be lost on the way back to the last screen before it.
+        if (null !== $violation && CheckoutTrail::COMPANY_SPENDING_STEP === $violation->stepCode) {
+            $this->addFlash('error', $violation->message);
+        }
+
         return $this->generateRedirect($routes->pathOfTheFirstIncompleteStep($cart));
     }
 

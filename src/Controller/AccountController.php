@@ -15,29 +15,38 @@ declare(strict_types=1);
 namespace FlexyBundle\Controller;
 
 use FlexyBundle\Form\AddressEditForm;
+use FlexyBundle\Service\CompanyAccount;
+use Propel\Runtime\Propel;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Service\Attribute\Required;
 use Thelia\Api\Service\DataAccess\DataAccessService;
+use Thelia\Core\Event\Address\AddressCreateOrUpdateEvent;
 use Thelia\Core\Event\Customer\CustomerPersonalDataExportEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Domain\Addressing\Exception\AddressNotFoundException;
+use Thelia\Domain\Addressing\Service\AddressAccess;
 use Thelia\Domain\Addressing\Service\AddressService;
+use Thelia\Domain\Company\CompanyFacade;
+use Thelia\Domain\Company\Exception\CompanyException;
 use Thelia\Domain\Customer\DTO\CustomerRegisterDTO;
 use Thelia\Domain\Customer\Exception\CustomerException;
 use Thelia\Domain\Customer\Service\CustomerUpdateService;
 use Thelia\Form\Definition\FrontForm;
 use Thelia\Form\Exception\FormValidationException;
+use Thelia\Model\Address;
 use Thelia\Model\AddressQuery;
 use Thelia\Model\Customer;
 use Thelia\Model\Event\AddressEvent;
+use Thelia\Model\Map\AddressTableMap;
 
 #[Route('/account', name: 'account_')]
 class AccountController extends FlexyController
@@ -45,6 +54,15 @@ class AccountController extends FlexyController
     public const ADDRESS_ACTION_TOKEN_ID = 'address_action';
 
     public const PERSONAL_DATA_TOKEN_ID = 'personal_data';
+
+    private ?CompanyAccount $companyAccount = null;
+
+    // A setter: the constructor is the one of the parent, shared by every controller of the theme.
+    #[Required]
+    public function setCompanyAccount(CompanyAccount $companyAccount): void
+    {
+        $this->companyAccount = $companyAccount;
+    }
 
     #[Route('', name: 'index')]
     public function index(): Response
@@ -59,7 +77,7 @@ class AccountController extends FlexyController
     {
         $this->checkAuth();
 
-        return $this->render('account-addresses');
+        return $this->render('account-addresses', ['sharedAddressIds' => $this->sharedAddressIds()]);
     }
 
     #[Route('/address/new', name: 'address_new', methods: ['GET'])]
@@ -71,17 +89,17 @@ class AccountController extends FlexyController
     }
 
     #[Route('/address/new', name: 'address_create', methods: ['POST'])]
-    public function addressCreate(AddressService $addressService): Response
+    public function addressCreate(AddressService $addressService, EventDispatcherInterface $eventDispatcher, CompanyFacade $companyFacade): Response
     {
         $this->checkAuth();
 
-        return $this->saveAddress($addressService, null);
+        return $this->saveAddress($addressService, null, $eventDispatcher, $companyFacade);
     }
 
     #[Route('/address/{addressId}', name: 'address', requirements: ['addressId' => '\d+'], methods: ['GET'])]
-    public function address(DataAccessService $dataAccessService, int $addressId): Response
+    public function address(DataAccessService $dataAccessService, AddressAccess $addressAccess, int $addressId): Response
     {
-        $this->checkOwnedAddress($addressId);
+        $this->checkEditableAddress($addressAccess, $addressId);
 
         // Same reason as the order page: an empty API result must not render in 200.
         if (null === $dataAccessService->resources('/api/front/account/addresses/'.$addressId)) {
@@ -92,11 +110,11 @@ class AccountController extends FlexyController
     }
 
     #[Route('/address/{addressId}', name: 'address_update', requirements: ['addressId' => '\d+'], methods: ['POST'])]
-    public function addressUpdate(AddressService $addressService, int $addressId): Response
+    public function addressUpdate(AddressService $addressService, EventDispatcherInterface $eventDispatcher, CompanyFacade $companyFacade, int $addressId): Response
     {
         $this->checkAuth();
 
-        return $this->saveAddress($addressService, $addressId);
+        return $this->saveAddress($addressService, $addressId, $eventDispatcher, $companyFacade);
     }
 
     #[Route('/address/delete/{addressId}', name: 'address_delete', requirements: ['addressId' => '\d+'], methods: ['POST'])]
@@ -123,6 +141,7 @@ class AccountController extends FlexyController
     #[Route('/address/default/{addressId}', name: 'address_default', requirements: ['addressId' => '\d+'], methods: ['POST'])]
     public function addressDefault(
         EventDispatcherInterface $eventDispatcher,
+        AddressAccess $addressAccess,
         CsrfTokenManagerInterface $csrfTokenManager,
         Request $request,
         int $addressId,
@@ -130,12 +149,12 @@ class AccountController extends FlexyController
         $this->checkAuth();
         $this->checkAddressActionToken($csrfTokenManager, $request);
 
-        $address = AddressQuery::create()
-            ->filterByCustomerId($this->getSecurityContext()->getCustomerUser()?->getId())
-            ->findPk($addressId)
-        ;
+        $customer = $this->getSecurityContext()->getCustomerUser();
+        $address = $addressAccess->find($customer, $addressId);
 
-        if (null === $address) {
+        // The default address is the one of the account that owns it: an address a colleague
+        // shared can be used, never made the default one of someone else.
+        if (null === $address || (int) $address->getCustomerId() !== (int) $customer?->getId()) {
             return $this->generateRedirect($this->generateUrl('account_addresses', ['error' => true]));
         }
 
@@ -249,40 +268,52 @@ class AccountController extends FlexyController
     }
 
     /**
-     * The core leaves `Get /front/account/addresses/{id}` without a security expression,
-     * so nothing downstream checks who owns the address: the check belongs here.
-     * Answers like a missing address so an id cannot be probed for existence.
+     * The page that changes an address is the one of an address the customer may change: their
+     * own, or one shared with their company that their role manages. The core leaves
+     * `Get /front/account/addresses/{id}` open to whoever may use the address, so what makes
+     * the page refuse is decided here, by the permission checker. Answers like a missing
+     * address, so that an id cannot be probed for existence.
      */
-    private function checkOwnedAddress(int $addressId): void
+    private function checkEditableAddress(AddressAccess $addressAccess, int $addressId): void
     {
         $this->checkAuth();
 
-        $isOwner = AddressQuery::create()
-            ->filterByCustomerId($this->getSecurityContext()->getCustomerUser()?->getId())
-            ->filterById($addressId)
-            ->exists()
-        ;
+        $customer = $this->getSecurityContext()->getCustomerUser();
+        $address = $addressAccess->find($customer, $addressId);
 
-        if (!$isOwner) {
+        if (null === $address || !$customer instanceof Customer || !$addressAccess->canEdit($customer, $address)) {
             throw new NotFoundHttpException();
         }
     }
 
-    private function saveAddress(AddressService $addressService, ?int $addressId): Response
+    private function saveAddress(AddressService $addressService, ?int $addressId, EventDispatcherInterface $eventDispatcher, CompanyFacade $companyFacade): Response
     {
         $form = $this->createForm(AddressEditForm::FORM_NAME);
 
+        // A new address is known to the controller only through the event that creates it.
+        $created = null;
+        $listener = static function (AddressCreateOrUpdateEvent $event) use (&$created): void {
+            $created = $event->getAddress();
+        };
+        $eventDispatcher->addListener(TheliaEvents::ADDRESS_CREATE, $listener, -1000);
+
         try {
             $validatedForm = $this->validateForm($form, Request::METHOD_POST);
-            $addressService->updateOrCreateAddress($addressId, $validatedForm);
+
+            // The address and its sharing are one change: a sharing the company refuses saves nothing.
+            $this->inOneTransaction(function () use ($addressService, $addressId, $validatedForm, $companyFacade, &$created): void {
+                $addressService->updateOrCreateAddress($addressId, $validatedForm);
+                $this->shareAddress($companyFacade, $addressId, $created, $validatedForm->has('share_with_company') && true === $validatedForm->get('share_with_company')->getData());
+            });
 
             return $this->generateSuccessRedirect($form);
         } catch (FormValidationException $e) {
             $message = $this->translator->trans('Please check your input: %s', ['%s' => $e->getMessage()]);
-        } catch (AddressNotFoundException|CustomerException $e) {
+        } catch (AddressNotFoundException|CustomerException|CompanyException $e) {
             $message = $this->translator->trans('An error has occurred, please try again later');
         }
 
+        $eventDispatcher->removeListener(TheliaEvents::ADDRESS_CREATE, $listener);
         $this->logger->error(\sprintf('Error during address save process: %s.', $message));
 
         $form->setErrorMessage($message);
@@ -296,5 +327,64 @@ class AccountController extends FlexyController
         }
 
         return $this->generateRedirectFromRoute('account_addresses');
+    }
+
+    /**
+     * @param callable(): void $work
+     */
+    private function inOneTransaction(callable $work): void
+    {
+        $connection = Propel::getWriteConnection(AddressTableMap::DATABASE_NAME);
+        $connection->beginTransaction();
+
+        try {
+            $work();
+            $connection->commit();
+        } catch (\Throwable $throwable) {
+            $connection->rollBack();
+
+            throw $throwable;
+        }
+    }
+
+    /**
+     * The addresses of the address book that belong to the company of the customer, to draw them
+     * in a group of their own. Empty, and nothing asked of the database, for a customer who
+     * belongs to no company: their address book is the list it always was.
+     *
+     * @return list<int>
+     */
+    private function sharedAddressIds(): array
+    {
+        $membership = $this->companyAccount?->membership();
+
+        if (null === $membership) {
+            return [];
+        }
+
+        return array_map('intval', AddressQuery::create()->filterByCompanyId($membership->companyId)->select('Id')->find()->getData());
+    }
+
+    /**
+     * The "share with my company" box: the address is shared with the company of the buyer when
+     * it is ticked and not otherwise. A customer who belongs to no company has no such box, and
+     * what an address was before is left alone for them. The rule is the core's: any buyer shares
+     * what they created, and the sharing is taken back by its creator or a buyer who manages the
+     * shared addresses.
+     */
+    private function shareAddress(CompanyFacade $companyFacade, ?int $addressId, ?Address $created, bool $shared): void
+    {
+        $customer = $this->getSecurityContext()->getCustomerUser();
+        $address = $created ?? (null === $addressId ? null : AddressQuery::create()->findPk($addressId));
+
+        if (!$customer instanceof Customer || null === $address || true !== $this->companyAccount?->isMember()) {
+            return;
+        }
+
+        if ($shared === (null !== $address->getCompanyId())) {
+            return;
+        }
+
+        $companyFacade->shareAddress($customer, $address, $shared);
     }
 }
