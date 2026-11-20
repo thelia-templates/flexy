@@ -14,9 +14,10 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Service;
 
+use Thelia\Core\Security\SecurityContext;
+use Thelia\Domain\Addressing\Service\AddressAccess;
 use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Cart\Service\CartAddressService;
-use Thelia\Model\AddressQuery;
 
 /**
  * The cart keeps its own copy of the delivery address, taken when the address was chosen,
@@ -28,8 +29,8 @@ use Thelia\Model\AddressQuery;
  * again, which only choosing the address again on the delivery step does.
  *
  * Only an address the checkout shows the buyer is followed: the id comes with a request,
- * and the customer row of a guest carries the addresses of every earlier buyer of that
- * e-mail address.
+ * the customer row of a guest carries the addresses of every earlier buyer of that e-mail
+ * address, and a buyer of a company reads the ones of their company beside their own.
  */
 final readonly class DeliveryAddressCopy
 {
@@ -37,6 +38,8 @@ final readonly class DeliveryAddressCopy
         private CartFacade $cartFacade,
         private CartAddressService $cartAddressService,
         private GuestCheckoutGate $guestCheckoutGate,
+        private AddressAccess $addressAccess,
+        private SecurityContext $securityContext,
     ) {
     }
 
@@ -53,7 +56,9 @@ final readonly class DeliveryAddressCopy
         }
 
         $copy = $this->cartFacade->getOrCreateFromSession()->getCartAddressRelatedByAddressDeliveryId();
-        $address = AddressQuery::create()->findPk($addressId);
+        // Read through what the customer may use, not by its number: the gate above answers for the
+        // list the buyer is shown, and an address they may not use is none of this method's business.
+        $address = $this->addressAccess->find($this->securityContext->getCustomerUser(), $addressId);
 
         if (null === $copy || null === $address) {
             return false;

@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Buyers'|trans }}{% endblock %}
+
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
+{% block body %}
+    <twig:Layouts:Subheader:Account
+        title="{{ 'My company'|trans }}"
+        selected="company"
+        :breadcrumb="[
+            {title: 'My account'|trans, url: path('account_index')},
+            {title: 'My company'|trans, url: path('account_company')},
+            {title: 'Buyers'|trans},
+        ]"
+    />
+
+    <div class="container-l pt-6 pb-20 md:pt-11 md:pb-30">
+        <div class="max-w-4xl mx-auto">
+            <twig:Layouts:AccountCompanyTabs:Base current="buyers" />
+
+            <h2 class="h4 text-black mb-4">{{ 'Invite a buyer'|trans }}</h2>
+            <p class="paragraph-3 mb-6">{{ 'The person receives a link, valid for seven days, to create the password of their account or to sign in.'|trans }}</p>
+            <form method="post" action="{{ path('account_company_invite') }}" class="grid grid-cols-1 gap-4 md:grid-cols-3 mb-12" data-testid="company-invitation-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('company_action') }}">
+                <twig:Fields:Input:Base label="{{ 'E-mail address'|trans }}" name="email" id="invitation-email" type="email" dir="ltr" :required="true" autocomplete="off" />
+                <twig:Fields:Select:Base
+                    label="{{ 'Role'|trans }}"
+                    select:name="role"
+                    id="invitation-role"
+                    :choices="roles|map((title, code) => {value: code, label: title})"
+                    :required="true"
+                />
+                <twig:Fields:Input:Base
+                    label="{{ 'Limit per order'|trans }}"
+                    name="order_limit"
+                    id="invitation-order-limit"
+                    unit="{{ currencySymbol }}"
+                    value="{{ ownLimits.orderLimit|default('') }}"
+                    autocomplete="off"
+                    dir="ltr"
+                    :optional="true"
+                    help="{{ ownLimits.orderLimit or ownLimits.periodLimit ? 'The invited buyer starts with your own limits, and cannot be given higher ones.'|trans : '' }}"
+                />
+                <twig:Fields:Input:Base
+                    label="{{ 'Limit per period'|trans }}"
+                    name="period_limit"
+                    id="invitation-period-limit"
+                    unit="{{ currencySymbol }}"
+                    value="{{ ownLimits.periodLimit|default('') }}"
+                    autocomplete="off"
+                    dir="ltr"
+                    :optional="true"
+                />
+                <twig:Fields:Select:Base
+                    label="{{ 'Period'|trans }}"
+                    select:name="period"
+                    id="invitation-period"
+                    :choices="[{value: '', label: 'No period'|trans}, {value: 'week', label: 'Week'|trans}, {value: 'month', label: 'Month'|trans}, {value: 'year', label: 'Year'|trans}]"
+                    value="{{ ownLimits.period|default('') }}"
+                />
+                <div class="flex items-end md:col-span-3">
+                    <twig:Molecules:Button:Base text="{{ 'Send the invitation'|trans }}" type="submit" />
+                </div>
+            </form>
+
+            <h2 class="h4 text-black mb-6">{{ 'Buyers'|trans }}</h2>
+            <twig:Layouts:AccountCompanyBuyers:Base
+                :buyers="buyers"
+                :roles="roles"
+                :roleTitles="roleTitles"
+                :pagination="pagination"
+                :currentCustomerId="currentCustomerId"
+            />
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}
+
+{% block modals %}
+    <twig:Molecules:Modal:Base id="confirmDetachBuyer" labelledby="confirmDetachBuyerTitle">
+        <h2 id="confirmDetachBuyerTitle" class="h4">{{ 'Are you sure you want to remove this buyer from the company ?'|trans }}</h2>
+        {# POST + CSRF: this action changes data, it must not be reachable by navigation #}
+        <form method="post" {{ stimulus_target('Molecules--Modal--base', 'confirm') }}>
+            <input type="hidden" name="_token" value="{{ csrf_token('company_action') }}">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                <twig:Molecules:Button:Base
+                    text="{{ 'Cancel'|trans }}"
+                    color="secondary"
+                    :fill="true"
+                    {{ ...stimulus_action('Molecules--Modal--base', 'close', 'click') }}
+                />
+                <twig:Molecules:Button:Base text="{{ 'Yes'|trans }}" type="submit" :fill="true" />
+            </div>
+        </form>
+    </twig:Molecules:Modal:Base>
+{% endblock %}

@@ -67,6 +67,8 @@ final class ComponentStatus
             'Organisms/CartButton' => self::READY,
             // The lines of a placed order, read in the display frozen on it: they pass it to the card of each line.
             'Layouts/OrderProducts' => self::READY,
+            'Layouts/AccountCompanyTabs' => self::READY,
+            'Layouts/AccountCompanyBuyers' => self::READY,
             'Forms/OrderReturn' => self::READY,
 
             // The gift block of the checkout, shipped with the core feature it renders.

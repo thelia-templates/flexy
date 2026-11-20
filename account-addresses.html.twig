@@ -3,7 +3,9 @@
 {% block title %}{{ 'My addresses'|trans }}{% endblock %}
 
 {% block body %}
-    {% set addresses = resources('/api/front/account/addresses', {'customer.id': getCurrentCustomer().id}) %}
+    {# The book of a buyer of a company is bounded by the company-aware extension of the API, which adds the
+       addresses of the company to their own: a filter on the owner would drop them. Everyone else keeps the owner filter. #}
+    {% set addresses = resources('/api/front/account/addresses', company_account().member ? {} : {'customer.id': getCurrentCustomer().id}) %}
 
     {% set notices = {
         delete_success: {variant: 'success', text: 'Your address has been deleted'|trans},
@@ -35,9 +37,17 @@
                 {% endif %}
             {% endfor %}
 
+            {# The address book of a buyer of a company has two groups: their own addresses, and the ones their company shares. #}
+            {% set sharedIds = sharedAddressIds|default([]) %}
+            {% set personalAddresses = addresses|filter(address => address.id not in sharedIds) %}
+            {% set companyAddresses = addresses|filter(address => address.id in sharedIds) %}
+
             {% if addresses|length %}
+                {% if companyAddresses|length %}
+                    <h2 class="h4 w-full mb-4" data-testid="personal-addresses">{{ 'My personal addresses'|trans }}</h2>
+                {% endif %}
                 <ul class="grid w-full grid-cols-1 gap-6 sm:grid-cols-2">
-                    {% for address in addresses %}
+                    {% for address in personalAddresses %}
                         <li>
                             <twig:Organisms:AddressCard:Base
                                 :addressId="address.id"
@@ -47,6 +57,21 @@
                         </li>
                     {% endfor %}
                 </ul>
+
+                {% if companyAddresses|length %}
+                    <h2 class="h4 w-full mt-10 mb-4" data-testid="company-addresses">{{ 'Addresses of my company'|trans }}</h2>
+                    <ul class="grid w-full grid-cols-1 gap-6 sm:grid-cols-2">
+                        {% for address in companyAddresses %}
+                            <li>
+                                <twig:Organisms:AddressCard:Base
+                                    :addressId="address.id"
+                                    :withModal="true"
+                                    class="h-full"
+                                />
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
 
                 <twig:Molecules:Button:Base
                     text="{{ 'Add an address'|trans }}"

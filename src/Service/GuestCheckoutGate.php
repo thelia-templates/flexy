@@ -21,9 +21,11 @@ use Propel\Runtime\Map\TableMap;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Core\Security\SecurityContext;
+use Thelia\Domain\Addressing\Service\AddressAccess;
 use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Cart\Service\CartContext;
 use Thelia\Domain\Checkout\Service\GuestCheckoutPolicy;
+use Thelia\Model\AddressQuery;
 use Thelia\Model\Cart;
 use Thelia\Model\Customer;
 use Thelia\Model\CustomerQuery;
@@ -58,6 +60,7 @@ final readonly class GuestCheckoutGate
         private CartContext $cartContext,
         private GuestOrderTracking $guestOrderTracking,
         private PlacedOrderMemory $placedOrderMemory,
+        private AddressAccess $addressAccess,
     ) {
     }
 
@@ -192,7 +195,9 @@ final readonly class GuestCheckoutGate
     /**
      * The address book of the checkout, as the session in hand is entitled to see it.
      *
-     * A signed-in customer sees their own, whole. A guest sees only what they typed on
+     * A signed-in customer sees their own, whole, and the ones shared with the company they
+     * belong to, if any: the permission checker of the core decides, in one query, and no
+     * address of another company is in the answer. A guest sees only what they typed on
      * the identification page: the row they were given may have carried other buyers'
      * addresses long before they got to it.
      *
@@ -208,7 +213,11 @@ final readonly class GuestCheckoutGate
             return [];
         }
 
-        $addresses = $customer->getAddresses()->toArray(null, false, TableMap::TYPE_CAMELNAME);
+        $addresses = $this->addressAccess
+            ->restrict(AddressQuery::create(), $customer)
+            ->orderById()
+            ->find()
+            ->toArray(null, false, TableMap::TYPE_CAMELNAME);
 
         if (!$customer->isGuest()) {
             return $addresses;

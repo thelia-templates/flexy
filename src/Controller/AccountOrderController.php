@@ -14,8 +14,10 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Controller;
 
+use FlexyBundle\Components\Layouts\AccountOrders\Base as OrdersBase;
 use FlexyBundle\Exception\TooManyReturnRequestsException;
 use FlexyBundle\Service\CollectionPaginator;
+use FlexyBundle\Service\CompanyAccount;
 use FlexyBundle\Service\OrderReturnRequestService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,6 +27,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Service\Attribute\Required;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 use Thelia\Core\Event\Product\VirtualProductOrderDownloadResponseEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -53,6 +56,15 @@ class AccountOrderController extends FlexyController
 
     private const RETURNS_PER_PAGE = 10;
 
+    private ?CompanyAccount $companyAccount = null;
+
+    // A setter: the constructor is the one of the parent, shared by every controller of the theme.
+    #[Required]
+    public function setCompanyAccount(CompanyAccount $companyAccount): void
+    {
+        $this->companyAccount = $companyAccount;
+    }
+
     /**
      * A return document is only worth printing once the merchant has agreed to take the
      * parcel back; before that there is nothing to slip into it.
@@ -67,6 +79,14 @@ class AccountOrderController extends FlexyController
     public function orders(): Response
     {
         $this->checkAuth();
+
+        // The orders of the company are the ones of a buyer whose role reads them: the tab is
+        // not drawn for the others, and its address answers a refusal, not an empty list.
+        $scope = $this->getRequest()->query->all()['scope'] ?? null;
+
+        if (OrdersBase::SCOPE_COMPANY === $scope && true !== $this->companyAccount?->view()->canViewCompanyOrders) {
+            throw new AccessDeniedHttpException();
+        }
 
         return $this->render('account-orders');
     }
@@ -169,7 +189,7 @@ class AccountOrderController extends FlexyController
         int $orderId,
     ): Response {
         $this->assertReturnsEnabled($eligibility);
-        $order = $this->findCustomerOrder($orderId);
+        $order = $this->findOwnOrder($orderId);
 
         // Nothing left to return, or the window has closed: the page that would open a
         // return no longer exists, exactly as the button offering it no longer shows.
@@ -192,7 +212,7 @@ class AccountOrderController extends FlexyController
         int $orderId,
     ): Response {
         $this->assertReturnsEnabled($eligibility);
-        $order = $this->findCustomerOrder($orderId);
+        $order = $this->findOwnOrder($orderId);
         $this->checkReturnRequestToken($csrfTokenManager, $request);
 
         $customer = $this->getSecurityContext()->getCustomerUser();
@@ -493,12 +513,30 @@ class AccountOrderController extends FlexyController
     }
 
     /**
-     * Orders are only ever reached through their owner: never look one up by primary key
-     * alone, or a logged-in customer reads someone else's order by walking the sequential
-     * ids. An unknown id and another customer's id answer the same 404, so neither response
-     * confirms that the other order exists.
+     * Orders are only ever reached through the permission checker of the core: the order a
+     * customer placed, and, for a buyer whose role reads the orders of their company, the ones
+     * of that company, never another company's nor a colleague's without the right. Never look
+     * one up by primary key alone, or a logged-in customer reads someone else's order by walking
+     * the sequential ids. An unknown id and an order the customer may not read answer the same
+     * 404, so neither response confirms that the other order exists.
      */
     private function findCustomerOrder(int $orderId): Order
+    {
+        $this->checkAuth();
+
+        $order = OrderQuery::create()->findPk($orderId);
+
+        if (null === $order || true !== $this->companyAccount?->canAccessOrder($order)) {
+            throw new NotFoundHttpException();
+        }
+
+        return $order;
+    }
+
+    /**
+     * The order of the signed-in customer, for what only its owner does with it (a return).
+     */
+    private function findOwnOrder(int $orderId): Order
     {
         $this->checkAuth();
 

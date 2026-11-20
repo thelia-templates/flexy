@@ -1,0 +1,71 @@
+{# @prop current string Slug of the screen being shown: 'infos' or 'buyers' #}
+{# Reads what the company allows from company_account(): one decision per request, the same one the routes enforce. #}
+{% props current = 'infos' %}
+{% set account = company_account() %}
+{% set notices = {
+    company_updated: {variant: 'success', text: 'The details of your company have been updated'|trans},
+    buyer_updated: {variant: 'success', text: 'The buyer has been updated'|trans},
+    buyer_detached: {variant: 'success', text: 'The buyer has left your company'|trans},
+    invitation_sent: {variant: 'success', text: 'The invitation has been sent'|trans},
+    joined: {variant: 'success', text: 'You have joined the company'|trans},
+} %}
+{% set errors = {
+    invalid: {variant: 'error', text: 'Please check what you typed: the change was not saved'|trans},
+    invalid_invitation: {variant: 'error', text: 'Please type a valid e-mail address and choose a role'|trans},
+    identifiers_locked: {variant: 'error', text: 'The registration number and the VAT number can no longer be changed here: orders of your company were placed without VAT on them. Please contact the shop.'|trans},
+    last_administrator: {variant: 'error', text: 'A company keeps at least one administrator: give the role to another buyer first'|trans},
+    beyond_your_rights: {variant: 'error', text: 'You cannot give a role or limits beyond your own, nor change a buyer who holds more rights than you'|trans},
+    too_many_invitations: {variant: 'error', text: 'Too many invitations have been sent, please try again later'|trans},
+    already_a_buyer: {variant: 'error', text: 'This person already belongs to a company'|trans},
+    invitation_not_sent: {variant: 'error', text: 'The invitation could not be sent, please try again later'|trans},
+    not_found: {variant: 'error', text: 'This buyer does not exist any more'|trans},
+    error: {variant: 'error', text: 'An error has occurred, please try again later'|trans},
+} %}
+
+<div {{ attributes }}>
+    <nav aria-label="{{ 'My company'|trans }}" class="mb-8">
+        <ul class="flex flex-wrap gap-3">
+            <li>
+                <twig:Molecules:Button:Base
+                    text="{{ 'Company details'|trans }}"
+                    href="{{ path('account_company') }}"
+                    size="small"
+                    color="{{ current == 'infos' ? 'base' : 'secondary' }}"
+                    {{ ...(current == 'infos' ? {'aria-current': 'page'} : {}) }}
+                />
+            </li>
+            {% if account.canManageBuyers %}
+                <li>
+                    <twig:Molecules:Button:Base
+                        text="{{ 'Buyers'|trans }}"
+                        href="{{ path('account_company_buyers') }}"
+                        size="small"
+                        color="{{ current == 'buyers' ? 'base' : 'secondary' }}"
+                        {{ ...(current == 'buyers' ? {'aria-current': 'page'} : {}) }}
+                    />
+                </li>
+            {% endif %}
+            {% if account.canViewCompanyOrders %}
+                <li>
+                    <twig:Molecules:Button:Base
+                        text="{{ 'Orders of the company'|trans }}"
+                        href="{{ path('account_orders', {scope: 'company'}) }}"
+                        size="small"
+                        color="secondary"
+                    />
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    {% for param, notice in notices %}
+        {% if app.request.query.get('success') == param %}
+            <twig:Molecules:SnackBar:Base variant="{{ notice.variant }}" :withIcon="true" text="{{ notice.text }}" class="w-full mb-6" />
+        {% endif %}
+    {% endfor %}
+    {% for param, notice in errors %}
+        {% if app.request.query.get('error') == param %}
+            <twig:Molecules:SnackBar:Base variant="{{ notice.variant }}" :withIcon="true" text="{{ notice.text }}" class="w-full mb-6" />
+        {% endif %}
+    {% endfor %}
+</div>

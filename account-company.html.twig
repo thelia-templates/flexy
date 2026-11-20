@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'My company'|trans }}{% endblock %}
+
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
+{% block body %}
+    {% set account = company_account() %}
+    {% set company = resources('/api/front/account/company') %}
+
+    <twig:Layouts:Subheader:Account
+        title="{{ 'My company'|trans }}"
+        selected="company"
+        :breadcrumb="[
+            {title: 'My account'|trans, url: path('account_index')},
+            {title: 'My company'|trans},
+        ]"
+    />
+
+    <div class="container-l pt-6 pb-20 md:pt-11 md:pb-30">
+        <div class="max-w-4xl mx-auto">
+            <twig:Layouts:AccountCompanyTabs:Base current="infos" />
+
+            {% if identifierErrors|default([]) is not empty %}
+                <twig:Molecules:SnackBar:Base variant="error" :withIcon="true" text="{{ 'The registration number or the VAT number is not valid: the change was not saved'|trans }}" class="w-full mb-6" />
+            {% endif %}
+
+            {% if account.canEditCompany %}
+                <form method="post" action="{{ path('account_company_update') }}" class="flex flex-col gap-6" data-testid="company-form">
+                    <input type="hidden" name="_token" value="{{ csrf_token('company_action') }}">
+                    <twig:Fields:Input:Base label="{{ 'Company name'|trans }}" name="name" id="company-name" value="{{ typed.name|default(company.name) }}" :required="true" />
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <twig:Fields:Input:Base label="{{ 'Company registration number'|trans }}" name="siret" id="company-siret" :error="identifierErrors.siret|default(false)" value="{{ typed.siret is defined ? typed.siret : company.siret|default('') }}" dir="ltr" :optional="true" />
+                        <twig:Fields:Input:Base label="{{ 'VAT number'|trans }}" name="vat_number" id="company-vat" :error="identifierErrors.vatNumber|default(false)" value="{{ typed.vat_number is defined ? typed.vat_number : company.vatNumber|default('') }}" dir="ltr" :optional="true" />
+                    </div>
+                    <twig:Fields:Input:Base label="{{ 'E-mail address that receives a copy of the order e-mails'|trans }}" name="notification_email" id="company-notification-email" type="email" value="{{ typed.notification_email is defined ? typed.notification_email : company.notificationEmail|default('') }}" dir="ltr" :optional="true" />
+                    <twig:Molecules:Button:Base text="{{ 'Save'|trans }}" type="submit" class="w-max" />
+                </form>
+            {% else %}
+                <dl class="flex flex-col gap-4" data-testid="company-details">
+                    <div>
+                        <dt class="paragraph-3">{{ 'Company name'|trans }}</dt>
+                        <dd class="h5"><bdi>{{ company.name }}</bdi></dd>
+                    </div>
+                    {% if company.siret %}
+                        <div>
+                            <dt class="paragraph-3">{{ 'Company registration number'|trans }}</dt>
+                            <dd dir="ltr">{{ company.siret }}</dd>
+                        </div>
+                    {% endif %}
+                    {% if company.vatNumber %}
+                        <div>
+                            <dt class="paragraph-3">{{ 'VAT number'|trans }}</dt>
+                            <dd dir="ltr">{{ company.vatNumber }}</dd>
+                        </div>
+                    {% endif %}
+                    {% if company.notificationEmail %}
+                        <div>
+                            <dt class="paragraph-3">{{ 'E-mail address that receives a copy of the order e-mails'|trans }}</dt>
+                            <dd dir="ltr">{{ company.notificationEmail }}</dd>
+                        </div>
+                    {% endif %}
+                </dl>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}

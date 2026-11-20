@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ invalid ? 'Invitation'|trans : 'Join %company%'|trans({'%company%': companyName}) }}{% endblock %}
+
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
+{% block body %}
+    <div class="container-s pt-8 pb-14 lg:pt-12 lg:pb-30" data-testid="company-invitation">
+        {% if invalid %}
+            <h1 class="h2 text-black mb-4">{{ 'This invitation is invalid or has expired'|trans }}</h1>
+            <p class="paragraph-2 text-black mb-8" data-testid="company-invitation-invalid">{{ 'Ask the administrator of your company to send you a new invitation.'|trans }}</p>
+            <twig:Molecules:Button:Base text="{{ 'Back to the home page'|trans }}" href="{{ path('index') }}" />
+        {% else %}
+            <h1 class="h2 text-black mb-4">{{ 'Join %company%'|trans({'%company%': companyName}) }}</h1>
+            <p class="paragraph-2 text-black mb-8">{{ 'You have been invited to join this company with the address %email%.'|trans({'%email%': email}) }}</p>
+
+            {% if state == 'accept' %}
+                <form method="post" action="{{ path('account_company_invitation_accept', {token: token}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('company_action') }}">
+                    <twig:Molecules:Button:Base text="{{ 'Accept the invitation'|trans }}" type="submit" />
+                </form>
+            {% elseif state == 'other_account' %}
+                <p class="paragraph-2 text-black" data-testid="company-invitation-other-account">{{ 'This invitation was sent to another e-mail address than the one of the account you are signed in with. Sign out, then open the link again.'|trans }}</p>
+            {% elseif state == 'sign_in' %}
+                <p class="paragraph-2 text-black mb-6">{{ 'An account already exists for this address: sign in to accept the invitation.'|trans }}</p>
+                <twig:Molecules:Button:Base text="{{ 'Log in'|trans }}" href="{{ path('customer_login', {redirect: path('account_company_invitation', {token: token})}) }}" />
+            {% else %}
+                {% set form = getForm('flexybundle_form_customer_register_form') %}
+                {% form_theme form with flexy_form_themes only %}
+
+                {{ form_start(form, {attr: {
+                    action: path('account_company_invitation_register', {token: token}),
+                    method: 'POST',
+                    class: 'flex flex-col gap-6 mb-3',
+                }}) }}
+                {{ form_row(form.success_url, {value: path('account_company', {success: 'joined'})}) }}
+                {{ form_row(form.error_url, {value: ''}) }}
+                {{ form_row(form.firstname) }}
+                {{ form_row(form.lastname) }}
+                {{ form_row(form.email, {value: email, disabled: true}) }}
+                {{ form_row(form.password) }}
+                {{ form_rest(form) }}
+                <twig:Molecules:Button:Base text="{{ 'Create my account and join'|trans }}" type="submit" class="w-max" />
+                {{ form_end(form) }}
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}
