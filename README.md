@@ -82,6 +82,7 @@ The points are part of the theme's public surface: their names and parameters ar
 | `layout.header.actions` | Header action row, between the account button and the cart | — |
 | `layout.header.bottom` | Under the header | — |
 | `layout.footer.top` | Above the footer | — |
+| `layout.footer.links` | End of the footer link list, main and checkout footers; render `<li>` items | — |
 | `home.top`, `home.bottom` | Home page | — |
 | `category.top`, `category.bottom` | Category page | `category` |
 | `brand.top`, `brand.bottom` | Brand page | `brand` |
