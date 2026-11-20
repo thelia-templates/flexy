@@ -9,6 +9,8 @@
                 {% endif %}
             </li>
         {% endfor %}
+        {# Links a module adds after the shop's own, as <li> items: a cookie settings button, a policy page. #}
+        {{ theme_hook('layout.footer.links') }}
     </ul>
     {# Same latin line as the main footer, kept left to right whole for the same reason. #}
     <span class="FooterCheckout-copyright text-grey-dark indication indication-small">
