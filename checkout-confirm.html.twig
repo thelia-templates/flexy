@@ -10,7 +10,7 @@
         <p class="paragraph-3 mt-4 mb-8">
             {# Paid only when the payment module says so: a cheque, a bank transfer or a
                payment the gateway confirms later leave the order waiting for its money. #}
-            {% if placed_order|default(null) and placed_order.isPaid() %}
+            {% if (placed_order ?? null) is not null and placed_order.isPaid() %}
                 <span class="block">{{ 'Your payment has been confirmed'|trans }}</span>
             {% else %}
                 <span class="block">{{ 'Your order has been placed'|trans }}</span>
@@ -20,7 +20,7 @@
         </p>
         {# What the payment module has left to say about the order: where to send a cheque,
            which bank account to transfer to. Each module answers for its own orders. #}
-        {% if placed_order|default(null) %}
+        {% if (placed_order ?? null) is not null %}
             {{ theme_hook('order-placed.additional-payment-info', {order: placed_order}) }}
         {% endif %}
         {# What was bought and where it goes, read off the order itself: the buyer leaves this
