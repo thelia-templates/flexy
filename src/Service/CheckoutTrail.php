@@ -32,6 +32,9 @@ use Thelia\Model\CheckoutStep;
  */
 final readonly class CheckoutTrail
 {
+    /** The step the company of a buyer checks the order against: it settles the placement and has nothing to draw. */
+    public const COMPANY_SPENDING_STEP = 'company.spending_limit';
+
     public function __construct(
         private CheckoutProgressionService $progression,
         private CheckoutStepRouteResolver $routes,
@@ -129,6 +132,11 @@ final readonly class CheckoutTrail
         $previousWasTheCart = false;
 
         foreach ($steps as $step) {
+            // A check with no screen: it refuses an order, it is not a stop of the buyer's way.
+            if (self::COMPANY_SPENDING_STEP === $step->code) {
+                continue;
+            }
+
             $standsForTheIdentification = $identifiesAfterTheCart && $previousWasTheCart;
             $previousWasTheCart = CheckoutStep::CODE_CART === $step->code;
 

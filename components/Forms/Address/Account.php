@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FlexyBundle\Components\Forms\Address;
 
 use FlexyBundle\Form\AddressEditForm;
+use FlexyBundle\Service\CompanyAccount;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -22,6 +23,7 @@ use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Thelia\Core\Form\FormServiceInterface;
+use Thelia\Domain\Addressing\Service\AddressAccess;
 use Thelia\Domain\Addressing\Service\AddressService;
 use Thelia\Domain\Customer\CustomerFacade;
 use Thelia\Model\AddressQuery;
@@ -56,12 +58,19 @@ class Account
         private readonly FormServiceInterface $formService,
         private readonly AddressService $addressService,
         private readonly CustomerFacade $customerFacade,
+        private readonly AddressAccess $addressAccess,
+        private readonly CompanyAccount $companyAccount,
     ) {
     }
 
     protected function instantiateForm(): FormInterface
     {
         $form = $this->formService->getFormByName(AddressEditForm::FORM_NAME, $this->getData());
+
+        // The box only a buyer of a company has: sharing is with the company they belong to.
+        if (!$this->companyAccount->isMember()) {
+            $form->remove('share_with_company');
+        }
 
         // A customer left with a single address cannot unset it as the default one:
         // the checkbox would offer a choice the shop cannot honour.
@@ -74,9 +83,10 @@ class Account
     }
 
     /**
-     * Scoped to the session customer: the component must not rely on its caller having
-     * checked ownership, and the core `Get` on this resource carries no security
-     * expression either.
+     * Scoped to what the session customer may change: the component must not rely on its
+     * caller having checked, and the core `Get` on this resource lets whoever may use the
+     * address read it. An address of the company the customer may not change is not offered
+     * to them.
      *
      * @return array<string, mixed>
      */
@@ -88,18 +98,18 @@ class Account
             return [];
         }
 
-        $address = AddressQuery::create()
-            ->filterByCustomerId($customer->getId())
-            ->findPk($this->addressId)
-        ;
+        $address = $this->addressAccess->find($customer, $this->addressId);
 
-        if (null === $address) {
+        if (null === $address || !$this->addressAccess->canEdit($customer, $address)) {
             return [];
         }
 
-        return $this->addressService->mapModelToFormData($address);
+        return $this->addressService->mapModelToFormData($address) + ['share_with_company' => null !== $address->getCompanyId()];
     }
 
+    /**
+     * The addresses that can be the default one are the customer's own, never one a colleague shared.
+     */
     private function hasSingleAddress(): bool
     {
         $customer = $this->customerFacade->getCurrentCustomer();

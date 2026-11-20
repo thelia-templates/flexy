@@ -1,7 +1,7 @@
 {% extends '@Flexy/Organisms/AddressCard/Base.html.twig' %}
 
 {% block header %}
-    {% if this.address.isDefault %}
+    {% if this.address.isDefault and this.ownedByCustomer %}
         <twig:Molecules:Favorite:Base
             text="{{ 'Favourite'|trans }}"
             selected
@@ -34,7 +34,7 @@
             {{ 'Modify'|trans }}
         </button>
 
-        {% if not this.address.isDefault %}
+        {% if not this.address.isDefault or not this.ownedByCustomer %}
             <button
                 type="button"
                 {% if disabled %}disabled{% endif %}

@@ -8,7 +8,7 @@
 >
     <div class="AddressCard-top">
         {% block header %}
-            {% if not this.inOrder %}
+            {% if not this.inOrder and this.ownedByCustomer %}
                 <twig:Molecules:Favorite:Base
                     text="{{ 'Favourite'|trans }}"
                     :selected="address.isDefault ? true : false"
@@ -33,6 +33,9 @@
             {% endif %}
             <span>
                 <span class="AddressCard-title">{{ cardTitle }}</span>
+                {% if this.shared %}
+                    <span class="AddressCard-shared" data-testid="address-shared"><twig:Molecules:Tag:Base color="validated" customText="{{ 'Shared with the company'|trans }}" /></span>
+                {% endif %}
                 {# Customer-entered, so the direction of each value follows its own content:
                    a Latin street line keeps "10 rue du Tunnel" in order inside a right-to-left
                    card, an Arabic one still reads right to left. #}
@@ -68,7 +71,7 @@
         {% endblock %}
     </label>
 
-    {% if not this.inOrder %}
+    {% if not this.inOrder and this.canEdit %}
         <div class="AddressCard-actions">
             {% block bottom %}
                 <a {% if disabled %}disabled{% endif %} href="{{ path('account_address', {addressId: this.addressId}) }}">
@@ -76,7 +79,7 @@
                     {{ 'Modify'|trans }}
                 </a>
 
-                {% if not address.isDefault %}
+                {% if not address.isDefault or not this.ownedByCustomer %}
                     <button
                         type="button"
                         {% if disabled %}disabled{% endif %}

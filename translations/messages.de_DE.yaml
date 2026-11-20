@@ -737,3 +737,58 @@ Not enough stock for the smallest quantity this product is sold in: Der Bestand 
 "This date takes your commitment into account: the installments it covers are still charged.": "Dieses Datum berücksichtigt Ihre Bindung: die davon abgedeckten Raten werden weiterhin abgebucht."
 "Keep my subscription": "Abonnement behalten"
 "Yes, cancel": "Ja, kündigen"
+Buyers: Einkäufer
+'My company': 'Mein Unternehmen'
+'Invite a buyer': 'Einkäufer einladen'
+'The person receives a link, valid for seven days, to create the password of their account or to sign in.': 'Die Person erhält einen sieben Tage gültigen Link, um das Passwort ihres Kontos festzulegen oder sich anzumelden.'
+'E-mail address': E-Mail-Adresse
+Role: Rolle
+'Send the invitation': 'Einladung senden'
+'The invited buyer starts with your own limits, and cannot be given higher ones.': 'Der eingeladene Einkäufer erhält zunächst Ihre eigenen Limits und kann keine höheren erhalten.'
+'Are you sure you want to remove this buyer from the company ?': 'Möchten Sie diesen Einkäufer wirklich aus dem Unternehmen entfernen?'
+Invitation: Einladung
+'Join %company%': '%company% beitreten'
+'This invitation is invalid or has expired': 'Diese Einladung ist ungültig oder abgelaufen'
+'Ask the administrator of your company to send you a new invitation.': 'Bitten Sie den Administrator Ihres Unternehmens, Ihnen eine neue Einladung zu senden.'
+'Back to the home page': 'Zurück zur Startseite'
+'You have been invited to join this company with the address %email%.': 'Sie wurden eingeladen, diesem Unternehmen mit der Adresse %email% beizutreten.'
+'Accept the invitation': 'Einladung annehmen'
+'This invitation was sent to another e-mail address than the one of the account you are signed in with. Sign out, then open the link again.': 'Diese Einladung wurde an eine andere E-Mail-Adresse gesendet als die des Kontos, mit dem Sie angemeldet sind. Melden Sie sich ab und öffnen Sie den Link erneut.'
+'An account already exists for this address: sign in to accept the invitation.': 'Für diese Adresse existiert bereits ein Konto: Melden Sie sich an, um die Einladung anzunehmen.'
+'Create my account and join': 'Konto erstellen und beitreten'
+'Company name': Firmenname
+'E-mail address that receives a copy of the order e-mails': 'E-Mail-Adresse, die eine Kopie der Bestell-E-Mails erhält'
+you: Sie
+'Limit per order': 'Limit pro Bestellung'
+'Limit per period': 'Limit pro Zeitraum'
+Period: Zeitraum
+'No period': 'Kein Zeitraum'
+Week: Woche
+Month: Monat
+Year: Jahr
+'Remove from the company': 'Aus dem Unternehmen entfernen'
+'This buyer holds rights beyond yours: only a buyer with the same rights can change them.': 'Dieser Einkäufer hat weitergehende Rechte als Sie: Nur ein Einkäufer mit denselben Rechten kann sie ändern.'
+'Your company has no buyer yet': 'Ihr Unternehmen hat noch keinen Einkäufer'
+'The details of your company have been updated': 'Die Angaben Ihres Unternehmens wurden aktualisiert'
+'The buyer has been updated': 'Der Einkäufer wurde aktualisiert'
+'The buyer has left your company': 'Der Einkäufer hat Ihr Unternehmen verlassen'
+'The invitation has been sent': 'Die Einladung wurde gesendet'
+'You have joined the company': 'Sie sind dem Unternehmen beigetreten'
+'Please check what you typed: the change was not saved': 'Bitte prüfen Sie Ihre Eingabe: Die Änderung wurde nicht gespeichert'
+'The registration number or the VAT number is not valid: the change was not saved': 'Die Registrierungsnummer oder die USt-IdNr. ist ungültig: Die Änderung wurde nicht gespeichert'
+'Please type a valid e-mail address and choose a role': 'Bitte geben Sie eine gültige E-Mail-Adresse ein und wählen Sie eine Rolle'
+'The registration number and the VAT number can no longer be changed here: orders of your company were placed without VAT on them. Please contact the shop.': 'Die Registernummer und die USt-IdNr. können hier nicht mehr geändert werden: Für Ihr Unternehmen wurden Bestellungen ohne Mehrwertsteuer aufgegeben. Bitte wenden Sie sich an den Shop.'
+'A company keeps at least one administrator: give the role to another buyer first': 'Ein Unternehmen behält mindestens einen Administrator: Übertragen Sie diese Rolle zuerst einem anderen Einkäufer'
+'You cannot give a role or limits beyond your own, nor change a buyer who holds more rights than you': 'Sie können keine Rolle oder Limits vergeben, die über Ihre eigenen hinausgehen, und keinen Einkäufer ändern, der mehr Rechte hat als Sie'
+'Too many invitations have been sent, please try again later': 'Es wurden zu viele Einladungen gesendet, bitte versuchen Sie es später erneut'
+'This person already belongs to a company': 'Diese Person gehört bereits zu einem Unternehmen'
+'The invitation could not be sent, please try again later': 'Die Einladung konnte nicht gesendet werden, bitte versuchen Sie es später erneut'
+'This buyer does not exist any more': 'Dieser Einkäufer existiert nicht mehr'
+'Company details': Unternehmensangaben
+'Orders of the company': 'Bestellungen des Unternehmens'
+'Your company account is suspended: orders cannot be placed until it is reactivated.': 'Das Konto Ihres Unternehmens ist gesperrt: Bis zur Reaktivierung können keine Bestellungen aufgegeben werden.'
+'My personal addresses': 'Meine persönlichen Adressen'
+'Addresses of my company': 'Adressen meines Unternehmens'
+'Placed by': 'Aufgegeben von'
+'Shared with the company': 'Mit dem Unternehmen geteilt'
+'Share this address with my company': 'Diese Adresse mit meinem Unternehmen teilen'

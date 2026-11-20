@@ -9,6 +9,17 @@
     <div class="container-l flex flex-col items-center gap-10">
         <h1 class="Subheader-title">{{ title }}</h1>
 
+        {# A suspended company keeps its buyers signed in and its history readable: the account says why nothing can be ordered. #}
+        {% if company_account().suspended %}
+            <twig:Molecules:SnackBar:Base
+                variant="warning"
+                :withIcon="true"
+                text="{{ 'Your company account is suspended: orders cannot be placed until it is reactivated.'|trans }}"
+                class="w-full max-w-4xl"
+                data-testid="company-suspended-banner"
+            />
+        {% endif %}
+
         <nav class="w-full flex justify-center" aria-label="{{ 'My account'|trans }}">
             <ul class="Subheader-links">
                 {% for item in this.items %}
