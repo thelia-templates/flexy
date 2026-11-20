@@ -44,8 +44,8 @@ final class QuickOrderTableBrowserEventsTest extends TestCase
 
         self::assertSame(
             [
-                ['event' => CheckoutEvents::BROWSER_ADD_PSE, 'payload' => ['pse' => 7, 'quantity' => 2]],
-                ['event' => CheckoutEvents::BROWSER_ADD_PSE, 'payload' => ['pse' => 8, 'quantity' => 1]],
+                ['event' => CheckoutEvents::BROWSER_ADD_PSE, 'payload' => ['pse' => 7, 'quantity' => 2.0]],
+                ['event' => CheckoutEvents::BROWSER_ADD_PSE, 'payload' => ['pse' => 8, 'quantity' => 1.0]],
             ],
             $responder->getBrowserEventsToDispatch(),
         );

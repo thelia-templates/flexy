@@ -21,7 +21,7 @@ namespace FlexyBundle\DTO;
 final readonly class ParsedReferenceQuantities
 {
     /**
-     * @param list<array{reference: string, quantity: int}>           $rows
+     * @param list<array{reference: string, quantity: float}>         $rows
      * @param list<array{line: int, content: string, reason: string}> $rejected
      */
     public function __construct(

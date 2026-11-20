@@ -544,13 +544,14 @@ Ready: Prête
 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.': "Le tableau n'a pas pu être vérifié : une référence est trop longue, ou le tableau dépasse 500 lignes."
 'The text is too long: a table takes at most 500 lines.': 'Le texte est trop long : un tableau prend au plus 500 lignes.'
 'expected a reference and a quantity': 'une référence et une quantité sont attendues'
-'the quantity is not a whole number from 1 to %max%': "la quantité n'est pas un nombre entier de 1 à %max%"
+'the quantity is not a number above zero, up to %max%, with three decimals at most': 'la quantité n''est pas un nombre supérieur à zéro, d''au plus %max% et trois décimales'
+'with commas between the columns, write the decimals with a point: 1.25': 'avec des virgules entre les colonnes, écrivez les décimales avec un point : 1.25'
 '%count% line(s) added to your cart.': '%count% ligne(s) ajoutée(s) à votre panier.'
 'See my cart': 'Voir mon panier'
 'Paste from a spreadsheet or import a CSV file': 'Coller depuis un tableur ou importer un fichier CSV'
 'The file is too large: a table takes at most 500 lines.': 'Le fichier est trop volumineux : un tableau prend au plus 500 lignes.'
 'Only a CSV file can be imported.': 'Seul un fichier CSV peut être importé.'
-'One line per product: the reference, then the quantity, separated by a tab, a semicolon or a comma.': 'Une ligne par produit : la référence, puis la quantité, séparées par une tabulation, un point-virgule ou une virgule.'
+'One line per product: the reference, then the quantity, separated by a tab, a semicolon or a comma. A quantity sold by measure takes its decimals: 1,25 or 1.25, with a point when the columns are separated by commas.': 'Une ligne par produit : la référence, puis la quantité, séparées par une tabulation, un point-virgule ou une virgule. Une quantité vendue à la mesure prend ses décimales : 1,25 ou 1.25, avec un point quand les colonnes sont séparées par des virgules.'
 'Lines to import': 'Lignes à importer'
 'Import these lines': 'Importer ces lignes'
 'Or choose a CSV file': 'Ou choisissez un fichier CSV'
@@ -565,7 +566,7 @@ Status: État
 Actions: Actions
 'Reference, line %line%': 'Référence, ligne %line%'
 'Quantity, line %line%': 'Quantité, ligne %line%'
-'Enter a whole number from 1 to %max%.': 'Saisissez un nombre entier de 1 à %max%.'
+'Enter a quantity above zero, up to %max%, with three decimals at most.': 'Saisissez une quantité supérieure à zéro, d''au plus %max% et trois décimales.'
 'Variant, line %line%': 'Déclinaison, ligne %line%'
 '%quantity% in stock': '%quantity% en stock'
 'To check': 'À vérifier'
@@ -607,7 +608,7 @@ Rename: Renommer
 'Save': 'Enregistrer'
 'The list could not be saved: its name is empty or longer than 255 characters, or the account already keeps 100 lists.': "La liste n'a pas pu être enregistrée : son nom est vide ou dépasse 255 caractères, ou le compte a déjà 100 listes."
 'The list could not be saved: a list holds at most 500 lines.': "La liste n'a pas pu être enregistrée : une liste compte au plus 500 lignes."
-'There is no line to save: type a reference and a whole quantity above zero.': 'Aucune ligne à enregistrer : saisissez une référence et une quantité entière supérieure à zéro.'
+'There is no line to save: type a reference and a quantity above zero.': 'Aucune ligne à enregistrer : saisissez une référence et une quantité supérieure à zéro.'
 'The lines have been added to the list.': 'Les lignes ont été ajoutées à la liste.'
 'Cart of %date%': 'Panier du %date%'
 'Order %ref%': 'Commande %ref%'

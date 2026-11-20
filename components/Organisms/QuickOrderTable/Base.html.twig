@@ -21,7 +21,7 @@
     rate_limited: 'Too many checks in a short time. Please wait a minute and try again.'|trans,
     invalid_lines: 'The table could not be checked: a reference is too long, or the table holds more than 500 lines.'|trans,
     text_refused: 'The text is too long: a table takes at most 500 lines.'|trans,
-    nothing_to_save: 'There is no line to save: type a reference and a whole quantity above zero.'|trans,
+    nothing_to_save: 'There is no line to save: type a reference and a quantity above zero.'|trans,
     list_refused: 'The list could not be saved: its name is empty or longer than 255 characters, or the account already keeps 100 lists.'|trans,
     cart_refused: 'None of these lines could be added to your cart.'|trans,
     destination_refused: 'Nothing was added to your cart: a product cannot be delivered to your address. Remove its line to add the others.'|trans,
@@ -29,7 +29,8 @@
 {% set maxQuantity = constant('Thelia\\Domain\\Catalog\\DTO\\ReferenceQuantityLines::MAX_QUANTITY')|format_number %}
 {% set rejectReasons = {
     columns: 'expected a reference and a quantity'|trans,
-    quantity: 'the quantity is not a whole number from 1 to %max%'|trans({'%max%': maxQuantity}),
+    quantity: 'the quantity is not a number above zero, up to %max%, with three decimals at most'|trans({'%max%': maxQuantity}),
+    decimal_comma: 'with commas between the columns, write the decimals with a point: 1.25'|trans,
     reference: 'the reference is longer than 255 characters'|trans,
 } %}
 {% set readyCount = this.readyCount %}
@@ -57,7 +58,7 @@
     <section class="QuickOrderTable-import" aria-labelledby="quick-order-import-title">
         <h2 id="quick-order-import-title" class="QuickOrderTable-importTitle h4">{{ 'Paste from a spreadsheet or import a CSV file'|trans }}</h2>
         <div class="QuickOrderTable-importBody" {{ stimulus_controller(fileController, {tooLarge: 'The file is too large: a table takes at most 500 lines.'|trans, notText: 'Only a CSV file can be imported.'|trans}) }}>
-            <p class="QuickOrderTable-help">{{ 'One line per product: the reference, then the quantity, separated by a tab, a semicolon or a comma.'|trans }}</p>
+            <p class="QuickOrderTable-help">{{ 'One line per product: the reference, then the quantity, separated by a tab, a semicolon or a comma. A quantity sold by measure takes its decimals: 1,25 or 1.25, with a point when the columns are separated by commas.'|trans }}</p>
             <twig:Fields:TextArea:Base
                 id="quick-order-pasted-text"
                 name="quick_order_pasted_text"
@@ -140,16 +141,17 @@
                         </td>
                         <td data-label="{{ 'Quantity'|trans }}">
                             <label class="sr-only" for="quick-order-quantity-{{ row.key }}">{{ 'Quantity, line %line%'|trans({'%line%': loop.index}) }}</label>
+                            {# A text field: a number field refuses the decimal comma of the buyer's language. What the buyer
+                               typed is shown as typed, a quantity the check answered in the decimals of the language. #}
                             <twig:Fields:Input:Base
                                 id="quick-order-quantity-{{ row.key }}"
                                 name="quick_order_quantity_{{ row.key }}"
-                                type="number"
                                 size="small"
-                                value="{{ row.quantity }}"
-                                error="{{ this.hasInvalidQuantity(index) ? 'Enter a whole number from 1 to %max%.'|trans({'%max%': maxQuantity}) : '' }}"
-                                input:min="1"
-                                input:step="1"
-                                input:inputmode="numeric"
+                                autocomplete="off"
+                                value="{{ row.quantity is same as(row.quantity ~ '') ? row.quantity : row.quantity|format_number({max_fraction_digit: 3}) }}"
+                                unit="{{ this.unitOf(index) }}"
+                                error="{{ this.hasInvalidQuantity(index) ? 'Enter a quantity above zero, up to %max%, with three decimals at most.'|trans({'%max%': maxQuantity}) : '' }}"
+                                input:inputmode="decimal"
                                 input:data-model="norender|rows.{{ index }}.quantity"
                             />
                         </td>
@@ -176,8 +178,13 @@
                             {% if line %}
                                 <twig:Molecules:Tag:Base color="{{ statusColors[line.status]|default('neutral') }}" customText="{{ statusLabels[line.status]|default('') }}" />
                                 {% if line.status == 'quantity_refused' and line.availableQuantity is not null %}
-                                    {# The stock as it is, 7.5 and not 7: the line carries neither decimals nor unit, so the number is written to three decimals at most, without trailing zeros. #}
-                                    <span class="QuickOrderTable-detail">{{ '%quantity% in stock'|trans({'%quantity%': line.availableQuantity|format_number({max_fraction_digit: 3})}) }}</span>
+                                    {# The stock as it is, 7.5 and not 7, in the decimals and the unit of the sale element; without its rule, to three decimals at most, without trailing zeros. #}
+                                    {% set rule = this.ruleOf(index) %}
+                                    <span class="QuickOrderTable-detail">{{ '%quantity% in stock'|trans({'%quantity%': rule ? line.availableQuantity|format_quantity(rule.quantityDecimals, rule.unitCode) : line.availableQuantity|format_number({max_fraction_digit: 3})}) }}</span>
+                                {% endif %}
+                                {% if line.status == 'quantity_refused' and line.refusalReason|default(null) %}
+                                    {# What the rules of the sale element take: its minimum, its step, or the decimals it is sold with. #}
+                                    <span class="QuickOrderTable-detail" data-testid="quick-order-quantity-reason">{{ line.refusalReason }}</span>
                                 {% endif %}
                                 {% if line.status == 'destination_refused' and line.refusalReason|default(null) %}
                                     <span class="QuickOrderTable-detail" data-testid="quick-order-destination-reason">{{ line.refusalReason }}</span>

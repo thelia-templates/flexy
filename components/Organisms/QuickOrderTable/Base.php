@@ -19,6 +19,7 @@ use FlexyBundle\Exception\ReferenceQuantityTextRefusedException;
 use FlexyBundle\Service\PurchaseListChoices;
 use FlexyBundle\Service\QuickOrderService;
 use FlexyBundle\Service\ReferenceQuantityTextParser;
+use FlexyBundle\Service\SaleElementQuantityRules;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -42,7 +43,9 @@ use Thelia\Domain\CustomerList\PurchaseListFacade;
 use Thelia\Domain\QuickOrder\DTO\QuickOrderTable;
 use Thelia\Domain\QuickOrder\Enum\LineStatus;
 use Thelia\Domain\QuickOrder\Exception\QuickOrderRateLimitedException;
+use Thelia\Domain\Catalog\Quantity\UnitCode;
 use Thelia\Model\Customer;
+use Thelia\Model\ProductSaleElementsQuery;
 
 /**
  * The quick order table: the rows the buyer types, pastes or imports, and what the shop
@@ -70,6 +73,9 @@ class Base
 
     public const int EMPTY_ROWS = 1;
 
+    /** The finest quantity a sale element is sold in, a gram of a kilogram. */
+    private const int MAXIMUM_DECIMALS = 3;
+
     /** The status of a line the destination restrictions of the core keep from the address of the cart. */
     private const string DESTINATION_REFUSED = 'destination_refused';
 
@@ -77,14 +83,14 @@ class Base
      * What the buyer typed. The sale element is the one a reference shared by several
      * of them was settled on; the core checks that it still carries the reference.
      *
-     * @var list<array{key: string, reference: string, quantity: int|string, productSaleElementsId: int|string|null}>
+     * @var list<array{key: string, reference: string, quantity: int|float|string, productSaleElementsId: int|string|null}>
      */
     #[LiveProp(writable: true)]
     public array $rows = [];
 
     /**
      * The control table of the last check, one entry per row, in the same order. A row
-     * left out of the check (its quantity is not a whole number the core takes) has none.
+     * left out of the check (its quantity is not a number above zero the core takes) has none.
      *
      * @var list<array<string, mixed>|null>
      */
@@ -123,6 +129,13 @@ class Base
 
     public bool $saved = false;
 
+    /**
+     * The quantity rule of each sale element the last check answered, read once per request.
+     *
+     * @var array<int, array{minQuantity: float, quantityStep: float, quantityDecimals: int, unitQuantity: float|null, referenceUnitQuantity: float|null, unitCode: string|null}>|null
+     */
+    private ?array $rules = null;
+
     public function __construct(
         private readonly QuickOrderService $quickOrderService,
         private readonly ReferenceQuantityTextParser $parser,
@@ -130,6 +143,7 @@ class Base
         private readonly PurchaseListFacade $purchaseListFacade,
         private readonly PurchaseListChoices $purchaseListChoices,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly SaleElementQuantityRules $saleElementQuantityRules,
     ) {
     }
 
@@ -267,7 +281,7 @@ class Base
 
         foreach ($this->rows as $index => $row) {
             if ($this->isReady($index)) {
-                $ready[] = new ReferenceQuantity((string) $row['reference'], (int) $row['quantity'], self::saleElementsIdOf($row));
+                $ready[] = new ReferenceQuantity((string) $row['reference'], (float) self::quantityOf($row), self::saleElementsIdOf($row));
                 $readyIndexes[] = $index;
             }
         }
@@ -461,12 +475,73 @@ class Base
             return null;
         }
 
+        $quantity = self::quantityOf($row);
+
         if (mb_strtolower(trim((string) $row['reference'])) !== mb_strtolower((string) $line['reference'])
-            || (int) $row['quantity'] !== (int) $line['quantity']) {
+            || null === $quantity
+            || !self::isTheSameQuantity($quantity, (float) $line['quantity'])) {
             return null;
         }
 
         return $line;
+    }
+
+    /**
+     * The quantity rule of the sale element the last check answered for this row, or null
+     * when the row was edited since, names no sale element, or the core has no rules.
+     *
+     * @return array{minQuantity: float, quantityStep: float, quantityDecimals: int, unitQuantity: float|null, referenceUnitQuantity: float|null, unitCode: string|null}|null
+     */
+    public function ruleOf(int $index): ?array
+    {
+        $saleElementsId = (int) ($this->lineOf($index)['productSaleElementsId'] ?? 0);
+
+        return $saleElementsId > 0 ? ($this->rules()[$saleElementsId] ?? null) : null;
+    }
+
+    /**
+     * The unit the quantity of this row is typed in, "kg" for a sale element sold by measure:
+     * none for one sold by the piece, as the cart writes it.
+     */
+    public function unitOf(int $index): ?string
+    {
+        $rule = $this->ruleOf($index);
+
+        if (null === $rule || $rule['quantityDecimals'] < 1 || null === $rule['unitCode'] || !enum_exists(UnitCode::class)) {
+            return null;
+        }
+
+        return UnitCode::tryFrom($rule['unitCode'])?->symbol();
+    }
+
+    /**
+     * @return array<int, array{minQuantity: float, quantityStep: float, quantityDecimals: int, unitQuantity: float|null, referenceUnitQuantity: float|null, unitCode: string|null}>
+     */
+    private function rules(): array
+    {
+        if (null !== $this->rules) {
+            return $this->rules;
+        }
+
+        $ids = array_values(array_unique(array_filter(array_map(
+            static fn (?array $line): int => (int) ($line['productSaleElementsId'] ?? 0),
+            $this->lines,
+        ))));
+        $this->rules = [];
+
+        if ([] === $ids) {
+            return $this->rules;
+        }
+
+        foreach (ProductSaleElementsQuery::create()->filterById($ids)->find() as $saleElement) {
+            $rule = $this->saleElementQuantityRules->ofSaleElement($saleElement);
+
+            if (null !== $rule) {
+                $this->rules[(int) $saleElement->getId()] = $rule;
+            }
+        }
+
+        return $this->rules;
     }
 
     public function isReady(int $index): bool
@@ -488,8 +563,9 @@ class Base
     }
 
     /**
-     * A typed row whose quantity is not a whole number from 1 to the core's maximum: it is left out of the
-     * check rather than let it refuse the whole table.
+     * A typed row whose quantity is not a number above zero, up to the core's maximum and with three decimals
+     * at most: it is left out of the check rather than let it refuse the whole table. Whether the sale element
+     * takes it (its minimum, step and decimals) is the check's answer.
      */
     public function hasInvalidQuantity(int $index): bool
     {
@@ -549,7 +625,7 @@ class Base
     }
 
     /**
-     * @return list<array{key: string, reference: string, quantity: int, productSaleElementsId: int|null}>
+     * @return list<array{key: string, reference: string, quantity: float, productSaleElementsId: int|null}>
      */
     private static function rowsOf(QuickOrderTable $table): array
     {
@@ -593,8 +669,8 @@ class Base
     }
 
     /**
-     * The typed rows a list can keep: a row whose quantity is not a whole number above
-     * zero is left out. The sale element a row names is kept only when the last check
+     * The typed rows a list can keep: a row whose quantity is not a number above zero is
+     * left out. The sale element a row names is kept only when the last check
      * offered it for that row: the row comes from the browser, and the list stores
      * whatever sale element it is given.
      *
@@ -618,13 +694,33 @@ class Base
     }
 
     /**
-     * @param array{quantity: int|string} $row
+     * The quantity a row holds, "1,25" as well as "1.25", or null when it is not a number
+     * above zero, up to the core's maximum, with three decimals at most.
+     *
+     * @param array{quantity: int|float|string} $row
      */
-    private static function quantityOf(array $row): ?int
+    private static function quantityOf(array $row): ?float
     {
-        $quantity = trim((string) $row['quantity']);
+        $typed = $row['quantity'];
 
-        return 1 === preg_match('/^[1-9]\d{0,8}$/', $quantity) && (int) $quantity <= ReferenceQuantityLines::MAX_QUANTITY ? (int) $quantity : null;
+        if (!\is_string($typed)) {
+            $typed = rtrim(rtrim(number_format((float) $typed, self::MAXIMUM_DECIMALS, '.', ''), '0'), '.');
+        }
+
+        $typed = str_replace([' ', "\u{00A0}", "\u{202F}"], '', trim($typed));
+
+        if (1 !== preg_match('/^\d{1,9}(?:[.,]\d{1,'.self::MAXIMUM_DECIMALS.'})?$/', $typed)) {
+            return null;
+        }
+
+        $quantity = (float) str_replace(',', '.', $typed);
+
+        return $quantity > 0 && $quantity <= ReferenceQuantityLines::MAX_QUANTITY ? $quantity : null;
+    }
+
+    private static function isTheSameQuantity(float $quantity, float $other): bool
+    {
+        return (int) round($quantity * 1_000_000) === (int) round($other * 1_000_000);
     }
 
     /**
