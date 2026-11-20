@@ -64,6 +64,8 @@
                     {% endif %}
                 </li>
             {% endfor %}
+            {# Links a module adds after the shop's own, as <li> items: a cookie settings button, a policy page. #}
+            {{ theme_hook('layout.footer.links') }}
         </ul>
     </div>
 
