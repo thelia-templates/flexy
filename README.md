@@ -160,7 +160,7 @@ Without such a module, a search engine plugged into the core (`Thelia\Domain\Sea
 
 The search synonyms of the back office (Configuration > Search synonyms) widen the search of the core's engine, which receives them as alternative terms, and the `title` filter, which matches the term or any of them, `%` and `_` being searched as such. An engine of the theme that implements `FlexyBundle\Search\ProductSearchEngineWithAlternativeTermsInterface` receives them through `productIdsMatchingAnyTerm()`; one that only implements `ProductSearchEngineInterface` receives the searched term alone, and the synonyms do nothing for it. A redirection back to the search page is never followed.
 
-Each client may ask an engine, the theme's or the core's, 120 times a minute (`flexy_product_search` rate limiter, keyed on the client IP). Past it the `title` filter answers, so a robot walking terms cannot wear the engine out and a visitor still gets results.
+Each client may ask an engine, the theme's or the core's, 120 times a minute (`flexy_product_search` rate limiter, keyed on the client IP), one request counting once whatever it searches (the results page counts and lists with a single token). Past it the `title` filter answers, so a robot walking terms cannot wear the engine out and a visitor still gets results. The limiter counts by the IP of the client as Symfony reads it: behind a reverse proxy or a CDN, declare it in `framework.trusted_proxies` (and `trusted_headers`), otherwise every visitor shares the IP of the proxy and the whole shop falls back to the database past 120 searches a minute.
 
 ### Account menu
 

@@ -60,6 +60,8 @@ final readonly class ProductSearch
      */
     public const ENGINE_LIMIT = 1000;
 
+    private const ENGINE_ALLOWED_ATTRIBUTE = '_flexy_product_search_engine_allowed';
+
     private ?ProductSearchEngineInterface $engine;
 
     /**
@@ -184,7 +186,9 @@ final readonly class ProductSearch
                 $ids[] = $hit->id;
             }
 
-            if ($result->hits === [] || $offset + SearchQuery::MAX_LIMIT >= $result->total) {
+            $engineTotal = property_exists($result, 'unfilteredTotal') ? $result->unfilteredTotal : $result->total;
+
+            if ($offset + SearchQuery::MAX_LIMIT >= $engineTotal) {
                 break;
             }
         }
@@ -200,13 +204,20 @@ final readonly class ProductSearch
             return true;
         }
 
-        if ($this->searchLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
-            return true;
+        $decided = $request->attributes->get(self::ENGINE_ALLOWED_ATTRIBUTE);
+
+        if (\is_bool($decided)) {
+            return $decided;
         }
 
-        $this->logger?->notice('Product search rate limit reached: the database answers instead of the search engine.');
+        $allowed = $this->searchLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted();
+        $request->attributes->set(self::ENGINE_ALLOWED_ATTRIBUTE, $allowed);
 
-        return false;
+        if (!$allowed) {
+            $this->logger?->notice('Product search rate limit reached: the database answers instead of the search engine.');
+        }
+
+        return $allowed;
     }
 
     /**
