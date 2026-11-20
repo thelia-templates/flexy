@@ -56,11 +56,14 @@ final class ProductSearchTest extends TestCase
     /** @var list<SearchQuery> */
     private array $coreQueries = [];
 
+    private RequestStack $requestStack;
+
     protected function setUp(): void
     {
         $this->apiCalls = [];
         $this->engineCalls = [];
         $this->coreQueries = [];
+        $this->requestStack = new RequestStack();
     }
 
     public function testWithoutEngineTheApiTitleFilterAnswers(): void
@@ -283,6 +286,29 @@ final class ProductSearchTest extends TestCase
         self::assertSame(249, $result['total']);
     }
 
+    public function testAFirstPageShortenedBelowItsSizeByHiddenMatchesDoesNotStopTheReading(): void
+    {
+        $matches = range(1, 150);
+        $search = $this->productSearch(catalog: $matches, coreSearch: $this->coreSearch($matches, hidden: range(1, 60)));
+
+        $result = $search->search('chaise', 1, 10);
+
+        self::assertSame([0, 100], array_map(static fn (SearchQuery $query): int => $query->offset, $this->coreQueries));
+        self::assertSame(90, $result['total']);
+        self::assertSame(range(61, 70), $this->ids($result));
+    }
+
+    public function testAPageOfTheIndexEntirelyHiddenDoesNotStopTheReading(): void
+    {
+        $matches = range(1, 250);
+        $search = $this->productSearch(catalog: $matches, coreSearch: $this->coreSearch($matches, hidden: range(1, 100)));
+
+        $result = $search->search('chaise', 1, 10);
+
+        self::assertSame([0, 100, 200], array_map(static fn (SearchQuery $query): int => $query->offset, $this->coreQueries));
+        self::assertSame(150, $result['total']);
+    }
+
     public function testAnUnavailableCoreEngineLetsTheDatabaseAnswer(): void
     {
         $search = $this->productSearch(catalog: [3, 7], coreSearch: $this->coreSearch([3], available: false));
@@ -306,12 +332,39 @@ final class ProductSearchTest extends TestCase
         $search = $this->productSearch(catalog: [3, 7], engineIds: [7], limit: 1);
 
         $search->search('chaise');
+        $this->nextRequest();
         $this->apiCalls = [];
         $result = $search->search('chaise');
 
         self::assertCount(1, $this->engineCalls);
         self::assertSame('chaise', $this->apiCalls[0]['title']);
         self::assertSame(2, $result['total']);
+    }
+
+    public function testTheResultsPageSpendsOneTokenForItsCountAndItsList(): void
+    {
+        $limiter = $this->limiter(2);
+        $search = $this->productSearch(catalog: [3, 7], engineIds: [7], limiter: $limiter);
+
+        $search->countSubmitted('chaise');
+        $search->search('chaise');
+
+        self::assertCount(2, $this->engineCalls);
+        self::assertTrue($limiter->create('203.0.113.9')->consume()->isAccepted());
+    }
+
+    public function testARequestRefusedByTheRateLimitStaysOnTheDatabaseForItsWholeLength(): void
+    {
+        $limiter = $this->limiter(1);
+        $search = $this->productSearch(catalog: [3, 7], engineIds: [7], limiter: $limiter);
+
+        $search->search('chaise');
+        $this->nextRequest();
+        $search->countSubmitted('chaise');
+        $limiter->create('203.0.113.9')->reset();
+        $search->search('chaise');
+
+        self::assertCount(1, $this->engineCalls);
     }
 
     public function testASearchWithoutEngineSpendsNoRateLimit(): void
@@ -331,8 +384,7 @@ final class ProductSearchTest extends TestCase
      */
     private function productSearch(array $catalog, ?array $engineIds = null, ?array $visible = null, ?SearchService $coreSearch = null, ?int $limit = null, ?RateLimiterFactory $limiter = null, ?ProductSearchEngineInterface $engine = null): ProductSearch
     {
-        $requestStack = new RequestStack();
-        $requestStack->push(Request::create('/search', server: ['REMOTE_ADDR' => '203.0.113.9']));
+        $this->requestStack->push(Request::create('/search', server: ['REMOTE_ADDR' => '203.0.113.9']));
 
         $visibleProductIds = $this->createStub(VisibleProductIds::class);
         $visibleProductIds->method('filter')->willReturnCallback(
@@ -348,8 +400,14 @@ final class ProductSearchTest extends TestCase
             $visibleProductIds,
             $coreSearch,
             $limiter ?? $this->limiter($limit ?? 1000),
-            $requestStack,
+            $this->requestStack,
         );
+    }
+
+    private function nextRequest(): void
+    {
+        $this->requestStack->pop();
+        $this->requestStack->push(Request::create('/search', server: ['REMOTE_ADDR' => '203.0.113.9']));
     }
 
     private function limiter(int $limit): RateLimiterFactory
