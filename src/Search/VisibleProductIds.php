@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Search;
 
-use Thelia\Domain\Sale\ReservedSaleVisibility;
+use Thelia\Domain\Catalog\Product\ProductVisibility;
 use Thelia\Model\Map\ProductTableMap;
 use Thelia\Model\ProductQuery;
 
@@ -23,17 +23,18 @@ use Thelia\Model\ProductQuery;
  *
  * Paginating by relevance needs the whole visible list before the first page is cut, and the
  * product API only answers with full product payloads: one id query here costs less than
- * normalising every match. It applies the two rules the front product API applies on its own
- * — the `visible` flag and the operations reserved to some customers — and the page itself is
- * still read through the API, which filters again: a rule added there later can shorten a page,
- * never show a product it hides.
+ * normalising every match. It applies the `visible` flag and the rule the front product API
+ * applies, ProductVisibility (catalog restrictions, categories closed to the customer group,
+ * reserved operations, rules of the modules), so that the total of a search counts none of the
+ * products the visitor may not see. The page itself is still read through the API, which
+ * filters again.
  *
  * Not final so a unit test can stand in for the database.
  */
 readonly class VisibleProductIds
 {
     public function __construct(
-        private ReservedSaleVisibility $reservedSaleVisibility,
+        private ProductVisibility $productVisibility,
     ) {
     }
 
@@ -49,7 +50,7 @@ readonly class VisibleProductIds
         }
 
         $query = ProductQuery::create()->filterById($ids)->filterByVisible(1);
-        $this->reservedSaleVisibility->applyTo($query, ProductTableMap::COL_ID);
+        $this->productVisibility->applyTo($query, ProductTableMap::COL_ID);
 
         $visible = array_flip(array_map('intval', $query->select('Id')->find()->toArray()));
 

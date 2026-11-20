@@ -15,13 +15,30 @@ declare(strict_types=1);
 namespace FlexyBundle\Tests\Unit\Service;
 
 use FlexyBundle\Search\ProductSearchEngineInterface;
+use FlexyBundle\Search\ProductSearchEngineWithAlternativeTermsInterface;
 use FlexyBundle\Search\VisibleProductIds;
 use FlexyBundle\Service\ProductSearch;
 use FlexyBundle\Service\ProductSort;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 use Thelia\Api\Service\DataAccess\DataAccessService;
 use Thelia\Domain\Localization\Service\LangService;
+use Thelia\Domain\Search\Contract\SearchableDocumentProviderInterface;
+use Thelia\Domain\Search\Contract\SearchEngineInterface;
+use Thelia\Domain\Search\Contract\SearchScope;
+use Thelia\Domain\Search\Contract\SearchTermExpanderInterface;
+use Thelia\Domain\Search\Contract\SearchTermRewriterInterface;
+use Thelia\Domain\Search\Document\SearchHit;
+use Thelia\Domain\Search\Document\SearchQuery;
+use Thelia\Domain\Search\Document\SearchResult;
+use Thelia\Domain\Search\SearchDocumentProviders;
+use Thelia\Domain\Search\SearchEngineRegistry;
+use Thelia\Domain\Search\SearchService;
 
 /**
  * Without a search engine the API's title filter answers; with one, the engine says which
@@ -36,10 +53,17 @@ final class ProductSearchTest extends TestCase
     /** @var list<array{string, string, int}> */
     private array $engineCalls = [];
 
+    /** @var list<SearchQuery> */
+    private array $coreQueries = [];
+
+    private RequestStack $requestStack;
+
     protected function setUp(): void
     {
         $this->apiCalls = [];
         $this->engineCalls = [];
+        $this->coreQueries = [];
+        $this->requestStack = new RequestStack();
     }
 
     public function testWithoutEngineTheApiTitleFilterAnswers(): void
@@ -53,6 +77,94 @@ final class ProductSearchTest extends TestCase
         self::assertSame(10, $this->apiCalls[0]['itemsPerPage']);
         self::assertArrayNotHasKey('id', $this->apiCalls[0]);
         self::assertSame(2, $result['total']);
+    }
+
+    public function testWithoutEngineTheSynonymsOfTheTermAreLookedForInTheTitles(): void
+    {
+        if (!interface_exists(SearchTermExpanderInterface::class)) {
+            self::markTestSkipped('The installed core has no search dictionary.');
+        }
+
+        $expander = $this->createStub(SearchTermExpanderInterface::class);
+        $expander->method('expand')->willReturnCallback(static fn (string $term, ?string $locale): array => $term === 'chaise' && $locale === 'fr_FR' ? ['siège', 'tabouret'] : []);
+        $coreSearch = new SearchService(new SearchEngineRegistry([]), new SearchDocumentProviders([]), [], [], new NullLogger(), [$expander]);
+
+        $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch)->search(' chaise ');
+        $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch)->search('table');
+
+        self::assertSame(['chaise', 'siège', 'tabouret'], $this->apiCalls[0]['title']);
+        self::assertSame('table', $this->apiCalls[1]['title']);
+    }
+
+    public function testWithoutEngineTheWildcardsOfTheTermAreSearchedLiterally(): void
+    {
+        $this->productSearch(catalog: [3, 7])->search('100%_coton\\');
+
+        self::assertSame('100\\%\\_coton\\\\', $this->apiCalls[0]['title']);
+    }
+
+    public function testWithoutEngineTheWildcardsOfTheSynonymsAreSearchedLiterally(): void
+    {
+        if (!interface_exists(SearchTermExpanderInterface::class)) {
+            self::markTestSkipped('The installed core has no search dictionary.');
+        }
+
+        $expander = $this->createStub(SearchTermExpanderInterface::class);
+        $expander->method('expand')->willReturn(['50%']);
+        $coreSearch = new SearchService(new SearchEngineRegistry([]), new SearchDocumentProviders([]), [], [], new NullLogger(), [$expander]);
+
+        $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch)->search('half_price');
+
+        self::assertSame(['half\\_price', '50\\%'], $this->apiCalls[0]['title']);
+    }
+
+    public function testWithoutEngineTheTitlesAreSearchedForTheRewrittenTermAndItsSynonyms(): void
+    {
+        if (!interface_exists(SearchTermExpanderInterface::class)) {
+            self::markTestSkipped('The installed core has no search dictionary.');
+        }
+
+        $rewriter = $this->createStub(SearchTermRewriterInterface::class);
+        $rewriter->method('rewrite')->willReturnCallback(static fn (string $term): string => $term === 'chaize' ? 'chaise' : $term);
+        $expander = $this->createStub(SearchTermExpanderInterface::class);
+        $expander->method('expand')->willReturnCallback(static fn (string $term): array => $term === 'chaise' ? ['siège'] : []);
+        $coreSearch = new SearchService(new SearchEngineRegistry([]), new SearchDocumentProviders([]), [$rewriter], [], new NullLogger(), [$expander]);
+
+        $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch)->search('chaize');
+
+        self::assertSame(['chaize', 'chaise', 'siège'], $this->apiCalls[0]['title']);
+    }
+
+    public function testAnEngineThatTakesAlternativeTermsReceivesTheSynonymsOfTheCore(): void
+    {
+        if (!interface_exists(SearchTermExpanderInterface::class)) {
+            self::markTestSkipped('The installed core has no search dictionary.');
+        }
+
+        $expander = $this->createStub(SearchTermExpanderInterface::class);
+        $expander->method('expand')->willReturnCallback(static fn (string $term, ?string $locale): array => $term === 'tel' && $locale === 'fr_FR' ? ['téléphone'] : []);
+        $coreSearch = new SearchService(new SearchEngineRegistry([]), new SearchDocumentProviders([]), [], [], new NullLogger(), [$expander]);
+        $engine = new class implements ProductSearchEngineWithAlternativeTermsInterface {
+            /** @var list<array{string, list<string>}> */
+            public array $calls = [];
+
+            public function productIds(string $term, string $locale, int $limit): array
+            {
+                throw new \LogicException('The engine is asked with its alternative terms.');
+            }
+
+            public function productIdsMatchingAnyTerm(string $term, array $alternativeTerms, string $locale, int $limit): array
+            {
+                $this->calls[] = [$term, $alternativeTerms];
+
+                return [7];
+            }
+        };
+
+        $result = $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch, engine: $engine)->search(' tel ');
+
+        self::assertSame([['tel', ['téléphone']]], $engine->calls);
+        self::assertSame([7], $this->ids($result));
     }
 
     public function testWithAnEngineAndNoSortTheRelevanceOrderIsKept(): void
@@ -137,13 +249,143 @@ final class ProductSearchTest extends TestCase
         self::assertSame([12], $this->ids($search->search('chaise')));
     }
 
+    public function testWithoutThemeEngineTheCoreEngineAnswersWithTheRewrittenTerm(): void
+    {
+        $search = $this->productSearch(catalog: [4, 12, 27], coreSearch: $this->coreSearch([12, 4], rewriteTo: 'chair'));
+
+        $result = $search->search('chaise');
+
+        self::assertSame('chair', $this->coreQueries[0]->term);
+        self::assertSame('fr_FR', $this->coreQueries[0]->locale);
+        self::assertSame(['product'], $this->coreQueries[0]->families);
+        self::assertTrue($this->coreQueries[0]->visibleOnly);
+        self::assertSame([12, 4], $this->ids($result));
+        self::assertArrayNotHasKey('title', $this->apiCalls[0]);
+    }
+
+    public function testTheCoreEngineIsReadPageAfterPageUpToTheEngineLimit(): void
+    {
+        $matches = range(1, 250);
+        $search = $this->productSearch(catalog: $matches, coreSearch: $this->coreSearch($matches));
+
+        $result = $search->search('chaise', 1, 10);
+
+        self::assertSame([0, 100, 200], array_map(static fn (SearchQuery $query): int => $query->offset, $this->coreQueries));
+        self::assertSame(250, $result['total']);
+        self::assertSame(range(1, 10), $this->ids($result));
+    }
+
+    public function testAHiddenMatchOfTheIndexDoesNotStopTheReadingOfTheNextPages(): void
+    {
+        $matches = range(1, 250);
+        $search = $this->productSearch(catalog: $matches, coreSearch: $this->coreSearch($matches, hidden: [5]));
+
+        $result = $search->search('chaise', 1, 10);
+
+        self::assertSame([0, 100, 200], array_map(static fn (SearchQuery $query): int => $query->offset, $this->coreQueries));
+        self::assertSame(249, $result['total']);
+    }
+
+    public function testAFirstPageShortenedBelowItsSizeByHiddenMatchesDoesNotStopTheReading(): void
+    {
+        $matches = range(1, 150);
+        $search = $this->productSearch(catalog: $matches, coreSearch: $this->coreSearch($matches, hidden: range(1, 60)));
+
+        $result = $search->search('chaise', 1, 10);
+
+        self::assertSame([0, 100], array_map(static fn (SearchQuery $query): int => $query->offset, $this->coreQueries));
+        self::assertSame(90, $result['total']);
+        self::assertSame(range(61, 70), $this->ids($result));
+    }
+
+    public function testAPageOfTheIndexEntirelyHiddenDoesNotStopTheReading(): void
+    {
+        $matches = range(1, 250);
+        $search = $this->productSearch(catalog: $matches, coreSearch: $this->coreSearch($matches, hidden: range(1, 100)));
+
+        $result = $search->search('chaise', 1, 10);
+
+        self::assertSame([0, 100, 200], array_map(static fn (SearchQuery $query): int => $query->offset, $this->coreQueries));
+        self::assertSame(150, $result['total']);
+    }
+
+    public function testAnUnavailableCoreEngineLetsTheDatabaseAnswer(): void
+    {
+        $search = $this->productSearch(catalog: [3, 7], coreSearch: $this->coreSearch([3], available: false));
+
+        $result = $search->search('chaise');
+
+        self::assertSame('chaise', $this->apiCalls[0]['title']);
+        self::assertSame(2, $result['total']);
+    }
+
+    public function testAThemeEngineIsPreferredToTheCoreEngine(): void
+    {
+        $search = $this->productSearch(catalog: [4, 12], engineIds: [12], coreSearch: $this->coreSearch([4]));
+
+        self::assertSame([12], $this->ids($search->search('chaise')));
+        self::assertSame([], $this->coreQueries);
+    }
+
+    public function testPastTheRateLimitTheDatabaseAnswersInsteadOfTheEngine(): void
+    {
+        $search = $this->productSearch(catalog: [3, 7], engineIds: [7], limit: 1);
+
+        $search->search('chaise');
+        $this->nextRequest();
+        $this->apiCalls = [];
+        $result = $search->search('chaise');
+
+        self::assertCount(1, $this->engineCalls);
+        self::assertSame('chaise', $this->apiCalls[0]['title']);
+        self::assertSame(2, $result['total']);
+    }
+
+    public function testTheResultsPageSpendsOneTokenForItsCountAndItsList(): void
+    {
+        $limiter = $this->limiter(2);
+        $search = $this->productSearch(catalog: [3, 7], engineIds: [7], limiter: $limiter);
+
+        $search->countSubmitted('chaise');
+        $search->search('chaise');
+
+        self::assertCount(2, $this->engineCalls);
+        self::assertTrue($limiter->create('203.0.113.9')->consume()->isAccepted());
+    }
+
+    public function testARequestRefusedByTheRateLimitStaysOnTheDatabaseForItsWholeLength(): void
+    {
+        $limiter = $this->limiter(1);
+        $search = $this->productSearch(catalog: [3, 7], engineIds: [7], limiter: $limiter);
+
+        $search->search('chaise');
+        $this->nextRequest();
+        $search->countSubmitted('chaise');
+        $limiter->create('203.0.113.9')->reset();
+        $search->search('chaise');
+
+        self::assertCount(1, $this->engineCalls);
+    }
+
+    public function testASearchWithoutEngineSpendsNoRateLimit(): void
+    {
+        $limiter = $this->limiter(1);
+        $search = $this->productSearch(catalog: [3, 7], limiter: $limiter);
+
+        $search->search('chaise');
+
+        self::assertTrue($limiter->create('203.0.113.9')->consume()->isAccepted());
+    }
+
     /**
      * @param list<int>      $catalog   ids the API knows, which it returns in ascending id order
      * @param list<int>|null $engineIds null for no engine
      * @param list<int>|null $visible   null when every id is visible
      */
-    private function productSearch(array $catalog, ?array $engineIds = null, ?array $visible = null): ProductSearch
+    private function productSearch(array $catalog, ?array $engineIds = null, ?array $visible = null, ?SearchService $coreSearch = null, ?int $limit = null, ?RateLimiterFactory $limiter = null, ?ProductSearchEngineInterface $engine = null): ProductSearch
     {
+        $this->requestStack->push(Request::create('/search', server: ['REMOTE_ADDR' => '203.0.113.9']));
+
         $visibleProductIds = $this->createStub(VisibleProductIds::class);
         $visibleProductIds->method('filter')->willReturnCallback(
             static fn (array $ids): array => $visible === null ? $ids : array_values(array_filter($ids, static fn (int $id): bool => \in_array($id, $visible, true))),
@@ -154,9 +396,84 @@ final class ProductSearchTest extends TestCase
             new ProductSort(),
             new EventDispatcher(),
             $this->langService(),
-            $engineIds === null ? [] : [$this->engine($engineIds)],
+            $engine !== null ? [$engine] : ($engineIds === null ? [] : [$this->engine($engineIds)]),
             $visibleProductIds,
+            $coreSearch,
+            $limiter ?? $this->limiter($limit ?? 1000),
+            $this->requestStack,
         );
+    }
+
+    private function nextRequest(): void
+    {
+        $this->requestStack->pop();
+        $this->requestStack->push(Request::create('/search', server: ['REMOTE_ADDR' => '203.0.113.9']));
+    }
+
+    private function limiter(int $limit): RateLimiterFactory
+    {
+        return new RateLimiterFactory(['id' => 'search', 'policy' => 'sliding_window', 'limit' => $limit, 'interval' => '1 minute'], new InMemoryStorage());
+    }
+
+    /**
+     * @param list<int> $matches
+     * @param list<int> $hidden
+     */
+    private function coreSearch(array $matches, ?string $rewriteTo = null, bool $available = true, array $hidden = []): SearchService
+    {
+        $record = function (SearchQuery $query): void {
+            $this->coreQueries[] = $query;
+        };
+
+        $engine = new class($matches, $available, $record) implements SearchEngineInterface {
+            /**
+             * @param list<int> $matches
+     * @param list<int> $hidden
+             */
+            public function __construct(private array $matches, private bool $available, private \Closure $record)
+            {
+            }
+
+            public function isAvailable(): bool
+            {
+                return $this->available;
+            }
+
+            public function index(array $documents): void
+            {
+            }
+
+            public function remove(string $family, array $ids, ?string $locale): void
+            {
+            }
+
+            public function purge(string $family): void
+            {
+            }
+
+            public function search(SearchQuery $query): SearchResult
+            {
+                ($this->record)($query);
+                $page = \array_slice($this->matches, $query->offset, $query->limit);
+
+                return new SearchResult(array_map(static fn (int $id): SearchHit => new SearchHit('product', $id, 1.0), $page), \count($this->matches));
+            }
+        };
+
+        $provider = $this->createStub(SearchableDocumentProviderInterface::class);
+        $provider->method('family')->willReturn('product');
+        $provider->method('scope')->willReturn(SearchScope::Shop);
+        $provider->method('visibleIds')->willReturnCallback(static fn (array $ids): array => array_values(array_diff($ids, $hidden)));
+
+        $rewriters = [];
+
+        if ($rewriteTo !== null) {
+            $rewriter = $this->createStub(SearchTermRewriterInterface::class);
+            $rewriter->method('rewrite')->willReturn($rewriteTo);
+            $rewriters[] = $rewriter;
+        }
+
+        return new SearchService(new SearchEngineRegistry([$engine]), new SearchDocumentProviders([$provider]), $rewriters, [], new NullLogger());
     }
 
     /**
