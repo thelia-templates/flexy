@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\DTO;
 
+use Thelia\Domain\Catalog\Quantity\QuantityScale;
 use Thelia\Domain\Catalog\Quantity\UnitCode;
 
 /**
@@ -30,9 +31,6 @@ final readonly class QuantityRuleDTO
 {
     /** The longest list of quantities the selector offers when nothing else bounds it. */
     public const LIST_LENGTH = 50;
-
-    /** Mirrors the core: a quantity is sold with three decimals at most. */
-    private const MAXIMUM_DECIMALS = 3;
 
     public function __construct(
         public float $minQuantity = 1.0,
@@ -57,7 +55,7 @@ final readonly class QuantityRuleDTO
         return new self(
             minQuantity: self::positive($data['minQuantity'] ?? null) ?? 1.0,
             step: self::positive($data['quantityStep'] ?? null) ?? 1.0,
-            decimals: max(0, min(self::MAXIMUM_DECIMALS, $decimals)),
+            decimals: max(0, min(QuantityScale::MAXIMUM_DECIMALS, $decimals)),
             unitQuantity: self::positive($data['unitQuantity'] ?? null),
             referenceUnitQuantity: self::positive($data['referenceUnitQuantity'] ?? null),
             unitCode: \is_string($data['unitCode'] ?? null) && '' !== $data['unitCode'] ? $data['unitCode'] : null,
