@@ -26,7 +26,8 @@
     cart_refused: 'None of these lines could be added to your cart.'|trans,
     destination_refused: 'Nothing was added to your cart: a product cannot be delivered to your address. Remove its line to add the others.'|trans,
 } %}
-{% set maxQuantity = constant('Thelia\\Domain\\Catalog\\DTO\\ReferenceQuantityLines::MAX_QUANTITY')|format_number %}
+{# Written in the language of the page, not in the default locale of PHP (en_US_POSIX on a server, with no grouping). #}
+{% set maxQuantity = constant('Thelia\\Domain\\Catalog\\DTO\\ReferenceQuantityLines::MAX_QUANTITY')|format_number(locale: app.request.locale|default(null)) %}
 {% set rejectReasons = {
     columns: 'expected a reference and a quantity'|trans,
     quantity: 'the quantity is not a number above zero, up to %max%, with three decimals at most'|trans({'%max%': maxQuantity}),
@@ -141,19 +142,32 @@
                         </td>
                         <td data-label="{{ 'Quantity'|trans }}">
                             <label class="sr-only" for="quick-order-quantity-{{ row.key }}">{{ 'Quantity, line %line%'|trans({'%line%': loop.index}) }}</label>
-                            {# A text field: a number field refuses the decimal comma of the buyer's language. What the buyer
-                               typed is shown as typed, a quantity the check answered in the decimals of the language. #}
-                            <twig:Fields:Input:Base
-                                id="quick-order-quantity-{{ row.key }}"
-                                name="quick_order_quantity_{{ row.key }}"
-                                size="small"
-                                autocomplete="off"
-                                value="{{ row.quantity is same as(row.quantity ~ '') ? row.quantity : row.quantity|format_number({max_fraction_digit: 3}) }}"
-                                unit="{{ this.unitOf(index) }}"
-                                error="{{ this.hasInvalidQuantity(index) ? 'Enter a quantity above zero, up to %max%, with three decimals at most.'|trans({'%max%': maxQuantity}) : '' }}"
-                                input:inputmode="decimal"
-                                input:data-model="norender|rows.{{ index }}.quantity"
+                            {# The quantity selector of the product page, on the rule of the sale element the check settled
+                               the row on: whole steps by the piece, decimals and the unit by measure. Before the check,
+                               a decimal field. What the buyer typed is shown as typed; the model follows the field on
+                               change, which the + and - buttons fire. #}
+                            {% set quantityRule = this.quantityRuleOf(index) %}
+                            {% set quantityBounds = this.ruleOf(index) is not null ? {'input:min': quantityRule.inputValue(quantityRule.smallestQuantity)} : {} %}
+                            {% set quantityError = this.hasInvalidQuantity(index) %}
+                            <twig:Molecules:Button:Quantity
+                                class="QuickOrderTable-quantity"
+                                button:size="small"
+                                input:id="quick-order-quantity-{{ row.key }}"
+                                input:name="quick_order_quantity_{{ row.key }}"
+                                input:value="{{ this.quantityFieldOf(index, app.request.locale) }}"
+                                input:max="{{ constant('Thelia\\Domain\\Catalog\\DTO\\ReferenceQuantityLines::MAX_QUANTITY') }}"
+                                {{ ...quantityBounds }}
+                                input:aria-label="{{ 'Quantity, line %line%'|trans({'%line%': loop.index}) }}"
+                                input:aria-invalid="{{ quantityError ? 'true' : 'false' }}"
+                                input:aria-errormessage="{{ quantityError ? 'quick-order-quantity-' ~ row.key ~ '-error' : false }}"
+                                input:data-model="norender|on(change)|rows.{{ index }}.quantity"
+                                step="{{ quantityRule.inputStep }}"
+                                :decimals="quantityRule.decimals"
+                                unit="{{ quantityRule.unitSymbol ?? '' }}"
                             />
+                            {% if quantityError %}
+                                <p id="quick-order-quantity-{{ row.key }}-error" class="Input-error">{{ 'Enter a quantity above zero, up to %max%, with three decimals at most.'|trans({'%max%': maxQuantity}) }}</p>
+                            {% endif %}
                         </td>
                         <td data-label="{{ 'Product'|trans }}">
                             {% if line and line.status == 'ambiguous' %}

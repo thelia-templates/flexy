@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Components\Organisms\QuickOrderTable;
 
+use FlexyBundle\DTO\QuantityRuleDTO;
 use FlexyBundle\Event\CheckoutEvents;
 use FlexyBundle\Exception\ReferenceQuantityTextRefusedException;
 use FlexyBundle\Service\PurchaseListChoices;
@@ -497,6 +498,40 @@ class Base
         $saleElementsId = (int) ($this->lineOf($index)['productSaleElementsId'] ?? 0);
 
         return $saleElementsId > 0 ? ($this->rules()[$saleElementsId] ?? null) : null;
+    }
+
+    /**
+     * The rule the quantity selector of this row follows, the one of the product page: whole steps
+     * for a sale element sold by the piece, decimals and a unit for one sold by measure. A row the
+     * check has not settled on a sale element yet takes any quantity of up to three decimals, the
+     * check then telling the rule of its sale element.
+     */
+    public function quantityRuleOf(int $index): QuantityRuleDTO
+    {
+        $rule = $this->ruleOf($index);
+
+        return null !== $rule
+            ? QuantityRuleDTO::fromArray($rule)
+            : new QuantityRuleDTO(minQuantity: 1.0, step: 1.0, decimals: self::MAXIMUM_DECIMALS);
+    }
+
+    /**
+     * The quantity in the field of this row: what the buyer typed, as typed, or the quantity the
+     * check answered, with the decimals of its rule in the language of the page.
+     */
+    public function quantityFieldOf(int $index, ?string $locale = null): string
+    {
+        $quantity = $this->rows[$index]['quantity'] ?? '';
+
+        if (\is_string($quantity)) {
+            return $quantity;
+        }
+
+        if (null === $this->ruleOf($index)) {
+            return rtrim(rtrim(number_format((float) $quantity, self::MAXIMUM_DECIMALS, '.', ''), '0'), '.');
+        }
+
+        return $this->quantityRuleOf($index)->fieldValue((float) $quantity, $locale);
     }
 
     /**
