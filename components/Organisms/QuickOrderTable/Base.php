@@ -37,6 +37,7 @@ use Thelia\Domain\Cart\Exception\InvalidCartException;
 use Thelia\Domain\Catalog\DTO\ReferenceQuantity;
 use Thelia\Domain\Catalog\DTO\ReferenceQuantityLines;
 use Thelia\Domain\Catalog\Exception\InvalidReferenceQuantityException;
+use Thelia\Domain\Catalog\Quantity\QuantityScale;
 use Thelia\Domain\CustomerList\Exception\InvalidPurchaseListException;
 use Thelia\Domain\CustomerList\Exception\PurchaseListAccessDeniedException;
 use Thelia\Domain\CustomerList\Exception\PurchaseListNotFoundException;
@@ -44,9 +45,7 @@ use Thelia\Domain\CustomerList\PurchaseListFacade;
 use Thelia\Domain\QuickOrder\DTO\QuickOrderTable;
 use Thelia\Domain\QuickOrder\Enum\LineStatus;
 use Thelia\Domain\QuickOrder\Exception\QuickOrderRateLimitedException;
-use Thelia\Domain\Catalog\Quantity\UnitCode;
 use Thelia\Model\Customer;
-use Thelia\Model\ProductSaleElementsQuery;
 
 /**
  * The quick order table: the rows the buyer types, pastes or imports, and what the shop
@@ -73,9 +72,6 @@ class Base
     use DefaultActionTrait;
 
     public const int EMPTY_ROWS = 1;
-
-    /** The finest quantity a sale element is sold in, a gram of a kilogram. */
-    private const int MAXIMUM_DECIMALS = 3;
 
     /** The status of a line the destination restrictions of the core keep from the address of the cart. */
     private const string DESTINATION_REFUSED = 'destination_refused';
@@ -351,11 +347,11 @@ class Base
         $byReference = [];
 
         foreach ($answered as $line) {
-            $byReference[mb_strtolower((string) $line['reference'])] = $line;
+            $byReference[self::referenceKey((string) $line['reference'])] = $line;
         }
 
         foreach ($readyIndexes as $index) {
-            $line = $byReference[mb_strtolower(trim((string) $this->rows[$index]['reference']))] ?? null;
+            $line = $byReference[self::referenceKey((string) $this->rows[$index]['reference'])] ?? null;
 
             if (null !== $line) {
                 $this->lines[$index] = $line;
@@ -478,9 +474,9 @@ class Base
 
         $quantity = self::quantityOf($row);
 
-        if (mb_strtolower(trim((string) $row['reference'])) !== mb_strtolower((string) $line['reference'])
+        if (self::referenceKey((string) $row['reference']) !== self::referenceKey((string) $line['reference'])
             || null === $quantity
-            || !self::isTheSameQuantity($quantity, (float) $line['quantity'])) {
+            || !QuantityScale::isTheSameQuantity($quantity, (float) $line['quantity'])) {
             return null;
         }
 
@@ -512,7 +508,7 @@ class Base
 
         return null !== $rule
             ? QuantityRuleDTO::fromArray($rule)
-            : new QuantityRuleDTO(minQuantity: 1.0, step: 1.0, decimals: self::MAXIMUM_DECIMALS);
+            : new QuantityRuleDTO(minQuantity: 1.0, step: 1.0, decimals: QuantityScale::MAXIMUM_DECIMALS);
     }
 
     /**
@@ -528,25 +524,10 @@ class Base
         }
 
         if (null === $this->ruleOf($index)) {
-            return rtrim(rtrim(number_format((float) $quantity, self::MAXIMUM_DECIMALS, '.', ''), '0'), '.');
+            return self::writtenPlain((float) $quantity);
         }
 
         return $this->quantityRuleOf($index)->fieldValue((float) $quantity, $locale);
-    }
-
-    /**
-     * The unit the quantity of this row is typed in, "kg" for a sale element sold by measure:
-     * none for one sold by the piece, as the cart writes it.
-     */
-    public function unitOf(int $index): ?string
-    {
-        $rule = $this->ruleOf($index);
-
-        if (null === $rule || $rule['quantityDecimals'] < 1 || null === $rule['unitCode'] || !enum_exists(UnitCode::class)) {
-            return null;
-        }
-
-        return UnitCode::tryFrom($rule['unitCode'])?->symbol();
     }
 
     /**
@@ -562,21 +543,8 @@ class Base
             static fn (?array $line): int => (int) ($line['productSaleElementsId'] ?? 0),
             $this->lines,
         ))));
-        $this->rules = [];
 
-        if ([] === $ids) {
-            return $this->rules;
-        }
-
-        foreach (ProductSaleElementsQuery::create()->filterById($ids)->find() as $saleElement) {
-            $rule = $this->saleElementQuantityRules->ofSaleElement($saleElement);
-
-            if (null !== $rule) {
-                $this->rules[(int) $saleElement->getId()] = $rule;
-            }
-        }
-
-        return $this->rules;
+        return $this->rules = $this->saleElementQuantityRules->ofSaleElements($ids);
     }
 
     public function isReady(int $index): bool
@@ -730,32 +698,33 @@ class Base
 
     /**
      * The quantity a row holds, "1,25" as well as "1.25", or null when it is not a number
-     * above zero, up to the core's maximum, with three decimals at most.
+     * above zero, up to the core's maximum, with three decimals at most: read as a pasted
+     * line is, spaces aside.
      *
      * @param array{quantity: int|float|string} $row
      */
     private static function quantityOf(array $row): ?float
     {
-        $typed = $row['quantity'];
+        $typed = \is_string($row['quantity']) ? $row['quantity'] : self::writtenPlain((float) $row['quantity']);
 
-        if (!\is_string($typed)) {
-            $typed = rtrim(rtrim(number_format((float) $typed, self::MAXIMUM_DECIMALS, '.', ''), '0'), '.');
-        }
-
-        $typed = str_replace([' ', "\u{00A0}", "\u{202F}"], '', trim($typed));
-
-        if (1 !== preg_match('/^\d{1,9}(?:[.,]\d{1,'.self::MAXIMUM_DECIMALS.'})?$/', $typed)) {
-            return null;
-        }
-
-        $quantity = (float) str_replace(',', '.', $typed);
-
-        return $quantity > 0 && $quantity <= ReferenceQuantityLines::MAX_QUANTITY ? $quantity : null;
+        return ReferenceQuantityTextParser::quantityOf(str_replace([' ', "\u{00A0}", "\u{202F}"], '', trim($typed)));
     }
 
-    private static function isTheSameQuantity(float $quantity, float $other): bool
+    /**
+     * A reference as the core matches it: invisible characters and spaces normalised, case ignored.
+     */
+    private static function referenceKey(string $reference): string
     {
-        return (int) round($quantity * 1_000_000) === (int) round($other * 1_000_000);
+        return mb_strtolower(ReferenceQuantityLines::normalizeReference($reference));
+    }
+
+    /**
+     * A quantity with its decimals and no trailing zeros, "1.25", "3": the way a quantity the
+     * check answered is read back, before any sale element rule writes it.
+     */
+    private static function writtenPlain(float $quantity): string
+    {
+        return rtrim(rtrim(number_format($quantity, QuantityScale::MAXIMUM_DECIMALS, '.', ''), '0'), '.');
     }
 
     /**

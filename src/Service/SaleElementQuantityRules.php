@@ -40,17 +40,23 @@ final readonly class SaleElementQuantityRules
             return [];
         }
 
-        $rules = [];
+        return $this->keyedBySaleElement(ProductSaleElementsQuery::create()->filterByProductId($productId)->find());
+    }
 
-        foreach (ProductSaleElementsQuery::create()->filterByProductId($productId)->find() as $saleElement) {
-            $rule = $this->ofSaleElement($saleElement);
-
-            if (null !== $rule) {
-                $rules[(int) $saleElement->getId()] = $rule;
-            }
+    /**
+     * The rules of the given sale elements, in one query: the lines of a quick order table.
+     *
+     * @param list<int> $saleElementIds
+     *
+     * @return array<int, array{minQuantity: float, quantityStep: float, quantityDecimals: int, unitQuantity: float|null, referenceUnitQuantity: float|null, unitCode: string|null}> by sale element id
+     */
+    public function ofSaleElements(array $saleElementIds): array
+    {
+        if ([] === $saleElementIds || !class_exists(QuantityRule::class)) {
+            return [];
         }
 
-        return $rules;
+        return $this->keyedBySaleElement(ProductSaleElementsQuery::create()->filterById($saleElementIds)->find());
     }
 
     /**
@@ -81,5 +87,25 @@ final readonly class SaleElementQuantityRules
             referenceUnitQuantity: $rule->referenceUnitQuantity,
             unitCode: $rule->unitCode?->value,
         ))->toArray();
+    }
+
+    /**
+     * @param iterable<ProductSaleElements> $saleElements
+     *
+     * @return array<int, array{minQuantity: float, quantityStep: float, quantityDecimals: int, unitQuantity: float|null, referenceUnitQuantity: float|null, unitCode: string|null}>
+     */
+    private function keyedBySaleElement(iterable $saleElements): array
+    {
+        $rules = [];
+
+        foreach ($saleElements as $saleElement) {
+            $rule = $this->ofSaleElement($saleElement);
+
+            if (null !== $rule) {
+                $rules[(int) $saleElement->getId()] = $rule;
+            }
+        }
+
+        return $rules;
     }
 }

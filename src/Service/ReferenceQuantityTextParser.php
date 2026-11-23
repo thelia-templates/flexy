@@ -17,6 +17,7 @@ namespace FlexyBundle\Service;
 use FlexyBundle\DTO\ParsedReferenceQuantities;
 use FlexyBundle\Exception\ReferenceQuantityTextRefusedException;
 use Thelia\Domain\Catalog\DTO\ReferenceQuantityLines;
+use Thelia\Domain\Catalog\Quantity\QuantityScale;
 
 /**
  * Reads cells copied from a spreadsheet, or the text of a CSV file the browser has
@@ -47,9 +48,6 @@ final readonly class ReferenceQuantityTextParser
     public const string REASON_REFERENCE = 'reference';
 
     public const string REASON_DECIMAL_COMMA = 'decimal_comma';
-
-    /** The finest quantity a sale element is sold in, a gram of a kilogram. */
-    private const int MAXIMUM_DECIMALS = 3;
 
     /**
      * @throws ReferenceQuantityTextRefusedException when the text is longer or has more rows than a table takes
@@ -100,9 +98,9 @@ final readonly class ReferenceQuantityTextParser
                 continue;
             }
 
-            $quantity = (float) str_replace(',', '.', $quantity);
+            $quantity = self::quantityOf($quantity);
 
-            if ($quantity <= 0 || $quantity > ReferenceQuantityLines::MAX_QUANTITY || 1 !== preg_match('/^\d+(?:[.,]\d{1,'.self::MAXIMUM_DECIMALS.'})?$/', $cells[1])) {
+            if (null === $quantity) {
                 $rejected[] = ['line' => $index + 1, 'content' => $line, 'reason' => self::REASON_QUANTITY];
 
                 continue;
@@ -131,5 +129,20 @@ final readonly class ReferenceQuantityTextParser
             str_contains($line, ';') => ';',
             default => ',',
         };
+    }
+
+    /**
+     * A quantity written "1,25" or "1.25", or null when it is not a number above zero, up to the
+     * core's maximum, with three decimals at most. The quick order table reads its fields with it.
+     */
+    public static function quantityOf(string $typed): ?float
+    {
+        if (1 !== preg_match('/^\d{1,9}(?:[.,]\d{1,'.QuantityScale::MAXIMUM_DECIMALS.'})?$/', $typed)) {
+            return null;
+        }
+
+        $quantity = (float) str_replace(',', '.', $typed);
+
+        return $quantity > 0 && $quantity <= ReferenceQuantityLines::MAX_QUANTITY ? $quantity : null;
     }
 }
