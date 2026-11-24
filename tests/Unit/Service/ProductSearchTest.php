@@ -132,7 +132,24 @@ final class ProductSearchTest extends TestCase
 
         $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch)->search('chaize');
 
-        self::assertSame(['chaize', 'chaise', 'siège'], $this->apiCalls[0]['title']);
+        self::assertSame(['chaise', 'siège'], $this->apiCalls[0]['title']);
+    }
+
+    public function testATermTheRewritingLeavesEmptyFindsNothingWithoutAskingTheCatalogue(): void
+    {
+        if (!interface_exists(SearchTermRewriterInterface::class)) {
+            self::markTestSkipped('The installed core has no search dictionary.');
+        }
+
+        $rewriter = $this->createStub(SearchTermRewriterInterface::class);
+        $rewriter->method('rewrite')->willReturnCallback(static fn (string $term): string => $term === 'le' ? '' : $term);
+        $coreSearch = new SearchService(new SearchEngineRegistry([]), new SearchDocumentProviders([]), [$rewriter], [], new NullLogger(), []);
+
+        $result = $this->productSearch(catalog: [3, 7], coreSearch: $coreSearch)->search('le');
+
+        self::assertSame([], $result['products']);
+        self::assertSame(0, $result['total']);
+        self::assertSame([], $this->apiCalls);
     }
 
     public function testAnEngineThatTakesAlternativeTermsReceivesTheSynonymsOfTheCore(): void
