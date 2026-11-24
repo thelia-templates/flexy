@@ -34,6 +34,14 @@ use Thelia\Model\ProductSaleElements;
 final readonly class CartStockService
 {
     /**
+     * The stock of a line with nothing to enforce: more than any cart asks for, and no more than a browser
+     * keeps. The answer travels in the `items` LiveProp of the cart, and JavaScript rounds a whole number
+     * above Number.MAX_SAFE_INTEGER (2^53 - 1): PHP_INT_MAX came back changed, the checksum of the props no
+     * longer matched, and every action on a cart holding such a line was refused.
+     */
+    public const UNLIMITED_STOCK = 9007199254740991;
+
+    /**
      * Optional: a core without the bundles has no line service, and has no bundle line either.
      */
     public function __construct(
@@ -161,7 +169,7 @@ final readonly class CartStockService
     private function answerFor(float $available, bool $preorder): array
     {
         if ($available >= CartLineAvailability::UNLIMITED) {
-            return ['stock' => \PHP_INT_MAX, 'managed' => false, 'preorder' => $preorder];
+            return ['stock' => self::UNLIMITED_STOCK, 'managed' => false, 'preorder' => $preorder];
         }
 
         // In the unit the line is sold in, rounded at the micro unit, the precision of the columns:
