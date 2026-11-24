@@ -101,13 +101,21 @@ final readonly class ProductSearch
             return ['products' => [], 'total' => 0];
         }
 
-        $matches = $this->engineMatches(trim($term));
+        $term = trim($term);
+        $locale = (string) $this->langService->getLocale();
+        $terms = $this->termsOf($term, $locale);
+
+        if ($terms === []) {
+            return ['products' => [], 'total' => 0];
+        }
+
+        $matches = $this->engineMatches($term, $terms, $locale);
 
         if ($matches !== null) {
             return $this->searchWithEngine($matches, max(1, $page), $itemsPerPage, $sort);
         }
 
-        return $this->fetch($this->parameters(['title' => $this->titleFilter(trim($term))], $page, $itemsPerPage, $sort));
+        return $this->fetch($this->parameters(['title' => $this->titleFilter($terms)], $page, $itemsPerPage, $sort));
     }
 
     public function count(string $term): int
@@ -134,9 +142,11 @@ final readonly class ProductSearch
     }
 
     /**
+     * @param non-empty-list<string> $terms
+     *
      * @return list<int>|null
      */
-    private function engineMatches(string $term): ?array
+    private function engineMatches(string $term, array $terms, string $locale): ?array
     {
         $coreEngine = $this->engine === null && $this->coreSearch?->hasEngine() === true;
 
@@ -148,10 +158,8 @@ final readonly class ProductSearch
             return null;
         }
 
-        $locale = (string) $this->langService->getLocale();
-
         if ($this->engine instanceof ProductSearchEngineWithAlternativeTermsInterface) {
-            return array_map('intval', $this->engine->productIdsMatchingAnyTerm($term, $this->alternativeTerms($term, $locale), $locale, self::ENGINE_LIMIT));
+            return array_map('intval', $this->engine->productIdsMatchingAnyTerm($terms[0], \array_slice($terms, 1), $locale, self::ENGINE_LIMIT));
         }
 
         if ($this->engine !== null) {
@@ -273,31 +281,34 @@ final readonly class ProductSearch
     /**
      * @return string|list<string>
      */
-    private function titleFilter(string $term): string|array
+    /**
+     * @param non-empty-list<string> $terms
+     *
+     * @return string|list<string>
+     */
+    private function titleFilter(array $terms): string|array
     {
-        $alternatives = $this->alternativeTerms($term, (string) $this->langService->getLocale());
-
-        if ($alternatives === []) {
-            return self::literal($term);
+        if (\count($terms) === 1) {
+            return self::literal($terms[0]);
         }
 
-        return array_map(self::literal(...), [$term, ...$alternatives]);
+        return array_map(self::literal(...), $terms);
     }
 
     /**
      * @return list<string>
      */
-    private function alternativeTerms(string $term, string $locale): array
+    private function termsOf(string $term, string $locale): array
     {
         if ($this->coreSearch === null) {
-            return [];
+            return [$term];
         }
 
-        if (method_exists($this->coreSearch, 'alternativeTermsOf')) {
-            return $this->coreSearch->alternativeTermsOf($term, $locale);
+        if (method_exists($this->coreSearch, 'termsOf')) {
+            return $this->coreSearch->termsOf($term, $locale);
         }
 
-        return method_exists($this->coreSearch, 'expand') ? $this->coreSearch->expand($term, $locale) : [];
+        return method_exists($this->coreSearch, 'expand') ? [$term, ...$this->coreSearch->expand($term, $locale)] : [$term];
     }
 
     private static function literal(string $term): string
