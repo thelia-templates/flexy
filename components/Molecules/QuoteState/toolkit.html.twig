@@ -1,0 +1,10 @@
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">Every state a quote reads in</h4>
+        <div class="flex flex-wrap gap-2">
+            {% for state in ['requested', 'quoted', 'countered', 'accepted', 'rejected', 'expired', 'ordered'] %}
+                <twig:Molecules:QuoteState:Base :state="state" />
+            {% endfor %}
+        </div>
+    </div>
+</div>

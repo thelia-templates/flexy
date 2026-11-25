@@ -40,6 +40,7 @@ use Thelia\Domain\Cart\Exception\InvalidCartException;
 use Thelia\Domain\Cart\Exception\NotEnoughStockException;
 use Thelia\Domain\Catalog\Bundle\BundleComposition;
 use Thelia\Domain\Localization\Service\LangService;
+use Thelia\Domain\Quote\Cart\QuoteCartLockedException;
 use Thelia\Form\Definition\FrontForm;
 use Thelia\Model\CartItem;
 use Thelia\Model\CartItemQuery;
@@ -433,7 +434,7 @@ class Base
     {
         $cartItem = $this->items[$index] ?? null;
 
-        if (null === $cartItem || $cartItem->isOffered) {
+        if (null === $cartItem || $cartItem->isOffered || $cartItem->isFrozen) {
             return null;
         }
 
@@ -551,6 +552,12 @@ class Base
             $this->refusalProduct = $cartItem->title;
 
             return;
+        } catch (QuoteCartLockedException) {
+            // The lines of a quote are the quote's. The line says it is frozen and shows no control, but `items` is
+            // the browser's to write: the core is the one that refuses, and it is told so here rather than answered 500.
+            $this->refusal = 'quote';
+
+            return;
         }
 
         $this->emit(CheckoutEvents::UPDATE_ITEM_QUANTITY_EVENT);
@@ -592,10 +599,18 @@ class Base
             'bundleComposition' => BundleLines::storedComposition($line),
         ];
 
-        $this->cartFacade->removeItem(new CartItemDeleteDTO(
-            cart: $cart,
-            cartItemId: $line->getId(),
-        ));
+        try {
+            $this->cartFacade->removeItem(new CartItemDeleteDTO(
+                cart: $cart,
+                cartItemId: $line->getId(),
+            ));
+        } catch (QuoteCartLockedException) {
+            $this->pendingDelete = null;
+            $this->refusal = 'quote';
+
+            return;
+        }
+
         $this->emit(CheckoutEvents::DELETE_ITEM_EVENT);
         $this->dispatchQuantityChange((int) $line->getProductSaleElementsId(), -(float) $line->getQuantity());
     }
@@ -654,6 +669,12 @@ class Base
             // pendingDelete is kept (a signed LiveProp): the undo tile stays, and the message tells the
             // shopper the line was not put back.
             $this->recordRefusal('restore', $exception);
+
+            return;
+        } catch (QuoteCartLockedException) {
+            // The cart in the session became the cart of a quote since the line was removed: nothing comes back.
+            $this->pendingDelete = null;
+            $this->refusal = 'quote';
 
             return;
         }

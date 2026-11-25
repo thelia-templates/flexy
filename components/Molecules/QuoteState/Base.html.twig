@@ -1,0 +1,28 @@
+{# @prop state string The state a quote reads in, as the API gives it: requested, quoted, countered, accepted, rejected, expired or ordered #}
+{% props state %}
+
+{% set labels = {
+    requested: 'Waiting for the shop'|trans,
+    quoted: 'Quote received'|trans,
+    countered: 'Counter-proposal sent'|trans,
+    accepted: 'Accepted'|trans,
+    rejected: 'Declined'|trans,
+    expired: 'Expired'|trans,
+    ordered: 'Ordered'|trans,
+} %}
+{% set colors = {
+    requested: 'neutral',
+    quoted: 'warning',
+    countered: 'neutral',
+    accepted: 'success',
+    rejected: 'error',
+    expired: 'error',
+    ordered: 'success',
+} %}
+
+<twig:Molecules:Tag:Base
+    color="{{ colors[state]|default('neutral') }}"
+    customText="{{ labels[state]|default(state) }}"
+    data-testid="quote-state"
+    data-state="{{ state }}"
+/>

@@ -1,0 +1,9 @@
+{# One revision of a quote with its lines, as the fragment the history loads when the buyer opens it. #}
+{% set quote = resources('/api/front/account/quotes/' ~ quoteId) %}
+{% set revision = resources('/api/front/account/quotes/' ~ quoteId ~ '/revisions/' ~ number) %}
+<turbo-frame id="quote-revision-{{ number }}">
+    {% if revision.merchantNote|default('') is not empty %}
+        <p class="paragraph-3 whitespace-pre-line mb-4">{{ revision.merchantNote }}</p>
+    {% endif %}
+    <twig:Organisms:QuoteLines:Base :revision="revision" currencyCode="{{ quote.currencyCode|default('EUR') }}" />
+</turbo-frame>

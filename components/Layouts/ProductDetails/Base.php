@@ -44,6 +44,7 @@ use Thelia\Domain\Cart\Exception\NotEnoughStockException;
 use Thelia\Domain\Catalog\Bundle\BundleDisplayedStock;
 use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Domain\Media\AltTextResolver;
+use Thelia\Domain\Quote\Cart\QuoteCartLockedException;
 use Thelia\Domain\Shipping\DestinationRestriction\CartDestinations;
 use Thelia\Domain\Shipping\DestinationRestriction\DestinationRestrictionChecker;
 use Thelia\Domain\Shipping\DestinationRestriction\ProductDestinationRestrictionReader;
@@ -159,6 +160,12 @@ class Base
      * and is not translated.
      */
     public string $cartRefusalReason = '';
+
+    /**
+     * Set when the add was refused because the cart in hand is the cart of an accepted quote, whose lines are the
+     * quote's: the page says so and offers the way back to the buyer's own cart. Not a LiveProp, like the refusal above.
+     */
+    public bool $cartLockedByAQuote = false;
 
     /**
      * The product is a bundle: a sellable product made of the sale elements of other products. Every
@@ -755,6 +762,10 @@ class Base
         } catch (InvalidCartException|NotEnoughStockException $exception) {
             $this->cartRefused = true;
             $this->cartRefusalReason = $exception instanceof InvalidCartException ? trim($exception->getMessage()) : '';
+
+            return;
+        } catch (QuoteCartLockedException) {
+            $this->cartLockedByAQuote = true;
 
             return;
         }

@@ -45,6 +45,7 @@ use Thelia\Domain\CustomerList\PurchaseListFacade;
 use Thelia\Domain\QuickOrder\DTO\QuickOrderTable;
 use Thelia\Domain\QuickOrder\Enum\LineStatus;
 use Thelia\Domain\QuickOrder\Exception\QuickOrderRateLimitedException;
+use Thelia\Domain\Quote\Cart\QuoteCartLockedException;
 use Thelia\Model\Customer;
 
 /**
@@ -302,6 +303,12 @@ class Base
             // back, so nothing reached the cart and every row stays for the buyer to correct.
             $this->error = 'cart_refused';
             $this->cartRefusalReason = trim($exception->getMessage());
+
+            return;
+        } catch (QuoteCartLockedException) {
+            // The cart in hand is the cart of an accepted quote: the core rolled the table back, the rows stay, and
+            // the buyer is offered their own cart to add them to.
+            $this->error = 'quote_cart';
 
             return;
         }

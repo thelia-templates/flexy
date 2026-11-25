@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Request a quote'|trans }}{% endblock %}
+
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
+{% block body %}
+    {# The book of a buyer of a company is bounded by the company-aware extension of the API, which adds the addresses of the
+       company to their own: a filter on the owner would drop them. Everyone else keeps the owner filter. #}
+    {% set addresses = resources('/api/front/account/addresses', company_account().member ? {} : {'customer.id': getCurrentCustomer().id}) %}
+    {% set choices = [] %}
+    {% set defaultAddressId = null %}
+    {% for address in addresses %}
+        {% set choices = choices|merge([{value: address.id, label: ((address.label|default('') ~ ' - ')|trim('- ') ~ ' ' ~ address.address1 ~ ', ' ~ address.zipcode ~ ' ' ~ address.city)|trim}]) %}
+        {% if address.isDefault|default(false) %}{% set defaultAddressId = address.id %}{% endif %}
+    {% endfor %}
+
+    {{ theme_hook('account-quote-request.top') }}
+
+    <div class="pt-2 pb-3 md:pt-5 md:ps-5">
+        <twig:Molecules:Breadcrumb:Base :items="[
+            {title: 'My account'|trans, url: path('account_index')},
+            {title: 'My cart'|trans, url: path('checkout_cart')},
+            {title: 'Request a quote'|trans},
+        ]" />
+    </div>
+
+    <div class="container-s pb-14 md:pb-24" data-testid="quote-request">
+        <h1 class="h3 text-black mb-2">{{ 'Request a quote'|trans }}</h1>
+        <p class="paragraph-3 mb-8">{{ 'The shop receives your cart as it is now and answers with a quote, line by line. Your cart stays as it is.'|trans }}</p>
+
+        {% if couponDropped|default(false) %}
+            <twig:Molecules:SnackBar:Base
+                variant="informative"
+                :withIcon="true"
+                text="{{ 'The promo code of your cart will not be part of the quote: the shop sets the prices line by line.'|trans }}"
+                class="w-full mb-6"
+                data-testid="quote-request-coupon-dropped"
+            />
+        {% endif %}
+
+        {# The refusals of the request come back here as 'error' flashes. Plain text out of the translator, escaped: no SnackBar,
+           whose text is rendered raw. #}
+        {% for message in app.session ? app.session.flashBag.get('error') : [] %}
+            <div class="SnackBar bg-error-lightest border-error SnackBar--error mb-6" role="alert" data-testid="quote-request-error">
+                <div class="SnackBar-content">
+                    <span class="SnackBar-icon">{{ ux_icon('error') }}</span>
+                    <div class="SnackBar-message">{{ message }}</div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <form method="post" action="{{ path('account_quote_create') }}" class="flex flex-col gap-6" data-turbo="false">
+            <input type="hidden" name="_token" value="{{ csrf_token('quote_action') }}">
+
+            <twig:Fields:TextArea:Base
+                label="{{ 'Comment for the shop'|trans }}"
+                name="comment"
+                id="quote-comment"
+                :rows="5"
+                :optional="true"
+            />
+
+            <twig:Fields:Input:Base
+                label="{{ 'Day you need the goods'|trans }}"
+                name="needed_by"
+                id="quote-needed-by"
+                type="date"
+                :optional="true"
+            />
+
+            {% if choices is not empty %}
+                <twig:Fields:Select:Base
+                    label="{{ 'Delivery address'|trans }}"
+                    select:name="delivery_address_id"
+                    id="quote-delivery-address"
+                    :choices="choices"
+                    :value="defaultAddressId"
+                />
+                <twig:Fields:Select:Base
+                    label="{{ 'Billing address'|trans }}"
+                    select:name="invoice_address_id"
+                    id="quote-invoice-address"
+                    :choices="choices"
+                    :value="defaultAddressId"
+                />
+            {% endif %}
+
+            <div class="flex flex-wrap gap-4">
+                <twig:Molecules:Button:Base text="{{ 'Send my request'|trans }}" type="submit" data-testid="quote-request-submit" />
+                <twig:Molecules:Button:Base text="{{ 'Back to my cart'|trans }}" href="{{ path('checkout_cart') }}" color="secondary" />
+            </div>
+        </form>
+    </div>
+
+    {{ theme_hook('account-quote-request.bottom') }}
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}

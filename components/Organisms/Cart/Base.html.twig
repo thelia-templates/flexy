@@ -7,6 +7,7 @@
             quantity: 'The quantity of %product% could not be changed.'|trans({'%product%': this.refusalProduct}),
             stock: 'There is not enough stock of %product% for this quantity.'|trans({'%product%': this.refusalProduct}),
             restore: 'The product you removed could not be put back in your cart.'|trans,
+            quote: 'The lines of a quote cannot be changed: ask the shop for another quote.'|trans,
         } %}
         {% set refusalText = refusalMessages[this.refusal] ~ (this.refusalReason ? ' ' ~ this.refusalReason : '') %}
         <twig:Molecules:SnackBar:Base

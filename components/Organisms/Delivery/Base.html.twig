@@ -3,11 +3,26 @@
         {# SnackBar prints its text raw: the sentence carries the reference of a product, which is the merchant's. #}
         <twig:Molecules:SnackBar:Base variant="error" withIcon role="alert" class="mb-5" text="{{ this.stockRefusal|escape('html') }}" data-testid="checkout-stock-refusal" />
     {% endif %}
+    {# What the quote fixed is not chosen: its headings say so. #}
+    {% set imposedAddress = this.imposedAddress %}
     <{{ this.headingLevel }} class="text-black h4">
-        {{ 'Choose a delivery address'|trans }}
+        {{ (imposedAddress ? 'Your delivery address' : 'Choose a delivery address')|trans }}
     </{{ this.headingLevel }}>
+    {% if this.quoteDeliveryRefusal %}
+        {# SnackBar prints its text raw: the sentence is the core's, escaped before it is printed. #}
+        <twig:Molecules:SnackBar:Base variant="warning" withIcon role="alert" class="mt-5" text="{{ this.quoteDeliveryRefusal|trans|escape('html') }}" data-testid="quote-delivery-imposed" />
+    {% endif %}
     <div class="my-8">
-        {% if this.showNewAddressForm %}
+        {% if imposedAddress %}
+            <div data-testid="quote-delivery-address" class="flex flex-col gap-1">
+                <span class="font-bold">{{ 'The delivery address of your quote'|trans }}</span>
+                <span>{{ imposedAddress.name }}</span>
+                {% if imposedAddress.company %}<span>{{ imposedAddress.company }}</span>{% endif %}
+                {% for line in imposedAddress.lines %}<span>{{ line }}</span>{% endfor %}
+                <span>{{ imposedAddress.zipcode }} {{ imposedAddress.city }}</span>
+                <span>{{ imposedAddress.country }}</span>
+            </div>
+        {% elseif this.showNewAddressForm %}
             <twig:Forms:Address:Base />
         {% elseif this.editingAddressId %}
             <twig:Forms:Address:Base :addressId="this.editingAddressId" />
@@ -58,7 +73,7 @@
         <twig:Molecules:SnackBar:Base variant="warning" withIcon class="mb-5" text="{{ restrictedMessage }}" data-testid="delivery-destination-restricted" />
     {% endif %}
     <h2 class="text-black h4">
-        {{ 'Choose a delivery method'|trans }}
+        {{ ((this.quoteCart and this.imposedCarrierId is not null) ? 'Your delivery method' : 'Choose a delivery method')|trans }}
     </h2>
     {% if this.deliveryDateNotice %}
         {% set noticeText = this.deliveryDateNotice == 'carrier_gone'
@@ -69,7 +84,21 @@
     <div class="flex flex-col gap-3.5 my-5">
         {% set deliveryOptions = this.deliveryModulesOptions %}
         {% set datePickerShown = false %}
-        {% if deliveryOptions|length > 0 %}
+        {% set imposedCarrierId = this.quoteCart ? this.imposedCarrierId : null %}
+        {% if imposedCarrierId %}
+            {% set imposedOption = null %}
+            {% for option in deliveryOptions %}
+                {% if option.moduleId == imposedCarrierId and imposedOption is null %}{% set imposedOption = option %}{% endif %}
+            {% endfor %}
+            {% if imposedOption %}
+                <div data-testid="quote-delivery-carrier" class="flex flex-col gap-1">
+                    <span class="font-bold">{{ 'The carrier of your quote'|trans }}</span>
+                    <span>{{ imposedOption.title }}</span>
+                </div>
+            {% else %}
+                <twig:Molecules:SnackBar:Base variant="warning" withIcon text="{{ 'The carrier of your quote does not deliver to this address.'|trans|escape('html') }}" data-testid="quote-delivery-carrier-unavailable" />
+            {% endif %}
+        {% elseif deliveryOptions|length > 0 %}
             {% for option in deliveryOptions %}
                 {% if option.deliveryMode == enum('Thelia\\Domain\\Checkout\\Enum\\DeliveryMode').DELIVERY.value %}
                     <twig:Organisms:DeliveryMode:Home

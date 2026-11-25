@@ -1,0 +1,78 @@
+{# @prop quote array A quote as the /api/front/account/quotes/{id} item hands it over #}
+{# @prop revision array The revision the quote stands at: what the answers below are about #}
+{#
+   What the buyer answers a quote with: accept it and pay, counter-propose line by line, or refuse it. Drawn only
+   for a quote the shop has answered, whose validity is not over, and for the buyer who may answer it; the core
+   judges every answer again. The acceptance carries the number of the revision and never an amount: what the
+   buyer pays is what the quote says.
+#}
+{% props quote, revision %}
+{% set reply = quote_reply(quote.id) %}
+
+{% if quote.state == 'countered' %}
+    <p class="paragraph-3" data-testid="quote-waiting-for-the-shop">{{ 'Your counter-proposal has been sent. The shop will answer with a new quote.'|trans }}</p>
+{% endif %}
+
+{% if reply.offersAnything %}
+    <div class="flex flex-col gap-10" data-testid="quote-reply">
+        {% if reply.canAccept %}
+            <form method="post" action="{{ path('account_quote_accept', {quoteId: quote.id}) }}" class="flex flex-col gap-3" data-turbo="false" data-testid="quote-accept-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('quote_action') }}">
+                <input type="hidden" name="revision" value="{{ revision.number }}">
+                <p class="paragraph-3">{{ 'Accepting the quote takes you to the payment of your order, at the prices of the quote.'|trans }}</p>
+                <div>
+                    <twig:Molecules:Button:Base
+                        text="{{ 'Accept the quote and pay'|trans }}"
+                        type="submit"
+                        data-testid="quote-accept"
+                    />
+                </div>
+            </form>
+        {% endif %}
+
+        {% if reply.canResumePayment %}
+            <form method="post" action="{{ path('account_quote_accept', {quoteId: quote.id}) }}" class="flex flex-col gap-3" data-turbo="false" data-testid="quote-resume-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('quote_action') }}">
+                <input type="hidden" name="revision" value="{{ revision.number }}">
+                <p class="paragraph-3">{{ 'You accepted this quote and its payment is not done: resume it, at the prices of the quote.'|trans }}</p>
+                <div>
+                    <twig:Molecules:Button:Base
+                        text="{{ 'Resume the payment'|trans }}"
+                        type="submit"
+                        data-testid="quote-resume"
+                    />
+                </div>
+            </form>
+        {% endif %}
+
+        {% if reply.canCounter %}
+            <details class="border border-grey-lighter rounded-lg p-4" data-testid="quote-counter-offer-zone">
+                <summary class="h4 cursor-pointer">{{ 'Make a counter-proposal'|trans }}</summary>
+                <div class="mt-4">
+                    <twig:Organisms:QuoteCounterOffer:Base :quoteId="quote.id" :revisionNumber="revision.number" :lineIds="revision.items|map(item => item.id)" />
+                </div>
+            </details>
+        {% endif %}
+
+        {% if reply.canReject %}
+            <details class="border border-grey-lighter rounded-lg p-4" data-testid="quote-reject-zone">
+                <summary class="h4 cursor-pointer">{{ 'Decline the quote'|trans }}</summary>
+                <form method="post" action="{{ path('account_quote_reject', {quoteId: quote.id}) }}" class="flex flex-col gap-3 mt-4" data-turbo="false" data-testid="quote-reject-form">
+                    <input type="hidden" name="_token" value="{{ csrf_token('quote_action') }}">
+                    <input type="hidden" name="revision" value="{{ revision.number }}">
+                    <p class="paragraph-3">{{ 'Declining closes the quote: it cannot be accepted afterwards, and you would have to ask for another one.'|trans }}</p>
+                    <div>
+                        <twig:Molecules:Button:Base
+                            text="{{ 'Yes, decline this quote'|trans }}"
+                            type="submit"
+                            color="error"
+                            name="confirm"
+                            value="1"
+                            data-testid="quote-reject"
+                        />
+                    </div>
+                </form>
+            </details>
+        {% endif %}
+    </div>
+{% endif %}

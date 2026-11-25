@@ -1,0 +1,109 @@
+{# @prop quoteId int The quote the buyer answers #}
+{# @prop revisionNumber int The revision the table was drawn for: the one the quote stands at #}
+{#
+   The table of the counter-proposal. Every field is bound with `norender`: typing re-renders nothing, and the only
+   request is the submission, which carries the token of the account. Each field has a real <label>, visible on a
+   narrow screen where the columns fold, and read out by the column header elsewhere.
+#}
+{% set currencyCode = (resources('/api/front/account/quotes/' ~ this.quoteId).currencyCode|default('EUR')) %}
+{% set lines = this.lines %}
+
+<div class="{{ ('QuoteCounterOffer ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }} data-loading="addClass(opacity-50 pointer-events-none)">
+    {% if lines is not empty %}
+        <form
+            class="flex flex-col gap-4"
+            novalidate
+            data-testid="quote-counter-offer"
+            data-action="live#action:prevent"
+            data-live-action-param="submit"
+            data-live-token-param="{{ csrf_token('quote_action') }}"
+        >
+            <p class="paragraph-3">{{ 'Type the quantity or the unit price, without taxes, you would rather have. A line left empty is not discussed.'|trans }}</p>
+
+            {% if this.error %}
+                <div class="SnackBar bg-error-lightest border-error SnackBar--error" role="alert" data-testid="quote-counter-offer-error">
+                    <div class="SnackBar-content">
+                        <span class="SnackBar-icon">{{ ux_icon('error') }}</span>
+                        <div class="SnackBar-message">{{ this.error }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-start border-collapse max-md:block">
+                    <caption class="sr-only">{{ 'Your counter-proposal, line by line'|trans }}</caption>
+                    <thead class="max-md:sr-only">
+                        <tr class="border-b border-grey-lighter paragraph-3 text-grey-dark">
+                            <th scope="col" class="py-2 pe-3 text-start font-medium">{{ 'Product'|trans }}</th>
+                            <th scope="col" class="py-2 pe-3 text-end font-medium">{{ 'Quantity offered'|trans }}</th>
+                            <th scope="col" class="py-2 pe-3 text-end font-medium">{{ 'Price offered'|trans }}</th>
+                            <th scope="col" class="py-2 pe-3 text-start font-medium">{{ 'Quantity you would like'|trans }}</th>
+                            <th scope="col" class="py-2 text-start font-medium">{{ 'Unit price you would like, without taxes'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="max-md:block">
+                        {% for line in lines %}
+                            {% set decimals = (line.quantity|round == line.quantity) ? 0 : 3 %}
+                            <tr class="border-b border-grey-lighter align-top max-md:grid max-md:grid-cols-2 max-md:gap-x-3 max-md:gap-y-2 max-md:py-4" data-testid="quote-counter-offer-line" data-line-id="{{ line.id }}">
+                                <th scope="row" class="py-3 pe-3 text-start font-normal max-md:col-span-2 max-md:p-0">
+                                    <span class="block font-medium"><bdi>{{ line.title }}</bdi></span>
+                                    <span class="block paragraph-3"><span dir="ltr">{{ line.productRef }}</span></span>
+                                </th>
+                                <td class="py-3 pe-3 text-end max-md:block max-md:p-0 max-md:text-start">
+                                    <span class="block paragraph-3 text-grey-dark md:hidden">{{ 'Quantity offered'|trans }}</span>
+                                    <bdi>{{ line.quantity|format_quantity(decimals) }}</bdi>
+                                </td>
+                                <td class="py-3 pe-3 text-end max-md:block max-md:p-0 max-md:text-start">
+                                    <span class="block paragraph-3 text-grey-dark md:hidden">{{ 'Price offered'|trans }}</span>
+                                    <span dir="ltr">{{ line.price|format_currency(currencyCode, locale: lang_code) }}</span>
+                                </td>
+                                <td class="py-3 pe-3 max-md:block max-md:p-0">
+                                    <twig:Fields:Input:Base
+                                        id="counter-quantity-{{ line.id }}"
+                                        name="counter_quantity_{{ line.id }}"
+                                        label="{{ 'Quantity you would like'|trans }}"
+                                        class="[&_.Input-header]:md:sr-only"
+                                        type="number"
+                                        size="small"
+                                        autocomplete="off"
+                                        value="{{ this.typed(line.id, 'quantity') }}"
+                                        error="{{ this.hasFieldError(line.id, 'quantity') ? 'Type a quantity above zero, in digits.'|trans : '' }}"
+                                        input:min="0"
+                                        input:step="any"
+                                        input:inputmode="decimal"
+                                        input:data-model="norender|requests.{{ line.id }}.quantity"
+                                    />
+                                </td>
+                                <td class="py-3 max-md:block max-md:p-0">
+                                    <twig:Fields:Input:Base
+                                        id="counter-price-{{ line.id }}"
+                                        name="counter_price_{{ line.id }}"
+                                        label="{{ 'Unit price you would like, without taxes'|trans }}"
+                                        class="[&_.Input-header]:md:sr-only"
+                                        type="number"
+                                        size="small"
+                                        autocomplete="off"
+                                        value="{{ this.typed(line.id, 'price') }}"
+                                        error="{{ this.hasFieldError(line.id, 'price') ? 'Type a price above zero, in digits.'|trans : '' }}"
+                                        input:min="0"
+                                        input:step="any"
+                                        input:inputmode="decimal"
+                                        input:data-model="norender|requests.{{ line.id }}.price"
+                                    />
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div>
+                <twig:Molecules:Button:Base
+                    text="{{ 'Send my counter-proposal'|trans }}"
+                    type="submit"
+                    data-testid="quote-counter-offer-submit"
+                />
+            </div>
+        </form>
+    {% endif %}
+</div>

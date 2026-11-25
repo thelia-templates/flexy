@@ -23,9 +23,13 @@
 
 {% block checkoutNextButton %}
     {%- if not emptyCart -%}
-        <twig:Organisms:NextButton:Base
-            :step="current"
-            href="{{ next_step_url }}"
-        />
+        {# In the mode that requires a quote the direct way to the checkout is not drawn (the core refuses it anyway). #}
+        {%- if quote_offer().checkoutAllowed -%}
+            <twig:Organisms:NextButton:Base
+                :step="current"
+                href="{{ next_step_url }}"
+            />
+        {%- endif -%}
+        <twig:Organisms:QuoteRequestButton:Base class="mt-3" />
     {%- endif -%}
 {% endblock %}
