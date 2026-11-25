@@ -163,7 +163,7 @@ final readonly class ProductSearch
         }
 
         if ($this->engine !== null) {
-            return array_map('intval', $this->engine->productIds($term, $locale, self::ENGINE_LIMIT));
+            return array_map('intval', $this->engine->productIds($terms[0], $locale, self::ENGINE_LIMIT));
         }
 
         return $this->coreEngineMatches($term, $locale);

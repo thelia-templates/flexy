@@ -184,6 +184,22 @@ final class ProductSearchTest extends TestCase
         self::assertSame([7], $this->ids($result));
     }
 
+    public function testAnEngineWithoutAlternativeTermsReceivesTheRewrittenTerm(): void
+    {
+        if (!interface_exists(SearchTermRewriterInterface::class)) {
+            self::markTestSkipped('The installed core has no search dictionary.');
+        }
+
+        $rewriter = $this->createStub(SearchTermRewriterInterface::class);
+        $rewriter->method('rewrite')->willReturnCallback(static fn (string $term): string => $term === 'chaize' ? 'chaise' : $term);
+        $coreSearch = new SearchService(new SearchEngineRegistry([]), new SearchDocumentProviders([]), [$rewriter], [], new NullLogger(), []);
+
+        $result = $this->productSearch(catalog: [4, 12], engineIds: [12], coreSearch: $coreSearch)->search('chaize');
+
+        self::assertSame([['chaise', 'fr_FR', ProductSearch::ENGINE_LIMIT]], $this->engineCalls);
+        self::assertSame([12], $this->ids($result));
+    }
+
     public function testWithAnEngineAndNoSortTheRelevanceOrderIsKept(): void
     {
         $result = $this->productSearch(catalog: [4, 12, 27], engineIds: [12, 4, 27])->search('chaise');
