@@ -279,9 +279,6 @@ final readonly class ProductSearch
     }
 
     /**
-     * @return string|list<string>
-     */
-    /**
      * @param non-empty-list<string> $terms
      *
      * @return string|list<string>
