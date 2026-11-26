@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FlexyBundle\EventListener;
 
+use FlexyBundle\Service\CollectionPaginator;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Core\Event\TheliaEvents;
@@ -43,9 +44,7 @@ final readonly class SearchRedirectSubscriber implements EventSubscriberInterfac
             return;
         }
 
-        $page = $request->query->all()['page'] ?? null;
-
-        if (\is_scalar($page) && (int) $page > 1) {
+        if (CollectionPaginator::boundedPage($request->query->all()['page'] ?? null, CollectionPaginator::MAX_ITEMS_PER_PAGE) > 1) {
             return;
         }
 
