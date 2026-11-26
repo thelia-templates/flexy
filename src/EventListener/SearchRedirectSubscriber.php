@@ -39,7 +39,13 @@ final readonly class SearchRedirectSubscriber implements EventSubscriberInterfac
 
         $request = $this->requestStack->getMainRequest();
 
-        if ($request === null || !$request->isMethod('GET') || $request->query->getInt('page', 1) > 1 || $request->query->has('sort')) {
+        if ($request === null || !$request->isMethod('GET') || $request->query->has('sort')) {
+            return;
+        }
+
+        $page = $request->query->all()['page'] ?? null;
+
+        if (\is_scalar($page) && (int) $page > 1) {
             return;
         }
 
