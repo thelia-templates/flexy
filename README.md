@@ -242,6 +242,25 @@ A module's `templates/` directory is registered by the core as the `@{Code}Modul
 
 Mind the stylesheet: `assets/styles/app.css` limits the Tailwind scan to the theme's own files, so a utility class used only in a module template is never compiled. Build a module component out of the theme's components and classes.
 
+### Component showcase
+
+The theme can list its components in [`openstudio/ux-showcase-bundle`](https://github.com/openstudio-fr/ux-showcase-bundle), next to the toolkit, which stays as it is. The package is a suggestion: without it the theme builds and runs unchanged.
+
+```bash
+ddev composer require --dev openstudio/ux-showcase-bundle
+```
+
+(Add its GitHub repository to Composer as a `vcs` repository while it is not on Packagist.)
+
+Register the bundle and import its routes as the package describes (`/_showcase` is served only while the kernel runs in debug). The theme then brings, with nothing to configure:
+
+- a `flexy` library: the components of `components/`, one group per top-level directory (alphabetical, `Forms` and `Layouts` last), with the status the toolkit gives them (`story-statuses.php` included, `hidden` ones are left out);
+- one free example per `toolkit.html.twig` story, attached to the `<Path>:Base` component of its directory (`Molecules/Button` to `Molecules:Button:Base`), or a documentation page of its category when the directory has none. The stories of the modules (`StoryProviderInterface`) become documentation pages in the category they declare;
+- a bare preview page that loads the stylesheets and scripts of the shop pages and `toolkit.css`;
+- the breakpoints of `assets/styles/variables.css` as preview widths, in the toolkit's words (`Tablet`, `Desktop`...). Your own `ux_showcase.viewports` are merged after them, a name you reuse replaces the theme's width.
+
+The examples that read the shop's catalogue (a product, a category, a content, the menus) are marked `needs_data`: `bin/console ux-showcase:check` skips them unless it is given `--with-data`. The list is `FlexyExampleProvider::NEEDS_DATA`.
+
 ### Giving a checkout step of a module a screen
 
 A step declared through `CheckoutStepProviderInterface` is served by this theme when its `componentName()` names a
