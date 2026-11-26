@@ -1,0 +1,16 @@
+{# The bare page of the component showcase (openstudio/ux-showcase-bundle): what an example is
+   previewed in. It loads what the pages of the shop load, so a component looks here as it does on
+   the site, plus the stylesheet of the toolkit, whose `Story-*` classes the stories are written in.
+
+   It extends the page of the showcase package, which is installed only where the showcase is: no
+   other template refers to this one. #}
+{% extends '@OpenStudioUxShowcase/bare.html.twig' %}
+
+{% block head_assets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('styles/app.css') }}" blocking="render">
+    <link rel="stylesheet" href="{{ asset('styles/toolkit.css') }}" blocking="render">
+    {{ importmap('app') }}
+{% endblock %}

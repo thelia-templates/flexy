@@ -58,7 +58,7 @@ class ToolkitController extends AbstractController
     /** What `/toolkit` opens on, named rather than inherited from the order of SECTIONS. */
     private const string HOME = 'welcome';
 
-    private const array LABELS = [
+    public const array LABELS = [
         '2xs' => 'Mobile S',
         'xs' => 'Mobile M',
         'sm' => 'Mobile L',
