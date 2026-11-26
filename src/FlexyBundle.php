@@ -18,8 +18,10 @@ use FlexyBundle\DependencyInjection\Compiler\BundleServicesPass;
 use FlexyBundle\DependencyInjection\Compiler\SubscriptionServicesPass;
 use FlexyBundle\DependencyInjection\Compiler\TwigComponentDebugDirectoryPass;
 use FlexyBundle\EventListener\TailwindMinifiedBuildListener;
+use FlexyBundle\Showcase\ShowcaseViewports;
 use FlexyBundle\Template\FrontTemplateChain;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
+use OpenStudio\UxShowcaseBundle\Library\ComponentLibraryInterface;
 use Symfony\Component\AssetMapper\Event\PreAssetsCompileEvent;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -53,6 +55,7 @@ class FlexyBundle extends AbstractBundle
         $this->importServices($container);
         $this->registerTemplateChainIcons($container, $builder);
         $this->registerTailwindMinifiedBuildListener($container, $builder);
+        $this->registerShowcaseLibrary($container);
     }
 
 
@@ -67,6 +70,48 @@ class FlexyBundle extends AbstractBundle
         $this->prependConfigStimulus($builder);
         $this->prependConfigTranslator($builder);
         $this->prependConfigPackages($container);
+        $this->prependConfigShowcase($builder);
+    }
+
+    /**
+     * The component showcase is a suggestion, not a requirement: the adapter implements its
+     * interfaces, so it is registered only where they exist. `interface_exists`, not `class_exists`,
+     * which answers false for an interface.
+     */
+    private function registerShowcaseLibrary(ContainerConfigurator $containerConfigurator): void
+    {
+        if (!$this->isShowcaseInstalled()) {
+            return;
+        }
+
+        $containerConfigurator->import('../config/showcase.yaml');
+    }
+
+    protected function isShowcaseInstalled(): bool
+    {
+        return interface_exists(ComponentLibraryInterface::class);
+    }
+
+    /**
+     * The showcase previews at the breakpoints of the theme. Prepended, so the configuration of the
+     * application is merged after it: a width the application names replaces the one of the theme.
+     */
+    private function prependConfigShowcase(ContainerBuilder $containerBuilder): void
+    {
+        if (!$containerBuilder->hasExtension('ux_showcase')) {
+            return;
+        }
+
+        $variablesDirectory = $this->getFrontTemplateChain($containerBuilder)->nearest('assets/styles/variables.css', is_file(...));
+        $css = null === $variablesDirectory ? '' : (string) file_get_contents($variablesDirectory . '/assets/styles/variables.css');
+        $viewports = ShowcaseViewports::fromCss($css);
+
+        // Nothing but the responsive entry: no breakpoint to offer, the bundle keeps its own widths.
+        if (\count($viewports) < 2) {
+            return;
+        }
+
+        $containerBuilder->prependExtensionConfig('ux_showcase', ['viewports' => $viewports]);
     }
 
 

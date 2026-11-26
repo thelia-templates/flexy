@@ -1,0 +1,19 @@
+# Loaded by FlexyBundle only when openstudio/ux-showcase-bundle is installed (the package is a
+# `suggest`): these classes implement its interfaces, so the container cannot know them without it.
+services:
+    _defaults:
+        autowire: true
+
+    FlexyBundle\Showcase\FlexyComponents: ~
+
+    # Not autoconfigured: the ExampleProviderInterface autoconfiguration would also register it as a
+    # shared provider, and every example would then reach the library twice.
+    FlexyBundle\Showcase\FlexyExampleProvider:
+        autoconfigure: false
+
+    # Autoconfigured: the showcase tags every ComponentLibraryInterface.
+    FlexyBundle\Showcase\FlexyLibrary:
+        autoconfigure: true
+
+    FlexyBundle\Showcase\TheliaSessionForShowcaseCheck:
+        autoconfigure: true
