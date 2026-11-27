@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'My quotes'|trans }}{% endblock %}
+
+{% block body %}
+    {{ theme_hook('account-quotes.top', {quotes: quotes}) }}
+
+    <twig:Layouts:Subheader:Account
+        title="{{ 'My quotes'|trans }}"
+        selected="quotes"
+        :breadcrumb="[
+            {title: 'My account'|trans, url: path('account_index')},
+            {title: 'My quotes'|trans},
+        ]"
+    />
+
+    <div class="container-l pt-6 pb-20 md:pt-11 md:pb-30">
+        {% if quotes is not empty %}
+            <ul class="flex flex-col gap-2 list-none p-0 m-0" data-testid="quotes">
+                {% for quote in quotes %}
+                    <twig:Organisms:QuoteCard:Base :quote="quote" />
+                {% endfor %}
+            </ul>
+
+            <div class="flex justify-center mt-10">
+                <twig:Molecules:Pagination:Base
+                    :totalItems="pagination.totalItems"
+                    :itemsPerPage="pagination.itemsPerPage"
+                    :currentPage="pagination.currentPage"
+                />
+            </div>
+        {% else %}
+            <div class="flex flex-col items-center text-center" data-testid="quotes-empty">
+                <div class="w-36 h-auto lg:w-60">
+                    {{ source('assets/images/nothing.svg') }}
+                </div>
+                <h3 class="h3 mt-4 mb-6">{{ 'You have no quotes yet'|trans }}</h3>
+                <p class="paragraph-3 mb-6">{{ 'Ask for a quote from your cart: the shop answers line by line.'|trans }}</p>
+                <twig:Molecules:Button:Base text="{{ 'Go to my cart'|trans }}" href="{{ path('checkout_cart') }}" />
+            </div>
+        {% endif %}
+    </div>
+
+    {{ theme_hook('account-quotes.bottom', {quotes: quotes}) }}
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}

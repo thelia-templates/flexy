@@ -1,0 +1,33 @@
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">What the buyer asked for: the catalogue price alone</h4>
+        <twig:Organisms:QuoteLines:Base currencyCode="EUR" :revision="{
+            number: 1,
+            author: 'customer',
+            discount: '0.000000',
+            postage: '0.000000',
+            totalUntaxed: '1200.000000',
+            totalTaxed: '1440.000000',
+            items: [
+                {id: 1, title: 'Oak table', productRef: 'TABLE-OAK', quantity: 10, catalogPrice: '100.000000', price: '100.000000'},
+                {id: 2, title: 'Chair', productRef: 'CHAIR', quantity: 4, catalogPrice: '50.000000', price: '50.000000'},
+            ],
+        }" />
+    </div>
+    <div class="Story-section">
+        <h4 class="Story-title">An answer of the shop, with a counter-proposal on one line</h4>
+        <twig:Organisms:QuoteLines:Base currencyCode="EUR" :revision="{
+            number: 2,
+            author: 'admin',
+            discount: '30.000000',
+            postage: '15.000000',
+            totalUntaxed: '1350.000000',
+            totalTaxed: '1620.000000',
+            items: [
+                {id: 3, title: 'Oak table', productRef: 'TABLE-OAK', quantity: 12, catalogPrice: '100.000000', price: '90.000000', counterOffer: {quantity: null, price: '85.000000'}},
+                {id: 4, title: 'Chair', productRef: 'CHAIR', quantity: 4, catalogPrice: '50.000000', price: '45.000000'},
+                {id: 5, title: 'Stool', productRef: 'STOOL', quantity: 5, catalogPrice: '20.000000', price: '20.000000'},
+            ],
+        }" />
+    </div>
+</div>

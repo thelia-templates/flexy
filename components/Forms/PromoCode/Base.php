@@ -38,6 +38,7 @@ use Thelia\Domain\Promotion\Coupon\Exception\CouponExpiredException;
 use Thelia\Domain\Promotion\Coupon\Exception\CouponNotReleaseException;
 use Thelia\Domain\Promotion\Coupon\Exception\CouponNoUsageLeftException;
 use Thelia\Domain\Promotion\Coupon\Exception\InactiveCouponException;
+use Thelia\Domain\Quote\Cart\QuoteCartLockedException;
 use Thelia\Form\CouponCode;
 
 #[AsLiveComponent]
@@ -93,6 +94,12 @@ class Base
         } catch (InactiveCouponException|CouponExpiredException|CouponNotReleaseException|CouponNoUsageLeftException|UnmatchableConditionException|InvalidConditionException) {
             // One message for all six: naming the reason would confirm the code exists.
             $this->error = $this->translator->trans('This promo code cannot be used.');
+
+            return;
+        } catch (QuoteCartLockedException $exception) {
+            // The cart of an accepted quote holds the discount of the quote: a code has no place on it, and saying so
+            // reveals nothing about the code.
+            $this->error = $this->translator->trans($exception->getMessage());
 
             return;
         }

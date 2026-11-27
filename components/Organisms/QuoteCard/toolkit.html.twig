@@ -1,0 +1,30 @@
+{# Static quotes shaped like the account collection: the card links to a real route, so the id only
+   needs to be a number. #}
+<div class="Story">
+    <div class="Story-section">
+        <h4 class="Story-title">A quote waiting for the buyer</h4>
+        <ul class="flex flex-col gap-2 list-none p-0 m-0">
+            <twig:Organisms:QuoteCard:Base :quote="{
+                id: 1,
+                ref: 'QUO00000001',
+                state: 'quoted',
+                currencyCode: 'EUR',
+                createdAt: '2026-11-02',
+                validUntil: '2026-12-02',
+            }" />
+        </ul>
+    </div>
+    <div class="Story-section">
+        <h4 class="Story-title">An expired quote</h4>
+        <ul class="flex flex-col gap-2 list-none p-0 m-0">
+            <twig:Organisms:QuoteCard:Base :quote="{
+                id: 2,
+                ref: 'QUO00000002',
+                state: 'expired',
+                currencyCode: 'EUR',
+                createdAt: '2026-10-02',
+                validUntil: '2026-11-02',
+            }" />
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,31 @@
+{# The history of a quote, as the fragment its page loads when the buyer opens it: the summary of every revision sent, without
+   lines. Each revision reads its own lines when it is opened. Answered to a turbo frame: the frame of the page is replaced
+   by the one below. #}
+{% set quote = resources('/api/front/account/quotes/' ~ quoteId) %}
+{% set revisions = resources('/api/front/account/quotes/' ~ quoteId ~ '/revisions') %}
+<turbo-frame id="quote-history">
+    <ol class="flex flex-col gap-8 list-none p-0 m-0" data-testid="quote-revisions">
+        {% for revision in revisions|reverse %}
+            <li data-testid="quote-revision" data-number="{{ revision.number }}">
+                <h3 class="h5 text-black">
+                    {{ 'Revision %number%'|trans({'%number%': revision.number}) }}
+                    <span class="paragraph-3">: {{ (revision.author == 'admin' ? 'Answer of the shop' : 'Your request')|trans }}</span>
+                </h3>
+                {% if revision.sentAt|default(null) %}
+                    <p class="paragraph-3 mb-4"><bdi>{{ revision.sentAt|format_date() }}</bdi></p>
+                {% endif %}
+                <details data-testid="quote-revision-details" data-turbo="true">
+                    <summary class="paragraph-2 cursor-pointer">{{ 'Show the lines of this revision'|trans }}</summary>
+                    <turbo-frame id="quote-revision-{{ revision.number }}" src="{{ path('account_quote_revision', {quoteId: quote.id, number: revision.number}) }}" loading="lazy" class="block mt-4">
+                        <p class="paragraph-3">
+                            <a class="underline" href="{{ path('account_quote_revision', {quoteId: quote.id, number: revision.number}) }}">{{ 'Show the lines of this revision'|trans }}</a>
+                        </p>
+                    </turbo-frame>
+                </details>
+                <p class="mt-4">
+                    <a class="underline" data-turbo="false" href="{{ path('account_quote_pdf', {quoteId: quote.id, revision: revision.number}) }}">{{ 'Download this revision'|trans }}</a>
+                </p>
+            </li>
+        {% endfor %}
+    </ol>
+</turbo-frame>

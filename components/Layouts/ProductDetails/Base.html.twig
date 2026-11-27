@@ -87,6 +87,14 @@
             :subscriptionSignedIn="this.subscriptionSignedIn()"
         />
 
+        {# Outside the form of the sheet, which is the one of the PseSelector above: a form does not hold another. #}
+        {% if this.cartLockedByAQuote %}
+            <twig:Organisms:QuoteCartExit:Base
+                class="mt-4"
+                message="{{ 'This product could not be added: the cart in hand is the cart of an accepted quote. Go back to your own cart to add it.'|trans }}"
+            />
+        {% endif %}
+
         {% set restrictions = this.destinationRestrictions %}
         {% if restrictions.groups is not empty %}
             <div class="mt-4 flex flex-col gap-1 paragraph-3 text-grey" data-testid="destination-restrictions">

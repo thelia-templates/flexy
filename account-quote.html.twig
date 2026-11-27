@@ -1,0 +1,228 @@
+{% extends 'base.html.twig' %}
+
+{% set quote = resources('/api/front/account/quotes/' ~ quoteId) %}
+{# The revision the quote stands at: the request of the buyer until the shop has answered, then the last answer. It is read by
+   its own path, with its lines: the item of the quote carries none, and the older revisions are read when the history is opened. #}
+{% set revision = resources('/api/front/account/quotes/' ~ quoteId ~ '/revisions/' ~ quote.currentRevision) %}
+{# Two spellings of the same heading. `heading` is plain text, for the <title> and the breadcrumb, which are text
+   slots. `headingMarkup` isolates the reference for the visible <h1>: a reference that begins or ends with a
+   neutral character (#, /, -) is reordered without it. Only the reference is interpolated as markup, escaped. #}
+{% set heading = 'Quote %ref%'|trans({'%ref%': quote.ref}) %}
+{% set headingMarkup = 'Quote %ref%'|trans({'%ref%': '<span dir="ltr">' ~ quote.ref|e('html') ~ '</span>'}) %}
+{% set shopEmail = (attr('config', 'store_email') ?? '')|trim %}
+
+{% block title %}{{ heading }}{% endblock %}
+
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
+{% block body %}
+    {{ theme_hook('account-quote.top', {quote: quote}) }}
+
+    <div class="pt-2 pb-3 md:pt-5 md:ps-5">
+        <twig:Molecules:Breadcrumb:Base :items="[
+            {title: 'My account'|trans, url: path('account_index')},
+            {title: 'My quotes'|trans, url: path('account_quotes')},
+            {title: heading},
+        ]" />
+    </div>
+
+    <div class="container-m pb-14 md:pb-24" data-testid="quote-page">
+        {% if app.request.query.get('created') %}
+            <twig:Molecules:SnackBar:Base
+                variant="success"
+                :withIcon="true"
+                text="{{ 'Your request has been sent. The shop will answer with a quote, and you will be told by e-mail.'|trans }}"
+                class="w-full mb-6"
+                data-testid="quote-created"
+            />
+        {% endif %}
+
+        {% if app.request.query.get('countered') %}
+            <twig:Molecules:SnackBar:Base
+                variant="success"
+                :withIcon="true"
+                text="{{ 'Your counter-proposal has been sent. The shop will answer with a new quote.'|trans }}"
+                class="w-full mb-6"
+                data-testid="quote-countered"
+            />
+        {% endif %}
+
+        {% if app.request.query.get('rejected') %}
+            <twig:Molecules:SnackBar:Base
+                variant="success"
+                :withIcon="true"
+                text="{{ 'You have declined this quote.'|trans }}"
+                class="w-full mb-6"
+                data-testid="quote-rejected"
+            />
+        {% endif %}
+
+        {# What an answer was refused for comes back here as an 'error' flash: plain text out of the translator, escaped (a
+           SnackBar prints its text raw). When lines of the quote are no longer sold, they are listed. #}
+        {% for message in app.session ? app.session.flashBag.get('error') : [] %}
+            <div class="SnackBar bg-error-lightest border-error SnackBar--error mb-6" role="alert" data-testid="quote-answer-error">
+                <div class="SnackBar-content">
+                    <span class="SnackBar-icon">{{ ux_icon('error') }}</span>
+                    <div class="SnackBar-message">{{ message }}</div>
+                </div>
+            </div>
+        {% endfor %}
+        {% set unavailableLines = app.session ? app.session.flashBag.get('quote_unavailable_lines') : [] %}
+        {% if unavailableLines is not empty %}
+            <ul class="list-disc ps-6 mb-6 paragraph-3" data-testid="quote-unavailable-lines">
+                {% for line in unavailableLines|first %}
+                    <li><bdi>{{ line.title }}</bdi> (<span dir="ltr">{{ line.reference }}</span>)</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {# The promo code of the cart is not carried over: the buyer is told, whatever page they open the quote from. #}
+        {% if quote.couponDropped %}
+            <twig:Molecules:SnackBar:Base
+                variant="informative"
+                :withIcon="true"
+                text="{{ 'The promo code of your cart is not part of the quote: the shop sets the prices line by line.'|trans }}"
+                class="w-full mb-6"
+                data-testid="quote-coupon-dropped"
+            />
+        {% endif %}
+
+        <h1 class="h3 text-black">{{ headingMarkup|raw }}</h1>
+        <p class="paragraph-3 mb-4"><bdi>{{ quote.createdAt|format_date() }}</bdi></p>
+
+        <twig:Molecules:QuoteState:Base state="{{ quote.state }}" class="mb-8" />
+
+        {% if quote.state == 'expired' %}
+            <div class="SnackBar bg-warning-lightest border-warning mb-8" role="status" data-testid="quote-expired">
+                <div class="SnackBar-content">
+                    <span class="SnackBar-icon">{{ ux_icon('warning') }}</span>
+                    <div class="SnackBar-message">
+                        <p>{{ 'This quote has expired: it can no longer be accepted.'|trans }}</p>
+                        {% if shopEmail is not empty %}
+                            <p>
+                                <a class="underline" data-testid="quote-extension-link" href="mailto:{{ shopEmail }}?subject={{ 'Extension of the quote %ref%'|trans({'%ref%': quote.ref})|url_encode }}">{{ 'Ask the shop for an extension'|trans }}</a>
+                            </p>
+                        {% else %}
+                            <p data-testid="quote-extension-contact">{{ 'To get an extension, contact the shop and give the reference of this quote.'|trans }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <dl class="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-3">
+            {# The last day of the revision the quote stands at, as it was sent: the quote itself only says it for older rows. #}
+            {% set validUntil = revision.validUntil|default(quote.validUntil|default(null)) %}
+            {% if validUntil %}
+                <div>
+                    <dt class="paragraph-3">{{ 'Valid until'|trans }}</dt>
+                    <dd class="m-0" data-testid="quote-valid-until"><bdi>{{ validUntil|format_date() }}</bdi></dd>
+                </div>
+            {% endif %}
+            {% if quote.neededBy|default(null) %}
+                <div>
+                    <dt class="paragraph-3">{{ 'Needed by'|trans }}</dt>
+                    <dd class="m-0"><bdi>{{ quote.neededBy|format_date() }}</bdi></dd>
+                </div>
+            {% endif %}
+            <div>
+                <dt class="paragraph-3">{{ 'Revision'|trans }}</dt>
+                <dd class="m-0" data-testid="quote-revision-number">{{ revision.number }}</dd>
+            </div>
+        </dl>
+
+        {# Text, never markup: the buyer's comment and the word of the shop are typed by people. #}
+        {% if quote.buyerComment|default('') is not empty %}
+            <div class="mb-6">
+                <h2 class="paragraph-2 text-black">{{ 'Your comment'|trans }}</h2>
+                <p class="paragraph-3 whitespace-pre-line" data-testid="quote-buyer-comment">{{ quote.buyerComment }}</p>
+            </div>
+        {% endif %}
+        {% if revision.merchantNote|default('') is not empty %}
+            <div class="mb-6">
+                <h2 class="paragraph-2 text-black">{{ 'Message from the shop'|trans }}</h2>
+                <p class="paragraph-3 whitespace-pre-line" data-testid="quote-merchant-note">{{ revision.merchantNote }}</p>
+            </div>
+        {% endif %}
+
+        <h2 class="h4 mt-10 mb-6">{{ 'Quote details'|trans }}</h2>
+        <twig:Organisms:QuoteLines:Base :revision="revision" currencyCode="{{ quote.currencyCode|default('EUR') }}" />
+
+        {# The addresses the revision was sent with, copied onto it: the address book of the buyer is not read. #}
+        {% set deliveryAddress = revision.deliveryAddress|default(null) %}
+        {% set invoiceAddress = revision.invoiceAddress|default(null) %}
+        {% if deliveryAddress or invoiceAddress %}
+            <div class="grid grid-cols-1 gap-6 mt-10 sm:grid-cols-2" data-testid="quote-addresses">
+                {% for entry in [{title: 'Delivery address'|trans, address: deliveryAddress}, {title: 'Billing address'|trans, address: invoiceAddress}] %}
+                    {% set address = entry.address %}
+                    {% if address %}
+                        <div>
+                            <h3 class="paragraph-2 text-black">{{ entry.title }}</h3>
+                            <p class="paragraph-3 m-0"><bdi>{{ address.firstname }} {{ address.lastname }}</bdi></p>
+                            {% if address.company|default('') is not empty %}<p class="paragraph-3 m-0"><bdi>{{ address.company }}</bdi></p>{% endif %}
+                            <p class="paragraph-3 m-0"><bdi>{{ address.address1 }}</bdi></p>
+                            {% if address.address2|default('') is not empty %}<p class="paragraph-3 m-0"><bdi>{{ address.address2 }}</bdi></p>{% endif %}
+                            {% if address.address3|default('') is not empty %}<p class="paragraph-3 m-0"><bdi>{{ address.address3 }}</bdi></p>{% endif %}
+                            <p class="paragraph-3 m-0"><bdi>{{ address.zipcode }} {{ address.city }}</bdi></p>
+                            {% if address.country|default('') is not empty %}<p class="paragraph-3 m-0"><bdi>{{ address.country }}</bdi></p>{% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if revision.reverseCharge|default(false) %}
+            <p class="paragraph-3 mt-6" data-testid="quote-reverse-charge">
+                {% if invoiceAddress.vatNumber|default('') is not empty %}
+                    {{ 'VAT exempted (reverse charge), buyer VAT number %number%'|trans({'%number%': invoiceAddress.vatNumber}) }}
+                {% else %}
+                    {{ 'Reverse charge: the VAT of this quote is owed by the buyer.'|trans }}
+                {% endif %}
+            </p>
+        {% endif %}
+
+        {% if quote.orderId|default(null) %}
+            <p class="mt-6" data-testid="quote-order">
+                <a class="underline" href="{{ path('account_order', {orderId: quote.orderId}) }}">{{ 'See your order %ref%'|trans({'%ref%': quote.orderRef}) }}</a>
+            </p>
+        {% endif %}
+
+        {# What the buyer answers with. A quote that expired accepts nothing: only the request for an extension above is offered,
+           and a quote that waits for the shop offers nothing either. #}
+        <div class="mt-10" data-testid="quote-actions">
+            {{ theme_hook('account-quote.actions', {quote: quote, revision: revision}) }}
+            <twig:Organisms:QuoteActions:Base :quote="quote" :revision="revision" />
+        </div>
+
+        <div class="flex flex-wrap gap-4 mt-10">
+            <twig:Molecules:Button:Base
+                text="{{ 'Back to my quotes'|trans }}"
+                href="{{ path('account_quotes') }}"
+                color="secondary"
+            />
+            <twig:Molecules:Button:Base
+                text="{{ 'Download the quote'|trans }}"
+                href="{{ path('account_quote_pdf', {quoteId: quote.id}) }}"
+                icon_right="download"
+                data-testid="quote-pdf"
+            />
+        </div>
+
+        {# The revisions that came before are read only when the buyer opens this: the page carries the one the quote stands at. #}
+        {# data-turbo="true": Turbo is only loaded on a page that has such a zone, and the frame below is its to load. #}
+        <details class="mt-10 pt-6 border-t border-grey-lighter" data-testid="quote-history" data-turbo="true">
+            <summary class="h4 cursor-pointer">{{ 'History of the revisions'|trans }}</summary>
+            <turbo-frame id="quote-history" src="{{ path('account_quote_history', {quoteId: quote.id}) }}" loading="lazy" class="block mt-4">
+                <p class="paragraph-3">
+                    <a class="underline" href="{{ path('account_quote_history', {quoteId: quote.id}) }}">{{ 'Show the history of the revisions'|trans }}</a>
+                </p>
+            </turbo-frame>
+        </details>
+    </div>
+
+    {{ theme_hook('account-quote.bottom', {quote: quote}) }}
+{% endblock %}
+
+{% block footer %}
+    <twig:Layouts:Footer:Checkout />
+{% endblock %}

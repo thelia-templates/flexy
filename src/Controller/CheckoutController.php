@@ -52,6 +52,8 @@ use Thelia\Domain\Checkout\Exception\InvalidDeliveryException;
 use Thelia\Domain\Checkout\Exception\InvalidPaymentException;
 use Thelia\Domain\Checkout\Exception\MissingAddressException;
 use Thelia\Domain\Checkout\Exception\MissingConsentException;
+use Thelia\Domain\Checkout\Exception\QuoteDeliveryImposedException;
+use Thelia\Domain\Checkout\Exception\QuoteRequiredException;
 use Thelia\Domain\Checkout\Service\CheckoutProgressionService;
 use Thelia\Domain\Customer\Service\AuthenticationReturnUrl;
 use Thelia\Domain\Localization\Service\LangService;
@@ -59,6 +61,9 @@ use Thelia\Domain\Order\Exception\BundleLineNotOrderableException;
 use Thelia\Domain\Order\Exception\OrderPlacementConflictException;
 use Thelia\Domain\Order\Exception\StockShortageException;
 use Thelia\Domain\Payment\Exception\StoredMethodPaymentRateLimitedException;
+use Thelia\Domain\Quote\Cart\QuoteCartGuard;
+use Thelia\Domain\Quote\Cart\QuoteCartInspector;
+use Thelia\Domain\Quote\Exception\QuoteException;
 use Thelia\Log\Tlog;
 use Thelia\Model\Cart;
 use Thelia\Model\CheckoutStep;
@@ -98,6 +103,7 @@ class CheckoutController extends FlexyController
         CheckoutProgressionService $progression,
         CheckoutStepRouteResolver $routes,
         CheckoutTrail $trail,
+        QuoteCartInspector $quoteCartInspector,
     ): Response {
         $cart = $cartFacade->getOrCreateFromSession();
 
@@ -119,7 +125,10 @@ class CheckoutController extends FlexyController
 
         // A page fetched ahead of a click (hovering "Previous step" on the payment step) is not a visit to the
         // cart: it must not give the cart its delivery and its payment back under the buyer's feet.
-        if (!PrefetchRequest::is($this->getRequest())) {
+        //
+        // Not for the cart of a quote: its lines cannot change, so there is nothing for the buyer to settle again, and the
+        // reset would take back the carrier and the addresses the quote carries.
+        if (!PrefetchRequest::is($this->getRequest()) && !$quoteCartInspector->isQuoteCart($cart)) {
             $checkoutFacade->resetCheckout();
 
             // The reset gave the cart its delivery and its payment back: what the progression
@@ -155,10 +164,15 @@ class CheckoutController extends FlexyController
         CheckoutProgressionService $progression,
         CheckoutStepRouteResolver $routes,
         CheckoutTrail $trail,
+        QuoteCartGuard $quoteCartGuard,
     ): Response {
         $this->checkCheckoutAccess($guestCheckoutGate);
 
         $cart = $cartFacade->getOrCreateFromSession();
+
+        if (null !== $refusal = $this->sendBackIfTheShopSellsOnQuotesOnly($cart, $quoteCartGuard)) {
+            return $refusal;
+        }
 
         // On a one-page checkout the delivery is a section of the cart page, so this
         // route has no screen of its own left to serve.
@@ -193,10 +207,15 @@ class CheckoutController extends FlexyController
         CheckoutProgressionService $progression,
         CheckoutStepRouteResolver $routes,
         CheckoutTrail $trail,
+        QuoteCartGuard $quoteCartGuard,
     ): Response {
         $this->checkCheckoutAccess($guestCheckoutGate);
 
         $cart = $cartFacade->getOrCreateFromSession();
+
+        if (null !== $refusal = $this->sendBackIfTheShopSellsOnQuotesOnly($cart, $quoteCartGuard)) {
+            return $refusal;
+        }
 
         if ($routes->isOnePage()) {
             return $this->redirectToTheFirstIncompleteStep($cart, $progression, $routes);
@@ -222,6 +241,29 @@ class CheckoutController extends FlexyController
             'next_step_url' => $routes->pathAfter($cart, CheckoutStep::CODE_PAYMENT),
             'previous_step_url' => $routes->pathBefore($cart, CheckoutStep::CODE_PAYMENT),
         ]);
+    }
+
+    /**
+     * A shop that only sells through quotes places no ordinary cart: the buyer who reaches a step past the cart with one
+     * (the address typed, a bookmark) is sent back to the cart with the sentence of the core, instead of walking the
+     * steps until the order is refused. The cart of a quote goes on, and so does a cart with nothing in it, which the
+     * steps already send back to the cart with the sentence that fits it.
+     */
+    private function sendBackIfTheShopSellsOnQuotesOnly(Cart $cart, QuoteCartGuard $quoteCartGuard): ?Response
+    {
+        if (0 === $cart->countCartItems()) {
+            return null;
+        }
+
+        try {
+            $quoteCartGuard->refuseAnOrdinaryCartWhenQuotesAreRequired($cart);
+        } catch (QuoteRequiredException $refusal) {
+            $this->addFlash('error', $this->translator->trans($refusal->getMessage()));
+
+            return $this->generateRedirect($this->generateUrl('checkout_cart'));
+        }
+
+        return null;
     }
 
     /**
@@ -279,10 +321,15 @@ class CheckoutController extends FlexyController
         CheckoutProgressionService $progression,
         CheckoutStepRouteResolver $routes,
         CheckoutTrail $trail,
+        QuoteCartGuard $quoteCartGuard,
     ): Response {
         $this->checkCheckoutAccess($guestCheckoutGate);
 
         $cart = $cartFacade->getOrCreateFromSession();
+
+        if (null !== $refusal = $this->sendBackIfTheShopSellsOnQuotesOnly($cart, $quoteCartGuard)) {
+            return $refusal;
+        }
 
         $component = null;
 
@@ -344,6 +391,7 @@ class CheckoutController extends FlexyController
         GuestCheckoutGate $guestCheckoutGate,
         CheckoutStepRouteResolver $routes,
         InstantPaymentParts $paymentParts,
+        QuoteCartInspector $quoteCartInspector,
     ): Response {
         $cart = $cartFacade->getCartFromSession();
 
@@ -459,6 +507,12 @@ class CheckoutController extends FlexyController
             $this->addFlash('error', $e->getMessage());
 
             throw new RedirectException($routes->pathFor(CheckoutStep::CODE_PAYMENT), Response::HTTP_FOUND, $e->getMessage());
+        } catch (QuoteDeliveryImposedException $e) {
+            // The cart of a quote ships the way the quote was agreed: said in the catalogue of the theme.
+            $message = $this->translator->trans($e->getMessage());
+            $this->addFlash('error', $message);
+
+            throw new RedirectException($routes->pathOfTheFirstIncompleteStep($cart), Response::HTTP_FOUND, $message);
         } catch (MissingAddressException|InvalidDeliveryException|IncompleteInvoiceAddressException|MissingConsentException $e) {
             // The rule, not the greyed-out button: a request that reaches here without a
             // carrier, without the legal identifiers of a business invoice or without the
@@ -500,6 +554,15 @@ class CheckoutController extends FlexyController
             // each line, shown by the page: the generic refusal below would add a second, vaguer message
             // ("Quantities of your cart were adjusted...") on top of them. Nothing but the cart is shown.
             throw new RedirectException($routes->pathOfTheFirstIncompleteStep($cart), Response::HTTP_FOUND);
+        } catch (QuoteException $e) {
+            // The quote this cart was built from can no longer be ordered as it was accepted (a product gone, a currency
+            // unavailable, a cart that is not the accepted one, an order already placed): nothing was written. The buyer is
+            // sent to the page of the quote, where the reason is said and the quote can be looked at again.
+            $message = $this->translator->trans($e->getMessage());
+            $this->addFlash('error', $message);
+            $quote = null !== $cart ? $quoteCartInspector->quoteOf($cart) : null;
+
+            throw new RedirectException(null !== $quote ? $this->generateUrl('account_quote', ['quoteId' => $quote->getId()]) : $routes->pathFor(CheckoutStep::CODE_CART), Response::HTTP_FOUND, $message);
         } catch (CheckoutException $e) {
             // A refusal the theme knows nothing about: the step of a module (a minimum
             // order amount, an age check) refusing the cart at placement. Answered as the

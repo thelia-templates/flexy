@@ -41,9 +41,12 @@
    has always been, at /checkout/pay. #}
 {% block checkoutNextButton %}
     {%- if not emptyCart -%}
-        <twig:Organisms:NextButton:Base
-            :step="pay_step"
-            href="{{ next_step_url }}"
-        />
+        {%- if quote_offer().checkoutAllowed -%}
+            <twig:Organisms:NextButton:Base
+                :step="pay_step"
+                href="{{ next_step_url }}"
+            />
+        {%- endif -%}
+        <twig:Organisms:QuoteRequestButton:Base class="mt-3" />
     {%- endif -%}
 {% endblock %}

@@ -84,6 +84,17 @@ final class ComponentStatus
             // The card of a return, shared by the returns of an order and the list of every return.
             'Organisms/OrderReturnCard' => self::READY,
 
+            // The quotes of the account: their list, the pill of their state, the table of the lines with the catalogue
+            // price beside the negotiated one, and the button of the cart that asks for one, shipped with the core
+            // feature they render.
+            'Organisms/QuoteActions' => self::READY,
+            'Organisms/QuoteCartExit' => self::READY,
+            'Organisms/QuoteCard' => self::READY,
+            'Organisms/QuoteCounterOffer' => self::READY,
+            'Organisms/QuoteLines' => self::READY,
+            'Organisms/QuoteRequestButton' => self::READY,
+            'Molecules/QuoteState' => self::READY,
+
             // The lines of the cart brought back to how their product is sold, shipped with the
             // core feature that adjusts them.
             'Organisms/QuantityAdjustments' => self::READY,

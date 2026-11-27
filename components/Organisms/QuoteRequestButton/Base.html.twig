@@ -1,0 +1,15 @@
+{# The button that asks for a quote from the cart, when the shop offers it to the buyer in hand. It draws
+   nothing otherwise, so a page puts it where it belongs without testing the setting of the shop itself.
+   Next to the way to the checkout it is the second choice; alone, in the mode that requires a quote, it is the first. #}
+{% set offer = quote_offer() %}
+
+{% if offer.canRequest %}
+    <twig:Molecules:Button:Base
+        text="{{ 'Request a quote'|trans }}"
+        href="{{ path('account_quote_request') }}"
+        color="{{ offer.checkoutAllowed ? 'secondary' : 'base' }}"
+        data-testid="quote-request-button"
+        data-turbo="false"
+        class="{{ ('w-full ' ~ attributes.render('class'))|tailwind_merge }}"
+    />
+{% endif %}

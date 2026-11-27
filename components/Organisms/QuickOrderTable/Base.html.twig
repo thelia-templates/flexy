@@ -39,7 +39,9 @@
 
 <div class="{{ ('QuickOrderTable ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
     <div class="QuickOrderTable-messages" role="status">
-        {% if error %}
+        {% if error == 'quote_cart' %}
+            <twig:Organisms:QuoteCartExit:Base message="{{ 'None of these lines could be added: the cart in hand is the cart of an accepted quote. Go back to your own cart to add them.'|trans }}" />
+        {% elseif error %}
             {# The reason of a cart refusal is module-authored, and SnackBar prints its text raw. #}
             {% set errorText = errorMessages[error]|default('') ~ ('cart_refused' == error and cartRefusalReason ? ' ' ~ cartRefusalReason : '') %}
             <twig:Molecules:SnackBar:Base variant="error" withIcon text="{{ errorText|escape('html') }}" />

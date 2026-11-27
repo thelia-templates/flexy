@@ -42,8 +42,11 @@
     {% set checkoutBackButton = block('checkoutBackButton') is defined ? block('checkoutBackButton') : '' %}
     {# Lines the core brought back to the rules of their product while reading the cart: read
        after the content, which may be what read the cart. #}
+    {# On every step: the cart of an accepted quote is paid, not reworked, and the buyer who came for something else gets
+       their own cart back from here. Nothing is drawn for any other cart. #}
     {% set checkoutFlashes %}
         {{ checkoutFlashes }}
+        <twig:Organisms:QuoteCartExit:Base class="mb-6" />
         <twig:Organisms:QuantityAdjustments:Base />
     {% endset %}
     {% set useSidebar = checkoutSummary|trim != '' %}

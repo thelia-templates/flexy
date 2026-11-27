@@ -13,3 +13,11 @@ framework:
             policy: sliding_window
             limit: 120
             interval: '1 minute'
+
+        # The printable document of a quote is made again at each call. A buyer reading their
+        # revisions downloads a handful of them; twenty in ten minutes leaves room for that and
+        # none for a loop.
+        flexy_quote_pdf:
+            policy: sliding_window
+            limit: 20
+            interval: '10 minutes'

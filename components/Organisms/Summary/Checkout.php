@@ -20,6 +20,7 @@ use FlexyBundle\Service\CartItemCount;
 use FlexyBundle\Service\DeliveryDateBridge;
 use FlexyBundle\Service\ExcludedPromotionsReader;
 use FlexyBundle\Service\PriceDisplay;
+use FlexyBundle\Service\QuoteDeliveryTerms;
 use FlexyBundle\Service\TaxDisplay;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
@@ -60,7 +61,16 @@ class Checkout
         // Optional so that a child theme calling this constructor keeps working: it then counts
         // as the core does, the sum of the quantities.
         private readonly ?CartItemCount $itemCount = null,
+        private readonly ?QuoteDeliveryTerms $quoteTerms = null,
     ) {
+    }
+
+    /**
+     * The cart of an accepted quote holds the discount the shop agreed: the coupon form is not offered on it.
+     */
+    public function isQuoteCart(): bool
+    {
+        return $this->quoteTerms?->isQuoteCart($this->cartFacade->getOrCreateFromSession()) ?? false;
     }
 
     /**

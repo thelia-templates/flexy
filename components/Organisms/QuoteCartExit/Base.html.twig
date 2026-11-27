@@ -1,0 +1,29 @@
+{# @prop message string The sentence above the button, already translated: what happened, in the words of the page it is drawn on #}
+{#
+   The way out of the cart of an accepted quote: the buyer holding it cannot add to it nor change it, and gets their own
+   cart back. The quote is left as it was, and can be accepted again from its page. The form is its own and never inside
+   another one: drawn after the form of the sheet, not within it.
+#}
+{% props message = '' %}
+{% set offer = quote_offer() %}
+
+{% if offer.inQuoteCart %}
+    <div class="{{ ('SnackBar bg-warning-lightest border-warning ' ~ attributes.render('class'))|tailwind_merge }}" role="status" data-testid="quote-cart-exit" {{ attributes.without('class') }}>
+        <div class="SnackBar-content">
+            <span class="SnackBar-icon">{{ ux_icon('warning') }}</span>
+            <div class="SnackBar-message flex flex-col gap-3">
+                <p>{{ message is not empty ? message : 'The cart in hand is the cart of an accepted quote: its lines cannot be changed.'|trans }}</p>
+                <form method="post" action="{{ path('account_quote_cart_leave') }}" data-turbo="false" data-testid="quote-cart-exit-form">
+                    <input type="hidden" name="_token" value="{{ csrf_token('quote_action') }}">
+                    <twig:Molecules:Button:Base
+                        text="{{ 'Back to my cart'|trans }}"
+                        type="submit"
+                        color="secondary"
+                        data-testid="quote-cart-exit-button"
+                    />
+                    <p class="paragraph-3 mt-2">{{ 'The quote is left as it is: you can accept it again from its page.'|trans }}</p>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}

@@ -1,0 +1,27 @@
+{# @prop quote array A quote as the /api/front/account/quotes collection hands it over #}
+{% props quote %}
+
+<li data-testid="quote" class="{{ ('flex flex-wrap items-center justify-between gap-3 border border-grey-lighter rounded-lg p-4 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    <div class="flex flex-col gap-1">
+        {# `customText` is a text slot, so the reference goes in raw: the same rule as the order and the return cards. #}
+        <twig:Molecules:Link:Base
+            href="{{ path('account_quote', {quoteId: quote.id}) }}"
+            customText="{{ 'Quote %ref%'|trans({'%ref%': quote.ref}) }}"
+        />
+        <span class="paragraph-3"><bdi>{{ quote.createdAt|format_date() }}</bdi></span>
+        {% if quote.validUntil|default(null) %}
+            <span class="paragraph-3" data-testid="quote-valid-until">{{ 'Valid until %date%'|trans({'%date%': quote.validUntil|format_date()}) }}</span>
+        {% endif %}
+        {# Only when the collection carries it. While the shop has not answered, the revision it reads is the buyer's own: that
+           total is what was asked for, at the prices of the cart, and is said so rather than shown as a price of the shop. #}
+        {% if quote.totalTaxed|default(null) is not null %}
+            {% set total %}<span dir="ltr">{{ quote.totalTaxed|format_currency(quote.currencyCode|default('EUR'), locale: lang_code) }}</span>{% endset %}
+            {% if quote.state == 'requested' %}
+                <span class="paragraph-3" data-testid="quote-total" data-total-of="request"><span data-testid="quote-total-label">{{ 'Requested amount'|trans }}</span> {{ total }}</span>
+            {% else %}
+                <span class="paragraph-3" data-testid="quote-total">{{ total }}</span>
+            {% endif %}
+        {% endif %}
+    </div>
+    <twig:Molecules:QuoteState:Base state="{{ quote.state }}" />
+</li>

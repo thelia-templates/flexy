@@ -3,7 +3,8 @@
 {% props index = null, disabled = false %}
 {# A line the shop offers is read-only for the same reason a summary line is: the customer
    does not own it. The server refuses to change it either way. #}
-{% set readOnly = disabled or this.isOffered %}
+{# A line of a quote is read-only too: its quantity and its price are the quote's, and the core refuses to change them. #}
+{% set readOnly = disabled or this.isOffered or this.cartItem.isFrozen %}
 {% import '@theme_flexy/subscription-macros.html.twig' as sub %}
 <div
     class="{{ (this.outOfStock ? 'CartItem-wrapper CartItem-wrapper--outOfStock ' : 'CartItem-wrapper ') ~ attributes.render('class')|tailwind_merge }}"

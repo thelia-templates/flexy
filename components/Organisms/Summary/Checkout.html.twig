@@ -6,7 +6,8 @@
     {% set discounts = summary.discounts %}
 
     <div class="Summary">
-        {% if this.showPromoCodeForm %}
+        {# The prices of a quote are the ones the shop wrote: a code has no place on its cart. #}
+        {% if this.showPromoCodeForm and not this.isQuoteCart %}
             <div class="mb-4">
                 <twig:Forms:PromoCode:Base />
             </div>

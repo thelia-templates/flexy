@@ -1,0 +1,98 @@
+{# @prop revision array A revision of a quote as the /api/front/account/quotes/{id}/revisions/{number} read hands it over: its lines and its figures #}
+{# @prop currencyCode string The currency the quote is written in. Defaults to `EUR` #}
+{% props revision, currencyCode = 'EUR' %}
+
+{# The first revision is what the buyer asked for, at the catalogue prices of that day: only the revisions
+   of the shop have a price of their own to set beside the catalogue's. #}
+{% set negotiated = revision.author == 'admin' %}
+{% set counterOffered = revision.items|filter(line => line.counterOffer|default(null) is not null)|length > 0 %}
+
+{# What the shop gives up on the lines, read from the figures of the revision: catalogue minus proposed price, over the quantity. #}
+{% set catalogueSum = revision.items|reduce((sum, line) => sum + line.catalogPrice * line.quantity, 0) %}
+{% set grantedSum = revision.items|reduce((sum, line) => sum + (line.catalogPrice - line.price) * line.quantity, 0)|round(2) %}
+{% set grantedPercent = catalogueSum > 0 ? (grantedSum / catalogueSum * 100)|round(2) : 0 %}
+
+<div class="{{ ('flex flex-col gap-4 ' ~ attributes.render('class'))|tailwind_merge }}" {{ attributes.without('class') }}>
+    <div class="overflow-x-auto">
+        <table class="w-full text-start border-collapse" data-testid="quote-lines">
+            <caption class="sr-only">{{ 'Lines of the quote. The prices are for one unit, without taxes.'|trans }}</caption>
+            <thead>
+                <tr class="border-b border-grey-lighter paragraph-3 text-grey-dark">
+                    <th scope="col" class="py-2 pe-3 text-start font-medium">{{ 'Product'|trans }}</th>
+                    <th scope="col" class="py-2 pe-3 text-end font-medium">{{ 'Quantity'|trans }}</th>
+                    <th scope="col" class="py-2 pe-3 text-end font-medium">{{ 'Catalogue price'|trans }}</th>
+                    {% if negotiated %}
+                        <th scope="col" class="py-2 pe-3 text-end font-medium">{{ 'Negotiated price'|trans }}</th>
+                    {% endif %}
+                    {% if counterOffered %}
+                        <th scope="col" class="py-2 text-end font-medium">{{ 'Your counter-proposal'|trans }}</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in revision.items %}
+                    {% set counter = line.counterOffer|default(null) %}
+                    {% set decimals = (line.quantity|round == line.quantity) ? 0 : 3 %}
+                    <tr class="border-b border-grey-lighter align-top" data-testid="quote-line">
+                        <th scope="row" class="py-3 pe-3 text-start font-normal">
+                            <span class="block font-medium"><bdi>{{ line.title }}</bdi></span>
+                            <span class="block paragraph-3"><span dir="ltr">{{ line.productRef }}</span></span>
+                        </th>
+                        <td class="py-3 pe-3 text-end" data-testid="quote-line-quantity"><bdi>{{ line.quantity|format_quantity(decimals) }}</bdi></td>
+                        <td class="py-3 pe-3 text-end" data-testid="quote-line-catalogue-price">
+                            <span dir="ltr" class="{{ negotiated and line.price != line.catalogPrice ? 'line-through text-grey-dark' : '' }}">{{ line.catalogPrice|format_currency(currencyCode, locale: lang_code) }}</span>
+                        </td>
+                        {% if negotiated %}
+                            <td class="py-3 pe-3 text-end font-medium" data-testid="quote-line-price"><span dir="ltr">{{ line.price|format_currency(currencyCode, locale: lang_code) }}</span></td>
+                        {% endif %}
+                        {% if counterOffered %}
+                            <td class="py-3 text-end" data-testid="quote-line-counter-offer">
+                                {% if counter is not null %}
+                                    {% if counter.quantity|default(null) is not null %}
+                                        <span class="block">{{ 'Quantity'|trans }}{{ 'label_colon'|trans }} <bdi>{{ counter.quantity|format_quantity((counter.quantity|round == counter.quantity) ? 0 : 3) }}</bdi></span>
+                                    {% endif %}
+                                    {% if counter.price|default(null) is not null %}
+                                        <span class="block">{{ 'Price'|trans }}{{ 'label_colon'|trans }} <span dir="ltr">{{ counter.price|format_currency(currencyCode, locale: lang_code) }}</span></span>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <dl class="flex flex-col gap-1 ms-auto w-full max-w-sm" data-testid="quote-totals">
+        {% if negotiated %}
+            <div class="flex justify-between gap-4" data-testid="quote-granted-discount">
+                <dt>{{ 'Discount granted on the lines'|trans }}</dt>
+                <dd class="m-0"><span dir="ltr">{{ grantedSum|format_currency(currencyCode, locale: lang_code) }} ({{ (grantedPercent / 100)|format_number({max_fraction_digit: 2}, 'percent', locale: lang_code) }})</span></dd>
+            </div>
+        {% endif %}
+        {% if revision.discount != 0 %}
+            <div class="flex justify-between gap-4" data-testid="quote-discount">
+                <dt>{{ 'Discount, taxes included'|trans }}</dt>
+                <dd class="m-0"><span dir="ltr">{{ revision.discount|format_currency(currencyCode, locale: lang_code) }}</span></dd>
+            </div>
+        {% endif %}
+        {% if revision.postage != 0 %}
+            <div class="flex justify-between gap-4" data-testid="quote-postage">
+                <dt>{{ 'Shipping, without taxes'|trans }}</dt>
+                <dd class="m-0"><span dir="ltr">{{ revision.postage|format_currency(currencyCode, locale: lang_code) }}</span></dd>
+            </div>
+        {% endif %}
+        {% if revision.totalUntaxed|default(null) is not null %}
+            <div class="flex justify-between gap-4" data-testid="quote-total-untaxed">
+                <dt>{{ 'Total without taxes'|trans }}</dt>
+                <dd class="m-0"><span dir="ltr">{{ revision.totalUntaxed|format_currency(currencyCode, locale: lang_code) }}</span></dd>
+            </div>
+        {% endif %}
+        {% if revision.totalTaxed|default(null) is not null %}
+            <div class="flex justify-between gap-4 font-medium text-black" data-testid="quote-total-taxed">
+                <dt>{{ 'Total with taxes'|trans }}</dt>
+                <dd class="m-0"><span dir="ltr">{{ revision.totalTaxed|format_currency(currencyCode, locale: lang_code) }}</span></dd>
+            </div>
+        {% endif %}
+    </dl>
+</div>

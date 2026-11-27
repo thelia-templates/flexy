@@ -29,6 +29,8 @@ class CartItemDto
     public int $promo = 0;
     /** The line was put in the cart by a promotion: the shop owns it, not the customer. */
     public bool $isOffered = false;
+    /** The line is one of a quote: its quantity and its price are the quote's, and the buyer changes neither. */
+    public bool $isFrozen = false;
     /**
      * What the promotion owning this line takes off the cart because of it, bounded by what
      * the line is worth (a discount larger than the line takes the line), taxes included and
@@ -98,6 +100,8 @@ class CartItemDto
         // TINYINT column: the model hands it over as an int, and a core that predates
         // offered lines hands over nothing at all.
         $cartItem->isOffered = (bool) ($data['isOffered'] ?? false);
+        // The column that ties the line to a line of a quote; a core without quotes has none.
+        $cartItem->isFrozen = null !== ($data['quoteItemId'] ?? null);
         // Not columns: the core publishes them alongside the line, in whichever spelling its
         // data access layer uses, and a core that predates them publishes nothing.
         $cartItem->offeredEffectiveTaxed = self::amount($data, 'offeredEffectiveTaxed', 'offered_effective_taxed');

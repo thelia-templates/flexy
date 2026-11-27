@@ -22,6 +22,7 @@ use FlexyBundle\Service\DeliveryEstimate;
 use FlexyBundle\Service\DeliveryOptionChoice;
 use FlexyBundle\Service\GuestCheckoutGate;
 use FlexyBundle\Service\PriceDisplay;
+use FlexyBundle\Service\QuoteDeliveryTerms;
 use Propel\Runtime\Exception\PropelException;
 use Psr\Log\LoggerInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -38,6 +39,7 @@ use Thelia\Domain\Addressing\Service\AddressService;
 use Thelia\Domain\Cart\CartFacade;
 use Thelia\Domain\Checkout\DTO\CheckoutDTO;
 use Thelia\Domain\Checkout\Exception\DestinationRestrictedException;
+use Thelia\Domain\Checkout\Exception\QuoteDeliveryImposedException;
 use Thelia\Domain\Customer\Exception\CustomerException;
 use Thelia\Domain\Localization\Service\LangService;
 use Thelia\Domain\Shipping\ShippingFacade;
@@ -97,6 +99,13 @@ class Base
     public array $restrictedProducts = [];
 
     /**
+     * The sentence said when the core refused a carrier or an address because the cart is the cart of a quote,
+     * which ships the way the quote was agreed: the sentence of the core, translated by the template.
+     */
+    #[LiveProp]
+    public ?string $quoteDeliveryRefusal = null;
+
+    /**
      * Said when the line another cart holds keeps the stock from being held for this buyer after their choice. Not live
      * state: it is read by the render that follows the choice.
      */
@@ -114,17 +123,28 @@ class Base
         private readonly DeliveryAddressCopy $deliveryAddressCopy,
         private readonly PriceDisplay $priceDisplay,
         private readonly CheckoutStockHold $stockHold,
+        private readonly QuoteDeliveryTerms $quoteTerms,
     ) {
     }
 
     public function mount(): void
     {
+        $cart = $this->cartFacade->getOrCreateFromSession();
+        $isQuoteCart = $this->quoteTerms->isQuoteCart($cart);
+        $quoteAddress = $this->quoteTerms->addressToApply($cart);
+
+        if (null !== $quoteAddress) {
+            // The quote names where it ships: the cart is given that address, never the default one.
+            $this->applyDeliveryAddress($quoteAddress);
+        }
+
         $this->deliveryAddressId = $this->cartFacade->getDeliveryAddressId();
 
         if (null !== $this->deliveryAddressId) {
             // Edited since it was chosen, from the account or another step: the cart follows.
             $this->followTheDeliveryAddress($this->deliveryAddressId);
-        } else {
+        } elseif (!$isQuoteCart) {
+            // A quote that names no address asks the buyer for it once: no default one is chosen for them.
             $defaultAddresses = array_filter(
                 $this->getAddressList(),
                 static fn (array $address): bool => (bool) $address['isDefault'],
@@ -139,6 +159,59 @@ class Base
 
         $this->invoiceAddressId = $this->cartFacade->getInvoiceAddressId();
         $this->deliveryModuleId = $this->cartFacade->getDeliveryModuleId();
+
+        $quoteCarrier = $this->quoteTerms->carrierToApply($this->cartFacade->getOrCreateFromSession());
+
+        if (null !== $quoteCarrier) {
+            $this->applyQuoteCarrier($quoteCarrier);
+        }
+    }
+
+    /**
+     * The carrier the quote names is written on the cart as the one option the cart is offered.
+     */
+    private function applyQuoteCarrier(int $moduleId): void
+    {
+        foreach ($this->getDeliveryModulesOptions() as $option) {
+            if ($option['moduleId'] === $moduleId) {
+                $this->selectDeliveryModuleOption($option['code'], $moduleId);
+
+                return;
+            }
+        }
+    }
+
+    public function isQuoteCart(): bool
+    {
+        return $this->quoteTerms->isQuoteCart($this->cartFacade->getOrCreateFromSession());
+    }
+
+    public function getImposedCarrierId(): ?int
+    {
+        return $this->quoteTerms->imposedCarrierId($this->cartFacade->getOrCreateFromSession());
+    }
+
+    /**
+     * The address of a quote cart as the buyer reads it, once it can no longer be chosen.
+     *
+     * @return array{name: string, company: string, lines: list<string>, zipcode: string, city: string, country: string}|null
+     */
+    public function getImposedAddress(): ?array
+    {
+        $address = $this->quoteTerms->imposedAddress($this->cartFacade->getOrCreateFromSession());
+
+        if (null === $address) {
+            return null;
+        }
+
+        return [
+            'name' => trim($address->getFirstname().' '.$address->getLastname()),
+            'company' => (string) $address->getCompany(),
+            'lines' => array_values(array_filter([$address->getAddress1(), $address->getAddress2(), $address->getAddress3()], static fn (?string $line): bool => null !== $line && '' !== $line)),
+            'zipcode' => (string) $address->getZipcode(),
+            'city' => (string) $address->getCity(),
+            'country' => (string) $address->getCountry()?->setLocale($this->langService->getLocale())->getTitle(),
+        ];
     }
 
     #[LiveListener('cancelAddressForm')]
@@ -329,14 +402,27 @@ class Base
             return;
         }
 
-        $this->cartFacade->setDeliveryAddress(new CheckoutDTO($this->cartFacade->getOrCreateFromSession()));
+        $isQuoteCart = $this->quoteTerms->isQuoteCart($this->cartFacade->getOrCreateFromSession());
 
-        $this->invoiceAddressId = null;
+        try {
+            $this->cartFacade->setDeliveryAddress(new CheckoutDTO($this->cartFacade->getOrCreateFromSession()));
 
-        $this->cartFacade->setDeliveryModule(new CheckoutDTO(
-            cart: $this->cartFacade->getOrCreateFromSession(),
-            deliveryModuleId: $moduleId,
-        ));
+            $this->invoiceAddressId = null;
+
+            $this->cartFacade->setDeliveryModule(new CheckoutDTO(
+                cart: $this->cartFacade->getOrCreateFromSession(),
+                deliveryModuleId: $moduleId,
+            ));
+        } catch (QuoteDeliveryImposedException $refusal) {
+            $this->quoteDeliveryRefusal = $refusal->getMessage();
+            $this->invoiceAddressId = $this->cartFacade->getInvoiceAddressId();
+            $this->deliveryModuleId = $this->cartFacade->getDeliveryModuleId();
+            $this->emit('updateNextButton');
+
+            return;
+        }
+
+        $this->quoteDeliveryRefusal = null;
 
         $this->session->set('deliveryModuleOption', $optionCode);
         $this->deliveryDateNotice = null;
@@ -344,7 +430,7 @@ class Base
         $this->deliveryModuleId = $moduleId;
         $this->deliveryModuleOptionCode = $optionCode;
 
-        if (strtolower($optionCode) === 'localpickup') {
+        if (strtolower($optionCode) === 'localpickup' && !$isQuoteCart) {
             $this->shippingFacade->setCustomerDefaultDeliveryAddress($this->cartFacade->getOrCreateFromSession());
         }
 
@@ -374,6 +460,12 @@ class Base
                 cart: $cart,
                 deliveryAddressId: $addressId,
             ));
+        } catch (QuoteDeliveryImposedException $refusal) {
+            $this->quoteDeliveryRefusal = $refusal->getMessage();
+            $this->deliveryAddressId = $this->cartFacade->getDeliveryAddressId();
+            $this->emit('updateNextButton');
+
+            return;
         } catch (DestinationRestrictedException $exception) {
             // The buyer's business, not a server error: nothing was written, the step names what to remove.
             $this->restrictedProducts = array_map(static fn ($line): string => $line->label(), $exception->lines);
@@ -384,8 +476,17 @@ class Base
         }
 
         $this->restrictedProducts = [];
+        $this->quoteDeliveryRefusal = null;
         $this->deliveryAddressId = $this->cartFacade->getDeliveryAddressId();
         $this->deliveryDateNotice = null;
+
+        if ($this->quoteTerms->isQuoteCart($cart)) {
+            // The carrier and its postage are the quote's: an address that is the quote's changes neither.
+            $this->emit('syncSummary');
+            $this->emit('updateNextButton');
+
+            return;
+        }
 
         if (null !== $carrierOfTheDay && $this->offersModule($carrierOfTheDay)) {
             // The buyer picked a day: it stays as long as the carrier serves the new address
