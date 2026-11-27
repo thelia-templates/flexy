@@ -24,6 +24,7 @@ use Symfony\Component\AssetMapper\AssetMapperInterface;
 use OpenStudio\UxShowcaseBundle\Library\ComponentLibraryInterface;
 use OpenStudio\UxShowcaseBundle\OpenStudioUxShowcaseBundle;
 use Symfony\Component\AssetMapper\Event\PreAssetsCompileEvent;
+use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -108,7 +109,8 @@ class FlexyBundle extends AbstractBundle
 
     /**
      * The showcase previews at the breakpoints of the theme. Prepended, so the configuration of the
-     * application is merged after it: a width the application names replaces the one of the theme.
+     * application is merged after it, and a `viewports` of the application replaces the whole list.
+     * The stylesheet is a resource of the container, so a changed breakpoint rebuilds it in debug.
      */
     private function prependConfigShowcase(ContainerBuilder $containerBuilder): void
     {
@@ -117,7 +119,13 @@ class FlexyBundle extends AbstractBundle
         }
 
         $variablesDirectory = $this->getFrontTemplateChain($containerBuilder)->nearest('assets/styles/variables.css', is_file(...));
-        $css = null === $variablesDirectory ? '' : (string) file_get_contents($variablesDirectory . '/assets/styles/variables.css');
+        $variablesFile = null === $variablesDirectory ? null : $variablesDirectory . '/assets/styles/variables.css';
+        $css = null === $variablesFile ? '' : (string) file_get_contents($variablesFile);
+
+        if (null !== $variablesFile) {
+            $containerBuilder->addResource(new FileResource($variablesFile));
+        }
+
         $viewports = ShowcaseViewports::fromCss($css);
 
         // Nothing but the responsive entry: no breakpoint to offer, the bundle keeps its own widths.
