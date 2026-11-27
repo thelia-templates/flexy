@@ -104,6 +104,9 @@ final class FlexyLibraryTest extends TestCase
         self::assertContains('Atoms', $groups);
         self::assertContains('Molecules', $groups);
         self::assertSame(['Forms', 'Layouts'], \array_slice($groups, -2));
+        // The pages of the toolkit that are not components come before every category, as there.
+        self::assertSame(['Docs', 'Design tokens', 'Atoms'], \array_slice($groups, 0, 3));
+        self::assertSame($groups, array_values(array_unique($groups)));
     }
 
     public function testItIsTheLibraryNamedFlexyWithTheBarePageOfTheTheme(): void
@@ -134,7 +137,7 @@ final class FlexyLibraryTest extends TestCase
         $moduleStories = new ModuleStories([]);
         $finder = new StoryFinder(new FrontTemplateChain($theme), $moduleStories);
 
-        return new FlexyLibrary($components, $finder, new FlexyExampleProvider($finder, $moduleStories, $components));
+        return new FlexyLibrary($components, $finder, new FlexyExampleProvider($finder, $moduleStories, $components, new FrontTemplateChain($theme)));
     }
 
     /**

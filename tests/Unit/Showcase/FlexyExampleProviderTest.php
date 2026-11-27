@@ -22,6 +22,7 @@ use FlexyBundle\Toolkit\ModuleStories;
 use FlexyBundle\Toolkit\Story;
 use FlexyBundle\Toolkit\StoryFinder;
 use FlexyBundle\Toolkit\StoryProviderInterface;
+use FlexyBundle\Tests\Support\WithChildTheme;
 use OpenStudio\UxShowcaseBundle\Example\Example;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -33,6 +34,8 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 final class FlexyExampleProviderTest extends TestCase
 {
+    use WithChildTheme;
+
     private const THEME = 'flexy';
 
     protected function setUp(): void
@@ -73,7 +76,11 @@ final class FlexyExampleProviderTest extends TestCase
 
     public function testEveryStoryOfTheChainIsAnExampleWithAValidUniqueSlug(): void
     {
-        $examples = iterator_to_array($this->provider([])->getExamples(), false);
+        $provider = $this->provider([]);
+        $examples = array_values(array_filter(
+            iterator_to_array($provider->getExamples(), false),
+            static fn (Example $example): bool => !\in_array($example->group, $provider->pageGroups(), true),
+        ));
         $stories = array_merge(...array_values($this->finder()->groupedComponents()));
         $slugs = array_map(static fn (Example $example): string => $example->slug, $examples);
 
@@ -84,6 +91,53 @@ final class FlexyExampleProviderTest extends TestCase
         foreach ($slugs as $slug) {
             self::assertMatchesRegularExpression(Example::SLUG_PATTERN, $slug);
         }
+    }
+
+    public function testThePagesOfTheToolkitAreDocumentationPagesOfTheirGroupsAndComeFirst(): void
+    {
+        $examples = iterator_to_array($this->provider([])->getExamples(), false);
+
+        self::assertSame(['welcome', 'getting-started', 'breakpoints', 'layout'], \array_slice(array_map(static fn (Example $example): string => $example->slug, $examples), 0, 4));
+        self::assertSame(['Docs', 'Docs', 'Design tokens', 'Design tokens'], \array_slice(array_map(static fn (Example $example): ?string => $example->group, $examples), 0, 4));
+        self::assertNull($examples[0]->component);
+        self::assertSame(['Docs', 'Design tokens'], $this->provider([])->pageGroups());
+        self::assertSame(file_get_contents(FrontTemplateChain::ownDirectory().'/components/Toolkit/welcome.html.twig'), $examples[0]->source);
+    }
+
+    public function testThePageOfTheBreakpointsCarriesTheBreakpointsOfTheTheme(): void
+    {
+        $examples = $this->examplesBySlug([]);
+
+        self::assertStringContainsString('@Flexy/Toolkit/breakpoints.html.twig', (string) $examples['breakpoints']->source);
+        self::assertStringContainsString('{"name":"md","rem":48,"px":768,"label":"Tablet"}', (string) $examples['breakpoints']->source);
+    }
+
+    public function testAHiddenPageOfTheToolkitIsNotAnExample(): void
+    {
+        $this->withChildTheme(
+            [StoryFinder::STATUS_FILE => "<?php\n\nreturn ['Toolkit/layout' => 'hidden', 'Toolkit/breakpoints' => 'hidden', 'Toolkit/welcome' => 'hidden', 'Toolkit/getting-started' => 'hidden'];\n"],
+            function (string $child): void {
+                $moduleStories = new ModuleStories([]);
+                $provider = new FlexyExampleProvider(
+                    new StoryFinder(new FrontTemplateChain($child), $moduleStories),
+                    $moduleStories,
+                    new class([]) extends FlexyComponents {
+                        public function __construct(private readonly array $names)
+                        {
+                        }
+
+                        public function names(): array
+                        {
+                            return $this->names;
+                        }
+                    },
+                    new FrontTemplateChain($child),
+                );
+
+                self::assertSame([], $provider->pageGroups());
+                self::assertNotContains('welcome', array_map(static fn (Example $example): string => $example->slug, iterator_to_array($provider->getExamples(), false)));
+            },
+        );
     }
 
     public function testAHiddenStoryIsNotAnExample(): void
@@ -126,6 +180,7 @@ final class FlexyExampleProviderTest extends TestCase
                         return $this->names;
                     }
                 },
+                new FrontTemplateChain($child),
             ))->getExamples(), false);
             $slugs = array_map(static fn (Example $example): string => $example->slug, $examples);
 
@@ -165,6 +220,7 @@ final class FlexyExampleProviderTest extends TestCase
                         return $this->names;
                     }
                 },
+                new FrontTemplateChain($child),
             ))->getExamples(), false);
             $slugs = array_map(static fn (Example $example): string => $example->slug, $examples);
 
@@ -256,7 +312,7 @@ final class FlexyExampleProviderTest extends TestCase
 
         $moduleStories = new ModuleStories(null === $moduleProvider ? [] : [$moduleProvider]);
 
-        return new FlexyExampleProvider(new StoryFinder(new FrontTemplateChain(self::THEME), $moduleStories), $moduleStories, $components);
+        return new FlexyExampleProvider(new StoryFinder(new FrontTemplateChain(self::THEME), $moduleStories), $moduleStories, $components, new FrontTemplateChain(self::THEME));
     }
 
     private function finder(): StoryFinder

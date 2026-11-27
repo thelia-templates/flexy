@@ -44,7 +44,7 @@ class ToolkitController extends AbstractController
      * `standalone` renders the template whole and shows no status; without it the page is
      * framed like a component, which is what the token pages need.
      */
-    private const array SECTIONS = [
+    public const array SECTIONS = [
         'Docs' => [
             'welcome' => ['name' => 'Welcome', 'standalone' => true],
             'getting-started' => ['name' => 'Getting started', 'standalone' => true],

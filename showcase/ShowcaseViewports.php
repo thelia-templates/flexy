@@ -25,11 +25,11 @@ final class ShowcaseViewports
     private const int PIXELS_PER_REM = 16;
 
     /**
-     * Responsive first, then one width per breakpoint, narrowest first, in pixels.
+     * The breakpoints of the stylesheet, narrowest first, as the toolkit's page of the tokens reads them.
      *
-     * @return array<string, int|null>
+     * @return list<array{name: string, rem: float, px: float, label: string|null}>
      */
-    public static function fromCss(string $css): array
+    public static function breakpointsFromCss(string $css): array
     {
         preg_match_all('/--breakpoint-([\w-]+):\s*([\d.]+)rem/', $css, $matches, \PREG_SET_ORDER);
 
@@ -40,9 +40,28 @@ final class ShowcaseViewports
 
         asort($breakpoints);
 
+        return array_map(
+            static fn (string $name, float $rem): array => [
+                'name' => $name,
+                'rem' => $rem,
+                'px' => $rem * self::PIXELS_PER_REM,
+                'label' => ToolkitController::LABELS[$name] ?? null,
+            ],
+            array_keys($breakpoints),
+            array_values($breakpoints),
+        );
+    }
+
+    /**
+     * Responsive first, then one width per breakpoint, narrowest first, in pixels.
+     *
+     * @return array<string, int|null>
+     */
+    public static function fromCss(string $css): array
+    {
         $viewports = ['responsive' => null];
-        foreach ($breakpoints as $name => $rem) {
-            $viewports[ToolkitController::LABELS[$name] ?? $name] = (int) round($rem * self::PIXELS_PER_REM);
+        foreach (self::breakpointsFromCss($css) as $breakpoint) {
+            $viewports[$breakpoint['label'] ?? $breakpoint['name']] = (int) round($breakpoint['px']);
         }
 
         return $viewports;
