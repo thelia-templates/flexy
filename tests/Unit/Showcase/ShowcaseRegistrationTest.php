@@ -20,6 +20,7 @@ use FlexyBundle\Showcase\FlexyExampleProvider;
 use FlexyBundle\Showcase\FlexyLibrary;
 use FlexyBundle\Showcase\TheliaCheckRequestFactory;
 use OpenStudio\UxShowcaseBundle\Library\ComponentLibraryInterface;
+use OpenStudio\UxShowcaseBundle\OpenStudioUxShowcaseBundle;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Component\Config\FileLocator;
@@ -59,6 +60,18 @@ final class ShowcaseRegistrationTest extends TestCase
         ));
     }
 
+    public function testWithThePackageButNotItsBundleNoShowcaseServiceIsRegistered(): void
+    {
+        // Installed but not registered in this environment: there is no ComponentCatalog to autowire.
+        $builder = $this->load(showcaseInstalled: true, bundleRegistered: false);
+
+        self::assertSame([], array_filter(
+            array_keys($builder->getDefinitions()),
+            static fn (string $id): bool => str_starts_with($id, 'FlexyBundle\\Showcase\\'),
+        ));
+        self::assertTrue($builder->hasDefinition(\FlexyBundle\Toolkit\StoryFinder::class));
+    }
+
     public function testWithoutThePackageTheServicesOfTheThemeAreStillThere(): void
     {
         $builder = $this->load(showcaseInstalled: false);
@@ -79,6 +92,7 @@ final class ShowcaseRegistrationTest extends TestCase
     public function testTheRealGuardFollowsThePackage(): void
     {
         $builder = $this->builder();
+        $builder->setParameter('kernel.bundles', ['OpenStudioUxShowcaseBundle' => OpenStudioUxShowcaseBundle::class]);
 
         (new FlexyBundle())->loadExtension([], $this->configurator($builder), $builder);
 
@@ -128,9 +142,10 @@ final class ShowcaseRegistrationTest extends TestCase
         self::assertSame([], $builder->getExtensionConfig('ux_showcase'));
     }
 
-    private function load(bool $showcaseInstalled): ContainerBuilder
+    private function load(bool $showcaseInstalled, bool $bundleRegistered = true): ContainerBuilder
     {
         $builder = $this->builder();
+        $builder->setParameter('kernel.bundles', $bundleRegistered ? ['OpenStudioUxShowcaseBundle' => OpenStudioUxShowcaseBundle::class] : []);
         $bundle = new class($showcaseInstalled) extends FlexyBundle {
             public function __construct(private readonly bool $showcaseInstalled)
             {
