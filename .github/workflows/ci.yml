@@ -88,6 +88,18 @@ jobs:
           COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
+      - name: Install the component showcase package the adapter implements
+        # The theme only suggests openstudio/ux-showcase-bundle, and the unit tests of its adapter
+        # (src/Showcase/) skip themselves while the package is missing. It is not on Packagist yet:
+        # a vcs repository stands in (`no-api`, so Composer clones it instead of calling the GitHub
+        # API). This step goes away once the package is published and required by the host.
+        working-directory: thelia
+        env:
+          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ github.token }}"}}'
+        run: |
+          composer config repositories.ux-showcase '{"type":"vcs","url":"https://github.com/openstudio-fr/ux-showcase-bundle","no-api":true}'
+          composer require --no-progress --no-interaction "openstudio/ux-showcase-bundle:^0.2.3"
+
       - name: Restore the project schema the config package overwrote
         # Same step as the core CI: the thelia/config package installs into local/
         # and replaces the version-controlled local/config/schema.xml, which carries
