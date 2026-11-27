@@ -105,6 +105,16 @@ final class FlexyExampleProviderTest extends TestCase
         self::assertSame(file_get_contents(FrontTemplateChain::ownDirectory().'/components/Toolkit/welcome.html.twig'), $examples[0]->source);
     }
 
+    public function testTheStandalonePagesOfTheToolkitArePreviewedWithoutItsCanvasAndTheOthersWithIt(): void
+    {
+        $bodyClasses = [];
+        foreach (\array_slice(iterator_to_array($this->provider([])->getExamples(), false), 0, 4) as $example) {
+            $bodyClasses[$example->slug] = $example->preview->bodyClass;
+        }
+
+        self::assertSame(['welcome' => 'Toolkit-standalone', 'getting-started' => 'Toolkit-standalone', 'breakpoints' => null, 'layout' => null], $bodyClasses);
+    }
+
     public function testThePageOfTheBreakpointsCarriesTheBreakpointsOfTheTheme(): void
     {
         $examples = $this->examplesBySlug([]);

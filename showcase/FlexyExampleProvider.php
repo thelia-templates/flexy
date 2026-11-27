@@ -114,6 +114,9 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
                 title: $page['name'],
                 source: $page['source'],
                 group: $page['group'],
+                // A standalone page is laid out whole in the toolkit, without the white canvas of the
+                // other pages: the bare page of the showcase drops the canvas under this class.
+                preview: new PreviewOptions(bodyClass: $page['standalone'] ? 'Toolkit-standalone' : null),
             );
         }
 
@@ -196,7 +199,7 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
      * The pages of the toolkit that are not components, as `buildPages()` of its controller keeps them:
      * the ones whose template is there and that are not `hidden`.
      *
-     * @return list<array{slug: string, name: string, group: string, source: string, status: string|null}>
+     * @return list<array{slug: string, name: string, group: string, source: string, status: string|null, standalone: bool}>
      */
     private function pages(): array
     {
@@ -217,7 +220,7 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
                     ? $this->breakpointsSource($breakpoints ??= $this->breakpoints())
                     : (string) file_get_contents($directory.'/components/Toolkit/'.$slug.'.html.twig');
 
-                $pages[] = ['slug' => $slug, 'name' => $section['name'], 'group' => (string) $group, 'source' => $source, 'status' => $this->storyFinder->statusOf('Toolkit/'.$slug)];
+                $pages[] = ['slug' => $slug, 'name' => $section['name'], 'group' => (string) $group, 'source' => $source, 'status' => $this->storyFinder->statusOf('Toolkit/'.$slug), 'standalone' => $section['standalone'] ?? false];
             }
         }
 
