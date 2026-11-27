@@ -1,11 +1,20 @@
+{# @prop text string Text of the button #}
 {% props
+    ## ?string Name of the icon before the text
     icon_left = null,
+    ## ?string Name of the icon after the text
     icon_right = null,
+    ## 'base'|'secondary'|'minimal'|'error'|'raised'|null Colour variant; base when left empty
     color = null,
+    ## 'large'|'small'|null Size; the default size when left empty
     size = null,
+    ## bool Takes the whole width of its container
     fill = false,
+    ## bool Rectangular corners
     rectangle = false,
+    ## bool Sharp corners
     sharp = false,
+    ## bool Round button, for an icon alone
     round = false,
 %}
 {% set button = html_cva(
