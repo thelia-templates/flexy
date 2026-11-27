@@ -14,3 +14,11 @@
     <link rel="stylesheet" href="{{ asset('styles/toolkit.css') }}" blocking="render">
     {{ importmap('app') }}
 {% endblock %}
+
+{# The toolkit frames each story in a white canvas with an inner margin (`.Toolkit-canvas`, in
+   toolkit.css), on the tinted page: the example is framed the same way here. #}
+{% block content %}
+    <div style="padding: 1rem;">
+        <div class="Toolkit-canvas">{{ content }}</div>
+    </div>
+{% endblock %}
