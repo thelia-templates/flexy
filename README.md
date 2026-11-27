@@ -250,8 +250,6 @@ The theme can list its components in [`openstudio/ux-showcase-bundle`](https://g
 ddev composer require --dev openstudio/ux-showcase-bundle
 ```
 
-(Add its GitHub repository to Composer as a `vcs` repository while it is not on Packagist.)
-
 Register the bundle and import its routes as the package describes (`/_showcase` is served only while the kernel runs in debug). The theme then brings, with nothing to configure:
 
 - a `flexy` library: the components of `components/`, one group per top-level directory (alphabetical, `Forms` and `Layouts` last), with the status the toolkit gives them (`story-statuses.php` included, `hidden` ones are left out);
