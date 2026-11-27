@@ -22,6 +22,7 @@ use FlexyBundle\Showcase\ShowcaseViewports;
 use FlexyBundle\Template\FrontTemplateChain;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
 use OpenStudio\UxShowcaseBundle\Library\ComponentLibraryInterface;
+use OpenStudio\UxShowcaseBundle\OpenStudioUxShowcaseBundle;
 use Symfony\Component\AssetMapper\Event\PreAssetsCompileEvent;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -55,7 +56,7 @@ class FlexyBundle extends AbstractBundle
         $this->importServices($container);
         $this->registerTemplateChainIcons($container, $builder);
         $this->registerTailwindMinifiedBuildListener($container, $builder);
-        $this->registerShowcaseLibrary($container);
+        $this->registerShowcaseLibrary($container, $builder);
     }
 
 
@@ -75,12 +76,14 @@ class FlexyBundle extends AbstractBundle
 
     /**
      * The component showcase is a suggestion, not a requirement: the adapter implements its
-     * interfaces, so it is registered only where they exist. `interface_exists`, not `class_exists`,
-     * which answers false for an interface.
+     * interfaces, so it is registered only where they exist (`interface_exists`, not `class_exists`,
+     * which answers false for an interface) and where its bundle is registered in this environment.
+     * A package that is installed but whose bundle is not (declared for `dev` only, or forgotten)
+     * has no `ComponentCatalog` service: the adapter would autowire a service that is not there.
      */
-    private function registerShowcaseLibrary(ContainerConfigurator $containerConfigurator): void
+    private function registerShowcaseLibrary(ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void
     {
-        if (!$this->isShowcaseInstalled()) {
+        if (!$this->isShowcaseInstalled() || !$this->isShowcaseBundleRegistered($containerBuilder)) {
             return;
         }
 
@@ -90,6 +93,17 @@ class FlexyBundle extends AbstractBundle
     protected function isShowcaseInstalled(): bool
     {
         return interface_exists(ComponentLibraryInterface::class);
+    }
+
+    /**
+     * loadExtension() runs in a temporary container that holds this bundle's extension alone, so the
+     * bundles of the kernel are read; the extension is asked too, for a container that has it.
+     */
+    private function isShowcaseBundleRegistered(ContainerBuilder $containerBuilder): bool
+    {
+        $bundles = $containerBuilder->hasParameter('kernel.bundles') ? $containerBuilder->getParameter('kernel.bundles') : [];
+
+        return \in_array(OpenStudioUxShowcaseBundle::class, $bundles, true) || $containerBuilder->hasExtension('ux_showcase');
     }
 
     /**
