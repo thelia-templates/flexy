@@ -18,6 +18,7 @@ use FlexyBundle\DependencyInjection\Compiler\BundleServicesPass;
 use FlexyBundle\DependencyInjection\Compiler\SubscriptionServicesPass;
 use FlexyBundle\DependencyInjection\Compiler\TwigComponentDebugDirectoryPass;
 use FlexyBundle\EventListener\TailwindMinifiedBuildListener;
+use FlexyBundle\Showcase\ShowcaseBackgrounds;
 use FlexyBundle\Showcase\ShowcaseLogoPass;
 use FlexyBundle\Showcase\ShowcasePrimaryColour;
 use FlexyBundle\Showcase\ShowcaseViewports;
@@ -138,6 +139,14 @@ class FlexyBundle extends AbstractBundle
         // Nothing but the responsive entry: no breakpoint to offer, the bundle keeps its own widths.
         if (\count($viewports) >= 2) {
             $config['viewports'] = $viewports;
+        }
+
+        // The body of the theme repaints its own colour over the one the showcase sets: the default
+        // list (light, white, dark) would offer choices that change nothing. Replaced as a whole.
+        $backgrounds = ShowcaseBackgrounds::fromCss($css);
+
+        if ([] !== $backgrounds) {
+            $config['backgrounds'] = $backgrounds;
         }
 
         // `theme` exists from 0.3.0 of the package; an older one would fail on the unknown key.
