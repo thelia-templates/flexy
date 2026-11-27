@@ -109,6 +109,53 @@ final class FlexyLibraryTest extends TestCase
         self::assertSame($groups, array_values(array_unique($groups)));
     }
 
+    private const COMPONENTS_WITH_PROPS = ['Fields:Input:Base', 'Molecules:Button:Base', 'Molecules:Price:Base', 'Molecules:SnackBar:Base', 'Molecules:Tag:Base'];
+
+    public function testTheComponentsWithPropsHaveExamplesThatTheTryFormCanEdit(): void
+    {
+        $byComponent = [];
+
+        foreach ($this->library([])->getExampleProviders() as $provider) {
+            foreach ($provider->getExamples() as $example) {
+                if (!$example->isFree()) {
+                    $byComponent[$example->component][] = $example;
+                }
+            }
+        }
+
+        $components = array_keys($byComponent);
+        sort($components);
+        self::assertSame(self::COMPONENTS_WITH_PROPS, $components);
+
+        foreach ($byComponent as $component => $examples) {
+            $template = (string) file_get_contents(\dirname(__DIR__, 3).'/components/'.str_replace(':', '/', $component).'.html.twig');
+
+            foreach ($examples as $example) {
+                self::assertNotSame([], $example->props, $example->slug);
+
+                foreach (array_keys($example->props) as $prop) {
+                    // A prop the form accepts has a declared type: `## <type>` before it, or `@prop`.
+                    self::assertMatchesRegularExpression('/(##\s+\S+[^\n]*\n\s*'.preg_quote($prop, '/').'\b|@prop\s+'.preg_quote($prop, '/').'\s+\S+)/', $template, $component.' / '.$prop);
+                }
+            }
+        }
+    }
+
+    public function testTheExamplesWithPropsAreAddedToTheFreeStoriesNotInsteadOfThem(): void
+    {
+        $slugs = [];
+
+        foreach ($this->library(['Molecules:Button:Base'])->getExampleProviders() as $provider) {
+            foreach ($provider->getExamples() as $example) {
+                if ('Molecules:Button:Base' === $example->component) {
+                    $slugs[$example->slug] = $example->isFree();
+                }
+            }
+        }
+
+        self::assertSame(['molecules-button' => true, 'button' => false, 'button-secondary' => false], $slugs);
+    }
+
     public function testItIsTheLibraryNamedFlexyWithTheBarePageOfTheTheme(): void
     {
         $library = $this->library([]);
