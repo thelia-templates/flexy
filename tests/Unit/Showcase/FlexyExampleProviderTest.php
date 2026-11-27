@@ -16,6 +16,7 @@ namespace FlexyBundle\Tests\Unit\Showcase;
 
 use FlexyBundle\Showcase\FlexyComponents;
 use FlexyBundle\Showcase\FlexyExampleProvider;
+use FlexyBundle\Showcase\FlexyLibrary;
 use FlexyBundle\Template\FrontTemplateChain;
 use FlexyBundle\Toolkit\ComponentStatus;
 use FlexyBundle\Toolkit\ModuleStories;
@@ -112,7 +113,8 @@ final class FlexyExampleProviderTest extends TestCase
             $bodyClasses[$example->slug] = $example->preview->bodyClass;
         }
 
-        self::assertSame(['welcome' => 'Toolkit-standalone', 'getting-started' => 'Toolkit-standalone', 'breakpoints' => null, 'layout' => null], $bodyClasses);
+        $standalone = FlexyLibrary::showcaseDrawsTheBlock() ? null : 'Toolkit-standalone';
+        self::assertSame(['welcome' => $standalone, 'getting-started' => $standalone, 'breakpoints' => null, 'layout' => null], $bodyClasses, 'Where the showcase draws its block, every page sits in it.');
     }
 
     public function testThePageOfTheBreakpointsCarriesTheBreakpointsOfTheTheme(): void
