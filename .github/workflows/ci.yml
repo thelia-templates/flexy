@@ -30,7 +30,7 @@ jobs:
         run: find src components -name '*.php' -print0 | xargs -0 -n1 -P4 php -l
 
   theme:
-    name: Theme in a Thelia checkout (PHP ${{ matrix.php }})
+    name: Theme in a Thelia checkout (PHP ${{ matrix.php }}, showcase ${{ matrix.showcase }})
     runs-on: ubuntu-latest
     # A leaked DB transaction once kept a core DDL test waiting on a metadata
     # lock until the runner limit; keep the same guard here.
@@ -42,6 +42,9 @@ jobs:
         # on. Keeping both is what catches a dependency that resolves to a
         # different release depending on the interpreter (see #152).
         php: [ '8.3', '8.4' ]
+        # The component showcase is only a suggestion of the theme: the build and the tests run
+        # both with the package and without it.
+        showcase: [ 'with', 'without' ]
     steps:
       - name: Checkout the theme
         uses: actions/checkout@v4
@@ -89,6 +92,7 @@ jobs:
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
       - name: Install the component showcase package the adapter implements
+        if: matrix.showcase == 'with'
         # The theme only suggests openstudio/ux-showcase-bundle, and the unit tests of its adapter
         # (src/Showcase/) skip themselves while the package is missing. It is not on Packagist yet:
         # a vcs repository stands in (`no-api`, so Composer clones it instead of calling the GitHub
