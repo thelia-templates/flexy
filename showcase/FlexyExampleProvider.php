@@ -17,6 +17,7 @@ namespace FlexyBundle\Showcase;
 use OpenStudio\UxShowcaseBundle\Example\Example;
 use OpenStudio\UxShowcaseBundle\Example\ExampleProviderInterface;
 use OpenStudio\UxShowcaseBundle\Example\PreviewOptions;
+use OpenStudio\UxShowcaseBundle\Library\ComponentStatus as ShowcaseStatus;
 use FlexyBundle\Controller\ToolkitController;
 use FlexyBundle\Template\FrontTemplateChain;
 use FlexyBundle\Toolkit\ComponentStatus;
@@ -107,6 +108,7 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
     {
         foreach ($this->pages() as $page) {
             yield new Example(
+                ...self::statusArguments($page['status']),
                 component: null,
                 slug: $page['slug'],
                 title: $page['name'],
@@ -143,7 +145,9 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
                 $slug = trim(strtolower(preg_replace('/[^a-z0-9]+/i', '-', $story['slug']) ?? ''), '-');
                 $component = isset($moduleSlugs[$story['slug']]) ? null : $this->baseComponentOf($story['twigPath'], $components);
 
+                // The package refuses a status on the example of a component: only a page of documentation has one.
                 yield new Example(
+                    ...(null === $component ? self::statusArguments($story['status']) : []),
                     component: $component,
                     slug: $slug,
                     title: $story['name'],
@@ -156,10 +160,43 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
     }
 
     /**
+     * The status the toolkit shows beside a documentation page, as the named argument of `Example`.
+     *
+     * `status` exists from 0.3.1 of the package: an older one fails on the unknown named argument, so
+     * it is passed only where the constructor takes it. Nothing when the toolkit gives the page no
+     * status, or one the showcase does not show on a page (`hidden` is a page that is not listed).
+     *
+     * @param bool|null $exampleTakesAStatus whether the installed package knows the argument; read from `Example` when null
+     *
+     * @return array{status?: ShowcaseStatus}
+     */
+    public static function statusArguments(?string $status, ?bool $exampleTakesAStatus = null): array
+    {
+        if (null === $status || !($exampleTakesAStatus ?? self::exampleTakesAStatus())) {
+            return [];
+        }
+
+        $showcaseStatus = ShowcaseStatus::tryFrom($status);
+
+        return null === $showcaseStatus || ShowcaseStatus::Hidden === $showcaseStatus ? [] : ['status' => $showcaseStatus];
+    }
+
+    public static function exampleTakesAStatus(): bool
+    {
+        foreach ((new \ReflectionClass(Example::class))->getConstructor()?->getParameters() ?? [] as $parameter) {
+            if ('status' === $parameter->getName()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * The pages of the toolkit that are not components, as `buildPages()` of its controller keeps them:
      * the ones whose template is there and that are not `hidden`.
      *
-     * @return list<array{slug: string, name: string, group: string, source: string}>
+     * @return list<array{slug: string, name: string, group: string, source: string, status: string|null}>
      */
     private function pages(): array
     {
@@ -180,7 +217,7 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
                     ? $this->breakpointsSource($breakpoints ??= $this->breakpoints())
                     : (string) file_get_contents($directory.'/components/Toolkit/'.$slug.'.html.twig');
 
-                $pages[] = ['slug' => $slug, 'name' => $section['name'], 'group' => (string) $group, 'source' => $source];
+                $pages[] = ['slug' => $slug, 'name' => $section['name'], 'group' => (string) $group, 'source' => $source, 'status' => $this->storyFinder->statusOf('Toolkit/'.$slug)];
             }
         }
 

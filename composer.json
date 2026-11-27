@@ -40,7 +40,7 @@
         "nikic/php-parser": "^5.0"
     },
     "suggest": {
-        "openstudio/ux-showcase-bundle": "^0.3.0 Lists the components of the theme in a component showcase, next to the toolkit"
+        "openstudio/ux-showcase-bundle": "^0.3.1 Lists the components of the theme in a component showcase, next to the toolkit"
     },
     "conflict": {
         "thelia/thelia-skeleton": "<3.2"
