@@ -23,6 +23,7 @@ use OpenStudio\UxShowcaseBundle\Library\ComponentLibraryInterface;
 use OpenStudio\UxShowcaseBundle\OpenStudioUxShowcaseBundle;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -144,6 +145,43 @@ final class ShowcaseRegistrationTest extends TestCase
         self::assertSame('Flexy', $config[0]['title']);
         self::assertNull($config[0]['viewports']['responsive']);
         self::assertSame(768, $config[0]['viewports']['Tablet']);
+    }
+
+    public function testThePrimaryColourOfTheThemeIsPrependedOnlyWhereThePackageKnowsIt(): void
+    {
+        $builder = $this->builder();
+        $builder->registerExtension($this->extension('ux_showcase'));
+
+        (new FlexyBundle())->prependExtension($this->configurator($builder), $builder);
+
+        $config = $builder->getExtensionConfig('ux_showcase')[0];
+
+        if (property_exists('OpenStudio\\UxShowcaseBundle\\ShowcaseConfiguration', 'primaryColor')) {
+            self::assertSame(['primary_color' => '#ff4822'], $config['theme']);
+        } else {
+            self::assertArrayNotHasKey('theme', $config, 'An older package fails on the unknown key.');
+        }
+    }
+
+    public function testThePrimaryColourOfTheApplicationWinsOverTheOneOfTheTheme(): void
+    {
+        if (!property_exists('OpenStudio\\UxShowcaseBundle\\ShowcaseConfiguration', 'primaryColor')) {
+            self::markTestSkipped('The installed showcase package has no theme.primary_color.');
+        }
+
+        $bundle = new OpenStudioUxShowcaseBundle();
+        $extension = $bundle->getContainerExtension();
+        $builder = $this->builder();
+        $builder->registerExtension($extension);
+
+        (new FlexyBundle())->prependExtension($this->configurator($builder), $builder);
+        $builder->loadFromExtension('ux_showcase', ['theme' => ['primary_color' => 'rebeccapurple']]);
+
+        $configs = $builder->getExtensionConfig('ux_showcase');
+        $merged = (new Processor())->processConfiguration($extension->getConfiguration([], $builder), $configs);
+
+        self::assertSame('rebeccapurple', $merged['theme']['primary_color']);
+        self::assertSame('Flexy', $merged['title']);
     }
 
     public function testNoShowcaseConfigurationIsPrependedWhenTheExtensionIsNotThere(): void
