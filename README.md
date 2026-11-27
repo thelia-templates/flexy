@@ -250,14 +250,14 @@ The theme can list its components in [`openstudio/ux-showcase-bundle`](https://g
 ddev composer require --dev openstudio/ux-showcase-bundle
 ```
 
-Register the bundle and import its routes as the package describes (`/_showcase` is served only while the kernel runs in debug). The theme then brings, with nothing to configure:
+A Thelia that registers the showcase in its core (3.5 and later) needs nothing more: `/_showcase` opens while the kernel runs in debug, and on a live shop to the people `ux_showcase.access` lets in (`Thelia\Core\Security\Showcase\AdministratorShowcaseAccess` for the back-office administrators); everyone else gets a 404. On an older Thelia, register the bundle and import its routes as the package describes. The theme then brings, with nothing to configure:
 
 - a `flexy` library: the components of `components/`, one group per top-level directory (alphabetical, `Forms` and `Layouts` last), with the status the toolkit gives them (`story-statuses.php` included, `hidden` ones are left out);
 - one free example per `toolkit.html.twig` story, attached to the `<Path>:Base` component of its directory (`Molecules/Button` to `Molecules:Button:Base`), or a documentation page of its category when the directory has none. The stories of the modules (`StoryProviderInterface`) become documentation pages in the category they declare;
 - a bare preview page that loads the stylesheets and scripts of the shop pages and `toolkit.css`;
 - the breakpoints of `assets/styles/variables.css` as preview widths, in the toolkit's words (`Tablet`, `Desktop`...). A `ux_showcase.viewports` of your own replaces the whole list, the theme's included: declare every width you want to keep;
 - no preview background: the `<body>` of the theme paints its own page colour over the one the showcase sets, so a light, white or dark choice would change nothing, and the showcase hides its background selector. An application that declares `ux_showcase.backgrounds` gets its own list (it replaces the theme's, which is empty). Needs 0.3.2 of the package; an older one keeps its default list;
-- examples with props for the button, the tag, the message (`SnackBar`), the text field (`Fields:Input:Base`) and the price, so these components have a Props tab and a Try form. They are `showcase/examples/<Path>/<Component>.showcase.twig` files; the types of the props are the `##` comments of their `{% props %}`;
+- examples with props for the button, the tag, the message (`SnackBar`), the text field (`Fields:Input:Base`) and the price, so these components have their props and a Try form. They are `showcase/examples/<Path>/<Component>.showcase.twig` files; the types of the props are the `##` comments of their `{% props %}`;
 - the status the toolkit shows beside a documentation page (`Welcome`, `Getting started`, the pages of the modules), from 0.3.1 of the package; a page with none shows no badge.
 
 The examples that read the shop's catalogue (a product, a category, a content, the menus) are marked `needs_data`: `bin/console ux-showcase:check` skips them unless it is given `--with-data`. The list is `FlexyExampleProvider::NEEDS_DATA`.
