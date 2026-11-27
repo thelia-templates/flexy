@@ -19,6 +19,7 @@ use FlexyBundle\DependencyInjection\Compiler\SubscriptionServicesPass;
 use FlexyBundle\DependencyInjection\Compiler\TwigComponentDebugDirectoryPass;
 use FlexyBundle\EventListener\TailwindMinifiedBuildListener;
 use FlexyBundle\Showcase\ShowcaseLogoPass;
+use FlexyBundle\Showcase\ShowcasePageBackground;
 use FlexyBundle\Showcase\ShowcasePrimaryColour;
 use FlexyBundle\Showcase\ShowcaseViewports;
 use FlexyBundle\Template\FrontTemplateChain;
@@ -152,10 +153,19 @@ class FlexyBundle extends AbstractBundle
             $config['backgrounds'] = [];
         }
 
-        // `theme` exists from 0.3.0 of the package; an older one would fail on the unknown key.
+        // `theme` exists from 0.3.0 of the package, its `page_background` from 0.3.4; an older one would
+        // fail on the unknown key. The page background is the colour the toolkit lays its pages on.
+        $theme = [];
         $primaryColour = ShowcasePrimaryColour::fromCss($css);
         if (null !== $primaryColour && property_exists('OpenStudio\\UxShowcaseBundle\\ShowcaseConfiguration', 'primaryColor')) {
-            $config['theme'] = ['primary_color' => $primaryColour];
+            $theme['primary_color'] = $primaryColour;
+        }
+        $pageBackground = ShowcasePageBackground::fromCss($css);
+        if (null !== $pageBackground && property_exists('OpenStudio\\UxShowcaseBundle\\ShowcaseConfiguration', 'pageBackground')) {
+            $theme['page_background'] = $pageBackground;
+        }
+        if ([] !== $theme) {
+            $config['theme'] = $theme;
         }
 
         $containerBuilder->prependExtensionConfig('ux_showcase', $config);

@@ -157,7 +157,12 @@ final class ShowcaseRegistrationTest extends TestCase
         $config = $builder->getExtensionConfig('ux_showcase')[0];
 
         if (property_exists('OpenStudio\\UxShowcaseBundle\\ShowcaseConfiguration', 'primaryColor')) {
-            self::assertSame(['primary_color' => '#ff4822'], $config['theme']);
+            self::assertSame('#ff4822', $config['theme']['primary_color']);
+            if (property_exists('OpenStudio\\UxShowcaseBundle\\ShowcaseConfiguration', 'pageBackground')) {
+                self::assertSame('#fff5f1', $config['theme']['page_background']);
+            } else {
+                self::assertArrayNotHasKey('page_background', $config['theme'], 'A package older than 0.3.4 fails on the unknown key.');
+            }
         } else {
             self::assertArrayNotHasKey('theme', $config, 'An older package fails on the unknown key.');
         }
