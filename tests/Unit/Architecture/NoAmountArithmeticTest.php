@@ -29,7 +29,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * The theme chooses between a price with the taxes and a price without, and calculates nothing:
  * every amount it prints is one the core published, in both forms. This test reads the
- * places where an amount is handled (the services and the component classes: all of `src` and `components`) and fails
+ * places where an amount is handled (the services and the component classes: all of `src`, `components` and `showcase`) and fails
  * on any arithmetic applied to one: an operator, a rounding, a bound.
  *
  * An expression counts as an amount when its source names one (price, total, discount, tax,
@@ -105,7 +105,7 @@ final class NoAmountArithmeticTest extends TestCase
         $themeDirectory = \dirname(__DIR__, 3);
         $files = [];
 
-        foreach (['components', 'src'] as $directory) {
+        foreach (['components', 'showcase', 'src'] as $directory) {
             $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($themeDirectory.'/'.$directory, \FilesystemIterator::SKIP_DOTS));
 
             foreach ($iterator as $file) {
