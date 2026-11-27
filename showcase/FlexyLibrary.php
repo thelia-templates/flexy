@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace FlexyBundle\Showcase;
 
-use FlexyBundle\Toolkit\ComponentStatus as ToolkitStatus;
 use FlexyBundle\Toolkit\StoryFinder;
 use OpenStudio\UxShowcaseBundle\Example\PreviewOptions;
 use OpenStudio\UxShowcaseBundle\Library\ComponentLibraryInterface;
@@ -27,7 +26,7 @@ use OpenStudio\UxShowcaseBundle\Library\ComponentStatus;
  * categories the modules add.
  *
  * The status of a component is the one of its directory in the toolkit (`ready`, `waiting`,
- * `hidden`), whatever template of the chain declares it.
+ * `hidden`), whatever template of the chain declares it; none when the toolkit declares none.
  */
 final readonly class FlexyLibrary implements ComponentLibraryInterface
 {
@@ -64,7 +63,7 @@ final readonly class FlexyLibrary implements ComponentLibraryInterface
             $references[] = new ComponentReference(
                 $name,
                 $segments[0],
-                ComponentStatus::tryFrom($this->storyFinder->statusOf($directory) ?? ToolkitStatus::READY) ?? ComponentStatus::Ready,
+                $this->statusOf($directory),
                 self::labelOf($name, $segments),
             );
         }
@@ -95,6 +94,16 @@ final readonly class FlexyLibrary implements ComponentLibraryInterface
     public function getPreviewOptions(): PreviewOptions
     {
         return new PreviewOptions();
+    }
+
+    /**
+     * Null where the toolkit declares nothing: the showcase then shows no badge, as the toolkit does.
+     */
+    private function statusOf(string $directory): ?ComponentStatus
+    {
+        $status = $this->storyFinder->statusOf($directory);
+
+        return null === $status ? null : ComponentStatus::tryFrom($status);
     }
 
     /**

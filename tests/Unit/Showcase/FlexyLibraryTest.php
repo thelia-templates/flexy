@@ -68,11 +68,18 @@ final class FlexyLibraryTest extends TestCase
         self::assertSame('Summary / Mini', $references['Organisms:Summary:Mini']->label);
     }
 
-    public function testAComponentWithNoDeclaredStatusIsReady(): void
+    public function testAComponentTheToolkitDeclaresNoStatusForHasNone(): void
     {
         $references = $this->referencesByName($this->library(['Molecules:Button:Base']));
 
-        self::assertSame(ComponentStatus::Ready, $references['Molecules:Button:Base']->status);
+        self::assertNull($references['Molecules:Button:Base']->status);
+    }
+
+    public function testAComponentTheToolkitDeclaresReadyIsReady(): void
+    {
+        $references = $this->referencesByName($this->library(['Atoms:TaxMention:Base']));
+
+        self::assertSame(ComponentStatus::Ready, $references['Atoms:TaxMention:Base']->status);
     }
 
     public function testTheStatusOfTheDirectoryIsTheOneOfTheComponent(): void
@@ -85,7 +92,7 @@ final class FlexyLibraryTest extends TestCase
                 self::assertSame(ComponentStatus::Waiting, $references['Molecules:Button:Quantity']->status);
                 // Hidden stays a status: the showcase is the one that leaves the component out.
                 self::assertSame(ComponentStatus::Hidden, $references['Molecules:Tag:Base']->status);
-                self::assertSame(ComponentStatus::Ready, $references['Molecules:Card:Base']->status);
+                self::assertNull($references['Molecules:Card:Base']->status);
             },
         );
     }
