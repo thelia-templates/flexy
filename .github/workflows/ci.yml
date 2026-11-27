@@ -154,3 +154,18 @@ jobs:
         # a new one comes from the theme or from a dependency.
         working-directory: thelia
         run: composer test:http-flexy -- --display-deprecations
+
+  theme-result:
+    # The branch rulesets require "Theme in a Thelia checkout (PHP 8.3|8.4)". The showcase axis of
+    # the theme matrix changes the job names, so this job reports the required names, green only
+    # when every variant of the theme job passed.
+    name: Theme in a Thelia checkout (PHP ${{ matrix.php }})
+    needs: theme
+    if: always()
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [ '8.3', '8.4' ]
+    steps:
+      - name: Every variant of the theme job passed
+        run: test "${{ needs.theme.result }}" = success
