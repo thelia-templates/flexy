@@ -1,7 +1,7 @@
-{# @prop variant string 'neutral-light'|'neutral-dark'|'error'|'warning'|'success'|'informative' #}
+{# @prop variant 'neutral-light'|'neutral-dark'|'error'|'warning'|'success'|'informative' Colour variant of the message #}
 {# @prop withIcon bool Show a variant-matched icon (no icon for neutral-light/neutral-dark) #}
 {# @prop text string Message, rendered raw #}
-{# @prop button string|null Optional secondary button label #}
+{# @prop button ?string Optional secondary button label #}
 {% props variant = 'neutral-light', withIcon = false, text = '', button = null %}
 
 {% set icon = {

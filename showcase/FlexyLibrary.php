@@ -16,6 +16,7 @@ namespace FlexyBundle\Showcase;
 
 use FlexyBundle\Toolkit\StoryFinder;
 use OpenStudio\UxShowcaseBundle\Example\PreviewOptions;
+use OpenStudio\UxShowcaseBundle\Example\TwigExampleFileProvider;
 use OpenStudio\UxShowcaseBundle\Library\ComponentLibraryInterface;
 use OpenStudio\UxShowcaseBundle\Library\ComponentReference;
 use OpenStudio\UxShowcaseBundle\Library\ComponentStatus;
@@ -34,6 +35,9 @@ final readonly class FlexyLibrary implements ComponentLibraryInterface
 
     /** A template of the theme: the bare page loads the stylesheets and scripts of the shop pages. */
     public const string BARE_TEMPLATE = '@Flexy/Toolkit/_showcase-bare.html.twig';
+
+    /** The examples with props, in the convention of the package: the path is the name of the component. */
+    public const string EXAMPLES_DIRECTORY = __DIR__ . '/examples';
 
     public function __construct(
         private FlexyComponents $components,
@@ -81,7 +85,12 @@ final readonly class FlexyLibrary implements ComponentLibraryInterface
 
     public function getExampleProviders(): iterable
     {
+        // The stories of the toolkit, as free examples.
         yield $this->exampleProvider;
+
+        // A few components with props, so that the Props tab and the Try form exist: one
+        // `<Category>/<Component>/<Variant>.showcase.twig` per component, next to nothing of its template.
+        yield new TwigExampleFileProvider(self::EXAMPLES_DIRECTORY);
     }
 
     public function getWrapperTemplate(): ?string
