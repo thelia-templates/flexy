@@ -13,6 +13,9 @@
     <link rel="stylesheet" href="{{ asset('styles/app.css') }}" blocking="render">
     <link rel="stylesheet" href="{{ asset('styles/toolkit.css') }}" blocking="render">
     {{ importmap('app') }}
+    {# The welcome and getting started pages open on their own title, which the page of the
+       showcase already shows above the preview, status included: the toolkit keeps it. #}
+    <style>.Toolkit-sectionTitle { display: none; }</style>
 {% endblock %}
 
 {# The toolkit frames each story in a white canvas with an inner margin (`.Toolkit-canvas`, in
