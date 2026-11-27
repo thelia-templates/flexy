@@ -108,15 +108,17 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
                     throw new \RuntimeException(\sprintf('The story "%s" cannot be read: "%s".', $story['name'], $story['path']));
                 }
 
+                // The story slug keeps the case and the underscores of a directory name: a slug of the showcase does not.
+                $slug = trim(strtolower(preg_replace('/[^a-z0-9]+/i', '-', $story['slug']) ?? ''), '-');
                 $component = isset($moduleSlugs[$story['slug']]) ? null : $this->baseComponentOf($story['twigPath'], $components);
 
                 yield new Example(
                     component: $component,
-                    slug: $story['slug'],
+                    slug: $slug,
                     title: $story['name'],
                     source: $source,
                     group: null === $component ? (string) $category : null,
-                    preview: new PreviewOptions(needsData: \in_array($story['slug'], self::NEEDS_DATA, true) ? true : null),
+                    preview: new PreviewOptions(needsData: \in_array($slug, self::NEEDS_DATA, true) ? true : null),
                 );
             }
         }
