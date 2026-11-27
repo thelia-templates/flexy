@@ -43,7 +43,11 @@
         "openstudio/ux-showcase-bundle": "^0.3.0 Lists the components of the theme in a component showcase, next to the toolkit"
     },
     "conflict": {
-        "thelia/thelia-skeleton": "<3.2"
+        "symfony/ux-icons": "<2.36.3",
+        "symfony/ux-live-component": "<2.36.3",
+        "thelia/thelia-skeleton": "<3.2",
+        "twig/html-extra": "<3.31.1",
+        "twig/twig": "<3.31.1"
     },
     "autoload": {
         "psr-4": {
