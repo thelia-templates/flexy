@@ -195,26 +195,36 @@ final class ShowcaseRegistrationTest extends TestCase
     }
 
     /**
-     * The application keeps the hand: its own entries come after the one of the theme, and an entry
-     * of the same name wins. The package merges `backgrounds` by key (only `viewports` is replaced as a
-     * whole), so the application cannot drop `theme` but it can give it another colour.
+     * The application keeps the hand: from 0.3.1 of the package `backgrounds` is replaced as a whole,
+     * the last list declared (the application's) is the one that stays.
      */
-    public function testTheBackgroundsOfTheApplicationAreMergedAfterTheOneOfTheThemeAndWinByName(): void
+    public function testTheBackgroundsOfTheApplicationReplaceTheOneOfTheTheme(): void
     {
+        if (!$this->packageReplacesBackgrounds()) {
+            self::markTestSkipped('The installed showcase package (before 0.3.1) merges `backgrounds` by key.');
+        }
+
         $bundle = new OpenStudioUxShowcaseBundle();
         $extension = $bundle->getContainerExtension();
         $builder = $this->builder();
         $builder->registerExtension($extension);
 
         (new FlexyBundle())->prependExtension($this->configurator($builder), $builder);
-        $builder->loadFromExtension('ux_showcase', ['backgrounds' => ['night' => '#000000', 'theme' => '#abcdef']]);
+        $builder->loadFromExtension('ux_showcase', ['backgrounds' => ['night' => '#000000']]);
 
         $merged = (new Processor())->processConfiguration($extension->getConfiguration([], $builder), $builder->getExtensionConfig('ux_showcase'));
 
-        self::assertSame(['theme', 'night'], array_keys($merged['backgrounds']));
+        self::assertSame(['night'], array_keys($merged['backgrounds']));
         self::assertSame('#000000', $merged['backgrounds']['night']['color']);
-        self::assertSame('#abcdef', $merged['backgrounds']['theme']['color']);
-        self::assertArrayNotHasKey('light', $merged['backgrounds']);
+    }
+
+    private function packageReplacesBackgrounds(): bool
+    {
+        $extension = (new OpenStudioUxShowcaseBundle())->getContainerExtension();
+        $builder = $this->builder();
+        $processed = (new Processor())->processConfiguration($extension->getConfiguration([], $builder), [['backgrounds' => ['a' => '#111111']], ['backgrounds' => ['b' => '#222222']]]);
+
+        return ['b'] === array_keys($processed['backgrounds']);
     }
 
     public function testWithoutAnApplicationChoiceTheMergedBackgroundsAreTheOneOfTheTheme(): void

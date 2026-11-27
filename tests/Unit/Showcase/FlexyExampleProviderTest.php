@@ -24,6 +24,7 @@ use FlexyBundle\Toolkit\StoryFinder;
 use FlexyBundle\Toolkit\StoryProviderInterface;
 use FlexyBundle\Tests\Support\WithChildTheme;
 use OpenStudio\UxShowcaseBundle\Example\Example;
+use OpenStudio\UxShowcaseBundle\Library\ComponentStatus as ShowcaseStatus;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -244,6 +245,62 @@ final class FlexyExampleProviderTest extends TestCase
 
         self::assertSame('All sections', $examples['cms-all-sections']->title);
         self::assertSame(file_get_contents(__FILE__), $examples['cms-icons']->source);
+    }
+
+    public function testTheStatusOfAPageIsPassedOnlyWhereThePackageKnowsIt(): void
+    {
+        self::assertSame(['status' => ShowcaseStatus::Ready], FlexyExampleProvider::statusArguments('ready', true));
+        self::assertSame(['status' => ShowcaseStatus::Waiting], FlexyExampleProvider::statusArguments('waiting', true));
+        // 0.3.0: no `status` parameter, the named argument would be an Error.
+        self::assertSame([], FlexyExampleProvider::statusArguments('ready', false));
+    }
+
+    public function testNoStatusWhenTheToolkitGivesNoneOrOneThePageCannotShow(): void
+    {
+        self::assertSame([], FlexyExampleProvider::statusArguments(null, true));
+        self::assertSame([], FlexyExampleProvider::statusArguments('hidden', true));
+        self::assertSame([], FlexyExampleProvider::statusArguments('unknown', true));
+    }
+
+    public function testTheGuardFollowsTheConstructorOfTheInstalledPackage(): void
+    {
+        self::assertSame(
+            \in_array('status', array_map(static fn (\ReflectionParameter $parameter): string => $parameter->getName(), (new \ReflectionMethod(Example::class, '__construct'))->getParameters()), true),
+            FlexyExampleProvider::exampleTakesAStatus(),
+        );
+    }
+
+    public function testTheDocumentationPagesCarryTheStatusTheToolkitShowsThem(): void
+    {
+        if (!FlexyExampleProvider::exampleTakesAStatus()) {
+            self::markTestSkipped('The installed showcase package predates the status of a documentation page (0.3.1).');
+        }
+
+        $statuses = [];
+
+        foreach ($this->provider([])->getExamples() as $example) {
+            $statuses[$example->slug] = $example->status;
+        }
+
+        self::assertSame(ShowcaseStatus::Ready, $statuses['welcome']);
+        self::assertSame(ShowcaseStatus::Waiting, $statuses['getting-started']);
+        self::assertNull($statuses['breakpoints']);
+        self::assertNull($statuses['layout']);
+    }
+
+    public function testAModuleStoryCarriesItsStatusAndAStoryWithoutOneCarriesNone(): void
+    {
+        if (!FlexyExampleProvider::exampleTakesAStatus()) {
+            self::markTestSkipped('The installed showcase package predates the status of a documentation page (0.3.1).');
+        }
+
+        $examples = $this->examplesBySlug([], $this->moduleProvider(
+            new Story('CMS', 'All sections', '@Module/toolkit/All.html.twig', __FILE__, ComponentStatus::READY),
+            new Story('CMS', 'Icons', '@Module/toolkit/Icons.html.twig', __FILE__),
+        ));
+
+        self::assertSame(ShowcaseStatus::Ready, $examples['cms-all-sections']->status);
+        self::assertNull($examples['cms-icons']->status);
     }
 
     public function testAModuleStoryIsNeverAttachedToAComponentOfTheTheme(): void
