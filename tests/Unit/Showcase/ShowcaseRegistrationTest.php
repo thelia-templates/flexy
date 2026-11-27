@@ -184,6 +184,54 @@ final class ShowcaseRegistrationTest extends TestCase
         self::assertSame('Flexy', $merged['title']);
     }
 
+    public function testTheBackgroundsAreOnlyTheOneTheThemeLetsShow(): void
+    {
+        $builder = $this->builder();
+        $builder->registerExtension($this->extension('ux_showcase'));
+
+        (new FlexyBundle())->prependExtension($this->configurator($builder), $builder);
+
+        self::assertSame(['theme' => ['color' => '#fff5f1']], $builder->getExtensionConfig('ux_showcase')[0]['backgrounds']);
+    }
+
+    /**
+     * The application keeps the hand: its own entries come after the one of the theme, and an entry
+     * of the same name wins. The package merges `backgrounds` by key (only `viewports` is replaced as a
+     * whole), so the application cannot drop `theme` but it can give it another colour.
+     */
+    public function testTheBackgroundsOfTheApplicationAreMergedAfterTheOneOfTheThemeAndWinByName(): void
+    {
+        $bundle = new OpenStudioUxShowcaseBundle();
+        $extension = $bundle->getContainerExtension();
+        $builder = $this->builder();
+        $builder->registerExtension($extension);
+
+        (new FlexyBundle())->prependExtension($this->configurator($builder), $builder);
+        $builder->loadFromExtension('ux_showcase', ['backgrounds' => ['night' => '#000000', 'theme' => '#abcdef']]);
+
+        $merged = (new Processor())->processConfiguration($extension->getConfiguration([], $builder), $builder->getExtensionConfig('ux_showcase'));
+
+        self::assertSame(['theme', 'night'], array_keys($merged['backgrounds']));
+        self::assertSame('#000000', $merged['backgrounds']['night']['color']);
+        self::assertSame('#abcdef', $merged['backgrounds']['theme']['color']);
+        self::assertArrayNotHasKey('light', $merged['backgrounds']);
+    }
+
+    public function testWithoutAnApplicationChoiceTheMergedBackgroundsAreTheOneOfTheTheme(): void
+    {
+        $bundle = new OpenStudioUxShowcaseBundle();
+        $extension = $bundle->getContainerExtension();
+        $builder = $this->builder();
+        $builder->registerExtension($extension);
+
+        (new FlexyBundle())->prependExtension($this->configurator($builder), $builder);
+
+        $merged = (new Processor())->processConfiguration($extension->getConfiguration([], $builder), $builder->getExtensionConfig('ux_showcase'));
+
+        self::assertSame(['theme'], array_keys($merged['backgrounds']));
+        self::assertSame('#fff5f1', $merged['backgrounds']['theme']['color']);
+    }
+
     public function testNoShowcaseConfigurationIsPrependedWhenTheExtensionIsNotThere(): void
     {
         $builder = $this->builder();
