@@ -127,6 +127,10 @@ final class FlexyComponentsTest extends TestCase
      */
     private function names(string $child, string $directory, array $known): array
     {
+        if (!class_exists(ComponentCatalog::class)) {
+            self::markTestSkipped('openstudio/ux-showcase-bundle is a suggestion of the theme and is not installed.');
+        }
+
         $other = sys_get_temp_dir().'/flexy-showcase-'.uniqid('', false);
         mkdir($other.'/components/Zed/Thing', 0777, true);
         touch($other.'/components/Zed/Thing.html.twig');
