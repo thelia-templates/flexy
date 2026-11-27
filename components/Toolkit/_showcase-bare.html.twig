@@ -22,9 +22,8 @@
 {% endblock %}
 
 {# The toolkit frames each story in a white canvas with an inner margin (`.Toolkit-canvas`, in
-   toolkit.css), on the tinted page: the example is framed the same way here. #}
+   toolkit.css), on the tinted page: the example is framed the same way here, its canvas aligned on
+   the title of the showcase page as the toolkit aligns it on its own. #}
 {% block content %}
-    <div style="padding: 1rem;">
-        <div class="Toolkit-canvas">{{ content }}</div>
-    </div>
+    <div class="Toolkit-canvas">{{ content }}</div>
 {% endblock %}
