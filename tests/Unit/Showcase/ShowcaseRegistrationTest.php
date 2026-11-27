@@ -72,6 +72,18 @@ final class ShowcaseRegistrationTest extends TestCase
         self::assertTrue($builder->hasDefinition(\FlexyBundle\Toolkit\StoryFinder::class));
     }
 
+    public function testTheBreakpointsStylesheetIsAResourceOfTheContainer(): void
+    {
+        $builder = $this->builder();
+        $builder->registerExtension($this->extension('ux_showcase'));
+
+        (new FlexyBundle())->prependExtension($this->configurator($builder), $builder);
+
+        $files = array_map(static fn ($resource): string => (string) $resource, $builder->getResources());
+
+        self::assertNotEmpty(array_filter($files, static fn (string $file): bool => str_ends_with($file, 'assets/styles/variables.css')));
+    }
+
     public function testWithoutThePackageTheServicesOfTheThemeAreStillThere(): void
     {
         $builder = $this->load(showcaseInstalled: false);
