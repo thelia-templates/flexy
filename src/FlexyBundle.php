@@ -18,7 +18,6 @@ use FlexyBundle\DependencyInjection\Compiler\BundleServicesPass;
 use FlexyBundle\DependencyInjection\Compiler\SubscriptionServicesPass;
 use FlexyBundle\DependencyInjection\Compiler\TwigComponentDebugDirectoryPass;
 use FlexyBundle\EventListener\TailwindMinifiedBuildListener;
-use FlexyBundle\Showcase\ShowcaseBackgrounds;
 use FlexyBundle\Showcase\ShowcaseLogoPass;
 use FlexyBundle\Showcase\ShowcasePrimaryColour;
 use FlexyBundle\Showcase\ShowcaseViewports;
@@ -27,8 +26,11 @@ use Symfony\Component\AssetMapper\AssetMapperInterface;
 use OpenStudio\UxShowcaseBundle\Library\ComponentLibraryInterface;
 use OpenStudio\UxShowcaseBundle\OpenStudioUxShowcaseBundle;
 use Symfony\Component\AssetMapper\Event\PreAssetsCompileEvent;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\ConfigurationExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\UX\Icons\Registry\LocalSvgIconRegistry;
@@ -141,12 +143,13 @@ class FlexyBundle extends AbstractBundle
             $config['viewports'] = $viewports;
         }
 
-        // The body of the theme repaints its own colour over the one the showcase sets: the default
-        // list (light, white, dark) would offer choices that change nothing. Replaced as a whole.
-        $backgrounds = ShowcaseBackgrounds::fromCss($css);
-
-        if ([] !== $backgrounds) {
-            $config['backgrounds'] = $backgrounds;
+        // The body of the theme paints its own page colour over the one the showcase sets, so a light,
+        // white or dark choice would change nothing: the theme offers none, and the showcase then hides
+        // its selector. An empty list is refused before 0.3.2 (and an absent key keeps the default
+        // list), so it is prepended only where the installed package accepts it. An application that
+        // declares `backgrounds` replaces it.
+        if ($this->showcaseAcceptsNoBackground($containerBuilder)) {
+            $config['backgrounds'] = [];
         }
 
         // `theme` exists from 0.3.0 of the package; an older one would fail on the unknown key.
@@ -158,6 +161,28 @@ class FlexyBundle extends AbstractBundle
         $containerBuilder->prependExtensionConfig('ux_showcase', $config);
     }
 
+
+    /**
+     * Asked of the configuration of the package rather than of its version number: whatever installs it
+     * (a release, a branch, a path), what counts is that an empty `backgrounds` is accepted.
+     */
+    private function showcaseAcceptsNoBackground(ContainerBuilder $containerBuilder): bool
+    {
+        $extension = $containerBuilder->getExtension('ux_showcase');
+        $configuration = $extension instanceof ConfigurationExtensionInterface ? $extension->getConfiguration([], $containerBuilder) : null;
+
+        if (null === $configuration) {
+            return false;
+        }
+
+        try {
+            (new Processor())->processConfiguration($configuration, [['backgrounds' => []]]);
+        } catch (InvalidConfigurationException) {
+            return false;
+        }
+
+        return true;
+    }
 
     private function registerTailwindMinifiedBuildListener(ContainerConfigurator $container, ContainerBuilder $builder): void
     {
