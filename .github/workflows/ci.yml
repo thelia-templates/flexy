@@ -96,7 +96,7 @@ jobs:
         # The theme only suggests openstudio/ux-showcase-bundle, and the unit tests of its adapter
         # (showcase/) skip themselves while the package is missing.
         working-directory: thelia
-        run: composer require --no-progress --no-interaction "openstudio/ux-showcase-bundle:^0.2.4"
+        run: composer require --no-progress --no-interaction "openstudio/ux-showcase-bundle:^0.3.0"
 
       - name: Restore the project schema the config package overwrote
         # Same step as the core CI: the thelia/config package installs into local/
