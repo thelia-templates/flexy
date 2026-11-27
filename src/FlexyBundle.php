@@ -19,6 +19,7 @@ use FlexyBundle\DependencyInjection\Compiler\SubscriptionServicesPass;
 use FlexyBundle\DependencyInjection\Compiler\TwigComponentDebugDirectoryPass;
 use FlexyBundle\EventListener\TailwindMinifiedBuildListener;
 use FlexyBundle\Showcase\ShowcaseLogoPass;
+use FlexyBundle\Showcase\ShowcasePrimaryColour;
 use FlexyBundle\Showcase\ShowcaseViewports;
 use FlexyBundle\Template\FrontTemplateChain;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
@@ -137,6 +138,12 @@ class FlexyBundle extends AbstractBundle
         // Nothing but the responsive entry: no breakpoint to offer, the bundle keeps its own widths.
         if (\count($viewports) >= 2) {
             $config['viewports'] = $viewports;
+        }
+
+        // `theme` exists from 0.3.0 of the package; an older one would fail on the unknown key.
+        $primaryColour = ShowcasePrimaryColour::fromCss($css);
+        if (null !== $primaryColour && property_exists('OpenStudio\\UxShowcaseBundle\\ShowcaseConfiguration', 'primaryColor')) {
+            $config['theme'] = ['primary_color' => $primaryColour];
         }
 
         $containerBuilder->prependExtensionConfig('ux_showcase', $config);
