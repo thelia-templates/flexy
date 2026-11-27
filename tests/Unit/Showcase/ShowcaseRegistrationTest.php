@@ -141,6 +141,7 @@ final class ShowcaseRegistrationTest extends TestCase
 
         self::assertCount(1, $config);
         self::assertSame(['responsive', 'Mobile S', 'Mobile M', 'Mobile L', 'Tablet', 'Small Desktop', 'Desktop', 'Large Desktop', '3xl'], array_keys($config[0]['viewports']));
+        self::assertSame('Flexy', $config[0]['title']);
         self::assertNull($config[0]['viewports']['responsive']);
         self::assertSame(768, $config[0]['viewports']['Tablet']);
     }
