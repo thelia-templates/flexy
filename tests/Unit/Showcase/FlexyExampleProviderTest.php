@@ -136,6 +136,44 @@ final class FlexyExampleProviderTest extends TestCase
         }
     }
 
+    public function testAStoryDirectoryOfAChildThemeWithUnderscoresOrCapitalsGetsAValidSlug(): void
+    {
+        $child = uniqid('zz-showcase-', false);
+        $link = THELIA_TEMPLATE_DIR.'frontOffice'.DS.$child;
+        $directory = \dirname(FrontTemplateChain::ownDirectory()).DS.$child;
+        $filesystem = new Filesystem();
+
+        try {
+            $filesystem->dumpFile($directory.DS.'template.xml', '<?xml version="1.0" encoding="UTF-8"?><template xmlns="http://thelia.net/schema/dic/template"><descriptive locale="en"><title>Child</title></descriptive><parent>flexy</parent><languages><language>en_US</language></languages><version>1.0.0</version><stability>prod</stability></template>');
+            $filesystem->dumpFile($directory.DS.'components'.DS.'Molecules'.DS.'Order_Item'.DS.'toolkit.html.twig', '<div>Order item</div>');
+
+            if (!is_dir($link)) {
+                $filesystem->symlink($directory, $link);
+            }
+
+            $moduleStories = new ModuleStories([]);
+            $examples = iterator_to_array((new FlexyExampleProvider(
+                new StoryFinder(new FrontTemplateChain($child), $moduleStories),
+                $moduleStories,
+                new class([]) extends FlexyComponents {
+                    public function __construct(private readonly array $names)
+                    {
+                    }
+
+                    public function names(): array
+                    {
+                        return $this->names;
+                    }
+                },
+            ))->getExamples(), false);
+            $slugs = array_map(static fn (Example $example): string => $example->slug, $examples);
+
+            self::assertContains('molecules-order-item', $slugs);
+        } finally {
+            $filesystem->remove([$link, $directory]);
+        }
+    }
+
     public function testAModuleStoryIsADocumentationPageOfTheCategoryItDeclares(): void
     {
         $examples = $this->examplesBySlug([], $this->moduleProvider(
