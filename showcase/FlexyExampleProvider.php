@@ -17,6 +17,9 @@ namespace FlexyBundle\Showcase;
 use OpenStudio\UxShowcaseBundle\Example\Example;
 use OpenStudio\UxShowcaseBundle\Example\ExampleProviderInterface;
 use OpenStudio\UxShowcaseBundle\Example\PreviewOptions;
+use FlexyBundle\Controller\ToolkitController;
+use FlexyBundle\Template\FrontTemplateChain;
+use FlexyBundle\Toolkit\ComponentStatus;
 use FlexyBundle\Toolkit\ModuleStories;
 use FlexyBundle\Toolkit\StoryFinder;
 
@@ -76,7 +79,25 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
         private StoryFinder $storyFinder,
         private ModuleStories $moduleStories,
         private FlexyComponents $components,
+        private FrontTemplateChain $templateChain,
     ) {
+    }
+
+    /**
+     * The groups of the pages that are not components (`Docs`, `Design tokens`), in the order of the
+     * toolkit, for the ones that still have a page.
+     *
+     * @return list<string>
+     */
+    public function pageGroups(): array
+    {
+        $groups = [];
+
+        foreach ($this->pages() as $page) {
+            $groups[$page['group']] = true;
+        }
+
+        return array_map('strval', array_keys($groups));
     }
 
     /**
@@ -84,6 +105,16 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
      */
     public function getExamples(): iterable
     {
+        foreach ($this->pages() as $page) {
+            yield new Example(
+                component: null,
+                slug: $page['slug'],
+                title: $page['name'],
+                source: $page['source'],
+                group: $page['group'],
+            );
+        }
+
         $moduleSlugs = [];
 
         foreach ($this->moduleStories->grouped() as $stories) {
@@ -122,6 +153,56 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
                 );
             }
         }
+    }
+
+    /**
+     * The pages of the toolkit that are not components, as `buildPages()` of its controller keeps them:
+     * the ones whose template is there and that are not `hidden`.
+     *
+     * @return list<array{slug: string, name: string, group: string, source: string}>
+     */
+    private function pages(): array
+    {
+        $pages = [];
+        $breakpoints = null;
+
+        foreach (ToolkitController::SECTIONS as $group => $sections) {
+            foreach ($sections as $slug => $section) {
+                $directory = $this->templateChain->nearest('components/Toolkit/'.$slug.'.html.twig', is_file(...));
+
+                if (null === $directory || ComponentStatus::HIDDEN === $this->storyFinder->statusOf('Toolkit/'.$slug)) {
+                    continue;
+                }
+
+                // The page of the breakpoints reads the ones the controller hands to the toolkit: they are
+                // given to it here, as the example is rendered without any variable.
+                $source = 'breakpoints' === $slug
+                    ? $this->breakpointsSource($breakpoints ??= $this->breakpoints())
+                    : (string) file_get_contents($directory.'/components/Toolkit/'.$slug.'.html.twig');
+
+                $pages[] = ['slug' => $slug, 'name' => $section['name'], 'group' => (string) $group, 'source' => $source];
+            }
+        }
+
+        return $pages;
+    }
+
+    /**
+     * @return list<array{name: string, rem: float, px: float, label: string|null}>
+     */
+    private function breakpoints(): array
+    {
+        $directory = $this->templateChain->nearest('assets/styles/variables.css', is_file(...));
+
+        return ShowcaseViewports::breakpointsFromCss(null === $directory ? '' : (string) file_get_contents($directory.'/assets/styles/variables.css'));
+    }
+
+    /**
+     * @param list<array{name: string, rem: float, px: float, label: string|null}> $breakpoints
+     */
+    private function breakpointsSource(array $breakpoints): string
+    {
+        return "{% include '@Flexy/Toolkit/breakpoints.html.twig' with {breakpoints: ".json_encode($breakpoints, \JSON_THROW_ON_ERROR)."} %}";
     }
 
     /**

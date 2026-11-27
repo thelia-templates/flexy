@@ -73,7 +73,10 @@ final readonly class FlexyLibrary implements ComponentLibraryInterface
 
     public function getGroups(): array
     {
-        return array_map('strval', array_keys($this->storyFinder->groupedComponents()));
+        return array_values(array_unique([
+            ...$this->exampleProvider->pageGroups(),
+            ...array_map('strval', array_keys($this->storyFinder->groupedComponents())),
+        ]));
     }
 
     public function getExampleProviders(): iterable
