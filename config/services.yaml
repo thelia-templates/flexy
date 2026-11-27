@@ -20,9 +20,6 @@ services:
         # an optional bundle: FlexyBundle registers it only when that bundle is installed.
         exclude:
             - '../src/DependencyInjection/'
-            # The component showcase adapter needs an optional package: config/showcase.yaml
-            # registers it, and only where that package is installed.
-            - '../src/Showcase/'
             - '../src/EventListener/TailwindMinifiedBuildListener.php'
 
     FlexyBundle\Components\:
