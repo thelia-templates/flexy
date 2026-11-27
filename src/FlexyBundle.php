@@ -18,6 +18,7 @@ use FlexyBundle\DependencyInjection\Compiler\BundleServicesPass;
 use FlexyBundle\DependencyInjection\Compiler\SubscriptionServicesPass;
 use FlexyBundle\DependencyInjection\Compiler\TwigComponentDebugDirectoryPass;
 use FlexyBundle\EventListener\TailwindMinifiedBuildListener;
+use FlexyBundle\Showcase\ShowcaseLogoPass;
 use FlexyBundle\Showcase\ShowcaseViewports;
 use FlexyBundle\Template\FrontTemplateChain;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
@@ -46,6 +47,7 @@ class FlexyBundle extends AbstractBundle
         $container->addCompilerPass(new TwigComponentDebugDirectoryPass());
         $container->addCompilerPass(new BundleServicesPass());
         $container->addCompilerPass(new SubscriptionServicesPass());
+        $container->addCompilerPass(new ShowcaseLogoPass());
     }
 
     /**
@@ -118,6 +120,10 @@ class FlexyBundle extends AbstractBundle
             return;
         }
 
+        // The name of the theme heads the showcase; the application keeps the hand on it. The logo is
+        // set by ShowcaseLogoPass, which reads the URL of the asset when the container is built.
+        $config = ['title' => 'Flexy'];
+
         $variablesDirectory = $this->getFrontTemplateChain($containerBuilder)->nearest('assets/styles/variables.css', is_file(...));
         $variablesFile = null === $variablesDirectory ? null : $variablesDirectory . '/assets/styles/variables.css';
         $css = null === $variablesFile ? '' : (string) file_get_contents($variablesFile);
@@ -129,11 +135,11 @@ class FlexyBundle extends AbstractBundle
         $viewports = ShowcaseViewports::fromCss($css);
 
         // Nothing but the responsive entry: no breakpoint to offer, the bundle keeps its own widths.
-        if (\count($viewports) < 2) {
-            return;
+        if (\count($viewports) >= 2) {
+            $config['viewports'] = $viewports;
         }
 
-        $containerBuilder->prependExtensionConfig('ux_showcase', ['viewports' => $viewports]);
+        $containerBuilder->prependExtensionConfig('ux_showcase', $config);
     }
 
 
