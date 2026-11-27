@@ -184,28 +184,57 @@ final class ShowcaseRegistrationTest extends TestCase
         self::assertSame('Flexy', $merged['title']);
     }
 
-    public function testTheBackgroundsAreOnlyTheOneTheThemeLetsShow(): void
+    public function testTheThemeOffersNoBackgroundWhereThePackageAcceptsAnEmptyList(): void
     {
         $builder = $this->builder();
-        $builder->registerExtension($this->extension('ux_showcase'));
+        $builder->registerExtension($this->extensionWithBackgrounds(requireOne: false));
 
         (new FlexyBundle())->prependExtension($this->configurator($builder), $builder);
 
-        self::assertSame(['theme' => ['color' => '#fff5f1']], $builder->getExtensionConfig('ux_showcase')[0]['backgrounds']);
+        $config = $builder->getExtensionConfig('ux_showcase')[0];
+
+        self::assertArrayHasKey('backgrounds', $config);
+        self::assertSame([], $config['backgrounds']);
     }
 
     /**
-     * The application keeps the hand: from 0.3.1 of the package `backgrounds` is replaced as a whole,
-     * the last list declared (the application's) is the one that stays.
+     * Before 0.3.2 an empty list is a configuration error, and an absent key keeps the default list:
+     * the theme prepends nothing there.
      */
-    public function testTheBackgroundsOfTheApplicationReplaceTheOneOfTheTheme(): void
+    public function testTheThemePrependsNoBackgroundsWhereThePackageRefusesAnEmptyList(): void
     {
-        if (!$this->packageReplacesBackgrounds()) {
-            self::markTestSkipped('The installed showcase package (before 0.3.1) merges `backgrounds` by key.');
+        $builder = $this->builder();
+        $builder->registerExtension($this->extensionWithBackgrounds(requireOne: true));
+
+        (new FlexyBundle())->prependExtension($this->configurator($builder), $builder);
+
+        self::assertArrayNotHasKey('backgrounds', $builder->getExtensionConfig('ux_showcase')[0]);
+    }
+
+    public function testTheInstalledPackageEndsUpWithNoBackgroundSelector(): void
+    {
+        if (!$this->packageAcceptsNoBackground()) {
+            self::markTestSkipped('The installed showcase package (before 0.3.2) refuses an empty `backgrounds`.');
         }
 
-        $bundle = new OpenStudioUxShowcaseBundle();
-        $extension = $bundle->getContainerExtension();
+        $extension = (new OpenStudioUxShowcaseBundle())->getContainerExtension();
+        $builder = $this->builder();
+        $builder->registerExtension($extension);
+
+        (new FlexyBundle())->prependExtension($this->configurator($builder), $builder);
+
+        $merged = (new Processor())->processConfiguration($extension->getConfiguration([], $builder), $builder->getExtensionConfig('ux_showcase'));
+
+        self::assertSame([], $merged['backgrounds']);
+    }
+
+    public function testTheBackgroundsOfTheApplicationReplaceTheEmptyListOfTheTheme(): void
+    {
+        if (!$this->packageAcceptsNoBackground()) {
+            self::markTestSkipped('The installed showcase package (before 0.3.2) refuses an empty `backgrounds`.');
+        }
+
+        $extension = (new OpenStudioUxShowcaseBundle())->getContainerExtension();
         $builder = $this->builder();
         $builder->registerExtension($extension);
 
@@ -218,28 +247,64 @@ final class ShowcaseRegistrationTest extends TestCase
         self::assertSame('#000000', $merged['backgrounds']['night']['color']);
     }
 
-    private function packageReplacesBackgrounds(): bool
+    private function packageAcceptsNoBackground(): bool
     {
         $extension = (new OpenStudioUxShowcaseBundle())->getContainerExtension();
-        $builder = $this->builder();
-        $processed = (new Processor())->processConfiguration($extension->getConfiguration([], $builder), [['backgrounds' => ['a' => '#111111']], ['backgrounds' => ['b' => '#222222']]]);
 
-        return ['b'] === array_keys($processed['backgrounds']);
+        try {
+            (new Processor())->processConfiguration($extension->getConfiguration([], $this->builder()), [['backgrounds' => []]]);
+        } catch (\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException) {
+            return false;
+        }
+
+        return true;
     }
 
-    public function testWithoutAnApplicationChoiceTheMergedBackgroundsAreTheOneOfTheTheme(): void
+    /**
+     * A `ux_showcase` extension whose `backgrounds` list is or is not allowed to be empty, as the
+     * package is before and from 0.3.2.
+     */
+    private function extensionWithBackgrounds(bool $requireOne): Extension
     {
-        $bundle = new OpenStudioUxShowcaseBundle();
-        $extension = $bundle->getContainerExtension();
-        $builder = $this->builder();
-        $builder->registerExtension($extension);
+        return new class($requireOne) extends Extension implements \Symfony\Component\DependencyInjection\Extension\ConfigurationExtensionInterface {
+            public function __construct(private readonly bool $requireOne)
+            {
+            }
 
-        (new FlexyBundle())->prependExtension($this->configurator($builder), $builder);
+            public function load(array $configs, ContainerBuilder $container): void
+            {
+            }
 
-        $merged = (new Processor())->processConfiguration($extension->getConfiguration([], $builder), $builder->getExtensionConfig('ux_showcase'));
+            public function getAlias(): string
+            {
+                return 'ux_showcase';
+            }
 
-        self::assertSame(['theme'], array_keys($merged['backgrounds']));
-        self::assertSame('#fff5f1', $merged['backgrounds']['theme']['color']);
+            public function getConfiguration(array $config, ContainerBuilder $container): \Symfony\Component\Config\Definition\ConfigurationInterface
+            {
+                $requireOne = $this->requireOne;
+
+                return new class($requireOne) implements \Symfony\Component\Config\Definition\ConfigurationInterface {
+                    public function __construct(private readonly bool $requireOne)
+                    {
+                    }
+
+                    public function getConfigTreeBuilder(): \Symfony\Component\Config\Definition\Builder\TreeBuilder
+                    {
+                        $tree = new \Symfony\Component\Config\Definition\Builder\TreeBuilder('ux_showcase');
+                        $node = $tree->getRootNode()->children()->arrayNode('backgrounds')->variablePrototype()->end();
+
+                        if ($this->requireOne) {
+                            $node->requiresAtLeastOneElement();
+                        }
+
+                        $node->end()->end();
+
+                        return $tree;
+                    }
+                };
+            }
+        };
     }
 
     public function testNoShowcaseConfigurationIsPrependedWhenTheExtensionIsNotThere(): void
