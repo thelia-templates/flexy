@@ -15,5 +15,6 @@ services:
     FlexyBundle\Showcase\FlexyLibrary:
         autoconfigure: true
 
-    FlexyBundle\Showcase\TheliaSessionForShowcaseCheck:
+    # Autoconfigured: the check command tags every CheckRequestFactoryInterface.
+    FlexyBundle\Showcase\TheliaCheckRequestFactory:
         autoconfigure: true

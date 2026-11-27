@@ -257,7 +257,7 @@ Register the bundle and import its routes as the package describes (`/_showcase`
 - a `flexy` library: the components of `components/`, one group per top-level directory (alphabetical, `Forms` and `Layouts` last), with the status the toolkit gives them (`story-statuses.php` included, `hidden` ones are left out);
 - one free example per `toolkit.html.twig` story, attached to the `<Path>:Base` component of its directory (`Molecules/Button` to `Molecules:Button:Base`), or a documentation page of its category when the directory has none. The stories of the modules (`StoryProviderInterface`) become documentation pages in the category they declare;
 - a bare preview page that loads the stylesheets and scripts of the shop pages and `toolkit.css`;
-- the breakpoints of `assets/styles/variables.css` as preview widths, in the toolkit's words (`Tablet`, `Desktop`...). Your own `ux_showcase.viewports` are merged after them, a name you reuse replaces the theme's width.
+- the breakpoints of `assets/styles/variables.css` as preview widths, in the toolkit's words (`Tablet`, `Desktop`...). A `ux_showcase.viewports` of your own replaces the whole list, the theme's included: declare every width you want to keep.
 
 The examples that read the shop's catalogue (a product, a category, a content, the menus) are marked `needs_data`: `bin/console ux-showcase:check` skips them unless it is given `--with-data`. The list is `FlexyExampleProvider::NEEDS_DATA`.
 

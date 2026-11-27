@@ -18,7 +18,7 @@ use FlexyBundle\FlexyBundle;
 use FlexyBundle\Showcase\FlexyComponents;
 use FlexyBundle\Showcase\FlexyExampleProvider;
 use FlexyBundle\Showcase\FlexyLibrary;
-use FlexyBundle\Showcase\TheliaSessionForShowcaseCheck;
+use FlexyBundle\Showcase\TheliaCheckRequestFactory;
 use OpenStudio\UxShowcaseBundle\Library\ComponentLibraryInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
@@ -42,7 +42,7 @@ final class ShowcaseRegistrationTest extends TestCase
         FlexyLibrary::class,
         FlexyExampleProvider::class,
         FlexyComponents::class,
-        TheliaSessionForShowcaseCheck::class,
+        TheliaCheckRequestFactory::class,
     ];
 
     public function testWithoutThePackageNoShowcaseServiceIsRegistered(): void
@@ -95,6 +95,13 @@ final class ShowcaseRegistrationTest extends TestCase
 
         self::assertFalse($builder->getDefinition(FlexyExampleProvider::class)->isAutoconfigured());
         self::assertTrue($builder->getDefinition(FlexyLibrary::class)->isAutoconfigured());
+    }
+
+    public function testTheCheckRequestFactoryIsAutoconfiguredSoTheCheckCommandFindsIt(): void
+    {
+        $builder = $this->load(showcaseInstalled: true);
+
+        self::assertTrue($builder->getDefinition(TheliaCheckRequestFactory::class)->isAutoconfigured());
     }
 
     public function testThePreviewWidthsAreTheBreakpointsOfTheThemeWhenTheShowcaseIsLoaded(): void
