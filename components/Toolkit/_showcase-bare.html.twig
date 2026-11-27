@@ -19,6 +19,9 @@
     {# A standalone page (welcome, getting started) is laid out whole in the toolkit, on the page
        colour, without the white canvas the other pages sit in. #}
     <style>.Toolkit-standalone .Toolkit-canvas { padding: 0; border: 0; border-radius: 0; background: none; }</style>
+    {# From 0.4.0 the showcase draws the block of the toolkit around the preview: the page lets it
+       show through, and the canvas gives up its own frame. #}
+    <style>body.Showcase-framed { background-color: transparent; } .Showcase-framed .Toolkit-canvas { padding: 0; border: 0; border-radius: 0; background: none; }</style>
 {% endblock %}
 
 {# The toolkit frames each story in a white canvas with an inner margin (`.Toolkit-canvas`, in

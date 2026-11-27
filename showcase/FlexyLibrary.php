@@ -105,7 +105,19 @@ final readonly class FlexyLibrary implements ComponentLibraryInterface
 
     public function getPreviewOptions(): PreviewOptions
     {
-        return new PreviewOptions();
+        return new PreviewOptions(bodyClass: self::showcaseDrawsTheBlock() ? self::FRAMED_BODY_CLASS : null);
+    }
+
+    /** On the body of a preview the showcase already sits in its block: the bare page drops its own canvas. */
+    public const string FRAMED_BODY_CLASS = 'Showcase-framed';
+
+    /**
+     * From 0.4.0 the showcase draws the block of the toolkit around each preview (and has a
+     * `theme.block_background`); an older one draws none, and the theme keeps its canvas.
+     */
+    public static function showcaseDrawsTheBlock(): bool
+    {
+        return property_exists('OpenStudio\\UxShowcaseBundle\\ShowcaseConfiguration', 'blockBackground');
     }
 
     /**

@@ -165,6 +165,14 @@ final class FlexyLibraryTest extends TestCase
         self::assertNull($library->getWrapperTemplate());
     }
 
+    public function testThePreviewsDropTheCanvasOfTheThemeOnlyWhereTheShowcaseDrawsItsBlock(): void
+    {
+        $drawsTheBlock = property_exists('OpenStudio\\UxShowcaseBundle\\ShowcaseConfiguration', 'blockBackground');
+
+        self::assertSame($drawsTheBlock, FlexyLibrary::showcaseDrawsTheBlock());
+        self::assertSame($drawsTheBlock ? FlexyLibrary::FRAMED_BODY_CLASS : null, $this->library([])->getPreviewOptions()->bodyClass);
+    }
+
     /**
      * @param list<string> $componentNames
      */

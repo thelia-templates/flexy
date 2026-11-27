@@ -115,8 +115,9 @@ final readonly class FlexyExampleProvider implements ExampleProviderInterface
                 source: $page['source'],
                 group: $page['group'],
                 // A standalone page is laid out whole in the toolkit, without the white canvas of the
-                // other pages: the bare page of the showcase drops the canvas under this class.
-                preview: new PreviewOptions(bodyClass: $page['standalone'] ? 'Toolkit-standalone' : null),
+                // other pages: the bare page of the showcase drops the canvas under this class. Where the
+                // showcase draws its own block, every page sits in it, standalone ones included.
+                preview: new PreviewOptions(bodyClass: $page['standalone'] && !FlexyLibrary::showcaseDrawsTheBlock() ? 'Toolkit-standalone' : null),
             );
         }
 
